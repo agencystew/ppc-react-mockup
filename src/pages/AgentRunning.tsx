@@ -25,39 +25,50 @@ export function AgentRunning() {
   }
 
   return (
-    <div className="mx-auto max-w-[820px] space-y-7">
-      {/* Identity strip — eyebrow + breadcrumb + page actions */}
+    <div className="mx-auto max-w-[820px] space-y-6">
+      {/* Top breadcrumb + page actions */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.16em]">
-          <span className="inline-flex items-center gap-1.5 text-ppc-purple-300">
-            <span className="ppcio-live-dot inline-block h-1.5 w-1.5 rounded-full bg-ppc-purple-500" />
-            Agent loading
-          </span>
-          <span className="h-px w-7 bg-white/15" />
-          <Link to="/agents" className="text-white/55 transition-colors hover:text-white">
+        <div className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-ppc-neutral-500">
+          <Link to="/agents" className="transition-colors hover:text-ppc-purple-700">
             All agents
           </Link>
-          <span className="text-white/30">/</span>
-          <Link to={`/agents/${run.agentSlug}`} className="text-white/55 transition-colors hover:text-white">
+          <span className="text-ppc-neutral-300">/</span>
+          <Link to={`/agents/${run.agentSlug}`} className="transition-colors hover:text-ppc-purple-700">
             {run.parentAgent.name}
           </Link>
-          <span className="text-white/30">/</span>
-          <span className="text-white">Live</span>
+          <span className="text-ppc-neutral-300">/</span>
+          <span className="text-ppc-black">Live</span>
         </div>
 
         <div className="flex items-center gap-2">
           <Link
             to="/runs"
-            className="inline-flex items-center gap-1.5 rounded-md border border-white/15 px-3 py-1.5 text-[12px] font-semibold tracking-tight text-white transition-colors hover:bg-white/5"
+            className="inline-flex items-center gap-1.5 rounded-md border border-ppc-neutral-200 bg-white px-3 py-1.5 text-[12px] font-semibold tracking-tight text-ppc-black transition-colors hover:border-ppc-purple-300 hover:text-ppc-purple-700"
           >
             <Lightning size={12} weight="fill" /> Mission control
           </Link>
           <button
-            className="inline-flex items-center gap-1.5 rounded-md border border-white/15 px-3 py-1.5 text-[12px] font-semibold tracking-tight text-white/70 transition-colors hover:bg-white/5 hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-md border border-ppc-neutral-200 bg-white px-3 py-1.5 text-[12px] font-semibold tracking-tight text-ppc-neutral-700 transition-colors hover:border-ppc-purple-300 hover:text-ppc-black"
             type="button"
           >
             <X size={11} weight="bold" /> Cancel run
           </button>
+        </div>
+      </div>
+
+      {/* Page heading — anchors the dark canvas as a section of this page */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <h1 className="flex items-center gap-3 font-display text-[34px] font-bold leading-[1.05] tracking-[-0.022em] text-ppc-black">
+          <span>
+            Live run<span className="text-ppc-purple-500">.</span>
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-ppc-purple-200 bg-ppc-purple-50 px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-ppc-purple-700">
+            <span className="ppcio-live-dot inline-block h-1.5 w-1.5 rounded-full bg-ppc-purple-500" />
+            Stage {run.stage.current} of {run.stage.total}
+          </span>
+        </h1>
+        <div className="text-[12px] font-medium text-ppc-neutral-500">
+          {run.parentAgent.name} working in real time
         </div>
       </div>
 
@@ -67,7 +78,7 @@ export function AgentRunning() {
       <div className="pt-2">
         <Link
           to="/agents"
-          className="inline-flex items-center gap-1.5 text-[12px] font-medium text-white/55 transition-colors hover:text-ppc-purple-300"
+          className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ppc-neutral-500 transition-colors hover:text-ppc-purple-700"
         >
           <ArrowLeft size={12} weight="bold" /> Back to library
         </Link>

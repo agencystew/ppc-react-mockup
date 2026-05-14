@@ -108,16 +108,22 @@ function RunningBody({ run }: { run: AgentRun }) {
       <Hero headline={run.headline} description={run.description} />
 
       {run.activeAgent && (
-        <div className="ppcio-agent-card relative mb-7 flex items-center gap-4 rounded-2xl bg-white/[0.04] p-5"
-             style={{ backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025))' }}>
+        <div
+          className="ppcio-agent-card relative mb-7 flex items-center gap-4 overflow-hidden rounded-2xl border border-ppc-purple-500/25 p-5"
+          style={{
+            backgroundImage:
+              'linear-gradient(135deg, rgba(128,87,255,0.14) 0%, rgba(128,87,255,0.05) 55%, rgba(255,255,255,0.025) 100%)',
+          }}
+        >
+          <span className="pointer-events-none absolute left-6 right-6 top-0 h-px bg-grad-sheen" />
           <Avatar initial={run.activeAgent.initial} />
           <div className="flex-1 leading-tight">
             <div className="text-[15px] font-semibold tracking-tight text-white">
               {run.activeAgent.role}
             </div>
-            <div className="mt-0.5 text-[13.5px] text-white/70">{run.activeAgent.task}</div>
+            <div className="mt-0.5 text-[13.5px] text-white/75">{run.activeAgent.task}</div>
           </div>
-          <div className="tabular text-[13px] font-medium text-white/70">
+          <div className="tabular text-[13px] font-medium text-ppc-purple-300">
             {run.activeAgent.elapsed}
           </div>
         </div>
