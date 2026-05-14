@@ -39,22 +39,34 @@ export function StagePage({ run }: { run: AgentRun }) {
 function Header({ run }: { run: AgentRun }) {
   const isCompleted = run.status === 'completed';
   return (
-    <div className="mb-14 flex flex-wrap items-center justify-between gap-4">
-      <div className="inline-flex items-center gap-2.5 text-[15px] font-semibold tracking-tight">
-        <span className="text-[18px] leading-none drop-shadow-[0_2px_8px_rgba(128,87,255,0.25)]">
+    <div className="mb-14 flex flex-wrap items-start justify-between gap-4">
+      {/* Parent identity — bumped from 15px to 17px per Stewart's design note.
+       *  This is the only thing telling you which agent you're inside; it
+       *  needs to hold its own next to the 68px display H1 below. */}
+      <div className="inline-flex items-center gap-2.5 text-[17px] font-semibold tracking-tight">
+        <span className="text-[20px] leading-none drop-shadow-[0_2px_8px_rgba(128,87,255,0.25)]">
           {run.parentAgent.icon}
         </span>
         {run.parentAgent.name}
       </div>
 
       {isCompleted ? (
-        <div className="inline-flex items-center gap-2.5 text-[12px] text-white/60">
-          <span className="inline-grid h-3.5 w-3.5 place-items-center rounded-full bg-ppc-success text-white shadow-[0_2px_8px_-2px_rgba(23,178,106,0.4),inset_0_1px_0_rgba(255,255,255,0.2)]">
-            <Check size={9} weight="bold" />
-          </span>
-          <span className="font-medium uppercase tracking-wider">Completed</span>
-          <span className="opacity-40">·</span>
-          <span className="tabular">{run.totalDuration}</span>
+        <div className="flex flex-col items-end gap-1">
+          <div className="inline-flex items-center gap-2.5 text-[12px] text-white/60">
+            <span className="inline-grid h-3.5 w-3.5 place-items-center rounded-full bg-ppc-success text-white shadow-[0_2px_8px_-2px_rgba(23,178,106,0.4),inset_0_1px_0_rgba(255,255,255,0.2)]">
+              <Check size={9} weight="bold" />
+            </span>
+            <span className="font-medium uppercase tracking-wider">Completed</span>
+            <span className="opacity-40">·</span>
+            <span className="tabular">{run.totalDuration}</span>
+          </div>
+          {/* Freshness stamp — when operators land on a shared report link,
+           *  they want to know how fresh the data is. Per Stewart's design
+           *  note 2026-05-14. Static for the mockup; in prod this is the
+           *  run's finishedAt timestamp. */}
+          <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-white/40">
+            Today, 11:43am
+          </div>
         </div>
       ) : (
         <div className="inline-flex items-center gap-2.5 text-[12px] text-white/60">
