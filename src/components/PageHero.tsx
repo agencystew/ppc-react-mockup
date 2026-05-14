@@ -126,23 +126,19 @@ export function PrimaryCTA({
 export function SecondaryButton({
   children,
   onClick,
-  variant = 'dark',
+  // `variant` is kept for source-compatibility with older call sites but the
+  // app is dark-canvas-only — both values render the same outline pill.
+  variant: _variant,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
-  // Both variants render ON the dark canvas — only differ in tone.
   variant?: 'light' | 'dark';
 }) {
-  // "dark" = white outline on dark (default).
-  // "light" = filled white pill on dark — louder secondary, rare.
-  const cls =
-    variant === 'light'
-      ? 'border-white/0 bg-white text-ppc-black hover:bg-white/90'
-      : 'border-white/15 text-white hover:bg-white/5';
+  void _variant;
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-2 rounded-pill border px-5 py-3 text-[14px] font-semibold tracking-tight transition-colors ${cls}`}
+      className="inline-flex items-center gap-2 rounded-pill border border-white/15 px-5 py-3 text-[14px] font-semibold tracking-tight text-white transition-colors hover:bg-white/5"
     >
       {children}
     </button>

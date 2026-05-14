@@ -59,10 +59,10 @@ export function ProjectPage() {
     <div className="space-y-12">
       {/* Back rail */}
       <Link
-        to="/"
-        className="inline-flex items-center gap-1.5 text-[13px] font-medium text-white/55 transition-colors hover:text-ppc-purple-500"
+        to="/projects"
+        className="inline-flex items-center gap-1.5 text-[13px] font-medium text-white/55 transition-colors hover:text-ppc-purple-300"
       >
-        <ArrowLeft size={13} weight="bold" /> Dashboard
+        <ArrowLeft size={13} weight="bold" /> All clients
       </Link>
 
       {/* HERO — client name is the moment. Period in purple, breathable. */}
@@ -110,7 +110,7 @@ export function ProjectPage() {
           eyebrow="Business context"
           title="What every agent already knows."
           action={
-            <button className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-ppc-purple-500 transition-colors hover:text-ppc-purple-700">
+            <button className="ppc-link inline-flex items-center gap-1.5 text-[13px] font-semibold text-ppc-purple-300 transition-colors hover:text-ppc-purple-200">
               Edit context <ArrowRight size={12} weight="bold" />
             </button>
           }
@@ -144,7 +144,7 @@ export function ProjectPage() {
               <li key={acc.id}>
                 <button
                   type="button"
-                  className="group flex w-full items-center gap-6 px-8 py-6 text-left transition-colors hover:bg-ppc-purple-500/15/30"
+                  className="group flex w-full items-center gap-6 px-8 py-6 text-left transition-colors hover:bg-white/[0.04]"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-[16px] font-semibold tracking-tight text-white">
@@ -171,7 +171,7 @@ export function ProjectPage() {
                   <ArrowRight
                     size={14}
                     weight="bold"
-                    className="text-white/25 transition-colors group-hover:text-ppc-purple-500"
+                    className="text-white/25 transition-colors group-hover:text-ppc-purple-300"
                   />
                 </button>
               </li>
@@ -235,9 +235,9 @@ export function ProjectPage() {
               <li key={r.runId}>
                 <Link
                   to={`/reports/${r.runId}`}
-                  className="group flex items-center gap-6 px-8 py-6 transition-colors hover:bg-ppc-purple-500/15/30"
+                  className="group flex items-center gap-6 px-8 py-6 transition-colors hover:bg-white/[0.04]"
                 >
-                  <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ppc-purple-500 sm:w-44">
+                  <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ppc-purple-300 sm:w-44">
                     {r.agentName}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -257,7 +257,7 @@ export function ProjectPage() {
                   <ArrowRight
                     size={14}
                     weight="bold"
-                    className="text-white/25 transition-colors group-hover:text-ppc-purple-500"
+                    className="text-white/25 transition-colors group-hover:text-ppc-purple-300"
                   />
                 </Link>
               </li>
@@ -277,7 +277,7 @@ export function ProjectPage() {
             <li key={a.slug}>
               <Link
                 to={`/agents/${a.slug}`}
-                className="group flex items-center gap-6 px-8 py-6 transition-colors hover:bg-ppc-purple-500/15/30"
+                className="group flex items-center gap-6 px-8 py-6 transition-colors hover:bg-white/[0.04]"
               >
                 <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-ppc-purple-500/15 text-[20px]">
                   {a.emoji}
@@ -293,7 +293,7 @@ export function ProjectPage() {
                     <Clock size={12} weight="duotone" /> {a.expectedDuration}
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-ppc-purple-500 transition-[gap] group-hover:gap-2">
+                <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-ppc-purple-300 transition-[gap] group-hover:gap-2">
                   Launch <ArrowRight size={13} weight="bold" />
                 </span>
               </Link>
@@ -318,7 +318,7 @@ function Stat({ eyebrow, value, sub, trend }: {
         {value}
       </div>
       <div className="mt-3 text-[13.5px] leading-snug text-white/65">{sub}</div>
-      <div className="mt-1.5 font-mono text-[11px] uppercase tracking-wider text-ppc-purple-500">
+      <div className="mt-1.5 font-mono text-[11px] uppercase tracking-wider text-ppc-purple-300">
         {trend}
       </div>
     </div>
