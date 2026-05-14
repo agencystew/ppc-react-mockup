@@ -1,0 +1,128 @@
+<!--
+  PPC.io v5 source artifact · 04 of 04
+  Home dashboard ("What do you wanna work on?")
+  Black hero with chat input + specialist chips, accounts grid, "While you were
+  away" stream. Purple "?" accent (v5 supports purple period OR purple question
+  mark on headlines). Source: Stewart, 2026-05-14.
+-->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/figtree@5.1.0/900.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/figtree@5.1.0/500.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/figtree@5.1.0/400.css">
+
+<style>
+.fig { font-family: 'Figtree', system-ui, sans-serif; }
+.fig-display { font-family: 'Figtree', system-ui, sans-serif; font-weight: 900; letter-spacing: -0.035em; line-height: 0.92; }
+.pulse { animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+</style>
+
+<div class="fig" style="background: #ECEAFA; border-radius: 12px; padding: 24px;">
+
+  <div style="margin-bottom: 16px;">
+    <p style="font-family: 'Courier New', monospace; font-size: 11px; color: #6b6480; margin: 0 0 4px; letter-spacing: 1.2px;">PPC.IO · DESIGN SYSTEM · 04 / 05 · HOME v5</p>
+  </div>
+
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="width: 22px; height: 22px; background: #7f5af0; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; font-weight: 600;">io</div>
+      <p style="margin: 0; font-size: 13px; color: #6b6480;">Morning, Stewy</p>
+    </div>
+    <p style="margin: 0; font-family: 'Courier New', monospace; font-size: 11px; color: #6b6480; letter-spacing: 0.8px;">THU · 14 MAY</p>
+  </div>
+
+  <div style="background: #000000; border-radius: 18px; padding: 64px 40px 48px; margin-bottom: 18px; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -120px; right: -100px; width: 440px; height: 440px; background: radial-gradient(circle, rgba(127, 90, 240, 0.28) 0%, transparent 60%); border-radius: 50%;"></div>
+    <div style="position: absolute; bottom: -80px; left: 15%; width: 260px; height: 260px; background: radial-gradient(circle, rgba(127, 90, 240, 0.08) 0%, transparent 65%); border-radius: 50%;"></div>
+    <h1 class="fig-display" style="margin: 0 0 36px; font-size: 72px; color: white; position: relative;">What do you<br>wanna work on<span style="color: #7f5af0;">?</span></h1>
+    <div style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; margin-bottom: 18px; position: relative;">
+      <span style="font-size: 17px; color: #b8aeda;">✦</span>
+      <span style="color: #8b80a8; font-size: 14px; flex: 1;">Ask anything, or send a specialist in</span>
+      <span style="background: rgba(255, 255, 255, 0.08); color: #b8aeda; font-size: 11px; padding: 3px 8px; border-radius: 5px; font-family: 'Courier New', monospace; border: 1px solid rgba(255,255,255,0.08);">⌘K</span>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 6px; position: relative;">
+      <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: white; font-size: 12px; padding: 7px 13px; border-radius: 16px; display: inline-flex; align-items: center; gap: 6px;"><span style="font-size: 13px;">🕵️</span> Spy on competitors</span>
+      <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: white; font-size: 12px; padding: 7px 13px; border-radius: 16px; display: inline-flex; align-items: center; gap: 6px;"><span style="font-size: 13px;">🧹</span> Mine negatives</span>
+      <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: white; font-size: 12px; padding: 7px 13px; border-radius: 16px; display: inline-flex; align-items: center; gap: 6px;"><span style="font-size: 13px;">📊</span> Audit an account</span>
+      <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: white; font-size: 12px; padding: 7px 13px; border-radius: 16px; display: inline-flex; align-items: center; gap: 6px;"><span style="font-size: 13px;">🎯</span> Tune PMAX</span>
+      <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: white; font-size: 12px; padding: 7px 13px; border-radius: 16px; display: inline-flex; align-items: center; gap: 6px;"><span style="font-size: 13px;">✍️</span> Write copy</span>
+      <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: white; font-size: 12px; padding: 7px 13px; border-radius: 16px; display: inline-flex; align-items: center; gap: 6px;"><span style="font-size: 13px;">🛒</span> Audit shopping feed</span>
+      <span style="background: rgba(127, 90, 240, 0.2); border: 1px solid rgba(127, 90, 240, 0.4); color: white; font-size: 12px; padding: 7px 13px; border-radius: 16px; display: inline-flex; align-items: center; gap: 6px;">All 29 →</span>
+    </div>
+  </div>
+
+  <div style="background: white; border: 0.5px solid #d9d4ec; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+      <p style="margin: 0; font-size: 16px; font-weight: 500; color: #1a1625;">Your accounts<span style="color: #7f5af0;">.</span></p>
+      <span style="font-size: 12px; color: #7f5af0; font-weight: 500; cursor: pointer;">All 8 →</span>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <div style="border: 0.5px solid #ECEAFA; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; position: relative;">
+        <div style="width: 32px; height: 32px; background: #5DCAA5; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: white; font-weight: 500;">B</div>
+        <div style="flex: 1; min-width: 0;">
+          <p style="margin: 0; font-size: 13px; font-weight: 500; color: #1a1625;">Boulder Care</p>
+          <p style="margin: 0; font-size: 11px; color: #6b6480;">Healthcare · $34k/mo</p>
+        </div>
+        <span style="width: 6px; height: 6px; background: #E24B4A; border-radius: 50%;"></span>
+      </div>
+      <div style="border: 0.5px solid #ECEAFA; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; position: relative;">
+        <div style="width: 32px; height: 32px; background: #F0997B; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: white; font-weight: 500;">F</div>
+        <div style="flex: 1; min-width: 0;">
+          <p style="margin: 0; font-size: 13px; font-weight: 500; color: #1a1625;">Flock Events</p>
+          <p style="margin: 0; font-size: 11px; color: #6b6480;">Hen parties · $12k/mo</p>
+        </div>
+        <span style="width: 6px; height: 6px; background: #BA7517; border-radius: 50%;"></span>
+      </div>
+      <div style="border: 0.5px solid #ECEAFA; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; position: relative;">
+        <div style="width: 32px; height: 32px; background: #378ADD; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: white; font-weight: 500;">N</div>
+        <div style="flex: 1; min-width: 0;">
+          <p style="margin: 0; font-size: 13px; font-weight: 500; color: #1a1625;">Nordic Outdoor</p>
+          <p style="margin: 0; font-size: 11px; color: #6b6480;">Ecommerce · $68k/mo</p>
+        </div>
+        <span style="width: 6px; height: 6px; background: #BA7517; border-radius: 50%;"></span>
+      </div>
+      <div style="border: 0.5px solid #ECEAFA; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; position: relative;">
+        <div style="width: 32px; height: 32px; background: #534AB7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: white; font-weight: 500;">M</div>
+        <div style="flex: 1; min-width: 0;">
+          <p style="margin: 0; font-size: 13px; font-weight: 500; color: #1a1625;">Mason & Co.</p>
+          <p style="margin: 0; font-size: 11px; color: #6b6480;">B2B SaaS · $42k/mo</p>
+        </div>
+        <span style="width: 6px; height: 6px; background: #5DCAA5; border-radius: 50%;"></span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: white; border: 0.5px solid #d9d4ec; border-radius: 12px; overflow: hidden;">
+    <div style="padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.5px solid #ECEAFA;">
+      <p style="margin: 0; font-size: 16px; font-weight: 500; color: #1a1625;">While you were away<span style="color: #7f5af0;">.</span></p>
+      <span style="font-size: 12px; color: #7f5af0; font-weight: 500; cursor: pointer;">See all →</span>
+    </div>
+    <div style="padding: 14px 20px; border-bottom: 0.5px solid #ECEAFA; display: flex; align-items: center; gap: 14px; cursor: pointer;">
+      <span style="font-size: 22px;">🕵️</span>
+      <div style="flex: 1;">
+        <p style="margin: 0; font-size: 14px; color: #1a1625;"><span style="font-weight: 500;">Competitor Spy</span> wrapped on Boulder Care</p>
+        <p style="margin: 2px 0 0; font-size: 12px; color: #6b6480;">4 rivals analysed · 38 unique angles found · 6 gaps you could own</p>
+      </div>
+      <span style="font-size: 11px; color: #6b6480;">12m ago</span>
+      <span style="font-size: 16px; color: #b0a9c2;">›</span>
+    </div>
+    <div style="padding: 14px 20px; border-bottom: 0.5px solid #ECEAFA; display: flex; align-items: center; gap: 14px; cursor: pointer;">
+      <span style="font-size: 22px;">🧹</span>
+      <div style="flex: 1;">
+        <p style="margin: 0; font-size: 14px; color: #1a1625;"><span style="font-weight: 500;">Negative Keywords</span> wrapped on Flock Events</p>
+        <p style="margin: 2px 0 0; font-size: 12px; color: #6b6480;">47 candidates ready to review · saves an estimated $4,200/mo</p>
+      </div>
+      <span style="font-size: 11px; color: #6b6480;">2h ago</span>
+      <span style="font-size: 16px; color: #b0a9c2;">›</span>
+    </div>
+    <div style="padding: 14px 20px; display: flex; align-items: center; gap: 14px; cursor: pointer;">
+      <span style="font-size: 22px;">📊</span>
+      <div style="flex: 1;">
+        <p style="margin: 0; font-size: 14px; color: #1a1625;"><span style="font-weight: 500;">Account Audit</span> running on Nordic Outdoor · stage 8 of 12</p>
+        <p style="margin: 2px 0 0; font-size: 12px; color: #6b6480;"><span style="display: inline-block; width: 5px; height: 5px; background: #5DCAA5; border-radius: 50%; margin-right: 5px; vertical-align: middle;" class="pulse"></span>Currently auditing PMAX asset groups</p>
+      </div>
+      <span style="font-size: 11px; color: #7f5af0; font-weight: 500;">Watch live</span>
+      <span style="font-size: 16px; color: #b0a9c2;">›</span>
+    </div>
+  </div>
+
+</div>

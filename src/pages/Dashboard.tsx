@@ -1,273 +1,247 @@
 import { Link } from 'react-router-dom';
-import {
-  ArrowRight, ArrowUpRight, Clock, Sparkle, TrendUp, CheckCircle,
-} from '@phosphor-icons/react';
+import { CaretRight, Sparkle } from '@phosphor-icons/react';
+import { PROJECTS, ACCOUNTS } from '../mock/projects';
 import { AGENTS } from '../mock/agents';
 import { RECENT_RUNS_SUMMARY } from '../mock/runs';
 
 // Dashboard · /
 //
-// Three moments. That's it.
+// v5 home — "What do you wanna work on?"
+// Source artifact: docs/design-system/v5-source-artifacts/04-home-dashboard.html
 //
-//   1. Dark hero — today's standout finding (the moment most worth seeing
-//      when the user opens the app).
-//   2. Activity stream — every recent run, status-tagged (running / done).
-//      Merged so the user has one place to scan, not five lists.
-//   3. Suggested next — three plays for this week, slim wide rows.
-//
-// Per Stewart 2026-05-14: "Sharpen, don't rebuild. Strip to 3 sections max."
-// Cuts: KPI strip, jump strip, calls-to-make slab, client roll, featured
-// run preview, multi-list duplication. The Reports and Projects pages own
-// those surfaces.
+//   1 · Greeting strip       Morning, Stewy · THU · 14 MAY
+//   2 · Black hero card      Giant question + chat input + 6 specialist chips
+//                            (+ "All N →" purple chip linking to /agents)
+//   3 · Your accounts panel  2×2 grid of client cards with status dots
+//   4 · While you were away  Mixed feed of completed + live runs
 
-const TODAY = 'Thursday · 14 May';
+const TODAY = 'THU · 14 MAY';
 
-// Live runs (mock — in prod from the agent_runs API). Stage strings come
-// straight from the StagePage running fixture so muscle-memory is preserved.
-const LIVE_RUNS = [
-  {
-    runId: 'run-competitor-spy-running',
-    agentName: 'Competitor Spy',
-    projectName: 'Smith Law Group',
-    stage: 'Sizing their spend · Stage 5 of 11',
-    elapsed: '11m 21s',
-  },
-  {
-    runId: 'run-weekly-audit',
-    agentName: 'Weekly Audit',
-    projectName: 'Northstar Dental',
-    stage: 'Walking the alignment chain · Stage 3 of 7',
-    elapsed: '4m 02s',
-  },
+// Quick-action chips — six headline specialists. Emojis match the v5 source
+// artifact (intentionally distinct from the mock-agent emojis on /agents).
+const QUICK_CHIPS: { slug: string; emoji: string; label: string }[] = [
+  { slug: 'competitor-spy',     emoji: '🕵️',  label: 'Spy on competitors' },
+  { slug: 'negative-keyword',   emoji: '🧹',  label: 'Mine negatives' },
+  { slug: 'deep-account-audit', emoji: '📊',  label: 'Audit an account' },
+  { slug: 'pmax',               emoji: '🎯',  label: 'Tune PMAX' },
+  { slug: 'ad-copy',            emoji: '✍️',  label: 'Write copy' },
+  { slug: 'shopping-feed',      emoji: '🛒',  label: 'Audit shopping feed' },
 ];
 
+// Per-project home-dashboard meta. Kept local to the dashboard so the canonical
+// PROJECTS mock stays minimal. Avatar bg uses the same color rhythm as the v5
+// source artifact (green / orange / blue / purple).
+const ACCOUNT_META: Record<string, { industry: string; spend: string; bg: string }> = {
+  'smith-law':   { industry: 'Personal Injury', spend: '$34k/mo', bg: '#5DCAA5' },
+  'clear-skies': { industry: 'Home Services',   spend: '$12k/mo', bg: '#F0997B' },
+  'northstar':   { industry: 'Dental',          spend: '$68k/mo', bg: '#378ADD' },
+  'lemon-leaf':  { industry: 'D2C Sleep',       spend: '$42k/mo', bg: '#534AB7' },
+  'rocket-pet':  { industry: 'Pet Insurance',   spend: '$28k/mo', bg: '#E24B4A' },
+  'ironclad':    { industry: 'Home Services',   spend: '$18k/mo', bg: '#BA7517' },
+};
+
+// One live run for the bottom of the "While you were away" stream.
+const LIVE_RUN = {
+  runId: 'run-deep-account-audit-northstar',
+  agentName: 'Account Audit',
+  emoji: '📊',
+  projectName: 'Northstar Dental',
+  stageCurrent: 8,
+  stageTotal: 12,
+  stageDescription: 'Currently auditing PMAX asset groups',
+};
+
 export function Dashboard() {
-  const featured = RECENT_RUNS_SUMMARY[0]; // The standout finding
-  const suggested = [
-    AGENTS.find((a) => a.slug === 'weekly-audit')!,
-    AGENTS.find((a) => a.slug === 'spend-leak')!,
-    AGENTS.find((a) => a.slug === 'sales-intelligence')!,
-  ];
+  const visibleAccounts = PROJECTS.slice(0, 4);
 
   return (
-    <div className="space-y-14">
-      {/* ═══ 1 · HERO ════════════════════════════════════════════════════
-          Dark editorial MOMENT, not a wall. Compact rounded card so the
-          light page bg dominates the surface area below. Today's standout
-          finding + open-the-report CTA. */}
-      <section className="ppc-dark ppc-dark--hero relative overflow-hidden rounded-3xl px-8 py-8 sm:px-10 sm:py-10">
+    <div className="space-y-4">
+      {/* ═══ 1 · GREETING STRIP ════════════════════════════════════════════ */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <span className="grid h-[22px] w-[22px] place-items-center rounded-[5px] bg-ppc-purple-500 text-[10px] font-semibold text-white">
+            io
+          </span>
+          <span className="text-[13px] text-ppc-text-muted">Morning, Stewy</span>
+        </div>
+        <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ppc-text-muted">
+          {TODAY}
+        </span>
+      </div>
+
+      {/* ═══ 2 · BLACK HERO ═══════════════════════════════════════════════
+          The "moment" that anchors the home view. Pure black (not the
+          ppc-sidebar tint) per source artifact. Two radial purple glows. */}
+      <section className="relative overflow-hidden rounded-[18px] bg-black px-10 pt-16 pb-12 sm:px-12">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-32 h-[440px] w-[440px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.28) 0%, transparent 60%)' }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-20 left-[15%] h-[260px] w-[260px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.08) 0%, transparent 65%)' }}
+        />
+
         <div className="relative">
-          <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-white/55">
-            <span>{TODAY}</span>
-            <span className="inline-flex items-center gap-2 text-white/70">
-              <span className="ppcio-live-dot inline-block h-1.5 w-1.5 rounded-full bg-ppc-purple-500" />
-              <span>{LIVE_RUNS.length} agents running</span>
-            </span>
-          </div>
-
-          <div className="mt-5 inline-flex items-center gap-2 rounded-pill border border-ppc-purple-500/30 bg-ppc-purple-500/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ppc-purple-300">
-            <span className="inline-block h-1 w-1 rounded-full bg-ppc-purple-500" />
-            Today's headline finding
-          </div>
-
-          <h1 className="mt-3 max-w-[760px] font-display text-[42px] font-extrabold leading-[1.02] tracking-[-0.028em] text-white sm:text-[48px]">
-            {featured.headline}<span className="text-ppc-purple-500">.</span>
+          <h1 className="font-display text-[56px] font-black leading-[0.92] tracking-[-0.035em] text-white sm:text-[72px]">
+            What do you<br />wanna work on<span className="text-ppc-purple-500">?</span>
           </h1>
-          <p className="mt-4 max-w-[560px] text-[15px] leading-[1.55] tracking-tight text-white/65">
-            {featured.agentName} on {featured.projectName} · finished {featured.finishedAt}.
-          </p>
 
-          <div className="mt-6 flex flex-wrap items-center gap-2.5">
-            <Link
-              to={`/reports/${featured.runId}`}
-              className="inline-flex items-center gap-2 rounded-md bg-ppc-purple-500 px-4 py-2.5 text-[13.5px] font-semibold tracking-tight text-white shadow-[0_4px_14px_-4px_rgba(128,87,255,0.55)] transition-transform hover:-translate-y-[1px]"
-            >
-              <Sparkle size={13} weight="fill" />
-              Open the report
-              <ArrowRight size={12} weight="bold" />
-            </Link>
+          <div className="mt-9 flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3.5">
+            <Sparkle size={17} weight="fill" className="text-ppc-text-on-dark" />
+            <span className="flex-1 text-[14px] text-white/55">Ask anything, or send a specialist in</span>
+            <kbd className="rounded-[5px] border border-white/10 bg-white/[0.08] px-2 py-[3px] font-mono text-[11px] text-ppc-text-on-dark">
+              ⌘K
+            </kbd>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-1.5">
+            {QUICK_CHIPS.map((chip) => (
+              <Link
+                key={chip.slug}
+                to={`/agents/${chip.slug}`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3.5 py-[7px] text-[12px] text-white transition-colors hover:bg-white/[0.10]"
+              >
+                <span aria-hidden className="text-[13px]">{chip.emoji}</span>
+                {chip.label}
+              </Link>
+            ))}
             <Link
               to="/agents"
-              className="inline-flex items-center gap-2 rounded-md border border-white/15 px-3.5 py-2.5 text-[13.5px] font-semibold tracking-tight text-white/85 transition-colors hover:bg-white/5"
+              className="inline-flex items-center gap-1.5 rounded-full border border-ppc-purple-500/40 bg-ppc-purple-500/20 px-3.5 py-[7px] text-[12px] font-medium text-white transition-colors hover:bg-ppc-purple-500/30"
             >
-              Run another agent <ArrowRight size={12} weight="bold" />
+              All {AGENTS.length} →
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ═══ 2 · ACTIVITY STREAM ════════════════════════════════════════
-          One list. Live runs first, finished runs after. Same row shape so
-          the eye scans cleanly. No double sections. */}
-      <section>
-        <SectionEyebrow
-          label="Activity"
-          count={LIVE_RUNS.length + RECENT_RUNS_SUMMARY.length}
-          action={
-            <Link to="/runs" className="ppc-link inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-neutral-600 transition-colors hover:text-ppc-purple-500">
-              Mission control <ArrowRight size={12} weight="bold" />
-            </Link>
-          }
-        />
-        <ul className="divide-y divide-ppc-neutral-100 overflow-hidden rounded-2xl border border-ppc-neutral-100 bg-white">
-          {LIVE_RUNS.map((r) => (
-            <LiveRow key={r.runId} {...r} />
-          ))}
-          {RECENT_RUNS_SUMMARY.map((r) => (
-            <FinishedRow key={r.runId} {...r} />
-          ))}
-        </ul>
-      </section>
+      {/* ═══ 3 · YOUR ACCOUNTS ════════════════════════════════════════════
+          White card on lavender. Status dot is the v5 Surface 04 cue
+          (critical / warning / healthy from --ppc-status-*). */}
+      <section className="rounded-card border-[0.5px] border-ppc-card-border bg-ppc-card px-5 py-[18px]">
+        <div className="mb-3.5 flex items-center justify-between">
+          <h2 className="text-[16px] font-medium text-ppc-ink">
+            Your accounts<span className="text-ppc-purple-500">.</span>
+          </h2>
+          <Link
+            to="/projects"
+            className="text-[12px] font-medium text-ppc-purple-500 hover:underline"
+          >
+            All {PROJECTS.length} →
+          </Link>
+        </div>
 
-      {/* ═══ 3 · SUGGESTED NEXT ═════════════════════════════════════════
-          Three plays for this week. Slim wide rows so the picker doesn't
-          fight with the activity stream for attention. */}
-      <section>
-        <SectionEyebrow
-          label="Worth running next"
-          count={suggested.length}
-          action={
-            <Link to="/agents" className="ppc-link inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-neutral-600 transition-colors hover:text-ppc-purple-500">
-              All agents <ArrowRight size={12} weight="bold" />
-            </Link>
-          }
-        />
-        <ul className="divide-y divide-ppc-neutral-100 overflow-hidden rounded-2xl border border-ppc-neutral-100 bg-white">
-          {suggested.map((a) => (
-            <li key={a.slug}>
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          {visibleAccounts.map((p) => {
+            const meta = ACCOUNT_META[p.id];
+            return (
               <Link
-                to={`/agents/${a.slug}`}
-                className="group flex items-center gap-5 px-7 py-5 transition-colors hover:bg-ppc-purple-50/40"
+                key={p.id}
+                to={`/projects/${p.id}`}
+                className="flex items-center gap-2.5 rounded-[10px] border-[0.5px] border-ppc-canvas px-3.5 py-3 transition-colors hover:border-ppc-purple-300"
               >
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-ppc-purple-50 text-[20px]">
-                  {a.emoji}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[16px] font-bold tracking-tight text-ppc-black">
-                    {a.name}
-                  </div>
-                  <div className="mt-0.5 max-w-[560px] truncate text-[13.5px] text-ppc-neutral-600">
-                    {a.headline}
-                  </div>
-                </div>
-                <div className="hidden text-right sm:block">
-                  <div className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ppc-neutral-500">
-                    <Clock size={11} weight="duotone" />
-                    <span className="tabular">{a.expectedDuration}</span>
-                  </div>
-                </div>
-                <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-neutral-600 transition-[gap,color] group-hover:gap-2 group-hover:text-ppc-purple-500">
-                  Launch <ArrowRight size={12} weight="bold" />
+                <span
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-[8px] text-[13px] font-medium text-white"
+                  style={{ background: meta?.bg ?? '#7F5AF0' }}
+                >
+                  {p.name.charAt(0)}
                 </span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[13px] font-medium text-ppc-ink">{p.name}</div>
+                  <div className="truncate text-[11px] text-ppc-text-muted">
+                    {meta?.industry ?? p.industry} · {meta?.spend ?? '—'}
+                  </div>
+                </div>
+                <StatusDot health={projectHealth(p.id)} />
               </Link>
-            </li>
-          ))}
-        </ul>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ═══ 4 · WHILE YOU WERE AWAY ══════════════════════════════════════
+          Mixed feed: completed runs (from RECENT_RUNS_SUMMARY) + one live
+          run pinned at the bottom. Watch-live is the only purple in-row. */}
+      <section className="overflow-hidden rounded-card border-[0.5px] border-ppc-card-border bg-ppc-card">
+        <div className="flex items-center justify-between border-b-[0.5px] border-ppc-canvas px-5 py-4">
+          <h2 className="text-[16px] font-medium text-ppc-ink">
+            While you were away<span className="text-ppc-purple-500">.</span>
+          </h2>
+          <Link
+            to="/runs"
+            className="text-[12px] font-medium text-ppc-purple-500 hover:underline"
+          >
+            See all →
+          </Link>
+        </div>
+
+        {RECENT_RUNS_SUMMARY.slice(0, 2).map((r) => (
+          <CompletedRow key={r.runId} run={r} />
+        ))}
+        <LiveRow run={LIVE_RUN} />
       </section>
     </div>
   );
 }
 
-// ─── Section eyebrow with optional count chip + action link ─────────────
-function SectionEyebrow({
-  label, count, action,
-}: {
-  label: string;
-  count?: number;
-  action?: React.ReactNode;
-}) {
+// ─── Atoms ───────────────────────────────────────────────────────────────
+
+function StatusDot({ health }: { health: 'good' | 'warning' | 'attention' }) {
+  const bg =
+    health === 'attention' ? 'bg-ppc-status-critical'
+  : health === 'warning'   ? 'bg-ppc-status-warning'
+  : 'bg-ppc-status-healthy';
+  return <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${bg}`} />;
+}
+
+function projectHealth(projectId: string): 'good' | 'warning' | 'attention' {
+  const accounts = ACCOUNTS.filter((a) => a.projectId === projectId);
+  if (accounts.some((a) => a.health === 'attention')) return 'attention';
+  if (accounts.some((a) => a.health === 'warning'))   return 'warning';
+  return 'good';
+}
+
+function CompletedRow({ run }: { run: typeof RECENT_RUNS_SUMMARY[number] }) {
+  const agent = AGENTS.find((a) => a.name === run.agentName);
   return (
-    <div className="mb-5 flex items-end justify-between gap-3">
-      <div className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
-        <span>{label}</span>
-        {count !== undefined && (
-          <span className="tabular rounded-md bg-ppc-neutral-100 px-1.5 py-0.5 text-[10.5px] text-ppc-neutral-600">
-            {String(count).padStart(2, '0')}
-          </span>
-        )}
+    <Link
+      to={`/reports/${run.runId}`}
+      className="group flex items-center gap-3.5 border-b-[0.5px] border-ppc-canvas px-5 py-3.5 transition-colors hover:bg-ppc-canvas/50 last:border-b-0"
+    >
+      <span aria-hidden className="text-[22px] leading-none">{agent?.emoji ?? '✨'}</span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[14px] text-ppc-ink">
+          <span className="font-medium">{run.agentName}</span> wrapped on {run.projectName}
+        </p>
+        <p className="mt-0.5 truncate text-[12px] text-ppc-text-muted">{run.headline}</p>
       </div>
-      {action}
-    </div>
+      <span className="hidden text-[11px] text-ppc-text-muted sm:inline">{run.finishedAt}</span>
+      <CaretRight size={14} weight="bold" className="text-ppc-text-faint" />
+    </Link>
   );
 }
 
-// ─── Row primitives ─────────────────────────────────────────────────────
-
-function LiveRow({
-  runId, agentName, projectName, stage, elapsed,
-}: typeof LIVE_RUNS[number]) {
+function LiveRow({ run }: { run: typeof LIVE_RUN }) {
   return (
-    <li>
-      <Link
-        to={`/agents/competitor-spy/run/${runId}`}
-        className="group flex items-center gap-5 px-7 py-5 transition-colors hover:bg-ppc-purple-50/40"
-      >
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ppc-purple-50">
-          <span className="ppcio-live-dot inline-block h-2 w-2 rounded-full bg-ppc-purple-500" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 text-[11px]">
-            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-neutral-600">
-              Running · {agentName}
-            </span>
-            <span className="text-ppc-neutral-300">·</span>
-            <span className="text-ppc-neutral-500">{projectName}</span>
-          </div>
-          <div className="mt-1 truncate text-[14.5px] font-medium tracking-tight text-ppc-black">
-            {stage}
-          </div>
-        </div>
-        <span className="tabular hidden text-[12.5px] font-medium text-ppc-neutral-500 sm:block">
-          {elapsed}
-        </span>
-        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-neutral-600 transition-[gap,color] group-hover:gap-2 group-hover:text-ppc-purple-500">
-          Watch <ArrowUpRight size={12} weight="bold" />
-        </span>
-      </Link>
-    </li>
-  );
-}
-
-function FinishedRow({
-  runId, agentName, projectName, headline, finishedAt, duration, upside,
-}: typeof RECENT_RUNS_SUMMARY[number]) {
-  return (
-    <li>
-      <Link
-        to={`/reports/${runId}`}
-        className="group flex items-center gap-5 px-7 py-5 transition-colors hover:bg-ppc-purple-50/40"
-      >
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ppc-success/15 text-ppc-success">
-          <CheckCircle size={14} weight="fill" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 text-[11px]">
-            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-neutral-600">
-              {agentName}
-            </span>
-            <span className="text-ppc-neutral-300">·</span>
-            <span className="text-ppc-neutral-500">{projectName}</span>
-            <span className="text-ppc-neutral-300">·</span>
-            <span className="tabular text-ppc-neutral-500">{finishedAt}</span>
-          </div>
-          <div className="mt-1 truncate text-[15px] font-semibold tracking-tight text-ppc-black">
-            {headline}
-          </div>
-        </div>
-        <div className="hidden items-center gap-4 text-[12.5px] sm:flex">
-          <span className="inline-flex items-center gap-1 text-ppc-neutral-500">
-            <Clock size={11} weight="duotone" />
-            <span className="tabular">{duration}</span>
-          </span>
-          <span className="inline-flex items-center gap-1 font-semibold text-ppc-success">
-            <TrendUp size={12} weight="bold" />
-            <span className="tabular">{upside}</span>
-          </span>
-        </div>
-        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-neutral-600 transition-[gap,color] group-hover:gap-2 group-hover:text-ppc-purple-500">
-          Report <ArrowUpRight size={12} weight="bold" />
-        </span>
-      </Link>
-    </li>
+    <Link
+      to={`/agents/competitor-spy/run/${run.runId}`}
+      className="group flex items-center gap-3.5 px-5 py-3.5 transition-colors hover:bg-ppc-canvas/50"
+    >
+      <span aria-hidden className="text-[22px] leading-none">{run.emoji}</span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[14px] text-ppc-ink">
+          <span className="font-medium">{run.agentName}</span> running on {run.projectName} · stage {run.stageCurrent} of {run.stageTotal}
+        </p>
+        <p className="mt-0.5 flex items-center gap-1.5 truncate text-[12px] text-ppc-text-muted">
+          <span className="ppcio-live-dot inline-block h-[5px] w-[5px] rounded-full bg-ppc-status-healthy" />
+          {run.stageDescription}
+        </p>
+      </div>
+      <span className="text-[11px] font-medium text-ppc-purple-500">Watch live</span>
+      <CaretRight size={14} weight="bold" className="text-ppc-text-faint" />
+    </Link>
   );
 }
