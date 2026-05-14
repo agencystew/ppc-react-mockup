@@ -1,0 +1,175 @@
+<!--
+  PPC.io · DESIGN SYSTEM · 05 / 05 · REPORT v2
+  Source artifact provided by Stewart 2026-05-14 — the dark "agent report"
+  composition. Used as the reference for src/components/StagePage.tsx
+  (completed branch) and src/pages/AgentResults.tsx.
+-->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/figtree@5.1.0/900.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/figtree@5.1.0/800.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/figtree@5.1.0/500.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/figtree@5.1.0/400.css">
+
+<style>
+.fig { font-family: 'Figtree', system-ui, sans-serif; }
+.fig-hero { font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.03em; line-height: 1.0; }
+.fig-metric { font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.025em; line-height: 1.0; }
+.tool-pill { background: rgba(127, 90, 240, 0.12); border: 1px solid rgba(127, 90, 240, 0.28); color: #c4b5fd; font-family: 'Courier New', monospace; font-size: 11px; padding: 5px 10px; border-radius: 6px; display: inline-flex; align-items: center; }
+.priority-high { background: rgba(226, 75, 74, 0.15); border: 1px solid rgba(226, 75, 74, 0.3); color: #F09595; font-size: 10px; font-weight: 500; padding: 4px 9px; border-radius: 4px; letter-spacing: 0.8px; }
+.priority-med { background: rgba(186, 117, 23, 0.15); border: 1px solid rgba(186, 117, 23, 0.3); color: #EF9F27; font-size: 10px; font-weight: 500; padding: 4px 9px; border-radius: 4px; letter-spacing: 0.8px; }
+</style>
+
+<div class="fig">
+
+  <div style="margin-bottom: 14px;">
+    <p style="font-family: 'Courier New', monospace; font-size: 11px; color: #6b6480; margin: 0 0 4px; letter-spacing: 1.2px;">PPC.IO · DESIGN SYSTEM · 05 / 05 · REPORT v2</p>
+  </div>
+
+  <div style="background: #000000; border-radius: 16px; padding: 48px 40px; position: relative; overflow: hidden;">
+
+    <div style="position: absolute; top: -100px; right: -80px; width: 380px; height: 380px; background: radial-gradient(circle, rgba(127, 90, 240, 0.16) 0%, transparent 60%); border-radius: 50%;"></div>
+    <div style="position: absolute; bottom: -80px; left: 10%; width: 240px; height: 240px; background: radial-gradient(circle, rgba(127, 90, 240, 0.06) 0%, transparent 65%); border-radius: 50%;"></div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 44px; position: relative;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 20px;">🕵️</span>
+        <p style="margin: 0; font-size: 15px; font-weight: 500; color: white;">Competitor Spy</p>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 18px; height: 18px; background: rgba(29, 158, 117, 0.2); border: 1px solid rgba(29, 158, 117, 0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+          <i class="ti ti-check" style="font-size: 11px; color: #5DCAA5;"></i>
+        </div>
+        <p style="margin: 0; font-family: 'Courier New', monospace; font-size: 12px; color: #8b80a8; letter-spacing: 1.2px;">COMPLETED · 47 MIN</p>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 40px; position: relative;">
+      <h1 class="fig-hero" style="margin: 0 0 20px; font-size: 64px; color: white;">11 gaps your rivals<br>are exploiting<span style="color: #7f5af0;">.</span></h1>
+      <p style="margin: 0; font-size: 16px; color: #b8aeda; line-height: 1.5; max-width: 88%;">Eight rivals analysed across copy, funnels, spend, and auction overlap. Here's where they're winning and what you can take back.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 44px; position: relative;">
+      <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 22px 20px;">
+        <p class="fig-metric" style="margin: 0 0 14px; font-size: 48px; color: white;">3</p>
+        <p style="margin: 0; font-size: 12px; color: #8b80a8; line-height: 1.5;">Quick wins ready to deploy this week</p>
+      </div>
+      <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 22px 20px;">
+        <p class="fig-metric" style="margin: 0 0 14px; font-size: 38px; color: white;">$8.2K<span style="font-size: 18px; font-weight: 500; color: #8b80a8;">/mo</span></p>
+        <p style="margin: 0; font-size: 12px; color: #8b80a8; line-height: 1.5;">Estimated upside if all 3 are applied</p>
+      </div>
+      <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 22px 20px;">
+        <p class="fig-metric" style="margin: 0 0 14px; font-size: 44px; color: white;">+18%</p>
+        <p style="margin: 0; font-size: 12px; color: #8b80a8; line-height: 1.5;">Top rival's spend growth in last 30 days</p>
+      </div>
+    </div>
+
+    <div style="position: relative; margin-bottom: 24px;">
+      <p style="margin: 0 0 16px; font-size: 14px; color: #8b80a8;">What the team found</p>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-left: 3px solid #7f5af0; border-radius: 8px; padding: 22px 24px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <p style="margin: 0; font-family: 'Courier New', monospace; font-size: 11px; color: #c4b5fd; letter-spacing: 1.2px;">COMPETITOR DISCOVERY</p>
+            <span class="priority-high">HIGH PRIORITY</span>
+          </div>
+          <p style="margin: 0 0 18px; font-size: 14px; color: white; line-height: 1.65;">Three of the eight active rivals weren't on your radar. Smith & Associates and Cleveland Injury Group are the most consistent bidders on your top terms, both growing month-over-month.</p>
+          <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 0.5px solid rgba(255, 255, 255, 0.08);">
+            <p style="margin: 0; font-size: 12px; color: #8b80a8;"><i class="ti ti-arrow-up-right" style="font-size: 14px; color: #5DCAA5; vertical-align: -2px; margin-right: 4px;"></i>Track 3 unmonitored rivals</p>
+            <span style="font-size: 12px; color: #c4b5fd; font-weight: 500; cursor: pointer;">Add to watchlist →</span>
+          </div>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-left: 3px solid #7f5af0; border-radius: 8px; padding: 22px 24px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <p style="margin: 0; font-family: 'Courier New', monospace; font-size: 11px; color: #c4b5fd; letter-spacing: 1.2px;">AUCTION INTELLIGENCE</p>
+            <span class="priority-high">HIGH PRIORITY</span>
+          </div>
+          <p style="margin: 0 0 18px; font-size: 14px; color: white; line-height: 1.65;">Smith & Associates is outranking you 41% of the time on your highest-CPC terms. Their bid intensity has climbed 28% in 30 days. You're losing share, not just impressions.</p>
+          <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 0.5px solid rgba(255, 255, 255, 0.08);">
+            <p style="margin: 0; font-size: 12px; color: #8b80a8;"><i class="ti ti-arrow-up-right" style="font-size: 14px; color: #5DCAA5; vertical-align: -2px; margin-right: 4px;"></i>Auction overlap data</p>
+            <span style="font-size: 12px; color: #c4b5fd; font-weight: 500; cursor: pointer;">Adjust bid strategy →</span>
+          </div>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-left: 3px solid #7f5af0; border-radius: 8px; padding: 22px 24px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <p style="margin: 0; font-family: 'Courier New', monospace; font-size: 11px; color: #c4b5fd; letter-spacing: 1.2px;">COPY ANALYST</p>
+            <span class="priority-med">MED PRIORITY</span>
+          </div>
+          <p style="margin: 0 0 18px; font-size: 14px; color: white; line-height: 1.65;">All eight rivals lead with "no fee unless we win." None mention recent settlement amounts or case timelines. Both are unclaimed positioning territory worth testing in your top campaign.</p>
+          <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 0.5px solid rgba(255, 255, 255, 0.08);">
+            <p style="margin: 0; font-size: 12px; color: #8b80a8;"><i class="ti ti-arrow-up-right" style="font-size: 14px; color: #5DCAA5; vertical-align: -2px; margin-right: 4px;"></i>Two untested angles</p>
+            <span style="font-size: 12px; color: #c4b5fd; font-weight: 500; cursor: pointer;">Draft ad variants →</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="background: #1F1342; border: 1px solid rgba(127, 90, 240, 0.28); border-radius: 12px; padding: 24px 26px; margin-bottom: 24px; position: relative;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+        <p style="margin: 0; font-size: 18px; font-weight: 500; color: white;">Audit the work</p>
+        <button style="background: rgba(127, 90, 240, 0.2); color: white; border: 1px solid rgba(127, 90, 240, 0.3); padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 6px;">Close <i class="ti ti-chevron-up" style="font-size: 12px;"></i></button>
+      </div>
+      <p style="margin: 0 0 16px; font-size: 13px; color: #b8aeda; line-height: 1.65;">Every API call, every data point, every AI judgment. <span style="color: white; font-weight: 500;">161 tool invocations across 6 specialists.</span> Inspect the methodology, audit the source tables, export the raw data.</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;">
+        <span class="tool-pill">serp_api.search</span>
+        <span class="tool-pill">web.scrape</span>
+        <span class="tool-pill">domain.lookup</span>
+        <span class="tool-pill">google_ads.auction_insights</span>
+      </div>
+      <p style="margin: 6px 0 22px; font-size: 12px; color: #8b80a8; cursor: pointer;">+ 11 more tools</p>
+
+      <div style="border-top: 0.5px solid rgba(127, 90, 240, 0.18); padding-top: 22px;">
+        <p style="margin: 0 0 4px; font-size: 15px; font-weight: 500; color: white;">Competitor Discovery</p>
+        <p style="margin: 0 0 14px; font-size: 12px; color: #8b80a8;">47 tool calls · 8 rivals · 12 keywords · 7-day window</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;">
+          <span class="tool-pill">serp_api.search</span>
+          <span class="tool-pill">web.scrape</span>
+          <span class="tool-pill">domain.lookup</span>
+        </div>
+        <p style="margin: 0 0 18px; font-size: 13px; color: #b8aeda; line-height: 1.65;">We searched Google for your top 12 keywords across personal injury terms and recorded every advertiser appearing in the top 4 positions over a 7-day window. Cross-referenced each domain against public ad libraries to confirm active campaigns and rule out one-off appearances.</p>
+
+        <div style="background: rgba(0, 0, 0, 0.25); border: 0.5px solid rgba(127, 90, 240, 0.15); border-radius: 10px; padding: 14px 16px;">
+          <div style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 0.8fr; gap: 12px; padding-bottom: 10px; border-bottom: 0.5px solid rgba(127, 90, 240, 0.12); margin-bottom: 10px;">
+            <p style="margin: 0; font-family: 'Courier New', monospace; font-size: 10px; color: #8b80a8; letter-spacing: 1px;">RIVAL</p>
+            <p style="margin: 0; font-family: 'Courier New', monospace; font-size: 10px; color: #8b80a8; letter-spacing: 1px;">DOMAIN</p>
+            <p style="margin: 0; font-family: 'Courier New', monospace; font-size: 10px; color: #8b80a8; letter-spacing: 1px;">EST. SPEND</p>
+            <p style="margin: 0; font-family: 'Courier New', monospace; font-size: 10px; color: #8b80a8; letter-spacing: 1px;">SINCE</p>
+          </div>
+          <div style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 0.8fr; gap: 12px; padding: 8px 0; border-bottom: 0.5px solid rgba(127, 90, 240, 0.08);">
+            <p style="margin: 0; font-size: 13px; color: white; font-weight: 500;">Smith & Associates</p>
+            <p style="margin: 0; font-size: 12px; color: #b8aeda;">smithlaw.com</p>
+            <p style="margin: 0; font-size: 12px; color: #b8aeda; font-family: 'Courier New', monospace;">$12K/mo</p>
+            <p style="margin: 0; font-size: 12px; color: #b8aeda; font-family: 'Courier New', monospace;">2019</p>
+          </div>
+          <div style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 0.8fr; gap: 12px; padding: 8px 0; border-bottom: 0.5px solid rgba(127, 90, 240, 0.08);">
+            <p style="margin: 0; font-size: 13px; color: white; font-weight: 500;">Cleveland Injury Group</p>
+            <p style="margin: 0; font-size: 12px; color: #b8aeda;">clevelandig.com</p>
+            <p style="margin: 0; font-size: 12px; color: #b8aeda; font-family: 'Courier New', monospace;">$9K/mo</p>
+            <p style="margin: 0; font-size: 12px; color: #b8aeda; font-family: 'Courier New', monospace;">2017</p>
+          </div>
+          <div style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 0.8fr; gap: 12px; padding: 8px 0;">
+            <p style="margin: 0; font-size: 13px; color: white; font-weight: 500;">Ohio Personal Injury</p>
+            <p style="margin: 0; font-size: 12px; color: #b8aeda;">ohiopi.com</p>
+            <p style="margin: 0; font-size: 12px; color: #b8aeda; font-family: 'Courier New', monospace;">$7K/mo</p>
+            <p style="margin: 0; font-size: 12px; color: #b8aeda; font-family: 'Courier New', monospace;">2021</p>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; margin-top: 4px; border-top: 0.5px solid rgba(127, 90, 240, 0.12);">
+            <p style="margin: 0; font-size: 11px; color: #8b80a8;">+ 5 more rivals</p>
+            <span style="font-size: 12px; color: #c4b5fd; font-weight: 500; cursor: pointer;">View all →</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px; position: relative;">
+      <button style="background: #7f5af0; color: white; border: none; padding: 14px 22px; border-radius: 10px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 8px;">Apply recommendations <i class="ti ti-arrow-right" style="font-size: 14px;"></i></button>
+      <button style="background: rgba(255, 255, 255, 0.06); color: white; border: 1px solid rgba(255, 255, 255, 0.12); padding: 14px 20px; border-radius: 10px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer;">Export findings</button>
+      <button style="background: rgba(255, 255, 255, 0.06); color: white; border: 1px solid rgba(255, 255, 255, 0.12); padding: 14px 20px; border-radius: 10px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer;">Schedule rerun</button>
+    </div>
+
+  </div>
+
+</div>
