@@ -2,34 +2,28 @@ import { useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import {
   ArrowRight, ArrowUp, ArrowDown,
-  Lightning, CaretDown,
+  Lightning, CaretDown, CaretRight,
   ChatCircleDots, Command,
   Detective, Microscope, Drop,
 } from '@phosphor-icons/react';
 import { PROJECTS } from '../mock/projects';
 
-// Project detail · /projects/:id
-//
-// Editorial-grade dashboard. Light page with a single signature moment —
-// three dark "Run an agent" cards in the middle and a dark command bar at
-// the foot. Every section title is punctuated by a purple period, the
-// page's visual leitmotif.
-//
-// Sections, top to bottom:
-//   1. Breadcrumb + Run agent CTA
-//   2. Hero (avatar, name, industry, critical/warning pill)
-//   3. Tabs (Overview default; others stubbed)
-//   4. Today's brief — 3 prioritised findings, money on the right
-//   5. Run an agent — 3 dark agent cards (signature moment)
-//   6. Performance — 4 KPI cards + Daily spend trend chart
-//   7. Recent activity — vertical timeline
-//   8. Campaigns — Top performers vs Needs attention
-//   9. Ask-about command bar (dark)
+/* Project detail · /projects/:id
+ *
+ * Editorial-grade dashboard, sized to match Stewart's reference screenshots.
+ * Light page on a soft lavender field (#f7f6fc) punctuated by three dark
+ * "Run an agent" cards in the middle and a dark command bar at the foot —
+ * the page's signature visual move. Every section heading is bold display
+ * sans with a single purple period dot.
+ *
+ * Top → bottom: breadcrumb + run agent ▸ hero ▸ tabs ▸ Today's brief
+ * ▸ Run an agent ▸ Performance ▸ Recent activity ▸ Campaigns ▸ ask bar.
+ */
 
 // ─── Tokens ────────────────────────────────────────────────────────────
-// Mockup palette. Locked. Kept inline so the page reads top to bottom.
 const C = {
   pageBg:    '#f7f6fc',
+  pageBor:   '#e8e6f0',
   ink:       '#18181b',
   neutral7:  '#3f3f46',
   neutral6:  '#52525b',
@@ -43,22 +37,21 @@ const C = {
   purpleSoft:'#c9c1ff',
   green:     '#16a34a',
   greenDot:  '#22c55e',
-  greenSoft: '#052e16',
   amber:     '#d97706',
   amberDot:  '#f59e0b',
   red:       '#dc2626',
   redDot:    '#ef4444',
 
-  // Dark surfaces — for the agent cards + command bar.
+  // Dark surfaces (agent cards + ask command bar).
   darkBg:     '#0a0a0f',
   darkBorder: '#1a1a22',
   darkText:   '#b8b8c0',
   darkMuted:  '#7a7a86',
-  darkKbdBg:  'rgba(255,255,255,0.04)',
+  darkKbdBg:  '#13131a',
   darkKbdBor: '#1f1f28',
 } as const;
 
-// ─── Mock data ─────────────────────────────────────────────────────────
+// ─── Data ──────────────────────────────────────────────────────────────
 
 type FindingTone = 'critical' | 'warning';
 interface Finding {
@@ -70,14 +63,13 @@ interface Finding {
   rightTopColor: string;
   rightBottom: string;
 }
-
 const FINDINGS: Finding[] = [
   {
     tone: 'critical',
     title: 'Wasted spend in non-converting search terms',
     source: 'Search Term Audit',
     meta: '2h ago · 47 negative candidates surfaced',
-    rightTop: <><span className="tabular">$4,200</span><span className="text-[10px] font-normal text-[#a1a1aa]">/mo</span></>,
+    rightTop: <><span className="tabular">$4,200</span><span className="text-[12px] font-normal text-[#a1a1aa]">/mo</span></>,
     rightTopColor: 'text-[#16a34a]',
     rightBottom: 'recoverable',
   },
@@ -85,8 +77,8 @@ const FINDINGS: Finding[] = [
     tone: 'warning',
     title: 'CPA up 43% in or_sud_search',
     source: 'CPA Monitor',
-    meta: '1d ago · $76 to $109 week over week',
-    rightTop: <><span className="tabular">$1,200</span><span className="text-[10px] font-normal text-[#a1a1aa]">/mo</span></>,
+    meta: '1d ago · $76 → $109 week over week',
+    rightTop: <><span className="tabular">$1,200</span><span className="text-[12px] font-normal text-[#a1a1aa]">/mo</span></>,
     rightTopColor: 'text-[#d97706]',
     rightBottom: 'at risk',
   },
@@ -94,10 +86,10 @@ const FINDINGS: Finding[] = [
     tone: 'warning',
     title: '3 PMAX assets rated "Poor"',
     source: 'PMAX Asset Review',
-    meta: '5h ago · headline and description swaps recommended',
+    meta: '5h ago · headline & description swaps recommended',
     rightTop: 'CTR uplift',
     rightTopColor: 'text-[#3f3f46]',
-    rightBottom: 'est. 0.4 to 0.8pp',
+    rightBottom: 'est. 0.4–0.8pp',
   },
 ];
 
@@ -105,24 +97,24 @@ const AGENT_CARDS = [
   {
     slug: 'competitor-spy',
     icon: Detective,
-    chipBg: 'rgba(251,191,36,0.12)',
-    chipFg: '#fbbf24',
+    chipBg: 'rgba(251,191,36,0.14)',
+    chipFg: '#FCD34D',
     title: 'Competitor Spy',
     blurb: 'A live read on every competitor in your auction. The angles, the spend, the gaps.',
   },
   {
     slug: 'deep-account-audit',
     icon: Microscope,
-    chipBg: 'rgba(96,165,250,0.12)',
-    chipFg: '#60a5fa',
+    chipBg: 'rgba(96,165,250,0.14)',
+    chipFg: '#93C5FD',
     title: 'Deep Account Audit',
     blurb: 'Structure, alignment, waste, growth ceilings. Client-ready output you hand straight to the meeting.',
   },
   {
     slug: 'spend-leak',
     icon: Drop,
-    chipBg: 'rgba(34,211,238,0.12)',
-    chipFg: '#22d3ee',
+    chipBg: 'rgba(34,211,238,0.14)',
+    chipFg: '#67E8F9',
     title: 'Spend Leak Detector',
     blurb: "Every place your budget is bleeding without conversions, ranked by what's recoverable.",
   },
@@ -142,7 +134,7 @@ const KPI_CARDS: KpiCard[] = [
   { label: 'CTR',         value: '3.42%',   delta: '-0.3%',  deltaTone: 'flat',      spark: [10, 9,11,10,12,10,11,10,12,11,13] },
 ];
 
-// Daily spend, 32 points, follows mockup's mountain shape.
+// Daily spend, 32 points, mountain shape.
 const SPEND_TREND = [
   3100,3300,3550,3800,4000,4400,4900,5100,5300,5500,5700,5900,
   6050,6200,6350,6450,6550,6500,6300,6050,5800,5500,5250,5000,
@@ -151,9 +143,9 @@ const SPEND_TREND = [
 
 interface Campaign { name: string; meta: string; cpaTone?: 'bad' | 'good' | 'neutral'; cpa: string; }
 const TOP_CAMPAIGNS: Campaign[] = [
-  { name: 'oh_brand_search', meta: '$5,274 · 126 conv',  cpa: '$42 CPA', cpaTone: 'good'    },
-  { name: 'or_brand_search', meta: '$4,810 · 56 conv',   cpa: '$86 CPA', cpaTone: 'neutral' },
-  { name: 'oh_sud_search',   meta: '$5,362 · 87 conv',   cpa: '$62 CPA', cpaTone: 'neutral' },
+  { name: 'oh_brand_search', meta: '$5,274 · 126 conv',  cpa: '$42 CPA',  cpaTone: 'good'    },
+  { name: 'or_brand_search', meta: '$4,810 · 56 conv',   cpa: '$86 CPA',  cpaTone: 'neutral' },
+  { name: 'oh_sud_search',   meta: '$5,362 · 87 conv',   cpa: '$62 CPA',  cpaTone: 'neutral' },
 ];
 const BAD_CAMPAIGNS: Campaign[] = [
   { name: 'nm_sud_search',   meta: '$2,603 · 9 conv',    cpa: '$289 CPA', cpaTone: 'bad' },
@@ -189,47 +181,47 @@ export function ProjectPage() {
 
   return (
     <div
-      className="rounded-[14px] border px-7 py-7 sm:px-8 sm:py-8"
-      style={{ background: C.pageBg, borderColor: '#e8e6f0', color: C.ink }}
+      className="rounded-[14px] border px-7 py-7 sm:px-9 sm:py-9"
+      style={{ background: C.pageBg, borderColor: C.pageBor, color: C.ink }}
     >
       {/* ── 1. Breadcrumb + Run agent ─────────────────────────────── */}
       <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-1.5 text-[11px]" style={{ color: C.neutral5 }}>
+        <div className="flex items-center gap-1.5 text-[12px]" style={{ color: C.neutral5 }}>
           <Link to="/projects" className="hover:text-[#18181b] transition-colors">Projects</Link>
           <span style={{ color: C.neutral3 }}>/</span>
           <span style={{ color: C.neutral7 }}>{project.name}</span>
         </div>
         <button
-          className="inline-flex items-center gap-1.5 rounded-[8px] px-3.5 py-2 text-[13px] font-medium text-white shadow-[0_1px_2px_rgba(124,109,255,0.35)] transition-transform hover:-translate-y-px"
+          className="inline-flex items-center gap-2 rounded-[10px] px-4 py-3 text-[14px] font-semibold text-white shadow-[0_1px_2px_rgba(124,109,255,0.35),0_10px_24px_-8px_rgba(124,109,255,0.5)] transition-transform hover:-translate-y-px"
           style={{ background: C.purple }}
         >
-          <Lightning size={14} weight="fill" />
+          <Lightning size={15} weight="fill" />
           Run agent
-          <CaretDown size={11} weight="bold" className="opacity-70" />
+          <CaretDown size={11} weight="bold" className="opacity-75" />
         </button>
       </div>
 
       {/* ── 2. Hero ───────────────────────────────────────────────── */}
-      <header className="mt-5 flex items-center gap-4">
+      <header className="mt-7 flex items-center gap-4">
         <div
-          className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[10px] text-[16px] font-semibold"
+          className="grid h-[60px] w-[60px] shrink-0 place-items-center rounded-[12px] text-[24px] font-semibold"
           style={{ background: avatar.bg, color: avatar.fg }}
         >
           {project.name.charAt(0)}
         </div>
         <div className="min-w-0">
           <h1
-            className="text-[26px] font-semibold leading-[1.1]"
-            style={{ color: C.ink, letterSpacing: '-0.018em' }}
+            className="text-[40px] font-extrabold leading-[1.02]"
+            style={{ color: C.ink, letterSpacing: '-0.025em' }}
           >
             {project.name}
           </h1>
-          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11.5px]" style={{ color: C.neutral5 }}>
+          <div className="mt-2.5 flex flex-wrap items-center gap-2.5 text-[13.5px]" style={{ color: C.neutral5 }}>
             <span>{project.industry}</span>
             <span style={{ color: C.neutral3 }}>·</span>
             <span>Lead gen</span>
             <span style={{ color: C.neutral3 }}>·</span>
-            <span className="inline-flex items-center gap-1.5" style={{ color: C.red }}>
+            <span className="inline-flex items-center gap-1.5 font-medium" style={{ color: C.red }}>
               <span className="h-1.5 w-1.5 rounded-full" style={{ background: C.redDot }} />
               1 critical, 3 warnings
             </span>
@@ -239,7 +231,7 @@ export function ProjectPage() {
 
       {/* ── 3. Tabs ───────────────────────────────────────────────── */}
       <nav
-        className="mt-6 flex items-center gap-0 border-b text-[12px]"
+        className="mt-8 flex items-center gap-1 border-b text-[13.5px]"
         style={{ borderColor: C.border }}
       >
         <Tab active>Overview</Tab>
@@ -255,16 +247,16 @@ export function ProjectPage() {
         sub={
           <>
             <span className="tabular">4</span> findings · est.{' '}
-            <span className="tabular font-medium" style={{ color: C.green }}>$5,400/mo</span>{' '}
+            <span className="tabular font-semibold" style={{ color: C.green }}>$5,400/mo</span>{' '}
             recoverable · updated 2h ago
           </>
         }
         right={<HeaderLink to="#">Run all audits</HeaderLink>}
-        marginTop="mt-6"
+        marginTop="mt-9"
       />
 
       <div
-        className="mt-3.5 overflow-hidden rounded-[10px] border"
+        className="mt-5 overflow-hidden rounded-[12px] border"
         style={{ background: C.cardBg, borderColor: C.border }}
       >
         {FINDINGS.map((f, i) => {
@@ -274,37 +266,38 @@ export function ProjectPage() {
             <a
               key={i}
               href="#"
-              className="grid grid-cols-[14px_1fr_auto_14px] items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-[#fafafd]"
+              className="grid grid-cols-[16px_1fr_auto_16px] items-center gap-4 px-5 py-4.5 transition-colors hover:bg-[#fafafd]"
               style={{
                 borderBottom: isLast ? 'none' : `1px solid ${C.rowBorder}`,
+                paddingTop: 18, paddingBottom: 18,
               }}
             >
               <span
-                className="h-[7px] w-[7px] rounded-full"
+                className="h-[8px] w-[8px] rounded-full"
                 style={{
                   background: dot,
                   boxShadow: f.tone === 'critical' ? `0 0 0 3px rgba(239,68,68,0.12)` : 'none',
                 }}
               />
               <div className="min-w-0">
-                <div className="truncate text-[13.5px] font-medium leading-tight" style={{ color: C.ink }}>
+                <div className="text-[15.5px] font-semibold leading-tight" style={{ color: C.ink, letterSpacing: '-0.005em' }}>
                   {f.title}
                 </div>
-                <div className="mt-1 text-[11px]" style={{ color: C.neutral5 }}>
+                <div className="mt-1.5 text-[12.5px]" style={{ color: C.neutral5 }}>
                   <span>{f.source}</span>
                   <span className="mx-1.5" style={{ color: C.neutral3 }}>·</span>
                   {f.meta}
                 </div>
               </div>
               <div className="text-right">
-                <div className={`text-[13px] font-semibold leading-none ${f.rightTopColor}`}>
+                <div className={`text-[16px] font-semibold leading-none ${f.rightTopColor}`}>
                   {f.rightTop}
                 </div>
-                <div className="mt-1 text-[10px]" style={{ color: C.neutral4 }}>
+                <div className="mt-1.5 text-[11.5px]" style={{ color: C.neutral4 }}>
                   {f.rightBottom}
                 </div>
               </div>
-              <ArrowRight size={13} weight="bold" style={{ color: C.neutral4 }} />
+              <CaretRight size={15} weight="bold" style={{ color: C.neutral4 }} />
             </a>
           );
         })}
@@ -314,39 +307,39 @@ export function ProjectPage() {
       <SectionHeading
         title="Run an agent"
         right={<HeaderLink to="/agents">Browse all 24</HeaderLink>}
-        marginTop="mt-12"
+        marginTop="mt-14"
       />
 
-      <div className="mt-3.5 grid grid-cols-1 gap-3 md:grid-cols-3">
+      <div className="mt-5 grid grid-cols-1 gap-3.5 md:grid-cols-3">
         {AGENT_CARDS.map((a) => {
           const Icon = a.icon;
           return (
             <Link
               key={a.slug}
               to={`/agents/${a.slug}`}
-              className="group relative flex flex-col rounded-[12px] border p-5 transition-all duration-200 hover:-translate-y-px hover:border-[#2a2a36]"
-              style={{ background: C.darkBg, borderColor: C.darkBorder }}
+              className="group relative flex flex-col rounded-[14px] border px-6 py-7 transition-all duration-200 hover:-translate-y-px hover:border-[#2a2a36]"
+              style={{ background: C.darkBg, borderColor: C.darkBorder, minHeight: 240 }}
             >
               <div
-                className="grid h-[42px] w-[42px] place-items-center rounded-[10px]"
+                className="grid h-[48px] w-[48px] place-items-center rounded-[12px]"
                 style={{ background: a.chipBg }}
               >
-                <Icon size={22} weight="duotone" style={{ color: a.chipFg }} />
+                <Icon size={26} weight="duotone" style={{ color: a.chipFg }} />
               </div>
 
-              <div className="mt-5 text-[15px] font-medium leading-snug tracking-[-0.005em] text-white">
+              <div className="mt-7 text-[20px] font-semibold leading-snug tracking-[-0.01em] text-white">
                 {a.title}<span style={{ color: C.purpleSoft }}>.</span>
               </div>
-              <div className="mt-2 flex-1 text-[12px] leading-[1.55]" style={{ color: C.darkText }}>
+              <div className="mt-3 flex-1 text-[13px] leading-[1.55]" style={{ color: C.darkText }}>
                 {a.blurb}
               </div>
 
               <div
-                className="mt-5 inline-flex items-center gap-1 text-[12px] font-medium"
+                className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-semibold"
                 style={{ color: C.purpleSoft }}
               >
                 Send in
-                <ArrowRight size={12} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight size={13} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
               </div>
             </Link>
           );
@@ -358,17 +351,17 @@ export function ProjectPage() {
         title="Performance"
         right={
           <button
-            className="inline-flex items-center gap-1.5 rounded-[6px] border bg-white px-2.5 py-1 text-[11px] font-medium"
+            className="inline-flex items-center gap-1.5 rounded-[8px] border bg-white px-3 py-1.5 text-[12.5px] font-medium"
             style={{ borderColor: C.border, color: C.neutral7 }}
           >
             Last 30 days
-            <CaretDown size={10} weight="bold" style={{ color: C.neutral4 }} />
+            <CaretDown size={11} weight="bold" style={{ color: C.neutral4 }} />
           </button>
         }
-        marginTop="mt-12"
+        marginTop="mt-14"
       />
 
-      <div className="mt-3.5 grid grid-cols-2 gap-2.5 md:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         {KPI_CARDS.map((k) => (
           <KpiCardBlock key={k.label} kpi={k} />
         ))}
@@ -380,37 +373,37 @@ export function ProjectPage() {
       <SectionHeading
         title="Recent activity"
         right={
-          <Link to="#" className="text-[12px] font-medium" style={{ color: C.purple }}>
+          <Link to="#" className="text-[13px] font-semibold transition-colors" style={{ color: C.purple }}>
             View all
           </Link>
         }
-        marginTop="mt-10"
+        marginTop="mt-14"
       />
 
-      <div className="relative mt-3.5 pl-1">
+      <div className="relative mt-5 pl-1">
         <div
-          className="absolute bottom-3 left-[5.5px] top-3 w-px"
+          className="absolute bottom-3.5 left-[6px] top-3.5 w-px"
           style={{ background: C.border }}
         />
         {ACTIVITY.map((a) => (
-          <div key={a.title} className="relative flex items-start gap-4 py-2.5">
+          <div key={a.title} className="relative flex items-start gap-4 py-3">
             <span
-              className="relative z-10 mt-1.5 h-[11px] w-[11px] shrink-0 rounded-full"
+              className="relative z-10 mt-2 h-[13px] w-[13px] shrink-0 rounded-full"
               style={{
                 background: C.greenDot,
-                boxShadow: `0 0 0 2px ${C.pageBg}`,
+                boxShadow: `0 0 0 3px ${C.pageBg}`,
               }}
             />
             <div className="flex flex-1 items-start justify-between gap-3">
               <div className="min-w-0">
-                <div className="text-[13px] font-medium" style={{ color: C.ink }}>
+                <div className="text-[14.5px] font-semibold" style={{ color: C.ink, letterSpacing: '-0.005em' }}>
                   {a.title}
                 </div>
-                <div className="mt-0.5 text-[11px]" style={{ color: C.neutral5 }}>
+                <div className="mt-1 text-[12.5px]" style={{ color: C.neutral5 }}>
                   {a.meta}
                 </div>
               </div>
-              <div className="text-[11px] whitespace-nowrap" style={{ color: C.neutral4 }}>
+              <div className="whitespace-nowrap text-[12px]" style={{ color: C.neutral4 }}>
                 {a.when}
               </div>
             </div>
@@ -423,34 +416,34 @@ export function ProjectPage() {
         title="Campaigns"
         sub={<><span className="tabular">152</span> total · <span className="tabular">8</span> types</>}
         right={
-          <Link to="#" className="inline-flex items-center gap-1 text-[12px] font-medium" style={{ color: C.purple }}>
-            View all <ArrowRight size={11} weight="bold" />
+          <Link to="#" className="inline-flex items-center gap-1 text-[13px] font-semibold" style={{ color: C.purple }}>
+            View all <ArrowRight size={12} weight="bold" />
           </Link>
         }
-        marginTop="mt-10"
+        marginTop="mt-14"
       />
 
-      <div className="mt-3.5 grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <div className="mt-5 grid grid-cols-1 gap-3.5 lg:grid-cols-2">
         <CampaignCard title="Top performers" tone="good" items={TOP_CAMPAIGNS} />
         <CampaignCard title="Needs attention" tone="bad"  items={BAD_CAMPAIGNS} />
       </div>
 
       {/* ── 9. Ask command bar ───────────────────────────────────── */}
       <div
-        className="mt-8 flex items-center gap-3 rounded-[12px] border px-4 py-3.5"
+        className="mt-10 flex items-center gap-3.5 rounded-[14px] border px-5 py-4"
         style={{ background: C.darkBg, borderColor: C.darkBorder }}
       >
-        <ChatCircleDots size={17} weight="duotone" style={{ color: C.purpleSoft }} />
-        <span className="flex-1 text-[13px]" style={{ color: C.darkText }}>
+        <ChatCircleDots size={19} weight="duotone" style={{ color: C.purpleSoft }} />
+        <span className="flex-1 text-[14px]" style={{ color: C.darkText }}>
           Ask about <span style={{ color: '#ffffff' }}>{project.name}</span>
-          <span className="mx-1.5" style={{ color: C.darkMuted }}>·</span>
+          <span className="mx-2" style={{ color: C.darkMuted }}>·</span>
           try "where am I wasting spend?"
         </span>
         <kbd
-          className="inline-flex items-center gap-[2px] rounded-[5px] border px-1.5 py-0.5 font-mono text-[10px] font-medium"
+          className="inline-flex items-center gap-[3px] rounded-[6px] border px-2 py-1 font-mono text-[11px] font-medium"
           style={{ background: C.darkKbdBg, borderColor: C.darkKbdBor, color: C.darkText }}
         >
-          <Command size={9} weight="bold" />K
+          <Command size={10} weight="bold" />K
         </kbd>
       </div>
     </div>
@@ -460,7 +453,7 @@ export function ProjectPage() {
 // ─── Subcomponents ─────────────────────────────────────────────────────
 
 function SectionHeading({
-  title, sub, right, marginTop = 'mt-10',
+  title, sub, right, marginTop = 'mt-12',
 }: {
   title: string;
   sub?: React.ReactNode;
@@ -468,16 +461,16 @@ function SectionHeading({
   marginTop?: string;
 }) {
   return (
-    <div className={`${marginTop} flex items-baseline justify-between gap-4`}>
+    <div className={`${marginTop} flex items-end justify-between gap-4`}>
       <div>
         <h2
-          className="text-[16px] font-medium leading-tight"
-          style={{ color: C.ink, letterSpacing: '-0.01em' }}
+          className="text-[26px] font-bold leading-[1.05]"
+          style={{ color: C.ink, letterSpacing: '-0.02em' }}
         >
           {title}<span style={{ color: C.purple }}>.</span>
         </h2>
         {sub && (
-          <p className="mt-1 text-[11px]" style={{ color: C.neutral5 }}>
+          <p className="mt-2 text-[12.5px]" style={{ color: C.neutral5 }}>
             {sub}
           </p>
         )}
@@ -491,11 +484,11 @@ function HeaderLink({ children, to }: { children: React.ReactNode; to: string })
   return (
     <Link
       to={to}
-      className="inline-flex items-center gap-1 text-[12px] font-medium transition-colors"
+      className="inline-flex items-center gap-1.5 text-[13px] font-semibold transition-colors"
       style={{ color: C.purple }}
     >
       {children}
-      <ArrowRight size={11} weight="bold" />
+      <ArrowRight size={12} weight="bold" />
     </Link>
   );
 }
@@ -503,10 +496,10 @@ function HeaderLink({ children, to }: { children: React.ReactNode; to: string })
 function Tab({ children, active = false }: { children: React.ReactNode; active?: boolean }) {
   return (
     <button
-      className="-mb-px border-b-2 px-3.5 py-2.5 transition-colors"
+      className="-mb-px border-b-2 px-4 py-3.5 transition-colors"
       style={{
         color: active ? C.ink : C.neutral5,
-        fontWeight: active ? 500 : 400,
+        fontWeight: active ? 600 : 500,
         borderColor: active ? C.purple : 'transparent',
       }}
     >
@@ -527,36 +520,39 @@ function KpiCardBlock({ kpi }: { kpi: KpiCard }) {
                                     ArrowUp;
   return (
     <div
-      className="rounded-[10px] border px-3.5 py-3.5"
+      className="rounded-[12px] border px-4 py-4"
       style={{ background: C.cardBg, borderColor: C.border }}
     >
       <div
-        className="text-[10px] font-medium uppercase"
-        style={{ color: C.neutral5, letterSpacing: '0.1em' }}
+        className="font-mono text-[10.5px] font-semibold uppercase"
+        style={{ color: C.neutral5, letterSpacing: '0.12em' }}
       >
         {kpi.label}
       </div>
-      <div className="tabular mt-2 text-[20px] font-semibold leading-none tracking-[-0.01em]" style={{ color: C.ink }}>
+      <div
+        className="tabular mt-3 text-[30px] font-bold leading-none"
+        style={{ color: C.ink, letterSpacing: '-0.02em' }}
+      >
         {kpi.value}
       </div>
-      <div className="tabular mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium" style={{ color: deltaColor }}>
-        <Arrow size={10} weight="bold" />
+      <div className="tabular mt-2.5 inline-flex items-center gap-1 text-[12.5px] font-semibold" style={{ color: deltaColor }}>
+        <Arrow size={11} weight="bold" />
         {kpi.delta}
       </div>
-      <Sparkline points={kpi.spark} color={C.purple} className="mt-1.5" />
+      <Sparkline points={kpi.spark} color={C.purple} className="mt-2.5" />
     </div>
   );
 }
 
 function Sparkline({ points, color, className = '' }: { points: number[]; color: string; className?: string }) {
-  const W = 120, H = 22, max = 22;
+  const W = 120, H = 26, max = 22;
   const stepX = W / (points.length - 1);
   const path = points
     .map((y, i) => `${i === 0 ? 'M' : 'L'}${(i * stepX).toFixed(2)},${y.toFixed(2)}`)
     .join(' ');
   return (
     <svg width="100%" height={H} viewBox={`0 0 ${W} ${max}`} className={`block ${className}`} preserveAspectRatio="none">
-      <path d={path} fill="none" stroke={color} strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" />
+      <path d={path} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -570,9 +566,9 @@ function DailyTrendChart({ data }: { data: number[] }) {
     { id: 'ctr',   label: 'CTR' },
   ] as const;
 
-  const W = 600, H = 130;
-  const padL = 0, padR = 0, padT = 6, padB = 22;
-  const maxY = Math.max(...data) * 1.1;
+  const W = 1100, H = 200;
+  const padL = 0, padR = 0, padT = 10, padB = 30;
+  const maxY = Math.max(...data) * 1.12;
   const innerW = W - padL - padR;
   const innerH = H - padT - padB;
 
@@ -605,13 +601,13 @@ function DailyTrendChart({ data }: { data: number[] }) {
 
   return (
     <div
-      className="mt-3 rounded-[10px] border px-4 pb-3 pt-3.5"
+      className="mt-3.5 rounded-[12px] border px-5 pb-4 pt-5"
       style={{ background: C.cardBg, borderColor: C.border }}
     >
       <div className="flex items-center justify-between">
-        <div className="text-[12px]" style={{ color: C.neutral7 }}>Daily spend trend</div>
+        <div className="text-[14px] font-semibold" style={{ color: C.ink }}>Daily spend trend</div>
         <div
-          className="inline-flex gap-[2px] rounded-[6px] p-[3px]"
+          className="inline-flex gap-[2px] rounded-[8px] p-[3px]"
           style={{ background: '#f4f3f9' }}
         >
           {segments.map((s) => {
@@ -620,7 +616,7 @@ function DailyTrendChart({ data }: { data: number[] }) {
               <button
                 key={s.id}
                 onClick={() => setMetric(s.id)}
-                className="rounded-[4px] px-2.5 py-1 text-[11px] font-medium transition-colors"
+                className="rounded-[5px] px-3 py-1 text-[12px] font-medium transition-colors"
                 style={{
                   background: active ? '#ffffff' : 'transparent',
                   color:      active ? C.ink     : C.neutral5,
@@ -634,18 +630,18 @@ function DailyTrendChart({ data }: { data: number[] }) {
         </div>
       </div>
 
-      <div className="mt-3.5">
+      <div className="mt-5">
         <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
           <defs>
             <linearGradient id="projChartFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"  stopColor={C.purple} stopOpacity={0.18} />
+              <stop offset="0%"  stopColor={C.purple} stopOpacity={0.20} />
               <stop offset="100%" stopColor={C.purple} stopOpacity={0} />
             </linearGradient>
           </defs>
           <path d={area} fill="url(#projChartFill)" />
-          <path d={line} fill="none" stroke={C.purple} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
+          <path d={line} fill="none" stroke={C.purple} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        <div className="mt-2 flex justify-between text-[10px] tabular" style={{ color: C.neutral4 }}>
+        <div className="mt-3 flex justify-between font-mono text-[11px] tabular" style={{ color: C.neutral4 }}>
           {xLabels.map((l) => <span key={l}>{l}</span>)}
         </div>
       </div>
@@ -664,14 +660,14 @@ function CampaignCard({
   const label = tone === 'good' ? C.green    : C.red;
   return (
     <div
-      className="rounded-[10px] border px-4 py-3.5"
+      className="rounded-[12px] border px-5 py-5"
       style={{ background: C.cardBg, borderColor: C.border }}
     >
-      <div className="mb-2.5 flex items-center gap-1.5">
-        <span className="h-1.5 w-1.5 rounded-full" style={{ background: dot }} />
+      <div className="mb-4 flex items-center gap-2">
+        <span className="h-[7px] w-[7px] rounded-full" style={{ background: dot }} />
         <span
-          className="font-mono text-[10px] font-medium uppercase"
-          style={{ color: label, letterSpacing: '0.12em' }}
+          className="font-mono text-[11px] font-semibold uppercase"
+          style={{ color: label, letterSpacing: '0.14em' }}
         >
           {title}
         </span>
@@ -684,16 +680,16 @@ function CampaignCard({
             <a
               key={c.name}
               href="#"
-              className="block py-2.5 transition-colors hover:bg-[#fafafd]"
+              className="block py-3.5 transition-colors hover:bg-[#fafafd]"
               style={{ borderBottom: isLast ? 'none' : `1px solid ${C.rowBorder}` }}
             >
-              <div className="font-mono text-[12px] font-medium" style={{ color: C.ink }}>
+              <div className="font-mono text-[14px] font-semibold" style={{ color: C.ink }}>
                 {c.name}
               </div>
-              <div className="mt-1 tabular text-[10.5px]" style={{ color: C.neutral5 }}>
+              <div className="mt-1.5 tabular text-[12px]" style={{ color: C.neutral5 }}>
                 {c.meta}
                 <span className="mx-1.5" style={{ color: C.neutral3 }}>·</span>
-                <span style={{ color: cpaColor, fontWeight: c.cpaTone === 'bad' ? 600 : 400 }}>{c.cpa}</span>
+                <span style={{ color: cpaColor, fontWeight: c.cpaTone === 'bad' ? 600 : 500 }}>{c.cpa}</span>
               </div>
             </a>
           );
