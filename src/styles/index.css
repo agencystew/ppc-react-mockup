@@ -16,23 +16,26 @@
 @tailwind components;
 @tailwind utilities;
 
-/* App-shell baseline. DARK canvas app-wide so the whole app reads as
- * one product with the StagePage JSX. Marketing site alternates
- * light/dark — the APP is dark, full stop.
+/* ════════════════════════════════════════════════════════════════════════
+ * BODY BACKGROUND IS LIGHT LAVENDER. DO NOT FLIP TO DARK.
  *
- * Surface palette (locked):
- *   bg-1  = #0C0C0E   page canvas (Smoky Black)
- *   bg-2  = #15151A   primary cards, sidebar surfaces
- *   bg-3  = #1E1E24   raised tiles inside cards
- *   fg-1  = white            text-white
- *   fg-2  = rgba(255,255,255,0.70)   text-white/70
- *   fg-3  = rgba(255,255,255,0.45)   text-white/45
- *   border  rgba(255,255,255,0.08)   (hover: 0.14)
- *   accent  ppc-purple-400 / 500 for links/hover. */
+ * Stewart's design principle (memory:
+ *   feedback_ppcio_app_hybrid_light_dark_design_system.md):
+ * "Dark content surfaces are for AI work and its outputs.
+ *  Everything else stays in the light system."
+ *
+ * The DARK editorial moments come from `.ppc-dark` blocks WITHIN pages
+ * (the StagePage canvas, the Dashboard hero card, the Project hero card,
+ * the Catalog hero block). The BODY / sidebar / workshop surfaces stay
+ * LIGHT — lavender bg, white cards.
+ *
+ * If you're tempted to set `background: var(--ppc-black)` here — DON'T.
+ * Wrap your dark moment in `.ppc-dark` inside a page component instead.
+ * ════════════════════════════════════════════════════════════════════════ */
 html, body, #root {
   min-height: 100%;
-  background: var(--ppc-black);
-  color: var(--ppc-white);
+  background: #F3F0FF;
+  color: var(--ppc-black);
 }
 
 /* The brand CSS adds a global `a:hover { text-decoration: underline }` —
