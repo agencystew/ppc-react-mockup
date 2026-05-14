@@ -7,12 +7,20 @@ import { AgentRunning } from './pages/AgentRunning';
 import { AgentResults } from './pages/AgentResults';
 import { Projects } from './pages/Projects';
 import { ProjectPage } from './pages/Project';
+import { Chat } from './pages/Chat';
 
 export default function App() {
   return (
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<Dashboard />} />
+
+        {/* Chat surfaces ----------------------------------------------------
+           /chat            — pre-chat (empty state, dark hero)
+           /chat/:chatId    — active conversation playback
+           Both render the inner chat-history rail on the left. */}
+        <Route path="chat" element={<Chat />} />
+        <Route path="chat/:chatId" element={<Chat />} />
 
         {/* Agent surfaces ---------------------------------------------------
            /agents              — catalog (28 specialists)

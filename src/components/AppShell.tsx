@@ -23,6 +23,7 @@ const STORAGE_KEY = 'ppcio-sidebar-collapsed';
 
 export function AppShell() {
   const [collapsed, setCollapsed] = useState(false);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -35,13 +36,21 @@ export function AppShell() {
     localStorage.setItem(STORAGE_KEY, String(next));
   };
 
+  // Chat surfaces ship their own inner rail + dock, so they break out of the
+  // standard 1240-cap and manage padding themselves.
+  const fullBleed = pathname.startsWith('/chat');
+
   return (
     <div className="flex min-h-screen w-full font-sans text-ppc-black">
       <Sidebar collapsed={collapsed} onToggle={toggle} />
       <main className="flex min-w-0 flex-1 flex-col">
-        <div className="mx-auto w-full max-w-[1240px] px-8 py-10 lg:px-12 lg:py-12">
+        {fullBleed ? (
           <Outlet />
-        </div>
+        ) : (
+          <div className="mx-auto w-full max-w-[1240px] px-8 py-10 lg:px-12 lg:py-12">
+            <Outlet />
+          </div>
+        )}
       </main>
     </div>
   );
