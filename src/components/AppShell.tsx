@@ -1,16 +1,23 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
-  House, Robot, Lightning, ChartLineUp, ChatCircle,
+  House, Robot, ChartLineUp, ChatCircle,
   MagnifyingGlass, SidebarSimple, Plus, SquaresFour,
-  CaretDown, Clock, DotsThree,
+  CaretRight, DotsThree,
 } from '@phosphor-icons/react';
 import { PROJECTS, ACCOUNTS } from '../mock/projects';
 
-// AppShell — DARK sidebar chrome (dark-mode of the same structure that was
-// in the white version: same sizes, same paddings, same components). Active
-// state inverts pale-purple-chip-on-white into solid-purple-chip-on-dark so
-// "click highlights purple" reads loudly. Page canvas stays light.
+/* AppShell — "Inhabited Dark" sidebar.
+ *
+ * Replaces the previous chunky purple-fill active state (which felt like a
+ * generic SaaS template) with an atmospheric rail: subtle radial top-glow,
+ * tonal project chips, and a soft-tint + 2px gradient accent-bar treatment
+ * for the active row. The sidebar now reads as the same world as the main
+ * content's dark hero card, not a different product.
+ *
+ * One signature moment: the lowercase "ppc" wordmark gets a single italic
+ * serif period — echoing the hero card's italic period in "Google Ads."
+ */
 
 interface SubPage { label: string; to: string; }
 const AGENT_PAGES: SubPage[] = [
@@ -36,8 +43,6 @@ export function AppShell() {
     localStorage.setItem(STORAGE_KEY, String(next));
   };
 
-  // Chat surfaces ship their own inner rail + dock, so they break out of the
-  // standard 1240-cap and manage padding themselves.
   const fullBleed = pathname.startsWith('/chat');
 
   return (
@@ -56,7 +61,7 @@ export function AppShell() {
   );
 }
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────
+/* ─── Sidebar shell ─────────────────────────────────────────────────────── */
 
 interface SidebarProps {
   collapsed: boolean;
@@ -66,65 +71,97 @@ interface SidebarProps {
 function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside
-      className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-[#1E1830] bg-ppc-sidebar transition-[width] duration-200 ${
-        collapsed ? 'w-[72px]' : 'w-[260px]'
+      className={`relative sticky top-0 flex h-screen shrink-0 flex-col transition-[width] duration-200 ${
+        collapsed ? 'w-[72px]' : 'w-[264px]'
       }`}
+      style={{
+        background:
+          'radial-gradient(120% 60% at 50% 0%, #1A1234 0%, #120C26 35%, #0E0820 100%)',
+        boxShadow: 'inset -1px 0 0 rgba(255,255,255,0.04)',
+      }}
     >
-      <BrandRow collapsed={collapsed} onToggle={onToggle} />
-      <SearchRow collapsed={collapsed} />
+      {/* Soft purple top-glow — echoes the dark hero card radial */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[260px] opacity-[0.55]"
+        style={{
+          background:
+            'radial-gradient(70% 60% at 30% 0%, rgba(127,90,240,0.28) 0%, transparent 70%)',
+        }}
+      />
 
-      <nav className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-3 pb-3">
-        <MainNavItem to="/" icon={House} label="Dashboard" collapsed={collapsed} end />
-        <MainNavItem to="/chat" icon={ChatCircle} label="Chat" collapsed={collapsed} badge="2" />
-        <ItemGroup
-          icon={Robot}
-          label="Agents"
-          basePath="/agents"
-          pages={AGENT_PAGES}
-          collapsed={collapsed}
-          status={<RunningPill count={4} />}
-        />
-        <MainNavItem
-          to="/reports/run-competitor-spy-completed"
-          icon={ChartLineUp}
-          label="Reports"
-          collapsed={collapsed}
-          activeMatch={(p) => p.startsWith('/reports')}
-        />
-        <MainNavItem
-          to="/runs"
-          icon={Lightning}
-          label="Mission control"
-          collapsed={collapsed}
-          dot="red"
-          activeMatch={(p) => p.startsWith('/runs')}
-        />
+      <div className="relative flex h-full flex-col">
+        <BrandRow collapsed={collapsed} onToggle={onToggle} />
+        <SearchRow collapsed={collapsed} />
 
-        <ProjectsSection collapsed={collapsed} />
-      </nav>
+        <nav className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-3 pb-3">
+          <MainNavItem to="/" icon={House} label="Dashboard" collapsed={collapsed} end />
+          <MainNavItem to="/chat" icon={ChatCircle} label="Chat" collapsed={collapsed} badge="2" />
+          <ItemGroup
+            icon={Robot}
+            label="Agents"
+            basePath="/agents"
+            pages={AGENT_PAGES}
+            collapsed={collapsed}
+            runningCount={4}
+          />
+          <MainNavItem
+            to="/reports/run-competitor-spy-completed"
+            icon={ChartLineUp}
+            label="Reports"
+            collapsed={collapsed}
+            activeMatch={(p) => p.startsWith('/reports')}
+          />
+          <ProjectsSection collapsed={collapsed} />
+        </nav>
 
-      <SidebarFooter collapsed={collapsed} />
+        <SidebarFooter collapsed={collapsed} />
+      </div>
     </aside>
   );
 }
 
-// ─── Brand row ────────────────────────────────────────────────────────────
+/* ─── Brand row ─────────────────────────────────────────────────────────── */
 
 function BrandRow({ collapsed, onToggle }: SidebarProps) {
   return (
-    <div className={`flex items-center pt-4 pb-3 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
+    <div className={`relative flex items-center pt-5 pb-4 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
       {!collapsed && (
-        <NavLink to="/" className="flex items-center gap-2.5">
-          <span className="grid h-[28px] w-[28px] place-items-center rounded-[7px] bg-ppc-purple-500 text-[14px] font-extrabold leading-none text-white">
-            ɪ
+        <NavLink to="/" className="group flex items-center gap-2.5">
+          <span
+            className="relative grid h-[28px] w-[28px] place-items-center overflow-hidden rounded-[8px] text-[13px] font-extrabold leading-none text-white"
+            style={{
+              background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 55%, #534AB7 100%)',
+              boxShadow:
+                '0 1px 0 rgba(255,255,255,0.18) inset, 0 0 0 1px rgba(127,90,240,0.55), 0 6px 14px -6px rgba(127,90,240,0.55)',
+            }}
+          >
+            <span
+              aria-hidden
+              className="absolute inset-0 opacity-50"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 55%)',
+              }}
+            />
+            <span className="relative">ɪ</span>
           </span>
-          <span className="text-[15px] font-bold tracking-[-0.01em] text-white">ppc.io</span>
+          <span className="flex items-baseline text-[15px] font-bold tracking-[-0.02em] text-white">
+            ppc
+            <span
+              className="ml-[1px] font-serif italic font-bold leading-none text-[#B08EF4]"
+              style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
+            >
+              .
+            </span>
+            io
+          </span>
         </NavLink>
       )}
       <button
         onClick={onToggle}
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        className="grid h-8 w-8 place-items-center rounded-md text-[#7A7A86] hover:bg-[#15101F] hover:text-white"
+        className="grid h-8 w-8 place-items-center rounded-md text-[#7A7388] transition-colors hover:bg-white/[0.05] hover:text-white"
       >
         <SidebarSimple
           size={16}
@@ -136,7 +173,7 @@ function BrandRow({ collapsed, onToggle }: SidebarProps) {
   );
 }
 
-// ─── Search ───────────────────────────────────────────────────────────────
+/* ─── Search ────────────────────────────────────────────────────────────── */
 
 function SearchRow({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
@@ -144,7 +181,7 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
       <div className="flex justify-center px-2 pb-3">
         <button
           title="Search"
-          className="grid h-9 w-9 place-items-center rounded-md text-[#7A7A86] hover:bg-[#15101F] hover:text-white"
+          className="grid h-9 w-9 place-items-center rounded-lg text-[#8B83A0] transition-colors hover:bg-white/[0.05] hover:text-white"
         >
           <MagnifyingGlass size={15} />
         </button>
@@ -152,18 +189,21 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
     );
   }
   return (
-    <div className="px-3 pb-3">
-      <div className="relative">
+    <div className="px-3 pb-4">
+      <div className="group relative">
         <MagnifyingGlass
-          size={14}
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#6A6A78]"
+          size={13.5}
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#6E667E] transition-colors group-hover:text-[#A88CFF]"
         />
         <input
           readOnly
           placeholder="Search or jump to"
-          className="w-full cursor-pointer rounded-lg border border-[#1E1830] bg-[#15101F] py-[8px] pl-8 pr-12 text-[13px] text-white outline-none placeholder:text-[#6A6A78] hover:border-white/14"
+          className="w-full cursor-pointer rounded-[10px] border border-white/[0.07] bg-white/[0.03] py-[8.5px] pl-[34px] pr-14 text-[13px] text-white outline-none placeholder:text-[#76708A] transition-colors hover:border-white/[0.12] hover:bg-white/[0.05]"
         />
-        <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-white/14 bg-[#15101F] px-[5px] py-[1px] font-mono text-[10.5px] text-[#7A7A86]">
+        <kbd
+          className="pointer-events-none absolute right-2.5 top-1/2 flex h-[18px] -translate-y-1/2 items-center rounded-[5px] border border-white/[0.10] bg-white/[0.04] px-[6px] font-mono text-[10px] leading-none text-[#8B83A0]"
+          style={{ fontFamily: '"Courier New", ui-monospace, Menlo, monospace' }}
+        >
           ⌘K
         </kbd>
       </div>
@@ -171,7 +211,7 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-// ─── Main nav item ────────────────────────────────────────────────────────
+/* ─── Main nav item ─────────────────────────────────────────────────────── */
 
 function MainNavItem({
   to, icon: Icon, label, collapsed, end, badge, dot, activeMatch,
@@ -195,33 +235,50 @@ function MainNavItem({
       title={collapsed ? label : undefined}
       className={({ isActive }) => {
         const active = overrideActive ?? isActive;
-        return `group flex items-center rounded-lg text-[14px] transition-colors ${
-          collapsed ? 'justify-center px-2 py-2' : 'gap-2.5 px-3 py-[8px]'
+        return `group relative flex items-center rounded-[9px] text-[13.5px] transition-colors duration-150 ${
+          collapsed ? 'justify-center px-2 py-[9px]' : 'gap-2.5 px-3 py-[8px]'
         } ${
           active
-            ? 'bg-ppc-purple-700 font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]'
-            : 'font-medium text-[#CFCFD9] hover:bg-[#15101F] hover:text-white'
+            ? 'font-semibold text-white'
+            : 'font-medium text-[#C0B8D2] hover:bg-white/[0.04] hover:text-white'
         }`;
+      }}
+      style={({ isActive }) => {
+        const active = overrideActive ?? isActive;
+        return active
+          ? {
+              background:
+                'linear-gradient(90deg, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.06) 60%, rgba(127,90,240,0) 100%)',
+              boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.16)',
+            }
+          : undefined;
       }}
     >
       {({ isActive }) => {
         const active = overrideActive ?? isActive;
         return (
           <>
+            {active && !collapsed && <ActiveAccent />}
             <Icon
               size={17}
               weight={active ? 'fill' : 'duotone'}
-              className={active ? 'text-ppc-purple-200' : 'text-[#6A6A78] group-hover:text-ppc-purple-300'}
+              className={
+                active
+                  ? 'text-[#B08EF4]'
+                  : 'text-[#7A7388] transition-colors group-hover:text-[#A88CFF]'
+              }
             />
             {!collapsed && (
               <>
-                <span className="flex-1">{label}</span>
+                <span className="flex-1 tracking-[-0.005em]">{label}</span>
                 {badge && (
-                  <span className={`ml-auto rounded px-1.5 py-[1px] text-[11px] font-semibold tabular-nums ${
-                    active
-                      ? 'bg-white/20 text-white'
-                      : 'bg-[#1A1A22] text-[#9A9AA5]'
-                  }`}>
+                  <span
+                    className={`ml-auto inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-[5px] px-[5px] text-[10.5px] font-semibold leading-none tabular-nums ${
+                      active
+                        ? 'bg-white/15 text-white'
+                        : 'bg-white/[0.06] text-[#8B83A0]'
+                    }`}
+                  >
                     {badge}
                   </span>
                 )}
@@ -235,7 +292,22 @@ function MainNavItem({
   );
 }
 
-// ─── ItemGroup (page-variant dropdown) ────────────────────────────────────
+/* Left edge accent: 2px vertical pill with a soft purple gradient + glow.
+ * Replaces the chunky background fill the previous active state used. */
+function ActiveAccent() {
+  return (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute left-0 top-1/2 h-[18px] w-[2.5px] -translate-y-1/2 rounded-r-full"
+      style={{
+        background: 'linear-gradient(180deg, #C7B0FF 0%, #7F5AF0 100%)',
+        boxShadow: '0 0 10px 0 rgba(127,90,240,0.55)',
+      }}
+    />
+  );
+}
+
+/* ─── ItemGroup (expandable section) ────────────────────────────────────── */
 
 function ItemGroup({
   icon: Icon,
@@ -243,14 +315,14 @@ function ItemGroup({
   basePath,
   pages,
   collapsed,
-  status,
+  runningCount,
 }: {
   icon: typeof House;
   label: string;
   basePath: string;
   pages: SubPage[];
   collapsed: boolean;
-  status?: React.ReactNode;
+  runningCount?: number;
 }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -265,16 +337,29 @@ function ItemGroup({
       <button
         onClick={() => navigate(pages[0].to)}
         title={label}
-        className={`group flex w-full items-center justify-center rounded-lg px-2 py-2 transition-colors ${
+        className={`group relative flex w-full items-center justify-center rounded-[9px] px-2 py-[9px] transition-colors ${
           inSection
-            ? 'bg-ppc-purple-700 text-white'
-            : 'text-[#CFCFD9] hover:bg-[#15101F] hover:text-white'
+            ? 'font-semibold text-white'
+            : 'text-[#C0B8D2] hover:bg-white/[0.04] hover:text-white'
         }`}
+        style={
+          inSection
+            ? {
+                background:
+                  'linear-gradient(90deg, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.06) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.16)',
+              }
+            : undefined
+        }
       >
         <Icon
           size={17}
           weight={inSection ? 'fill' : 'duotone'}
-          className={inSection ? 'text-ppc-purple-200' : 'text-[#6A6A78] group-hover:text-ppc-purple-300'}
+          className={
+            inSection
+              ? 'text-[#B08EF4]'
+              : 'text-[#7A7388] transition-colors group-hover:text-[#A88CFF]'
+          }
         />
       </button>
     );
@@ -285,39 +370,72 @@ function ItemGroup({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`group flex w-full items-center gap-2.5 rounded-lg px-3 py-[8px] text-left text-[14px] transition-colors ${
+        className={`group relative flex w-full items-center gap-2.5 rounded-[9px] px-3 py-[8px] text-left text-[13.5px] transition-colors duration-150 ${
           inSection
-            ? 'bg-ppc-purple-700 font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]'
-            : 'font-medium text-[#CFCFD9] hover:bg-[#15101F] hover:text-white'
+            ? 'font-semibold text-white'
+            : 'font-medium text-[#C0B8D2] hover:bg-white/[0.04] hover:text-white'
         }`}
+        style={
+          inSection
+            ? {
+                background:
+                  'linear-gradient(90deg, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.06) 60%, rgba(127,90,240,0) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.16)',
+              }
+            : undefined
+        }
       >
+        {inSection && <ActiveAccent />}
         <Icon
           size={17}
           weight={inSection ? 'fill' : 'duotone'}
-          className={inSection ? 'text-ppc-purple-200' : 'text-[#6A6A78] group-hover:text-ppc-purple-300'}
+          className={
+            inSection
+              ? 'text-[#B08EF4]'
+              : 'text-[#7A7388] transition-colors group-hover:text-[#A88CFF]'
+          }
         />
-        <span className="flex-1">{label}</span>
-        {status}
-        <CaretDown
-          size={11}
+        <span className="flex-1 tracking-[-0.005em]">{label}</span>
+        {runningCount !== undefined && <RunningIndicator count={runningCount} />}
+        <CaretRight
+          size={10}
           weight="bold"
-          className={`${inSection ? 'text-white/70' : 'text-[#6A6A78]'} transition-transform ${open ? '' : '-rotate-90'}`}
+          className={`shrink-0 ${
+            inSection ? 'text-white/55' : 'text-[#6E667E]'
+          } transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
         />
       </button>
 
       {open && (
-        <ul className="mb-1 ml-[26px] mt-0.5 flex flex-col gap-px border-l border-[#1E1830] pl-2">
+        <ul
+          className="relative mb-1 ml-[24px] mt-1 flex flex-col gap-[1px] pl-3"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(127,90,240,0.30) 0%, rgba(127,90,240,0.06) 100%)',
+            backgroundSize: '1px 100%',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'left top',
+          }}
+        >
           {pages.map((sp) => (
             <li key={sp.to}>
               <NavLink
                 to={sp.to}
                 end
                 className={({ isActive }) =>
-                  `block rounded-md px-2 py-[6px] text-[13px] transition-colors ${
+                  `block rounded-[7px] px-2.5 py-[6px] text-[12.5px] transition-colors duration-150 ${
                     isActive
-                      ? 'bg-ppc-purple-700 font-semibold text-white'
-                      : 'font-medium text-[#9A9AA5] hover:bg-[#15101F] hover:text-white'
+                      ? 'font-semibold text-white'
+                      : 'font-medium text-[#9890A8] hover:bg-white/[0.04] hover:text-white'
                   }`
+                }
+                style={({ isActive }) =>
+                  isActive
+                    ? {
+                        background:
+                          'linear-gradient(90deg, rgba(127,90,240,0.20) 0%, rgba(127,90,240,0.04) 100%)',
+                      }
+                    : undefined
                 }
               >
                 {sp.label}
@@ -330,45 +448,71 @@ function ItemGroup({
   );
 }
 
-// ─── Projects section (inline list) ───────────────────────────────────────
+/* ─── Projects section ──────────────────────────────────────────────────── */
 
 function ProjectsSection({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
-      <div className="mt-3 flex flex-col items-center gap-1.5 border-t border-[#1E1830] pt-3">
-        {PROJECTS.map((p) => (
-          <NavLink
-            key={p.id}
-            to={`/projects/${p.id}`}
-            title={p.name}
-            className={({ isActive }) =>
-              `grid h-8 w-8 place-items-center rounded-md text-[12px] font-semibold ${
-                isActive ? 'ring-2 ring-ppc-purple-400/70 ring-offset-2 ring-offset-ppc-sidebar' : ''
-              }`
-            }
-            style={{ background: projectColor(p.id).bg, color: projectColor(p.id).fg }}
-          >
-            {p.name.charAt(0)}
-          </NavLink>
-        ))}
+      <div className="mt-3 flex flex-col items-center gap-1.5 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        {PROJECTS.map((p) => {
+          const status = projectStatus(p.id);
+          const chip = projectChip(p.id);
+          return (
+            <NavLink
+              key={p.id}
+              to={`/projects/${p.id}`}
+              title={p.name}
+              className="group relative"
+            >
+              {({ isActive }) => (
+                <span
+                  className={`grid h-8 w-8 place-items-center rounded-[7px] text-[11px] font-semibold transition-all ${
+                    isActive ? '' : 'opacity-90 group-hover:opacity-100'
+                  }`}
+                  style={{
+                    background: chip.bg,
+                    color: chip.fg,
+                    boxShadow: isActive
+                      ? `inset 0 0 0 1px ${chip.ring}, 0 0 0 2px rgba(127,90,240,0.45)`
+                      : `inset 0 0 0 1px ${chip.ring}`,
+                  }}
+                >
+                  {p.name.charAt(0)}
+                  <StatusOrb tone={status} />
+                </span>
+              )}
+            </NavLink>
+          );
+        })}
       </div>
     );
   }
 
   return (
-    <div className="mt-4">
-      <div className="flex items-center justify-between px-3 pb-1.5">
-        <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#7A7A86]">
+    <div className="mt-5">
+      <div className="flex items-center justify-between px-3 pb-2">
+        <div className="flex items-center gap-[7px]">
+          <span
+            className="text-[10px] font-semibold uppercase leading-none text-[#76708A]"
+            style={{
+              fontFamily: '"Courier New", ui-monospace, monospace',
+              letterSpacing: '0.16em',
+            }}
+          >
             Projects
           </span>
-          <span className="font-mono text-[10.5px] tabular-nums text-[#7A7A86]">{PROJECTS.length}</span>
+          <span
+            className="text-[10px] tabular-nums leading-none text-[#5F586F]"
+            style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+          >
+            {PROJECTS.length}
+          </span>
         </div>
         <button
           title="New project"
-          className="grid h-5 w-5 place-items-center rounded text-[#7A7A86] hover:bg-[#15101F] hover:text-white"
+          className="grid h-[18px] w-[18px] place-items-center rounded-[4px] text-[#76708A] transition-colors hover:bg-white/[0.06] hover:text-white"
         >
-          <Plus size={12} weight="bold" />
+          <Plus size={11} weight="bold" />
         </button>
       </div>
 
@@ -380,34 +524,46 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
         end
       />
 
-      <ul className="mt-px flex flex-col">
+      <ul className="mt-px flex flex-col gap-[1px]">
         {PROJECTS.map((p) => {
           const status = projectStatus(p.id);
-          const color = projectColor(p.id);
+          const chip = projectChip(p.id);
           return (
             <li key={p.id}>
               <NavLink
                 to={`/projects/${p.id}`}
                 end
                 className={({ isActive }) =>
-                  `group flex items-center gap-2.5 overflow-hidden rounded-lg px-3 py-[7px] text-[13.5px] transition-colors ${
+                  `group relative flex items-center gap-2.5 overflow-hidden rounded-[9px] px-3 py-[7px] text-[13px] transition-colors duration-150 ${
                     isActive
-                      ? 'bg-ppc-purple-700 font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]'
-                      : 'font-medium text-[#CFCFD9] hover:bg-[#15101F] hover:text-white'
+                      ? 'font-semibold text-white'
+                      : 'font-medium text-[#C0B8D2] hover:bg-white/[0.04] hover:text-white'
                   }`
+                }
+                style={({ isActive }) =>
+                  isActive
+                    ? {
+                        background:
+                          'linear-gradient(90deg, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.05) 60%, rgba(127,90,240,0) 100%)',
+                        boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.16)',
+                      }
+                    : undefined
                 }
               >
                 {({ isActive }) => (
                   <>
+                    {isActive && <ActiveAccent />}
                     <span
-                      className={`grid h-[22px] w-[22px] shrink-0 place-items-center rounded text-[11px] font-semibold ${
-                        isActive ? 'ring-2 ring-ppc-purple-200/60' : ''
-                      }`}
-                      style={{ background: color.bg, color: color.fg }}
+                      className="relative grid h-[22px] w-[22px] shrink-0 place-items-center rounded-[6px] text-[10.5px] font-semibold leading-none"
+                      style={{
+                        background: chip.bg,
+                        color: chip.fg,
+                        boxShadow: `inset 0 0 0 1px ${chip.ring}`,
+                      }}
                     >
                       {p.name.charAt(0)}
                     </span>
-                    <span className="min-w-0 flex-1 truncate">{p.name}</span>
+                    <span className="min-w-0 flex-1 truncate tracking-[-0.005em]">{p.name}</span>
                     <StatusDot tone={status} />
                   </>
                 )}
@@ -420,48 +576,75 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-// ─── Atoms ────────────────────────────────────────────────────────────────
+/* ─── Atoms ─────────────────────────────────────────────────────────────── */
 
 function StatusDot({ tone }: { tone: 'red' | 'yellow' | 'green' }) {
   const palette = {
-    red:    { bg: '#ef4444', ring: 'rgba(239,68,68,0.22)' },
-    yellow: { bg: '#fbbf24', ring: 'rgba(251,191,36,0.22)' },
-    green:  { bg: '#22c55e', ring: 'rgba(34,197,94,0.22)' },
+    red:    { bg: '#E0524F', glow: 'rgba(224,82,79,0.30)' },
+    yellow: { bg: '#D69A35', glow: 'rgba(214,154,53,0.28)' },
+    green:  { bg: '#5DC2A2', glow: 'rgba(93,194,162,0.28)' },
   }[tone];
   return (
     <span
       className="h-[6px] w-[6px] shrink-0 rounded-full"
-      style={{ background: palette.bg, boxShadow: `0 0 0 2.5px ${palette.ring}` }}
+      style={{ background: palette.bg, boxShadow: `0 0 0 2px ${palette.glow}` }}
     />
   );
 }
 
-function RunningPill({ count }: { count: number }) {
+/* Inner status orb used inside collapsed project chips */
+function StatusOrb({ tone }: { tone: 'red' | 'yellow' | 'green' }) {
+  const palette = {
+    red:    '#E0524F',
+    yellow: '#D69A35',
+    green:  '#5DC2A2',
+  }[tone];
   return (
-    <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-[#22C55E]">
+    <span
+      aria-hidden
+      className="absolute -right-[2px] -top-[2px] h-[7px] w-[7px] rounded-full"
+      style={{
+        background: palette,
+        boxShadow: '0 0 0 1.5px #120C26',
+      }}
+    />
+  );
+}
+
+/* Refined "running" indicator — pulse dot + Courier label, not a bright pill. */
+function RunningIndicator({ count }: { count: number }) {
+  return (
+    <span
+      className="inline-flex items-center gap-[5px] text-[10px] font-semibold leading-none text-[#A6E3C6]"
+      style={{
+        fontFamily: '"Courier New", ui-monospace, monospace',
+        letterSpacing: '0.04em',
+      }}
+    >
       <span
-        className="h-[5px] w-[5px] rounded-full bg-[#22C55E]"
-        style={{ boxShadow: '0 0 0 2px rgba(34,197,94,0.22)' }}
+        className="relative h-[5px] w-[5px] rounded-full"
+        style={{
+          background: '#5DC2A2',
+          boxShadow: '0 0 0 2px rgba(93,194,162,0.24), 0 0 8px rgba(93,194,162,0.55)',
+        }}
       />
-      {count} running
+      <span className="tabular-nums">{count}</span>
     </span>
   );
 }
 
-const AVATAR_PALETTE: { bg: string; fg: string }[] = [
-  { bg: '#22c55e', fg: '#052e16' },
-  { bg: '#ef4444', fg: '#450a0a' },
-  { bg: '#14b8a6', fg: '#042f2c' },
-  { bg: '#10b981', fg: '#022c22' },
-  { bg: '#60a5fa', fg: '#172554' },
-  { bg: '#3b82f6', fg: '#172554' },
-  { bg: '#ec4899', fg: '#500724' },
-  { bg: '#f59e0b', fg: '#451a03' },
-];
-function projectColor(id: string) {
+/* Project chip — desaturated tonal squares (Linear-style), not crayons.
+ * Each project hashes to a hue, but we render at low saturation over a dark
+ * base so every chip lives in the same dark family. */
+function projectChip(id: string): { bg: string; fg: string; ring: string } {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return AVATAR_PALETTE[h % AVATAR_PALETTE.length];
+  const hue = h % 360;
+  return {
+    bg:   `linear-gradient(155deg, hsl(${hue}, 40%, 22%) 0%, hsl(${hue}, 32%, 14%) 100%)`,
+    fg:   `hsl(${hue}, 60%, 82%)`,
+    ring: `hsla(${hue}, 55%, 55%, 0.25)`,
+  };
 }
 
 function projectStatus(projectId: string): 'red' | 'yellow' | 'green' {
@@ -471,15 +654,20 @@ function projectStatus(projectId: string): 'red' | 'yellow' | 'green' {
   return 'green';
 }
 
-// ─── Footer ───────────────────────────────────────────────────────────────
+/* ─── Footer ────────────────────────────────────────────────────────────── */
 
 function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
-      <div className="flex justify-center border-t border-[#1E1830] px-2 py-3">
+      <div className="flex justify-center px-2 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <button
           title="Stewart Dunlop"
-          className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-300 to-ppc-purple-500 text-[12px] font-bold text-white"
+          className="grid h-9 w-9 place-items-center rounded-full text-[12px] font-bold text-white"
+          style={{
+            background: 'linear-gradient(135deg, #C7B0FF 0%, #7F5AF0 100%)',
+            boxShadow:
+              '0 0 0 1px rgba(127,90,240,0.45), 0 4px 12px -4px rgba(127,90,240,0.45)',
+          }}
         >
           SD
         </button>
@@ -487,30 +675,52 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
     );
   }
   return (
-    <div className="border-t border-[#1E1830] px-3 pt-3 pb-3">
-      <button className="mb-2 flex w-full items-center gap-2.5 rounded-xl border border-[#1E1830] bg-[#15101F] px-2.5 py-2 text-left transition-colors hover:border-white/14">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-300 to-ppc-purple-500 text-[11.5px] font-bold text-white">
+    <div className="px-3 pb-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <button
+        className="mb-3 flex w-full items-center gap-2.5 rounded-[11px] border border-white/[0.06] bg-white/[0.025] px-2.5 py-[8px] text-left transition-colors hover:border-white/[0.12] hover:bg-white/[0.05]"
+      >
+        <span
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11.5px] font-bold text-white"
+          style={{
+            background: 'linear-gradient(135deg, #C7B0FF 0%, #7F5AF0 100%)',
+            boxShadow:
+              '0 0 0 1px rgba(127,90,240,0.40), 0 3px 10px -4px rgba(127,90,240,0.50)',
+          }}
+        >
           SD
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[13px] font-semibold leading-tight text-white">
+          <span className="block truncate text-[12.5px] font-semibold leading-tight tracking-[-0.005em] text-white">
             Stewart Dunlop
           </span>
-          <span className="mt-px block truncate text-[11px] text-[#7A7A86]">stewart@ppc.io</span>
+          <span className="mt-[2px] block truncate text-[11px] leading-tight text-[#8B83A0]">
+            stewart@ppc.io
+          </span>
         </span>
-        <DotsThree size={15} weight="bold" className="text-[#6A6A78]" />
+        <DotsThree size={15} weight="bold" className="text-[#6E667E]" />
       </button>
-      <div className="flex items-center justify-between px-1 text-[10.5px]">
-        <span className="inline-flex items-center gap-1.5 font-semibold text-ppc-purple-300">
+      <div className="flex items-center justify-between px-1">
+        <span
+          className="inline-flex items-center gap-[6px] text-[10px] font-semibold uppercase leading-none text-[#B08EF4]"
+          style={{
+            fontFamily: '"Courier New", ui-monospace, monospace',
+            letterSpacing: '0.14em',
+          }}
+        >
           <span
-            className="h-[5px] w-[5px] rounded-full bg-ppc-purple-400"
-            style={{ boxShadow: '0 0 0 2px rgba(127,90,240,0.30)' }}
+            className="h-[5px] w-[5px] rounded-full bg-[#A88CFF]"
+            style={{ boxShadow: '0 0 0 2px rgba(127,90,240,0.30), 0 0 6px rgba(127,90,240,0.65)' }}
           />
           Beta
         </span>
-        <span className="inline-flex items-center gap-1.5 text-[#7A7A86]">
-          <Clock size={11} weight="duotone" />
-          <span className="tabular-nums">Saves ~22 h/wk</span>
+        <span
+          className="text-[10px] leading-none text-[#76708A]"
+          style={{
+            fontFamily: '"Courier New", ui-monospace, monospace',
+            letterSpacing: '0.06em',
+          }}
+        >
+          <span className="tabular-nums">~22</span> h/wk saved
         </span>
       </div>
     </div>
