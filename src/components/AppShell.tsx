@@ -2,30 +2,22 @@ import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   House, Robot, Lightning, ChartLineUp, ChatCircle,
-  TrendUp, MagnifyingGlass, SidebarSimple, Plus, SquaresFour,
+  MagnifyingGlass, SidebarSimple, Plus, SquaresFour,
   CaretDown, Clock, DotsThree,
 } from '@phosphor-icons/react';
 import { PROJECTS, ACCOUNTS } from '../mock/projects';
 
-// Dev-visibility nav: every page variation listed under its parent so the
-// team can jump to any state. The `pages` arrays here are the source of
-// truth — add a route, add a sub-page entry.
+// AppShell — DARK sidebar chrome (dark-mode of the same structure that was
+// in the white version: same sizes, same paddings, same components). Active
+// state inverts pale-purple-chip-on-white into solid-purple-chip-on-dark so
+// "click highlights purple" reads loudly. Page canvas stays light.
+
 interface SubPage { label: string; to: string; }
-// "Report" lives under Reports main-nav, not Agents — having it in both
-// places lit two sections at once on /reports/* URLs.
 const AGENT_PAGES: SubPage[] = [
   { label: 'Catalog',         to: '/agents' },
   { label: 'Detail · Launch', to: '/agents/competitor-spy' },
   { label: 'Loading',         to: '/agents/competitor-spy/loading/run-competitor-spy-running' },
 ];
-// Projects don't get a variant dropdown — the project tiles below ARE the
-// detail variants. /projects (catalog) is what "All projects" itself points
-// to. Listing variants here would only re-introduce the triple-highlight bug.
-
-// AppShell — dark sidebar (workshop chrome), light page canvas.
-// The sidebar is the operator's cockpit so it carries the AI/agent dark
-// language; pages stay in the light system. Page-variant dropdowns under
-// Agents and Projects let the team jump to any state during the build.
 
 const STORAGE_KEY = 'ppcio-sidebar-collapsed';
 
@@ -65,14 +57,14 @@ interface SidebarProps {
 function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside
-      className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-[#1a1a22] bg-[#0a0a0f] transition-[width] duration-200 ${
-        collapsed ? 'w-[72px]' : 'w-[284px]'
+      className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-[#1A1A22] bg-[#0A0A0F] transition-[width] duration-200 ${
+        collapsed ? 'w-[72px]' : 'w-[260px]'
       }`}
     >
       <BrandRow collapsed={collapsed} onToggle={onToggle} />
       <SearchRow collapsed={collapsed} />
 
-      <nav className="flex flex-1 flex-col gap-px overflow-y-auto px-2.5 pb-3">
+      <nav className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-3 pb-3">
         <MainNavItem to="/" icon={House} label="Dashboard" collapsed={collapsed} end />
         <MainNavItem to="/chat" icon={ChatCircle} label="Chat" collapsed={collapsed} badge="2" />
         <ItemGroup
@@ -111,19 +103,19 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
 function BrandRow({ collapsed, onToggle }: SidebarProps) {
   return (
-    <div className={`flex items-center pt-3.5 pb-2.5 ${collapsed ? 'justify-center px-2' : 'justify-between px-3.5'}`}>
+    <div className={`flex items-center pt-4 pb-3 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
       {!collapsed && (
-        <NavLink to="/" className="flex items-center gap-2">
-          <span className="grid h-[24px] w-[24px] place-items-center rounded-[6px] bg-ppc-purple-500 text-white">
-            <TrendUp size={13} weight="bold" />
+        <NavLink to="/" className="flex items-center gap-2.5">
+          <span className="grid h-[28px] w-[28px] place-items-center rounded-[7px] bg-ppc-purple-500 text-[14px] font-extrabold leading-none text-white">
+            ɪ
           </span>
-          <span className="text-[14px] font-medium tracking-[-0.01em] text-white">ppc.io</span>
+          <span className="text-[15px] font-bold tracking-[-0.01em] text-white">ppc.io</span>
         </NavLink>
       )}
       <button
         onClick={onToggle}
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        className="grid h-7 w-7 place-items-center rounded-md text-[#5a5a66] hover:bg-[#15151c] hover:text-white"
+        className="grid h-8 w-8 place-items-center rounded-md text-[#7A7A86] hover:bg-[#15151C] hover:text-white"
       >
         <SidebarSimple
           size={16}
@@ -143,7 +135,7 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
       <div className="flex justify-center px-2 pb-3">
         <button
           title="Search"
-          className="grid h-9 w-9 place-items-center rounded-md text-[#7a7a86] hover:bg-[#15151c] hover:text-white"
+          className="grid h-9 w-9 place-items-center rounded-md text-[#7A7A86] hover:bg-[#15151C] hover:text-white"
         >
           <MagnifyingGlass size={15} />
         </button>
@@ -151,18 +143,18 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
     );
   }
   return (
-    <div className="px-3 pb-2.5">
+    <div className="px-3 pb-3">
       <div className="relative">
         <MagnifyingGlass
-          size={13}
-          className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[#5a5a66]"
+          size={14}
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#6A6A78]"
         />
         <input
           readOnly
           placeholder="Search or jump to"
-          className="w-full cursor-pointer rounded-lg border border-[#1a1a22] bg-transparent py-[7px] pl-7 pr-11 text-[12px] text-[#e8e8ee] outline-none placeholder:text-[#5a5a66] hover:border-[#26262f] focus:border-ppc-purple-500/60"
+          className="w-full cursor-pointer rounded-lg border border-[#1A1A22] bg-[#15151C] py-[8px] pl-8 pr-12 text-[13px] text-white outline-none placeholder:text-[#6A6A78] hover:border-[#26262F]"
         />
-        <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-[#1f1f28] px-[5px] py-[1px] font-mono text-[10px] text-[#5a5a66]">
+        <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-[#26262F] bg-[#0F0F17] px-[5px] py-[1px] font-mono text-[10.5px] text-[#7A7A86]">
           ⌘K
         </kbd>
       </div>
@@ -170,7 +162,7 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-// ─── Main nav item (flat) ─────────────────────────────────────────────────
+// ─── Main nav item ────────────────────────────────────────────────────────
 
 function MainNavItem({
   to, icon: Icon, label, collapsed, end, badge, dot, activeMatch,
@@ -182,8 +174,6 @@ function MainNavItem({
   end?: boolean;
   badge?: string;
   dot?: 'red' | 'green' | 'yellow';
-  // Custom predicate so e.g. Reports stays active across every /reports/:runId,
-  // not just the one we navigate to.
   activeMatch?: (pathname: string) => boolean;
 }) {
   const { pathname } = useLocation();
@@ -196,12 +186,12 @@ function MainNavItem({
       title={collapsed ? label : undefined}
       className={({ isActive }) => {
         const active = overrideActive ?? isActive;
-        return `group flex items-center rounded-md text-[13px] transition-colors ${
-          collapsed ? 'justify-center px-2 py-[7px]' : 'gap-2 px-2.5 py-[6px]'
+        return `group flex items-center rounded-lg text-[14px] transition-colors ${
+          collapsed ? 'justify-center px-2 py-2' : 'gap-2.5 px-3 py-[8px]'
         } ${
           active
-            ? 'bg-ppc-purple-500/20 font-medium text-white'
-            : 'text-[#b8b8c0] hover:bg-[#15151c] hover:text-white'
+            ? 'bg-ppc-purple-700 font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]'
+            : 'font-medium text-[#CFCFD9] hover:bg-[#15151C] hover:text-white'
         }`;
       }}
     >
@@ -210,15 +200,19 @@ function MainNavItem({
         return (
           <>
             <Icon
-              size={15}
+              size={17}
               weight={active ? 'fill' : 'duotone'}
-              className={active ? 'text-ppc-purple-300' : 'text-[#7a7a86] group-hover:text-white'}
+              className={active ? 'text-ppc-purple-200' : 'text-[#6A6A78] group-hover:text-ppc-purple-300'}
             />
             {!collapsed && (
               <>
                 <span className="flex-1">{label}</span>
                 {badge && (
-                  <span className="ml-auto rounded bg-ppc-purple-500/18 px-1.5 py-[1px] text-[10px] font-medium text-[#c9c1ff]">
+                  <span className={`ml-auto rounded px-1.5 py-[1px] text-[11px] font-semibold tabular-nums ${
+                    active
+                      ? 'bg-white/20 text-white'
+                      : 'bg-[#1A1A22] text-[#9A9AA5]'
+                  }`}>
                     {badge}
                   </span>
                 )}
@@ -232,7 +226,7 @@ function MainNavItem({
   );
 }
 
-// ─── ItemGroup (page-variant dropdown — preserved from light sidebar) ────
+// ─── ItemGroup (page-variant dropdown) ────────────────────────────────────
 
 function ItemGroup({
   icon: Icon,
@@ -241,7 +235,6 @@ function ItemGroup({
   pages,
   collapsed,
   status,
-  tintActiveMatch,
 }: {
   icon: typeof House;
   label: string;
@@ -249,15 +242,10 @@ function ItemGroup({
   pages: SubPage[];
   collapsed: boolean;
   status?: React.ReactNode;
-  // Optional override for when to TINT the parent. Auto-open still keys off
-  // basePath. Used so /projects/clear-skies opens the section without also
-  // tinting "All projects" — the project tile already owns that highlight.
-  tintActiveMatch?: (pathname: string) => boolean;
 }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const inSection = pathname.startsWith(basePath);
-  const groupActive = tintActiveMatch ? tintActiveMatch(pathname) : inSection;
   const [open, setOpen] = useState(inSection);
   useEffect(() => {
     if (inSection) setOpen(true);
@@ -269,15 +257,15 @@ function ItemGroup({
         onClick={() => navigate(pages[0].to)}
         title={label}
         className={`group flex w-full items-center justify-center rounded-lg px-2 py-2 transition-colors ${
-          groupActive
-            ? 'bg-ppc-purple-500/20 text-white'
-            : 'text-[#b8b8c0] hover:bg-[#15151c] hover:text-white'
+          inSection
+            ? 'bg-ppc-purple-700 text-white'
+            : 'text-[#CFCFD9] hover:bg-[#15151C] hover:text-white'
         }`}
       >
         <Icon
-          size={15}
-          weight={groupActive ? 'fill' : 'duotone'}
-          className={groupActive ? 'text-ppc-purple-300' : 'text-[#7a7a86] group-hover:text-white'}
+          size={17}
+          weight={inSection ? 'fill' : 'duotone'}
+          className={inSection ? 'text-ppc-purple-200' : 'text-[#6A6A78] group-hover:text-ppc-purple-300'}
         />
       </button>
     );
@@ -288,38 +276,38 @@ function ItemGroup({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`group flex w-full items-center gap-2 rounded-md px-2.5 py-[6px] text-left text-[13px] transition-colors ${
-          groupActive
-            ? 'bg-ppc-purple-500/20 font-medium text-white'
-            : 'text-[#b8b8c0] hover:bg-[#15151c] hover:text-white'
+        className={`group flex w-full items-center gap-2.5 rounded-lg px-3 py-[8px] text-left text-[14px] transition-colors ${
+          inSection
+            ? 'bg-ppc-purple-700 font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]'
+            : 'font-medium text-[#CFCFD9] hover:bg-[#15151C] hover:text-white'
         }`}
       >
         <Icon
-          size={15}
-          weight={groupActive ? 'fill' : 'duotone'}
-          className={groupActive ? 'text-ppc-purple-300' : 'text-[#7a7a86] group-hover:text-white'}
+          size={17}
+          weight={inSection ? 'fill' : 'duotone'}
+          className={inSection ? 'text-ppc-purple-200' : 'text-[#6A6A78] group-hover:text-ppc-purple-300'}
         />
         <span className="flex-1">{label}</span>
         {status}
         <CaretDown
-          size={10}
+          size={11}
           weight="bold"
-          className={`text-[#5a5a66] transition-transform ${open ? '' : '-rotate-90'}`}
+          className={`${inSection ? 'text-white/70' : 'text-[#6A6A78]'} transition-transform ${open ? '' : '-rotate-90'}`}
         />
       </button>
 
       {open && (
-        <ul className="mb-0.5 ml-[25px] mt-px flex flex-col">
+        <ul className="mb-1 ml-[26px] mt-0.5 flex flex-col gap-px border-l border-[#1A1A22] pl-2">
           {pages.map((sp) => (
             <li key={sp.to}>
               <NavLink
                 to={sp.to}
                 end
                 className={({ isActive }) =>
-                  `block rounded-md px-2 py-[4px] text-[12px] transition-colors ${
+                  `block rounded-md px-2 py-[6px] text-[13px] transition-colors ${
                     isActive
-                      ? 'bg-ppc-purple-500/12 font-medium text-white'
-                      : 'text-[#7a7a86] hover:text-[#e8e8ee]'
+                      ? 'bg-ppc-purple-700 font-semibold text-white'
+                      : 'font-medium text-[#9A9AA5] hover:bg-[#15151C] hover:text-white'
                   }`
                 }
               >
@@ -333,21 +321,20 @@ function ItemGroup({
   );
 }
 
-// ─── Projects section (inline list — replaces the old dropdown switcher) ──
+// ─── Projects section (inline list) ───────────────────────────────────────
 
 function ProjectsSection({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
-    // In collapsed mode, just show project avatars as a stack.
     return (
-      <div className="mt-3 flex flex-col items-center gap-1.5 border-t border-[#1a1a22] pt-3">
+      <div className="mt-3 flex flex-col items-center gap-1.5 border-t border-[#1A1A22] pt-3">
         {PROJECTS.map((p) => (
           <NavLink
             key={p.id}
             to={`/projects/${p.id}`}
             title={p.name}
             className={({ isActive }) =>
-              `grid h-7 w-7 place-items-center rounded-md text-[11px] font-medium ${
-                isActive ? 'ring-2 ring-ppc-purple-500/40' : ''
+              `grid h-8 w-8 place-items-center rounded-md text-[12px] font-semibold ${
+                isActive ? 'ring-2 ring-ppc-purple-400/70 ring-offset-2 ring-offset-[#0A0A0F]' : ''
               }`
             }
             style={{ background: projectColor(p.id).bg, color: projectColor(p.id).fg }}
@@ -360,17 +347,17 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
   }
 
   return (
-    <div className="mt-3">
-      <div className="flex items-center justify-between px-2.5 pb-1">
+    <div className="mt-4">
+      <div className="flex items-center justify-between px-3 pb-1.5">
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#5a5a66]">
+          <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#7A7A86]">
             Projects
           </span>
-          <span className="text-[10px] tabular-nums text-[#5a5a66]">{PROJECTS.length}</span>
+          <span className="font-mono text-[10.5px] tabular-nums text-[#7A7A86]">{PROJECTS.length}</span>
         </div>
         <button
           title="New project"
-          className="grid h-5 w-5 place-items-center rounded text-[#5a5a66] hover:bg-[#15151c] hover:text-white"
+          className="grid h-5 w-5 place-items-center rounded text-[#7A7A86] hover:bg-[#15151C] hover:text-white"
         >
           <Plus size={12} weight="bold" />
         </button>
@@ -394,18 +381,18 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
                 to={`/projects/${p.id}`}
                 end
                 className={({ isActive }) =>
-                  `group flex items-center gap-2 overflow-hidden rounded-md px-2.5 py-[6px] text-[13px] transition-colors ${
+                  `group flex items-center gap-2.5 overflow-hidden rounded-lg px-3 py-[7px] text-[13.5px] transition-colors ${
                     isActive
-                      ? 'bg-ppc-purple-500/20 font-medium text-white'
-                      : 'text-[#b8b8c0] hover:bg-[#15151c] hover:text-white'
+                      ? 'bg-ppc-purple-700 font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]'
+                      : 'font-medium text-[#CFCFD9] hover:bg-[#15151C] hover:text-white'
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
                     <span
-                      className={`grid h-[20px] w-[20px] shrink-0 place-items-center rounded text-[10.5px] font-medium ${
-                        isActive ? 'ring-2 ring-ppc-purple-500/40' : ''
+                      className={`grid h-[22px] w-[22px] shrink-0 place-items-center rounded text-[11px] font-semibold ${
+                        isActive ? 'ring-2 ring-ppc-purple-200/60' : ''
                       }`}
                       style={{ background: color.bg, color: color.fg }}
                     >
@@ -428,41 +415,39 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
 
 function StatusDot({ tone }: { tone: 'red' | 'yellow' | 'green' }) {
   const palette = {
-    red:    { bg: '#ef4444', ring: 'rgba(239,68,68,0.18)' },
-    yellow: { bg: '#fbbf24', ring: 'rgba(251,191,36,0.18)' },
-    green:  { bg: '#22c55e', ring: 'rgba(34,197,94,0.2)' },
+    red:    { bg: '#ef4444', ring: 'rgba(239,68,68,0.22)' },
+    yellow: { bg: '#fbbf24', ring: 'rgba(251,191,36,0.22)' },
+    green:  { bg: '#22c55e', ring: 'rgba(34,197,94,0.22)' },
   }[tone];
   return (
     <span
       className="h-[6px] w-[6px] shrink-0 rounded-full"
-      style={{ background: palette.bg, boxShadow: `0 0 0 2px ${palette.ring}` }}
+      style={{ background: palette.bg, boxShadow: `0 0 0 2.5px ${palette.ring}` }}
     />
   );
 }
 
 function RunningPill({ count }: { count: number }) {
   return (
-    <span className="ml-auto inline-flex items-center gap-1 text-[10px] text-[#86efac]">
+    <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-[#22C55E]">
       <span
-        className="h-[5px] w-[5px] rounded-full bg-[#22c55e]"
-        style={{ boxShadow: '0 0 0 2px rgba(34,197,94,0.2)' }}
+        className="h-[5px] w-[5px] rounded-full bg-[#22C55E]"
+        style={{ boxShadow: '0 0 0 2px rgba(34,197,94,0.22)' }}
       />
       {count} running
     </span>
   );
 }
 
-// Deterministic per-project avatar color. Matches the eight-color palette in
-// the attached design — varied enough to read at a glance, all on a dark BG.
 const AVATAR_PALETTE: { bg: string; fg: string }[] = [
-  { bg: '#22c55e', fg: '#052e16' }, // green
-  { bg: '#ef4444', fg: '#450a0a' }, // red
-  { bg: '#14b8a6', fg: '#042f2c' }, // teal
-  { bg: '#10b981', fg: '#022c22' }, // emerald
-  { bg: '#60a5fa', fg: '#172554' }, // sky
-  { bg: '#3b82f6', fg: '#172554' }, // blue
-  { bg: '#ec4899', fg: '#500724' }, // pink
-  { bg: '#f59e0b', fg: '#451a03' }, // amber
+  { bg: '#22c55e', fg: '#052e16' },
+  { bg: '#ef4444', fg: '#450a0a' },
+  { bg: '#14b8a6', fg: '#042f2c' },
+  { bg: '#10b981', fg: '#022c22' },
+  { bg: '#60a5fa', fg: '#172554' },
+  { bg: '#3b82f6', fg: '#172554' },
+  { bg: '#ec4899', fg: '#500724' },
+  { bg: '#f59e0b', fg: '#451a03' },
 ];
 function projectColor(id: string) {
   let h = 0;
@@ -470,8 +455,6 @@ function projectColor(id: string) {
   return AVATAR_PALETTE[h % AVATAR_PALETTE.length];
 }
 
-// Roll project status up from its accounts: any 'attention' → red,
-// any 'warning' → yellow, else green. Keeps the dot honest.
 function projectStatus(projectId: string): 'red' | 'yellow' | 'green' {
   const accounts = ACCOUNTS.filter((a) => a.projectId === projectId);
   if (accounts.some((a) => a.health === 'attention')) return 'red';
@@ -484,10 +467,10 @@ function projectStatus(projectId: string): 'red' | 'yellow' | 'green' {
 function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
-      <div className="flex justify-center border-t border-[#1a1a22] px-2 py-3">
+      <div className="flex justify-center border-t border-[#1A1A22] px-2 py-3">
         <button
           title="Stewart Dunlop"
-          className="grid h-[26px] w-[26px] place-items-center rounded-full bg-ppc-purple-500 text-[11px] font-medium text-white"
+          className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-300 to-ppc-purple-500 text-[12px] font-bold text-white"
         >
           SD
         </button>
@@ -495,28 +478,28 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
     );
   }
   return (
-    <div className="border-t border-[#1a1a22] px-2.5 pt-2.5 pb-2.5">
-      <button className="mb-1.5 flex w-full items-center gap-2 rounded-lg border border-[#1a1a22] bg-[#0f0f17] px-2 py-[7px] text-left">
-        <span className="grid h-[24px] w-[24px] shrink-0 place-items-center rounded-full bg-ppc-purple-500 text-[10.5px] font-medium text-white">
+    <div className="border-t border-[#1A1A22] px-3 pt-3 pb-3">
+      <button className="mb-2 flex w-full items-center gap-2.5 rounded-xl border border-[#1A1A22] bg-[#15151C] px-2.5 py-2 text-left transition-colors hover:border-[#26262F]">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-300 to-ppc-purple-500 text-[11.5px] font-bold text-white">
           SD
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[12px] font-medium leading-tight text-white">
+          <span className="block truncate text-[13px] font-semibold leading-tight text-white">
             Stewart Dunlop
           </span>
-          <span className="mt-px block truncate text-[10px] text-[#7a7a86]">stewart@ppc.io</span>
+          <span className="mt-px block truncate text-[11px] text-[#7A7A86]">stewart@ppc.io</span>
         </span>
-        <DotsThree size={14} weight="bold" className="text-[#5a5a66]" />
+        <DotsThree size={15} weight="bold" className="text-[#6A6A78]" />
       </button>
-      <div className="flex items-center justify-between px-1 text-[10px]">
-        <span className="inline-flex items-center gap-1.5 text-[#c9c1ff]">
+      <div className="flex items-center justify-between px-1 text-[10.5px]">
+        <span className="inline-flex items-center gap-1.5 font-semibold text-ppc-purple-300">
           <span
-            className="h-[5px] w-[5px] rounded-full bg-ppc-purple-500"
-            style={{ boxShadow: '0 0 0 2px rgba(124,109,255,0.2)' }}
+            className="h-[5px] w-[5px] rounded-full bg-ppc-purple-400"
+            style={{ boxShadow: '0 0 0 2px rgba(128,87,255,0.30)' }}
           />
-          <span className="font-medium tracking-[0.02em]">Beta</span>
+          Beta
         </span>
-        <span className="inline-flex items-center gap-1.5 text-[#7a7a86]">
+        <span className="inline-flex items-center gap-1.5 text-[#7A7A86]">
           <Clock size={11} weight="duotone" />
           <span className="tabular-nums">Saves ~22 h/wk</span>
         </span>
