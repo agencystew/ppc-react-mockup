@@ -13,7 +13,7 @@ import type { AgentRun } from '../types/agent';
 const COMPETITOR_SPY_RUNNING: AgentRun = {
   runId: 'run-competitor-spy-running',
   agentSlug: 'competitor-spy',
-  projectId: 'smith-law',
+  projectId: 'boulder-care',
   status: 'running',
   parentAgent: { icon: '🕵️', name: 'Competitor Spy' },
   stage: { current: 5, total: 11 },
@@ -43,7 +43,7 @@ const COMPETITOR_SPY_RUNNING: AgentRun = {
 const COMPETITOR_SPY_COMPLETED: AgentRun = {
   runId: 'run-competitor-spy-completed',
   agentSlug: 'competitor-spy',
-  projectId: 'smith-law',
+  projectId: 'boulder-care',
   status: 'completed',
   parentAgent: { icon: '🕵️', name: 'Competitor Spy' },
   stage: { current: 11, total: 11 },
@@ -217,7 +217,7 @@ const COMPETITOR_SPY_COMPLETED: AgentRun = {
 const NEGATIVE_KEYWORD_COMPLETED: AgentRun = {
   runId: 'run-negative-keyword-completed',
   agentSlug: 'negative-keyword',
-  projectId: 'smith-law',
+  projectId: 'boulder-care',
   status: 'completed',
   parentAgent: { icon: '🛡️', name: 'Negative Keyword' },
   stage: { current: 8, total: 8 },

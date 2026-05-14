@@ -76,17 +76,17 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
       }`}
       style={{
         background:
-          'radial-gradient(120% 60% at 50% 0%, #1A1234 0%, #120C26 35%, #0E0820 100%)',
-        boxShadow: 'inset -1px 0 0 rgba(255,255,255,0.04)',
+          'linear-gradient(180deg, #07050D 0%, #050308 55%, #030206 100%)',
+        boxShadow: 'inset -1px 0 0 rgba(255,255,255,0.05)',
       }}
     >
-      {/* Soft purple top-glow — echoes the dark hero card radial */}
+      {/* Subtle purple bloom only at the very top, blending into deep black */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[260px] opacity-[0.55]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[240px]"
         style={{
           background:
-            'radial-gradient(70% 60% at 30% 0%, rgba(127,90,240,0.28) 0%, transparent 70%)',
+            'radial-gradient(60% 55% at 28% -10%, rgba(127,90,240,0.12) 0%, transparent 65%)',
         }}
       />
 
@@ -161,7 +161,7 @@ function BrandRow({ collapsed, onToggle }: SidebarProps) {
       <button
         onClick={onToggle}
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        className="grid h-8 w-8 place-items-center rounded-md text-[#7A7388] transition-colors hover:bg-white/[0.05] hover:text-white"
+        className="grid h-8 w-8 place-items-center rounded-md text-white/70 transition-colors hover:bg-white/[0.06] hover:text-white"
       >
         <SidebarSimple
           size={16}
@@ -181,7 +181,7 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
       <div className="flex justify-center px-2 pb-3">
         <button
           title="Search"
-          className="grid h-9 w-9 place-items-center rounded-lg text-[#8B83A0] transition-colors hover:bg-white/[0.05] hover:text-white"
+          className="grid h-9 w-9 place-items-center rounded-lg text-white/70 transition-colors hover:bg-white/[0.06] hover:text-white"
         >
           <MagnifyingGlass size={15} />
         </button>
@@ -193,15 +193,15 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
       <div className="group relative">
         <MagnifyingGlass
           size={13.5}
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#6E667E] transition-colors group-hover:text-[#A88CFF]"
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/45 transition-colors group-hover:text-white/80"
         />
         <input
           readOnly
           placeholder="Search or jump to"
-          className="w-full cursor-pointer rounded-[10px] border border-white/[0.07] bg-white/[0.03] py-[8.5px] pl-[34px] pr-14 text-[13px] text-white outline-none placeholder:text-[#76708A] transition-colors hover:border-white/[0.12] hover:bg-white/[0.05]"
+          className="w-full cursor-pointer rounded-[10px] border border-white/[0.07] bg-white/[0.03] py-[8.5px] pl-[34px] pr-14 text-[13px] text-white outline-none placeholder:text-white/50 transition-colors hover:border-white/[0.12] hover:bg-white/[0.05]"
         />
         <kbd
-          className="pointer-events-none absolute right-2.5 top-1/2 flex h-[18px] -translate-y-1/2 items-center rounded-[5px] border border-white/[0.10] bg-white/[0.04] px-[6px] font-mono text-[10px] leading-none text-[#8B83A0]"
+          className="pointer-events-none absolute right-2.5 top-1/2 flex h-[18px] -translate-y-1/2 items-center rounded-[5px] border border-white/[0.10] bg-white/[0.04] px-[6px] font-mono text-[10px] leading-none text-white/65"
           style={{ fontFamily: '"Courier New", ui-monospace, Menlo, monospace' }}
         >
           ⌘K
@@ -240,7 +240,7 @@ function MainNavItem({
         } ${
           active
             ? 'font-semibold text-white'
-            : 'font-medium text-[#C0B8D2] hover:bg-white/[0.04] hover:text-white'
+            : 'font-medium text-white/80 hover:bg-white/[0.05] hover:text-white'
         }`;
       }}
       style={({ isActive }) => {
@@ -248,8 +248,8 @@ function MainNavItem({
         return active
           ? {
               background:
-                'linear-gradient(90deg, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.06) 60%, rgba(127,90,240,0) 100%)',
-              boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.16)',
+                'linear-gradient(90deg, rgba(127,90,240,0.48) 0%, rgba(127,90,240,0.18) 55%, rgba(127,90,240,0) 100%)',
+              boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.32)',
             }
           : undefined;
       }}
@@ -264,8 +264,8 @@ function MainNavItem({
               weight={active ? 'fill' : 'duotone'}
               className={
                 active
-                  ? 'text-[#B08EF4]'
-                  : 'text-[#7A7388] transition-colors group-hover:text-[#A88CFF]'
+                  ? 'text-[#D3C6FF]'
+                  : 'text-white transition-colors group-hover:text-white'
               }
             />
             {!collapsed && (
@@ -276,7 +276,7 @@ function MainNavItem({
                     className={`ml-auto inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-[5px] px-[5px] text-[10.5px] font-semibold leading-none tabular-nums ${
                       active
                         ? 'bg-white/15 text-white'
-                        : 'bg-white/[0.06] text-[#8B83A0]'
+                        : 'bg-white/[0.07] text-white/70'
                     }`}
                   >
                     {badge}
@@ -340,14 +340,14 @@ function ItemGroup({
         className={`group relative flex w-full items-center justify-center rounded-[9px] px-2 py-[9px] transition-colors ${
           inSection
             ? 'font-semibold text-white'
-            : 'text-[#C0B8D2] hover:bg-white/[0.04] hover:text-white'
+            : 'text-white/80 hover:bg-white/[0.05] hover:text-white'
         }`}
         style={
           inSection
             ? {
                 background:
-                  'linear-gradient(90deg, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.06) 100%)',
-                boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.16)',
+                  'linear-gradient(90deg, rgba(127,90,240,0.48) 0%, rgba(127,90,240,0.18) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.32)',
               }
             : undefined
         }
@@ -357,8 +357,8 @@ function ItemGroup({
           weight={inSection ? 'fill' : 'duotone'}
           className={
             inSection
-              ? 'text-[#B08EF4]'
-              : 'text-[#7A7388] transition-colors group-hover:text-[#A88CFF]'
+              ? 'text-[#D3C6FF]'
+              : 'text-white transition-colors group-hover:text-white'
           }
         />
       </button>
@@ -373,14 +373,14 @@ function ItemGroup({
         className={`group relative flex w-full items-center gap-2.5 rounded-[9px] px-3 py-[8px] text-left text-[13.5px] transition-colors duration-150 ${
           inSection
             ? 'font-semibold text-white'
-            : 'font-medium text-[#C0B8D2] hover:bg-white/[0.04] hover:text-white'
+            : 'font-medium text-white/80 hover:bg-white/[0.05] hover:text-white'
         }`}
         style={
           inSection
             ? {
                 background:
-                  'linear-gradient(90deg, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.06) 60%, rgba(127,90,240,0) 100%)',
-                boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.16)',
+                  'linear-gradient(90deg, rgba(127,90,240,0.48) 0%, rgba(127,90,240,0.18) 55%, rgba(127,90,240,0) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.32)',
               }
             : undefined
         }
@@ -391,8 +391,8 @@ function ItemGroup({
           weight={inSection ? 'fill' : 'duotone'}
           className={
             inSection
-              ? 'text-[#B08EF4]'
-              : 'text-[#7A7388] transition-colors group-hover:text-[#A88CFF]'
+              ? 'text-[#D3C6FF]'
+              : 'text-white transition-colors group-hover:text-white'
           }
         />
         <span className="flex-1 tracking-[-0.005em]">{label}</span>
@@ -401,7 +401,7 @@ function ItemGroup({
           size={10}
           weight="bold"
           className={`shrink-0 ${
-            inSection ? 'text-white/55' : 'text-[#6E667E]'
+            inSection ? 'text-white/55' : 'text-white/45'
           } transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
         />
       </button>
@@ -426,14 +426,14 @@ function ItemGroup({
                   `block rounded-[7px] px-2.5 py-[6px] text-[12.5px] transition-colors duration-150 ${
                     isActive
                       ? 'font-semibold text-white'
-                      : 'font-medium text-[#9890A8] hover:bg-white/[0.04] hover:text-white'
+                      : 'font-medium text-white/65 hover:bg-white/[0.05] hover:text-white'
                   }`
                 }
                 style={({ isActive }) =>
                   isActive
                     ? {
                         background:
-                          'linear-gradient(90deg, rgba(127,90,240,0.20) 0%, rgba(127,90,240,0.04) 100%)',
+                          'linear-gradient(90deg, rgba(127,90,240,0.42) 0%, rgba(127,90,240,0.10) 100%)',
                       }
                     : undefined
                 }
@@ -493,7 +493,7 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
       <div className="flex items-center justify-between px-3 pb-2">
         <div className="flex items-center gap-[7px]">
           <span
-            className="text-[10px] font-semibold uppercase leading-none text-[#76708A]"
+            className="text-[10px] font-semibold uppercase leading-none text-white/55"
             style={{
               fontFamily: '"Courier New", ui-monospace, monospace',
               letterSpacing: '0.16em',
@@ -502,7 +502,7 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
             Projects
           </span>
           <span
-            className="text-[10px] tabular-nums leading-none text-[#5F586F]"
+            className="text-[10px] tabular-nums leading-none text-white/40"
             style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
           >
             {PROJECTS.length}
@@ -510,7 +510,7 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
         </div>
         <button
           title="New project"
-          className="grid h-[18px] w-[18px] place-items-center rounded-[4px] text-[#76708A] transition-colors hover:bg-white/[0.06] hover:text-white"
+          className="grid h-[18px] w-[18px] place-items-center rounded-[4px] text-white/50 transition-colors hover:bg-white/[0.08] hover:text-white"
         >
           <Plus size={11} weight="bold" />
         </button>
@@ -537,7 +537,7 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
                   `group relative flex items-center gap-2.5 overflow-hidden rounded-[9px] px-3 py-[7px] text-[13px] transition-colors duration-150 ${
                     isActive
                       ? 'font-semibold text-white'
-                      : 'font-medium text-[#C0B8D2] hover:bg-white/[0.04] hover:text-white'
+                      : 'font-medium text-white/80 hover:bg-white/[0.05] hover:text-white'
                   }`
                 }
                 style={({ isActive }) =>
@@ -545,7 +545,7 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
                     ? {
                         background:
                           'linear-gradient(90deg, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.05) 60%, rgba(127,90,240,0) 100%)',
-                        boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.16)',
+                        boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.32)',
                       }
                     : undefined
                 }
@@ -693,11 +693,11 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
           <span className="block truncate text-[12.5px] font-semibold leading-tight tracking-[-0.005em] text-white">
             Stewart Dunlop
           </span>
-          <span className="mt-[2px] block truncate text-[11px] leading-tight text-[#8B83A0]">
+          <span className="mt-[2px] block truncate text-[11px] leading-tight text-white/55">
             stewart@ppc.io
           </span>
         </span>
-        <DotsThree size={15} weight="bold" className="text-[#6E667E]" />
+        <DotsThree size={15} weight="bold" className="text-white/45" />
       </button>
       <div className="flex items-center justify-between px-1">
         <span
@@ -714,7 +714,7 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
           Beta
         </span>
         <span
-          className="text-[10px] leading-none text-[#76708A]"
+          className="text-[10px] leading-none text-white/55"
           style={{
             fontFamily: '"Courier New", ui-monospace, monospace',
             letterSpacing: '0.06em',

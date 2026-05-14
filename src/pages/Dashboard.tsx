@@ -32,20 +32,22 @@ const QUICK_CHIPS: { slug: string; emoji: string; label: string }[] = [
 // PROJECTS mock stays minimal. Avatar bg uses the same color rhythm as the v5
 // source artifact (green / orange / blue / purple).
 const ACCOUNT_META: Record<string, { industry: string; spend: string; bg: string }> = {
-  'smith-law':   { industry: 'Personal Injury', spend: '$34k/mo', bg: '#5DCAA5' },
-  'clear-skies': { industry: 'Home Services',   spend: '$12k/mo', bg: '#F0997B' },
-  'northstar':   { industry: 'Dental',          spend: '$68k/mo', bg: '#378ADD' },
-  'lemon-leaf':  { industry: 'D2C Sleep',       spend: '$42k/mo', bg: '#534AB7' },
-  'rocket-pet':  { industry: 'Pet Insurance',   spend: '$28k/mo', bg: '#E24B4A' },
-  'ironclad':    { industry: 'Home Services',   spend: '$18k/mo', bg: '#BA7517' },
+  'boulder-care':       { industry: 'Addiction Recovery', spend: '$83k/mo', bg: '#22C55E' },
+  'the-hoth':           { industry: 'SEO Software',       spend: '$13k/mo', bg: '#EF4444' },
+  'durable':            { industry: 'AI Website Builder', spend: '$20k/mo', bg: '#14B8A6' },
+  'linkbuilder':        { industry: 'SEO Tool',           spend: '$1.3k/mo', bg: '#65D6A1' },
+  'livingyoung':        { industry: 'Med Spa',            spend: '$8.4k/mo', bg: '#3B82F6' },
+  'authority-builders': { industry: 'Link Building',      spend: '$6.8k/mo', bg: '#5B7CF8' },
+  'edwin-novel':        { industry: 'D2C Jewelry',        spend: '$6.9k/mo', bg: '#D946A8' },
+  'flock':              { industry: 'Travel SaaS',        spend: '$0.5k/mo', bg: '#C08A2E' },
 };
 
 // One live run for the bottom of the "While you were away" stream.
 const LIVE_RUN = {
-  runId: 'run-deep-account-audit-northstar',
+  runId: 'run-deep-account-audit-durable',
   agentName: 'Account Audit',
   emoji: '📊',
-  projectName: 'Northstar Dental',
+  projectName: 'Durable',
   stageCurrent: 8,
   stageTotal: 12,
   stageDescription: 'Currently auditing PMAX asset groups',
