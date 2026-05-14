@@ -1,26 +1,31 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
-  House, Robot, Folder, Lightning, ChartLineUp, BookOpen, Gear,
-  Sparkle, MagnifyingGlass, SidebarSimple,
-  Buildings, CaretDown, Clock,
+  House, Robot, Lightning, ChartLineUp, ChatCircle,
+  TrendUp, MagnifyingGlass, SidebarSimple, Plus, SquaresFour,
+  CaretDown, Clock, DotsThree,
 } from '@phosphor-icons/react';
-import { PROJECTS, CURRENT_PROJECT_ID } from '../mock/projects';
+import { PROJECTS, ACCOUNTS } from '../mock/projects';
 
-// AppShell — classic SaaS layout. LIGHT workshop, dark moments live INSIDE
-// pages (the StagePage canvas, the Dashboard hero card, etc.).
-//
-//   ┌──────────────┬─────────────────────────────┐
-//   │  Sidebar     │  Main content               │
-//   │  white       │  lavender (#F3F0FF, body)   │
-//   └──────────────┴─────────────────────────────┘
-//
-// Per Stewart's design principle (see memory:
-//   feedback_ppcio_app_hybrid_light_dark_design_system.md):
-//   "Dark content surfaces are for AI work and its outputs. Everything
-//    else stays in the light system."
-// AppShell + sidebar are workshop = LIGHT. Page-level dark moments come
-// from .ppc-dark blocks inside pages.
+// Dev-visibility nav: every page variation listed under its parent so the
+// team can jump to any state. The `pages` arrays here are the source of
+// truth — add a route, add a sub-page entry.
+interface SubPage { label: string; to: string; }
+// "Report" lives under Reports main-nav, not Agents — having it in both
+// places lit two sections at once on /reports/* URLs.
+const AGENT_PAGES: SubPage[] = [
+  { label: 'Catalog',         to: '/agents' },
+  { label: 'Detail · Launch', to: '/agents/competitor-spy' },
+  { label: 'Loading',         to: '/agents/competitor-spy/loading/run-competitor-spy-running' },
+];
+// Projects don't get a variant dropdown — the project tiles below ARE the
+// detail variants. /projects (catalog) is what "All projects" itself points
+// to. Listing variants here would only re-introduce the triple-highlight bug.
+
+// AppShell — dark sidebar (workshop chrome), light page canvas.
+// The sidebar is the operator's cockpit so it carries the AI/agent dark
+// language; pages stay in the light system. Page-variant dropdowns under
+// Agents and Projects let the team jump to any state during the build.
 
 const STORAGE_KEY = 'ppcio-sidebar-collapsed';
 
@@ -60,30 +65,41 @@ interface SidebarProps {
 function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside
-      className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-ppc-neutral-100 bg-white transition-[width] duration-200 ${
-        collapsed ? 'w-[72px]' : 'w-[240px]'
+      className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-[#1a1a22] bg-[#0a0a0f] transition-[width] duration-200 ${
+        collapsed ? 'w-[72px]' : 'w-[284px]'
       }`}
     >
       <BrandRow collapsed={collapsed} onToggle={onToggle} />
-      <ProjectSwitcher collapsed={collapsed} />
       <SearchRow collapsed={collapsed} />
 
-      <nav className="flex-1 overflow-y-auto px-3 pb-3">
-        <NavSection eyebrow="App" collapsed={collapsed}>
-          <Item to="/"               icon={House}        label="Dashboard"      collapsed={collapsed} end />
-          <Item to="/agents"         icon={Robot}        label="Agents"         collapsed={collapsed} />
-          <Item to="/projects"       icon={Folder}       label="Projects"       collapsed={collapsed} />
-          <Item to="/reports/run-competitor-spy-completed" icon={ChartLineUp} label="Reports" collapsed={collapsed} />
-          <Item to="/runs"           icon={Lightning}    label="Mission Control" collapsed={collapsed} />
-        </NavSection>
+      <nav className="flex flex-1 flex-col gap-px overflow-y-auto px-2.5 pb-3">
+        <MainNavItem to="/" icon={House} label="Dashboard" collapsed={collapsed} end />
+        <MainNavItem to="/chat" icon={ChatCircle} label="Chat" collapsed={collapsed} badge="2" />
+        <ItemGroup
+          icon={Robot}
+          label="Agents"
+          basePath="/agents"
+          pages={AGENT_PAGES}
+          collapsed={collapsed}
+          status={<RunningPill count={4} />}
+        />
+        <MainNavItem
+          to="/reports/run-competitor-spy-completed"
+          icon={ChartLineUp}
+          label="Reports"
+          collapsed={collapsed}
+          activeMatch={(p) => p.startsWith('/reports')}
+        />
+        <MainNavItem
+          to="/runs"
+          icon={Lightning}
+          label="Mission control"
+          collapsed={collapsed}
+          dot="red"
+          activeMatch={(p) => p.startsWith('/runs')}
+        />
 
-        <NavSection eyebrow="Library" collapsed={collapsed}>
-          <Item to="/resources"  icon={BookOpen} label="Resources" collapsed={collapsed} />
-        </NavSection>
-
-        <NavSection eyebrow="Workspace" collapsed={collapsed}>
-          <Item to="/settings" icon={Gear} label="Settings" collapsed={collapsed} />
-        </NavSection>
+        <ProjectsSection collapsed={collapsed} />
       </nav>
 
       <SidebarFooter collapsed={collapsed} />
@@ -91,23 +107,23 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
   );
 }
 
-// ─── Sidebar pieces ───────────────────────────────────────────────────────
+// ─── Brand row ────────────────────────────────────────────────────────────
 
 function BrandRow({ collapsed, onToggle }: SidebarProps) {
   return (
-    <div className={`flex h-14 items-center border-b border-ppc-neutral-100 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
+    <div className={`flex items-center pt-3.5 pb-2.5 ${collapsed ? 'justify-center px-2' : 'justify-between px-3.5'}`}>
       {!collapsed && (
         <NavLink to="/" className="flex items-center gap-2">
-          <span className="grid h-6 w-6 place-items-center rounded-md bg-ppc-purple-500 text-[12px] font-extrabold leading-none text-white">
-            ɪ
+          <span className="grid h-[24px] w-[24px] place-items-center rounded-[6px] bg-ppc-purple-500 text-white">
+            <TrendUp size={13} weight="bold" />
           </span>
-          <span className="text-[14.5px] font-bold tracking-tight text-ppc-black">ppc.io</span>
+          <span className="text-[14px] font-medium tracking-[-0.01em] text-white">ppc.io</span>
         </NavLink>
       )}
       <button
         onClick={onToggle}
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        className="grid h-8 w-8 place-items-center rounded-md text-ppc-neutral-500 hover:bg-ppc-neutral-50 hover:text-ppc-black"
+        className="grid h-7 w-7 place-items-center rounded-md text-[#5a5a66] hover:bg-[#15151c] hover:text-white"
       >
         <SidebarSimple
           size={16}
@@ -119,113 +135,34 @@ function BrandRow({ collapsed, onToggle }: SidebarProps) {
   );
 }
 
-function ProjectSwitcher({ collapsed }: { collapsed: boolean }) {
-  const [open, setOpen] = useState(false);
-  const [filter, setFilter] = useState('');
-  const navigate = useNavigate();
-  const current = PROJECTS.find((p) => p.id === CURRENT_PROJECT_ID) ?? PROJECTS[0];
-  const filtered = PROJECTS.filter((p) =>
-    p.name.toLowerCase().includes(filter.toLowerCase()),
-  );
+// ─── Search ───────────────────────────────────────────────────────────────
 
+function SearchRow({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
-      <div className="flex justify-center border-b border-ppc-neutral-100 px-2 py-3">
+      <div className="flex justify-center px-2 pb-3">
         <button
-          onClick={() => setOpen(!open)}
-          title={current.name}
-          className="grid h-9 w-9 place-items-center rounded-lg bg-ppc-purple-50 text-ppc-purple-500 hover:bg-ppc-purple-100"
+          title="Search"
+          className="grid h-9 w-9 place-items-center rounded-md text-[#7a7a86] hover:bg-[#15151c] hover:text-white"
         >
-          <Buildings size={16} weight="duotone" />
+          <MagnifyingGlass size={15} />
         </button>
       </div>
     );
   }
-
   return (
-    <div className="relative border-b border-ppc-neutral-100 px-3 py-3">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-ppc-neutral-100 bg-ppc-neutral-25 px-3 py-2.5 text-left transition-colors hover:border-ppc-purple-300"
-      >
-        <span className="flex min-w-0 items-center gap-2.5">
-          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-ppc-purple-50 text-ppc-purple-500">
-            <Buildings size={14} weight="duotone" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-[13.5px] font-semibold leading-tight text-ppc-black">
-              {current.name}
-            </span>
-            <span className="block truncate text-[11.5px] text-ppc-neutral-500">
-              {current.accountCount} {current.accountCount === 1 ? 'account' : 'accounts'}
-            </span>
-          </span>
-        </span>
-        <CaretDown
-          size={12}
-          weight="bold"
-          className={`shrink-0 text-ppc-neutral-400 transition-transform ${open ? 'rotate-180' : ''}`}
-        />
-      </button>
-
-      {open && (
-        <div className="absolute left-3 right-3 top-full z-20 mt-1.5 overflow-hidden rounded-xl border border-ppc-neutral-100 bg-white shadow-ppc-lg">
-          <div className="flex items-center gap-2 border-b border-ppc-neutral-100 px-3 py-2.5">
-            <MagnifyingGlass size={14} className="text-ppc-neutral-400" />
-            <input
-              autoFocus
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              placeholder="Search clients..."
-              className="w-full bg-transparent text-[13px] outline-none placeholder:text-ppc-neutral-400"
-            />
-          </div>
-          <ul className="max-h-72 overflow-y-auto py-1.5">
-            {filtered.map((p) => (
-              <li key={p.id}>
-                <button
-                  onClick={() => { setOpen(false); navigate(`/projects/${p.id}`); }}
-                  className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-[13px] hover:bg-ppc-purple-50 ${
-                    p.id === CURRENT_PROJECT_ID ? 'bg-ppc-purple-50/60' : ''
-                  }`}
-                >
-                  <span className="min-w-0">
-                    <span className="block truncate font-semibold text-ppc-black">{p.name}</span>
-                    <span className="block truncate text-[11.5px] text-ppc-neutral-500">{p.industry}</span>
-                  </span>
-                  <span className="font-mono text-[11px] text-ppc-neutral-400">
-                    {p.accountCount}
-                  </span>
-                </button>
-              </li>
-            ))}
-            {filtered.length === 0 && (
-              <li className="px-3 py-5 text-center text-[12px] text-ppc-neutral-400">
-                No clients match "{filter}"
-              </li>
-            )}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SearchRow({ collapsed }: { collapsed: boolean }) {
-  if (collapsed) return null;
-  return (
-    <div className="border-b border-ppc-neutral-100 px-3 py-3">
+    <div className="px-3 pb-2.5">
       <div className="relative">
         <MagnifyingGlass
-          size={14}
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ppc-neutral-400"
+          size={13}
+          className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[#5a5a66]"
         />
         <input
           readOnly
-          placeholder="Search..."
-          className="w-full cursor-pointer rounded-lg border border-ppc-neutral-100 bg-ppc-neutral-25 py-2 pl-8 pr-12 text-[13px] outline-none placeholder:text-ppc-neutral-400 hover:border-ppc-purple-300"
+          placeholder="Search or jump to"
+          className="w-full cursor-pointer rounded-lg border border-[#1a1a22] bg-transparent py-[7px] pl-7 pr-11 text-[12px] text-[#e8e8ee] outline-none placeholder:text-[#5a5a66] hover:border-[#26262f] focus:border-ppc-purple-500/60"
         />
-        <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded border border-ppc-neutral-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-ppc-neutral-500">
+        <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-[#1f1f28] px-[5px] py-[1px] font-mono text-[10px] text-[#5a5a66]">
           ⌘K
         </kbd>
       </div>
@@ -233,70 +170,324 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-function NavSection({
-  eyebrow, collapsed, children,
-}: {
-  eyebrow: string; collapsed: boolean; children: React.ReactNode;
-}) {
-  return (
-    <div className="mt-4 first:mt-3">
-      {!collapsed && (
-        <div className="mb-1.5 px-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-400">
-          {eyebrow}
-        </div>
-      )}
-      <ul className="flex flex-col gap-0.5">{children}</ul>
-    </div>
-  );
-}
+// ─── Main nav item (flat) ─────────────────────────────────────────────────
 
-function Item({
-  to, icon: Icon, label, collapsed, end,
+function MainNavItem({
+  to, icon: Icon, label, collapsed, end, badge, dot, activeMatch,
 }: {
   to: string;
   icon: typeof House;
   label: string;
   collapsed: boolean;
   end?: boolean;
+  badge?: string;
+  dot?: 'red' | 'green' | 'yellow';
+  // Custom predicate so e.g. Reports stays active across every /reports/:runId,
+  // not just the one we navigate to.
+  activeMatch?: (pathname: string) => boolean;
 }) {
+  const { pathname } = useLocation();
+  const overrideActive = activeMatch ? activeMatch(pathname) : null;
+
   return (
-    <li>
-      <NavLink
-        to={to}
-        end={end}
-        title={collapsed ? label : undefined}
-        className={({ isActive }) =>
-          `group flex items-center rounded-lg text-[13.5px] transition-colors ${
-            collapsed ? 'justify-center px-2 py-2' : 'gap-2.5 px-3 py-2'
-          } ${
-            isActive
-              ? 'bg-ppc-purple-50 font-semibold text-ppc-purple-700'
-              : 'font-medium text-ppc-neutral-700 hover:bg-ppc-neutral-25 hover:text-ppc-black'
-          }`
-        }
-      >
-        {({ isActive }) => (
+    <NavLink
+      to={to}
+      end={end}
+      title={collapsed ? label : undefined}
+      className={({ isActive }) => {
+        const active = overrideActive ?? isActive;
+        return `group flex items-center rounded-md text-[13px] transition-colors ${
+          collapsed ? 'justify-center px-2 py-[7px]' : 'gap-2 px-2.5 py-[6px]'
+        } ${
+          active
+            ? 'bg-ppc-purple-500/20 font-medium text-white'
+            : 'text-[#b8b8c0] hover:bg-[#15151c] hover:text-white'
+        }`;
+      }}
+    >
+      {({ isActive }) => {
+        const active = overrideActive ?? isActive;
+        return (
           <>
             <Icon
-              size={16}
-              weight={isActive ? 'fill' : 'duotone'}
-              className={isActive ? 'text-ppc-purple-500' : 'text-ppc-neutral-400 group-hover:text-ppc-purple-500'}
+              size={15}
+              weight={active ? 'fill' : 'duotone'}
+              className={active ? 'text-ppc-purple-300' : 'text-[#7a7a86] group-hover:text-white'}
             />
-            {!collapsed && <span>{label}</span>}
+            {!collapsed && (
+              <>
+                <span className="flex-1">{label}</span>
+                {badge && (
+                  <span className="ml-auto rounded bg-ppc-purple-500/18 px-1.5 py-[1px] text-[10px] font-medium text-[#c9c1ff]">
+                    {badge}
+                  </span>
+                )}
+                {dot && <StatusDot tone={dot} />}
+              </>
+            )}
           </>
-        )}
-      </NavLink>
-    </li>
+        );
+      }}
+    </NavLink>
   );
 }
+
+// ─── ItemGroup (page-variant dropdown — preserved from light sidebar) ────
+
+function ItemGroup({
+  icon: Icon,
+  label,
+  basePath,
+  pages,
+  collapsed,
+  status,
+  tintActiveMatch,
+}: {
+  icon: typeof House;
+  label: string;
+  basePath: string;
+  pages: SubPage[];
+  collapsed: boolean;
+  status?: React.ReactNode;
+  // Optional override for when to TINT the parent. Auto-open still keys off
+  // basePath. Used so /projects/clear-skies opens the section without also
+  // tinting "All projects" — the project tile already owns that highlight.
+  tintActiveMatch?: (pathname: string) => boolean;
+}) {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const inSection = pathname.startsWith(basePath);
+  const groupActive = tintActiveMatch ? tintActiveMatch(pathname) : inSection;
+  const [open, setOpen] = useState(inSection);
+  useEffect(() => {
+    if (inSection) setOpen(true);
+  }, [inSection]);
+
+  if (collapsed) {
+    return (
+      <button
+        onClick={() => navigate(pages[0].to)}
+        title={label}
+        className={`group flex w-full items-center justify-center rounded-lg px-2 py-2 transition-colors ${
+          groupActive
+            ? 'bg-ppc-purple-500/20 text-white'
+            : 'text-[#b8b8c0] hover:bg-[#15151c] hover:text-white'
+        }`}
+      >
+        <Icon
+          size={15}
+          weight={groupActive ? 'fill' : 'duotone'}
+          className={groupActive ? 'text-ppc-purple-300' : 'text-[#7a7a86] group-hover:text-white'}
+        />
+      </button>
+    );
+  }
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={`group flex w-full items-center gap-2 rounded-md px-2.5 py-[6px] text-left text-[13px] transition-colors ${
+          groupActive
+            ? 'bg-ppc-purple-500/20 font-medium text-white'
+            : 'text-[#b8b8c0] hover:bg-[#15151c] hover:text-white'
+        }`}
+      >
+        <Icon
+          size={15}
+          weight={groupActive ? 'fill' : 'duotone'}
+          className={groupActive ? 'text-ppc-purple-300' : 'text-[#7a7a86] group-hover:text-white'}
+        />
+        <span className="flex-1">{label}</span>
+        {status}
+        <CaretDown
+          size={10}
+          weight="bold"
+          className={`text-[#5a5a66] transition-transform ${open ? '' : '-rotate-90'}`}
+        />
+      </button>
+
+      {open && (
+        <ul className="mb-0.5 ml-[25px] mt-px flex flex-col">
+          {pages.map((sp) => (
+            <li key={sp.to}>
+              <NavLink
+                to={sp.to}
+                end
+                className={({ isActive }) =>
+                  `block rounded-md px-2 py-[4px] text-[12px] transition-colors ${
+                    isActive
+                      ? 'bg-ppc-purple-500/12 font-medium text-white'
+                      : 'text-[#7a7a86] hover:text-[#e8e8ee]'
+                  }`
+                }
+              >
+                {sp.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+// ─── Projects section (inline list — replaces the old dropdown switcher) ──
+
+function ProjectsSection({ collapsed }: { collapsed: boolean }) {
+  if (collapsed) {
+    // In collapsed mode, just show project avatars as a stack.
+    return (
+      <div className="mt-3 flex flex-col items-center gap-1.5 border-t border-[#1a1a22] pt-3">
+        {PROJECTS.map((p) => (
+          <NavLink
+            key={p.id}
+            to={`/projects/${p.id}`}
+            title={p.name}
+            className={({ isActive }) =>
+              `grid h-7 w-7 place-items-center rounded-md text-[11px] font-medium ${
+                isActive ? 'ring-2 ring-ppc-purple-500/40' : ''
+              }`
+            }
+            style={{ background: projectColor(p.id).bg, color: projectColor(p.id).fg }}
+          >
+            {p.name.charAt(0)}
+          </NavLink>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-3">
+      <div className="flex items-center justify-between px-2.5 pb-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#5a5a66]">
+            Projects
+          </span>
+          <span className="text-[10px] tabular-nums text-[#5a5a66]">{PROJECTS.length}</span>
+        </div>
+        <button
+          title="New project"
+          className="grid h-5 w-5 place-items-center rounded text-[#5a5a66] hover:bg-[#15151c] hover:text-white"
+        >
+          <Plus size={12} weight="bold" />
+        </button>
+      </div>
+
+      <MainNavItem
+        to="/projects"
+        icon={SquaresFour}
+        label="All projects"
+        collapsed={false}
+        end
+      />
+
+      <ul className="mt-px flex flex-col">
+        {PROJECTS.map((p) => {
+          const status = projectStatus(p.id);
+          const color = projectColor(p.id);
+          return (
+            <li key={p.id}>
+              <NavLink
+                to={`/projects/${p.id}`}
+                end
+                className={({ isActive }) =>
+                  `group flex items-center gap-2 overflow-hidden rounded-md px-2.5 py-[6px] text-[13px] transition-colors ${
+                    isActive
+                      ? 'bg-ppc-purple-500/20 font-medium text-white'
+                      : 'text-[#b8b8c0] hover:bg-[#15151c] hover:text-white'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <span
+                      className={`grid h-[20px] w-[20px] shrink-0 place-items-center rounded text-[10.5px] font-medium ${
+                        isActive ? 'ring-2 ring-ppc-purple-500/40' : ''
+                      }`}
+                      style={{ background: color.bg, color: color.fg }}
+                    >
+                      {p.name.charAt(0)}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">{p.name}</span>
+                    <StatusDot tone={status} />
+                  </>
+                )}
+              </NavLink>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+// ─── Atoms ────────────────────────────────────────────────────────────────
+
+function StatusDot({ tone }: { tone: 'red' | 'yellow' | 'green' }) {
+  const palette = {
+    red:    { bg: '#ef4444', ring: 'rgba(239,68,68,0.18)' },
+    yellow: { bg: '#fbbf24', ring: 'rgba(251,191,36,0.18)' },
+    green:  { bg: '#22c55e', ring: 'rgba(34,197,94,0.2)' },
+  }[tone];
+  return (
+    <span
+      className="h-[6px] w-[6px] shrink-0 rounded-full"
+      style={{ background: palette.bg, boxShadow: `0 0 0 2px ${palette.ring}` }}
+    />
+  );
+}
+
+function RunningPill({ count }: { count: number }) {
+  return (
+    <span className="ml-auto inline-flex items-center gap-1 text-[10px] text-[#86efac]">
+      <span
+        className="h-[5px] w-[5px] rounded-full bg-[#22c55e]"
+        style={{ boxShadow: '0 0 0 2px rgba(34,197,94,0.2)' }}
+      />
+      {count} running
+    </span>
+  );
+}
+
+// Deterministic per-project avatar color. Matches the eight-color palette in
+// the attached design — varied enough to read at a glance, all on a dark BG.
+const AVATAR_PALETTE: { bg: string; fg: string }[] = [
+  { bg: '#22c55e', fg: '#052e16' }, // green
+  { bg: '#ef4444', fg: '#450a0a' }, // red
+  { bg: '#14b8a6', fg: '#042f2c' }, // teal
+  { bg: '#10b981', fg: '#022c22' }, // emerald
+  { bg: '#60a5fa', fg: '#172554' }, // sky
+  { bg: '#3b82f6', fg: '#172554' }, // blue
+  { bg: '#ec4899', fg: '#500724' }, // pink
+  { bg: '#f59e0b', fg: '#451a03' }, // amber
+];
+function projectColor(id: string) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return AVATAR_PALETTE[h % AVATAR_PALETTE.length];
+}
+
+// Roll project status up from its accounts: any 'attention' → red,
+// any 'warning' → yellow, else green. Keeps the dot honest.
+function projectStatus(projectId: string): 'red' | 'yellow' | 'green' {
+  const accounts = ACCOUNTS.filter((a) => a.projectId === projectId);
+  if (accounts.some((a) => a.health === 'attention')) return 'red';
+  if (accounts.some((a) => a.health === 'warning')) return 'yellow';
+  return 'green';
+}
+
+// ─── Footer ───────────────────────────────────────────────────────────────
 
 function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
-      <div className="flex justify-center border-t border-ppc-neutral-100 px-2 py-3">
+      <div className="flex justify-center border-t border-[#1a1a22] px-2 py-3">
         <button
           title="Stewart Dunlop"
-          className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-300 to-ppc-purple-500 text-[12px] font-bold text-white"
+          className="grid h-[26px] w-[26px] place-items-center rounded-full bg-ppc-purple-500 text-[11px] font-medium text-white"
         >
           SD
         </button>
@@ -304,24 +495,30 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
     );
   }
   return (
-    <div className="border-t border-ppc-neutral-100 px-3 py-3">
-      <div className="flex items-center gap-3 rounded-xl border border-ppc-neutral-100 bg-ppc-neutral-25 px-3 py-2.5">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-300 to-ppc-purple-500 text-[11.5px] font-bold text-white">
+    <div className="border-t border-[#1a1a22] px-2.5 pt-2.5 pb-2.5">
+      <button className="mb-1.5 flex w-full items-center gap-2 rounded-lg border border-[#1a1a22] bg-[#0f0f17] px-2 py-[7px] text-left">
+        <span className="grid h-[24px] w-[24px] shrink-0 place-items-center rounded-full bg-ppc-purple-500 text-[10.5px] font-medium text-white">
           SD
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[13px] font-semibold leading-tight text-ppc-black">
+          <span className="block truncate text-[12px] font-medium leading-tight text-white">
             Stewart Dunlop
           </span>
-          <span className="block truncate text-[11.5px] text-ppc-neutral-500">stewart@ppc.io</span>
+          <span className="mt-px block truncate text-[10px] text-[#7a7a86]">stewart@ppc.io</span>
         </span>
-      </div>
-      <div className="mt-3 flex items-center justify-between px-1 text-[11px] text-ppc-neutral-400">
-        <span className="inline-flex items-center gap-1">
-          <Sparkle size={11} weight="duotone" /> Beta
+        <DotsThree size={14} weight="bold" className="text-[#5a5a66]" />
+      </button>
+      <div className="flex items-center justify-between px-1 text-[10px]">
+        <span className="inline-flex items-center gap-1.5 text-[#c9c1ff]">
+          <span
+            className="h-[5px] w-[5px] rounded-full bg-ppc-purple-500"
+            style={{ boxShadow: '0 0 0 2px rgba(124,109,255,0.2)' }}
+          />
+          <span className="font-medium tracking-[0.02em]">Beta</span>
         </span>
-        <span className="inline-flex items-center gap-1">
-          <Clock size={11} /> Saves ~22 h/wk
+        <span className="inline-flex items-center gap-1.5 text-[#7a7a86]">
+          <Clock size={11} weight="duotone" />
+          <span className="tabular-nums">Saves ~22 h/wk</span>
         </span>
       </div>
     </div>
