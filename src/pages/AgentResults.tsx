@@ -239,7 +239,7 @@ export function AgentResults() {
           eyebrows, no chips.  The numbers 01/02/03 are repeated on the
           Spread C marker pins.
           ════════════════════════════════════════════════════════════════ */}
-      <section className="bg-ppc-canvas">
+      <section className="bg-canvas">
         <div className="mx-auto max-w-[1280px] px-6 py-24 md:px-12 md:py-28">
           <h2
             className="font-display font-extrabold text-ink"
@@ -302,7 +302,7 @@ export function AgentResults() {
           numbered marker pins with dashed leader lines.  One Caveat
           margin note pointing at the worst offender.
           ════════════════════════════════════════════════════════════════ */}
-      <section className="bg-ppc-canvas">
+      <section className="bg-canvas">
         <div className="mx-auto max-w-[1280px] px-6 pb-28 md:px-12 md:pb-32">
           <h2
             className="font-display font-extrabold text-ink"

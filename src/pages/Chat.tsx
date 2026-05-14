@@ -131,7 +131,7 @@ function ConversationList({
                     'group relative flex w-full flex-col items-start gap-1 rounded-[10px] px-3 py-3 text-left transition-colors duration-150',
                     active
                       ? 'text-ink'
-                      : 'text-ink/85 hover:bg-ink/[0.04] hover:text-ink',
+                      : 'text-ink/80 hover:bg-ink/[0.04] hover:text-ink',
                   ].join(' ')}
                   style={
                     active
@@ -512,7 +512,7 @@ function Composer() {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder="Ask anything about your account"
-            className="flex-1 bg-transparent font-sans text-ink placeholder:text-ink/45 outline-none"
+            className="flex-1 bg-transparent font-sans text-ink placeholder:text-ink/40 outline-none"
             style={{ fontSize: 17, fontWeight: 500, letterSpacing: '-0.005em' }}
           />
           <PillButton variant="primary" onClick={() => setValue('')}>

@@ -119,7 +119,7 @@ function HeroSpread({
     >
       <div className="mx-auto flex max-w-[1240px] flex-col justify-center gap-6 px-6 py-16 md:px-10 md:py-20">
         <h1
-          className="font-sans font-black tracking-tight text-white text-[32px] leading-[1.02] md:text-[56px]"
+          className="font-display font-black tracking-tight text-white text-[32px] leading-[1.02] md:text-[56px]"
           style={{ fontWeight: 900 }}
         >
           Every verdict. Every account. One page.
@@ -265,9 +265,9 @@ function VerdictRow({ row }: { row: Row }) {
           </span>
         </div>
 
-        {/* Middle: verdict headline — H2 32px Figtree 800 */}
+        {/* Middle: verdict headline — H2 32px Figtree 800 (collapses to body 17 on mobile to stay on-grid) */}
         <h2
-          className="flex-1 font-sans text-[24px] leading-[1.15] text-ink md:text-[32px]"
+          className="flex-1 font-display text-[17px] leading-[1.25] text-ink md:text-[32px] md:leading-[1.15]"
           style={{ fontWeight: 800 }}
         >
           {row.verdict}
