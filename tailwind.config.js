@@ -16,6 +16,8 @@ export default {
          * Used by brand primitives (Sticker, PillButton, Caveat, Mascot) and
          * the v2 page rebuilds. Legacy ppc-* tokens preserved below. */
         ink: '#0F0A1E',
+        canvas: '#ECEAFA',   /* Lavender — alias of ppc.canvas for v2 page surfaces */
+        purple: '#7F5AF0',   /* Alias of ppc.purple.500 for primary accents */
         redorange: '#F24A2E',
         mint: '#BFE9CC',
         ivory: '#FAF7F0',
