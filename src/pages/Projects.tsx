@@ -1,19 +1,20 @@
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, Plus, MagnifyingGlass, TrendUp, Buildings, Clock,
+  ArrowRight, Plus, MagnifyingGlass, TrendUp, Buildings, Clock, Sparkle,
 } from '@phosphor-icons/react';
 import { useMemo, useState } from 'react';
 import { PROJECTS, ACCOUNTS } from '../mock/projects';
-import { PageHero, PrimaryCTA, SecondaryButton } from '../components/PageHero';
 
-// Projects · /projects
+// Projects list · /projects
 //
-// The agency-team home for managing clients on the dark canvas. Lists
-// every project (client) the team is running with at-a-glance health,
-// account count, and the most recent agent activity. Click → /projects/:id
-// for the dossier.
+// LIGHT workshop surface (per hybrid design system: directory pages are
+// light, AI artifacts are dark). One dark hero card as the focal moment,
+// then editorial rows.
 //
-// Per Stewart 2026-05-14: "/projects is meant to be the LIST of projects."
+// Three jobs:
+//   1. Dark hero — roster framing + Add client / Connect MCC actions.
+//   2. Search + filter.
+//   3. Client rows — one per project, sortable scan by upside / activity.
 
 const ACTIVITY: Record<string, { lastRun: string; agentsThisWeek: number; upside: string; tone: 'good' | 'warning' | 'attention' }> = {
   'smith-law':   { lastRun: '2 hours ago',  agentsThisWeek: 4, upside: '$20.2K', tone: 'good' },
@@ -26,7 +27,6 @@ const ACTIVITY: Record<string, { lastRun: string; agentsThisWeek: number; upside
 
 export function Projects() {
   const [filter, setFilter] = useState('');
-  const totalAccounts = ACCOUNTS.length;
 
   const filtered = useMemo(() => {
     const q = filter.trim().toLowerCase();
@@ -39,115 +39,117 @@ export function Projects() {
   }, [filter]);
 
   return (
-    <div className="space-y-12">
-      <PageHero
-        eyebrow={`Clients · ${PROJECTS.length} projects · ${totalAccounts} Google Ads accounts`}
-        headline={`${PROJECTS.length} clients on your roster.`}
-        description="Every project below has its agents on watch. Open one to see the full dossier, recent runs, and what's worth running next."
-        actions={
-          <>
-            <PrimaryCTA>
-              <Plus size={16} weight="bold" />
+    <div className="space-y-10">
+      {/* ═══ HERO ════════════════════════════════════════════════════════
+          Dark editorial moment. Same compact rhythm as Dashboard + Project
+          dossier so the workshop pages all read as one product. */}
+      <section className="ppc-dark ppc-dark--hero relative overflow-hidden rounded-3xl px-8 py-9 sm:px-10 sm:py-10">
+        <div className="relative">
+          <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-white/55">
+            Your roster · {PROJECTS.length} clients · {ACCOUNTS.length} accounts
+          </div>
+          <h1 className="mt-3 max-w-[760px] font-display text-[42px] font-extrabold leading-[1.02] tracking-[-0.028em] text-white sm:text-[48px]">
+            {PROJECTS.length} clients on the books<span className="text-ppc-purple-500">.</span>
+          </h1>
+          <p className="mt-4 max-w-[560px] text-[15px] leading-[1.55] tracking-tight text-white/65">
+            Each one has its agents on watch. Open a client to read the full dossier — connected accounts, weekly findings, what's worth running next.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-2.5">
+            <button className="inline-flex items-center gap-2 rounded-md bg-ppc-purple-500 px-4 py-2.5 text-[13.5px] font-semibold tracking-tight text-white shadow-[0_4px_14px_-4px_rgba(128,87,255,0.55)] transition-transform hover:-translate-y-[1px]">
+              <Plus size={13} weight="bold" />
               Add a client
-            </PrimaryCTA>
-            <SecondaryButton>
-              <Buildings size={16} weight="duotone" />
-              Connect MCC
-            </SecondaryButton>
-          </>
-        }
-      />
+            </button>
+            <button className="inline-flex items-center gap-2 rounded-md border border-white/15 px-3.5 py-2.5 text-[13.5px] font-semibold tracking-tight text-white/85 transition-colors hover:bg-white/5">
+              <Buildings size={13} weight="duotone" /> Connect MCC
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* Search row */}
-      <div className="flex items-center gap-3 border-y border-white/8 py-4">
-        <MagnifyingGlass size={16} weight="duotone" className="text-white/45" />
+      <div className="flex items-center gap-3 rounded-2xl border border-ppc-neutral-100 bg-white px-5 py-3">
+        <MagnifyingGlass size={15} weight="duotone" className="text-ppc-neutral-400" />
         <input
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          placeholder={`Search ${PROJECTS.length} clients...`}
-          className="flex-1 bg-transparent text-[15px] font-medium tracking-tight text-white outline-none placeholder:text-white/40"
+          placeholder={`Search ${PROJECTS.length} clients…`}
+          className="flex-1 bg-transparent text-[14px] font-medium tracking-tight text-ppc-black outline-none placeholder:text-ppc-neutral-400"
         />
-        <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-white/45">
-          {filtered.length} of {PROJECTS.length}
+        <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ppc-neutral-400">
+          {String(filtered.length).padStart(2, '0')} of {String(PROJECTS.length).padStart(2, '0')}
         </span>
       </div>
 
-      {/* Editorial rows */}
-      <ul className="divide-y divide-white/8 rounded-2xl border border-white/8 bg-white/[0.04]">
+      {/* Client rows */}
+      <ul className="divide-y divide-ppc-neutral-100 overflow-hidden rounded-2xl border border-ppc-neutral-100 bg-white">
         {filtered.map((p) => {
           const a = ACTIVITY[p.id] ?? { lastRun: '—', agentsThisWeek: 0, upside: '—', tone: 'good' as const };
           return (
             <li key={p.id}>
               <Link
                 to={`/projects/${p.id}`}
-                className="group flex items-center gap-6 px-8 py-6 transition-colors hover:bg-white/[0.04]"
+                className="group flex items-center gap-6 px-7 py-5 transition-colors hover:bg-ppc-purple-50/40"
               >
-                {/* Identity */}
+                <HealthDot tone={a.tone} />
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-3">
-                    <div className="text-[18px] font-semibold tracking-tight text-white">
-                      {p.name}
-                    </div>
-                    <HealthDot tone={a.tone} />
+                  <div className="text-[16.5px] font-semibold tracking-tight text-ppc-black">
+                    {p.name}
                   </div>
-                  <div className="mt-1 flex items-center gap-3 text-[12.5px] text-white/55">
+                  <div className="mt-0.5 flex items-center gap-3 text-[12.5px] text-ppc-neutral-500">
                     <span>{p.industry}</span>
-                    <span className="text-white/30">·</span>
+                    <span className="text-ppc-neutral-300">·</span>
                     <span className="tabular">
                       {p.accountCount} {p.accountCount === 1 ? 'account' : 'accounts'}
                     </span>
                   </div>
                 </div>
 
-                {/* This week */}
                 <div className="hidden text-right md:block">
-                  <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-white/45">
+                  <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-ppc-neutral-400">
                     Upside this week
                   </div>
-                  <div className="tabular mt-1 inline-flex items-center gap-1 text-[15px] font-semibold text-ppc-success">
-                    <TrendUp size={13} weight="bold" />
+                  <div className="tabular mt-0.5 inline-flex items-center gap-1 text-[14.5px] font-semibold text-ppc-success">
+                    <TrendUp size={12} weight="bold" />
                     {a.upside}
                   </div>
                 </div>
 
-                {/* Activity */}
-                <div className="hidden text-right md:block">
-                  <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-white/45">
-                    Agents this week
+                <div className="hidden w-20 text-right md:block">
+                  <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-ppc-neutral-400">
+                    Agents
                   </div>
-                  <div className="tabular mt-1 text-[15px] font-semibold text-white">
+                  <div className="tabular mt-0.5 text-[14.5px] font-semibold text-ppc-black">
                     {a.agentsThisWeek}
                   </div>
                 </div>
 
-                {/* Last run */}
-                <div className="hidden text-right lg:block">
-                  <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-white/45">
+                <div className="hidden w-24 text-right lg:block">
+                  <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-ppc-neutral-400">
                     Last run
                   </div>
-                  <div className="mt-1 inline-flex items-center gap-1 text-[13px] font-medium text-white/70">
-                    <Clock size={11} weight="duotone" className="text-white/45" />
+                  <div className="mt-0.5 inline-flex items-center gap-1 text-[12.5px] font-medium text-ppc-neutral-700">
+                    <Clock size={10} weight="duotone" className="text-ppc-neutral-400" />
                     {a.lastRun}
                   </div>
                 </div>
 
                 <ArrowRight
-                  size={14}
+                  size={13}
                   weight="bold"
-                  className="text-white/30 transition-colors group-hover:text-ppc-purple-300"
+                  className="text-ppc-neutral-300 transition-colors group-hover:text-ppc-purple-500"
                 />
               </Link>
             </li>
           );
         })}
         {filtered.length === 0 && (
-          <li className="px-8 py-12 text-center text-[14px] text-white/55">
+          <li className="px-7 py-12 text-center text-[14px] text-ppc-neutral-500">
             No clients match "{filter}".
           </li>
         )}
       </ul>
 
-      <p className="text-[13px] text-white/55">
+      <p className="text-[12.5px] text-ppc-neutral-500">
         Tip: open any client to see their dossier, connected accounts, and the agent runs that landed this week.
       </p>
     </div>
@@ -155,15 +157,18 @@ export function Projects() {
 }
 
 function HealthDot({ tone }: { tone: 'good' | 'warning' | 'attention' }) {
-  const cls = {
+  const map = {
     good:      { dot: 'bg-ppc-success', label: 'On track' },
     warning:   { dot: 'bg-ppc-warning', label: 'Watch' },
-    attention: { dot: 'bg-ppc-error',   label: 'Needs attention' },
+    attention: { dot: 'bg-ppc-error',   label: 'Needs eyes' },
   }[tone];
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-pill border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-[11px] font-medium text-white/70">
-      <span className={`h-1.5 w-1.5 rounded-full ${cls.dot}`} />
-      {cls.label}
+    <span className="hidden shrink-0 items-center gap-1.5 rounded-pill border border-ppc-neutral-100 bg-ppc-neutral-25 px-2.5 py-1 text-[11px] font-medium text-ppc-neutral-700 sm:inline-flex">
+      <span className={`h-1.5 w-1.5 rounded-full ${map.dot}`} />
+      {map.label}
     </span>
   );
 }
+
+// Sparkle import kept for future "Run an agent" CTA usage on this page.
+void Sparkle;

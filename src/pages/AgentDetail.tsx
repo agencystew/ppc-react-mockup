@@ -1,30 +1,21 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowLeft, ArrowRight, Clock, CheckCircle,
-  Brain, Lightning, ChartLineUp, EnvelopeSimple,
-  ShieldCheck, FileText, Sparkle,
+  ArrowLeft, ArrowRight, Clock, CheckCircle, Sparkle,
+  Brain, Lightning, ChartLineUp, EnvelopeSimple, ShieldCheck, FileText,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
 import { PROJECTS, ACCOUNTS, CURRENT_PROJECT_ID } from '../mock/projects';
-import { PrimaryCTA } from '../components/PageHero';
 import type { LaunchLevel } from '../types/agent';
 
 // Agent Detail · /agents/:slug
 //
-// Editorial rhythm on the smoky-black canvas. Reads top-to-bottom like a
-// feature profile in a magazine, just a few shades deeper at the "How this
-// agent thinks" block.
+// LIGHT magazine-feature page with ONE dark focal moment (the
+// "How this agent thinks" block — the editorial smoky-black canvas
+// that mirrors the StagePage). Left = editorial story. Right = sticky
+// Configure & Launch card.
 //
-//   Eyebrow (00X · category)
-//   → 64px display H1 with purple period
-//   → 1-line outcome lede
-//   → "Stew built this" byline
-//   → "How this agent thinks" deeper-dark block
-//   → "What you'll get back" editorial bullets w/ duotone glyphs
-//
-// Right column: sticky configure & launch card. Marquee CTA = <PrimaryCTA>.
-// Pre-run surface — TIME + APPROVAL cues only. NEVER pre-run $ figures.
+// Hard rules: TIME + APPROVAL cues only. NEVER pre-run $ figures.
 
 const LAUNCH_LEVELS: Array<{ value: LaunchLevel; label: string; sub: string }> = [
   { value: 'account',  label: 'Account-wide', sub: 'Selected accounts' },
@@ -34,12 +25,11 @@ const LAUNCH_LEVELS: Array<{ value: LaunchLevel; label: string; sub: string }> =
 ];
 
 type RunMode = 'once' | 'recurring' | 'schedule-only' | 'custom';
-
 const RUN_MODES: Array<[RunMode, string, string]> = [
-  ['once',          'Run once now',     'Single launch, this run only'],
+  ['once',          'Run once now',       'Single launch, this run only'],
   ['recurring',     'Run now + schedule', 'Run today, then on a cadence'],
-  ['schedule-only', 'Schedule only',     'Queue for a future run'],
-  ['custom',        'Custom cron',       'Power-user cadence'],
+  ['schedule-only', 'Schedule only',      'Queue for a future run'],
+  ['custom',        'Custom cron',        'Power-user cadence'],
 ];
 
 export function AgentDetail() {
@@ -61,9 +51,9 @@ export function AgentDetail() {
 
   if (!agent) {
     return (
-      <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-12 text-center">
-        <div className="font-display text-[24px] font-bold tracking-tight text-white">Agent not found.</div>
-        <Link to="/agents" className="ppc-link mt-3 inline-flex items-center gap-1 text-ppc-purple-300">
+      <div className="rounded-2xl border border-ppc-neutral-100 bg-white p-12 text-center">
+        <div className="font-display text-[24px] font-bold tracking-tight">Agent not found.</div>
+        <Link to="/agents" className="mt-3 inline-flex items-center gap-1 text-ppc-purple-500 hover:underline">
           <ArrowLeft size={14} /> Back to library
         </Link>
       </div>
@@ -92,199 +82,147 @@ export function AgentDetail() {
     }
   };
 
-  const launchScope = (() => {
-    const level = LAUNCH_LEVELS.find((l) => l.value === launchLevel)?.label ?? '';
-    const accountSummary =
-      selectedAccounts.length === 0
-        ? `all ${projectAccounts.length} accounts`
-        : `${selectedAccounts.length} of ${projectAccounts.length} accounts`;
-    return `${level} · ${accountSummary}`;
-  })();
-
   return (
-    <div className="space-y-12">
-      {/* Back link — quiet, editorial */}
+    <div className="space-y-10">
       <Link
         to="/agents"
-        className="inline-flex items-center gap-1.5 text-[12.5px] font-medium tracking-tight text-white/55 transition-colors hover:text-ppc-purple-300"
+        className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-ppc-neutral-500 transition-colors hover:text-ppc-purple-500"
       >
-        <ArrowLeft size={13} weight="bold" /> All agents
+        <ArrowLeft size={12} weight="bold" /> All agents
       </Link>
 
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_440px]">
-        {/* ═══════════════════════════════════════════════════════════════
-            LEFT — editorial column
-            ═══════════════════════════════════════════════════════════════ */}
-        <div className="space-y-16 min-w-0">
-
-          {/* HERO ───────────────────────────────────────────────────── */}
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_420px]">
+        {/* ═══ LEFT — editorial column ═══════════════════════════════════ */}
+        <div className="min-w-0 space-y-12">
+          {/* HERO */}
           <section>
-            <div className="flex items-center gap-3 font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
-              <span className="tabular text-ppc-purple-300">00{Math.min(AGENTS.findIndex((a) => a.slug === agent.slug) + 1, 99)}</span>
-              <span className="h-px w-7 bg-white/15" />
+            <div className="flex items-center gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
+              <span className="tabular text-ppc-purple-500">
+                {String(AGENTS.findIndex((a) => a.slug === agent.slug) + 1).padStart(2, '0')}
+              </span>
+              <span className="h-px w-7 bg-ppc-neutral-200" />
               <span>{categoryLabel} agent</span>
             </div>
 
-            <div className="mt-7 flex items-center gap-3.5">
+            <div className="mt-6 flex items-center gap-3">
               <span
-                className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-white/[0.04] text-[22px] leading-none"
+                className="grid h-11 w-11 place-items-center rounded-2xl border border-ppc-neutral-100 bg-white text-[20px] shadow-ppc-sm"
                 aria-hidden
               >
                 {agent.emoji}
               </span>
-              <div className="font-display text-[18px] font-semibold tracking-tight text-white">
+              <div className="font-display text-[17px] font-semibold tracking-tight text-ppc-black">
                 {agent.name}
               </div>
             </div>
 
-            <h1 className="mt-7 max-w-[760px] font-display text-[58px] font-extrabold leading-[0.95] tracking-[-0.035em] text-white sm:text-[68px]">
+            <h1 className="mt-6 max-w-[720px] font-display text-[52px] font-extrabold leading-[0.98] tracking-[-0.03em] text-ppc-black sm:text-[60px]">
               {headlineBody}
-              <span className="text-ppc-purple-400">.</span>
+              <span className="text-ppc-purple-500">.</span>
             </h1>
 
-            <p className="mt-7 max-w-[640px] text-[18px] leading-[1.55] tracking-tight text-white/70">
+            <p className="mt-6 max-w-[620px] text-[17px] leading-[1.55] tracking-tight text-ppc-neutral-700">
               {agent.outcomeDescription}
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11.5px] uppercase tracking-[0.12em] text-white/55">
+            {/* Quiet meta row — TIME + APPROVAL cues */}
+            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ppc-neutral-500">
               <span className="inline-flex items-center gap-1.5">
-                <Clock size={13} weight="duotone" className="text-ppc-purple-300" />
+                <Clock size={12} weight="duotone" className="text-ppc-purple-500" />
                 <span className="tabular">{agent.expectedDuration}</span>
-                <span className="text-white/40">· background</span>
+                <span className="text-ppc-neutral-400">· background</span>
               </span>
-              <span className="h-3 w-px bg-white/15" />
+              <span className="h-3 w-px bg-ppc-neutral-200" />
               <span className="inline-flex items-center gap-1.5">
-                <EnvelopeSimple size={13} weight="duotone" className="text-ppc-purple-300" />
+                <EnvelopeSimple size={12} weight="duotone" className="text-ppc-purple-500" />
                 Email when ready
               </span>
-              <span className="h-3 w-px bg-white/15" />
+              <span className="h-3 w-px bg-ppc-neutral-200" />
               <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck size={13} weight="duotone" className="text-ppc-purple-300" />
+                <ShieldCheck size={12} weight="duotone" className="text-ppc-purple-500" />
                 Client-ready output
               </span>
             </div>
           </section>
 
-          <hr className="ppc-sheen" />
-
-          {/* STEW BUILT THIS */}
-          <section>
-            <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
-              Built by
-            </div>
-            <div className="mt-5 flex items-start gap-5">
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-300 to-ppc-purple-600 text-[28px] leading-none shadow-[0_8px_22px_-8px_rgba(128,87,255,0.55),inset_0_1px_0_rgba(255,255,255,0.35)]">
-                <span aria-hidden>👨</span>
+          {/* BUILT BY — light editorial byline */}
+          <section className="border-y border-ppc-neutral-100 py-7">
+            <div className="flex items-start gap-4">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-300 to-ppc-purple-500 text-[22px]">
+                👨
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-[13.5px] font-semibold tracking-tight text-white">
-                  Stew Dunlop{' '}
-                  <span className="font-normal text-white/55">/ Founder, PPC.io</span>
+              <div className="text-[14.5px] leading-relaxed tracking-tight">
+                <div className="text-[12.5px] font-semibold text-ppc-black">
+                  Stew built this <span className="font-normal text-ppc-neutral-500">/ founder, PPC.io</span>
                 </div>
-                <p className="mt-3 max-w-[640px] text-[16px] leading-[1.62] tracking-tight text-white/70">
-                  After scaling an agency to 100+ client accounts with a team of 50, I saw the same thing every agency owner sees. The gap between <em className="font-serif italic text-ppc-purple-300">&ldquo;we know what to do&rdquo;</em> and <em className="font-serif italic text-ppc-purple-300">&ldquo;we have time to do it for every single account&rdquo;</em> gets wider every month. This agent closes that gap.
+                <p className="mt-2 max-w-[600px] text-ppc-neutral-700">
+                  After scaling an agency to 100+ client accounts with a team of 50, I saw the same thing every agency owner sees: the gap between <em className="text-ppc-purple-500">we know what to do</em> and <em className="text-ppc-purple-500">we have time to do it for every single account</em> gets wider every month. This agent closes that gap.
                 </p>
               </div>
             </div>
           </section>
 
-          {/* HOW THIS AGENT THINKS */}
-          <section
-            className="relative overflow-hidden rounded-3xl bg-[#15151A] px-10 py-12 text-white sm:px-12 sm:py-14"
-            style={{
-              backgroundImage:
-                'radial-gradient(120% 80% at 20% 0%, rgba(128,87,255,0.16) 0%, transparent 55%)',
-            }}
-          >
-            <span className="pointer-events-none absolute left-10 right-10 top-0 h-px bg-grad-sheen" />
-
-            <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
-              How this agent thinks
+          {/* HOW THIS AGENT THINKS — DARK focal moment */}
+          <section className="ppc-dark ppc-dark--hero relative overflow-hidden rounded-3xl px-8 py-9 sm:px-10 sm:py-10">
+            <div className="relative">
+              <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-white/55">
+                How this agent thinks
+              </div>
+              <h2 className="mt-3 max-w-[560px] font-display text-[30px] font-bold leading-[1.05] tracking-[-0.022em] text-white">
+                Like a senior strategist, not a script<span className="text-ppc-purple-500">.</span>
+              </h2>
+              <ol className="mt-7 space-y-3">
+                {[
+                  { icon: Brain,         step: '01', kicker: 'Context',        label: agent.thinkingSteps[0] },
+                  { icon: Lightning,     step: '02', kicker: 'Alignment',      label: agent.thinkingSteps[1] },
+                  { icon: ChartLineUp,   step: '03', kicker: 'Recommendation', label: agent.thinkingSteps[2] },
+                ].map((s, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center gap-5 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-4"
+                  >
+                    <div className="tabular font-mono text-[12px] font-semibold text-ppc-purple-300">
+                      {s.step}
+                    </div>
+                    <div className="grid h-9 w-9 place-items-center rounded-xl bg-ppc-purple-500/15 text-ppc-purple-300">
+                      <s.icon size={17} weight="duotone" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.12em] text-white/55">
+                        {s.kicker}
+                      </div>
+                      <div className="mt-1 text-[14.5px] font-medium leading-snug tracking-tight text-white">
+                        {s.label}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ol>
             </div>
-            <h2 className="mt-3 max-w-[520px] font-display text-[34px] font-bold leading-[1.04] tracking-[-0.025em] text-white sm:text-[38px]">
-              Like a senior strategist, not a script
-              <span className="text-ppc-purple-400">.</span>
-            </h2>
-            <p className="mt-4 max-w-[520px] text-[15px] leading-[1.6] tracking-tight text-white/65">
-              Three reasoning beats, in order. You can audit every tool call, every source, every judgment after it runs.
-            </p>
-
-            <ol className="mt-10 space-y-4">
-              {[
-                { icon: Brain,        step: '01', label: agent.thinkingSteps[0], kicker: 'Context' },
-                { icon: Lightning,    step: '02', label: agent.thinkingSteps[1], kicker: 'Alignment' },
-                { icon: ChartLineUp,  step: '03', label: agent.thinkingSteps[2], kicker: 'Recommendation' },
-              ].map((s, i) => (
-                <li
-                  key={i}
-                  className="flex items-center gap-5 rounded-2xl border border-white/10 bg-white/[0.035] px-6 py-5 sm:gap-6 sm:px-7"
-                >
-                  <div className="tabular font-mono text-[12px] font-semibold tracking-[0.06em] text-ppc-purple-300">
-                    {s.step}
-                  </div>
-                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/10 bg-ppc-purple-500/15 text-ppc-purple-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-                    <s.icon size={20} weight="duotone" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-white/45">
-                      {s.kicker}
-                    </div>
-                    <div className="mt-1 text-[15.5px] font-medium leading-snug tracking-tight text-white">
-                      {s.label}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ol>
           </section>
 
-          {/* WHAT YOU'LL GET BACK */}
+          {/* WHAT YOU'LL GET BACK — light editorial */}
           <section>
-            <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
-              What you&rsquo;ll get back
+            <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
+              What you'll get back
             </div>
-            <h2 className="mt-3 max-w-[640px] font-display text-[34px] font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-[38px]">
-              Client-ready, audit-ready
-              <span className="text-ppc-purple-400">.</span>
+            <h2 className="mt-3 font-display text-[26px] font-bold leading-[1.05] tracking-[-0.02em] text-ppc-black">
+              Client-ready, audit-ready<span className="text-ppc-purple-500">.</span>
             </h2>
-            <p className="mt-4 max-w-[600px] text-[16px] leading-[1.6] tracking-tight text-white/65">
-              The output is the deliverable. Not raw data, not a model dump. Hand it straight to the meeting.
-            </p>
-
-            <ul className="mt-10 space-y-5">
-              {([
-                {
-                  icon: Clock,
-                  title: <>A <span className="tabular font-semibold text-white">{agent.expectedDuration}</span> background run</>,
-                  body: "Runs while you do other work. Email when it's done.",
-                },
-                {
-                  icon: ChartLineUp,
-                  title: <>Prioritized findings with <span className="font-semibold text-white">reasoning + impact</span></>,
-                  body: 'Every recommendation backed by data + a confidence read. Nothing vibes-based.',
-                },
-                {
-                  icon: FileText,
-                  title: <><span className="font-semibold text-white">&ldquo;Generate client report&rdquo;</span> path</>,
-                  body: 'Output formatted to hand to your client. No copy-paste reshuffle.',
-                },
-                {
-                  icon: ShieldCheck,
-                  title: <>Full audit trail of <span className="font-semibold text-white">defensible methodology</span></>,
-                  body: 'Every tool call. Every source. Every AI judgment. Open the receipts.',
-                },
-              ] as Array<{ icon: typeof Clock; title: React.ReactNode; body: string }>).map((row, i) => (
-                <li key={i} className="flex items-start gap-5">
-                  <div className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-ppc-purple-300">
-                    <row.icon size={18} weight="duotone" />
-                  </div>
-                  <div className="min-w-0 flex-1 leading-relaxed">
-                    <div className="text-[16px] tracking-tight text-white/85">
-                      {row.title}
-                    </div>
-                    <div className="mt-1 text-[14px] leading-relaxed tracking-tight text-white/55">
-                      {row.body}
-                    </div>
+            <ul className="mt-6 space-y-3 text-[15px] leading-[1.55] text-ppc-neutral-700">
+              {[
+                { icon: Clock,        title: `${agent.expectedDuration} in the background`, sub: "You'll get an email when it's done." },
+                { icon: CheckCircle,  title: 'Prioritized findings with impact', sub: 'Reasoning and estimated impact per finding.' },
+                { icon: FileText,     title: 'Generate client report', sub: 'Hand it to your client as-is. No editing.' },
+                { icon: ShieldCheck,  title: 'Full audit trail', sub: 'Every tool call, every source, every AI judgment.' },
+              ].map((row, i) => (
+                <li key={i} className="flex items-start gap-4 rounded-xl border border-ppc-neutral-100 bg-white px-5 py-4">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-ppc-purple-50 text-ppc-purple-500">
+                    <row.icon size={16} weight="duotone" />
+                  </span>
+                  <div>
+                    <div className="text-[14.5px] font-semibold text-ppc-black">{row.title}</div>
+                    <div className="mt-0.5 text-[13.5px] text-ppc-neutral-600">{row.sub}</div>
                   </div>
                 </li>
               ))}
@@ -292,22 +230,18 @@ export function AgentDetail() {
           </section>
         </div>
 
-        {/* ═══════════════════════════════════════════════════════════════
-            RIGHT — Configure & launch (sticky)
-            ═══════════════════════════════════════════════════════════════ */}
+        {/* ═══ RIGHT — Configure & launch (sticky light card) ═══════════════ */}
         <aside className="lg:sticky lg:top-10 lg:h-fit">
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#15151A] p-8">
-            <span className="pointer-events-none absolute left-8 right-8 top-0 h-px bg-grad-sheen" />
-
-            <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
-              Configure &amp; launch
+          <div className="rounded-2xl border border-ppc-neutral-100 bg-white p-7 shadow-ppc-sm">
+            <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-ppc-neutral-500">
+              Configure & launch
             </div>
-            <div className="mt-3 font-display text-[28px] font-bold leading-[1.05] tracking-[-0.025em] text-white">
-              Pick where this runs<span className="text-ppc-purple-400">.</span>
+            <div className="mt-2 font-display text-[22px] font-bold tracking-[-0.02em] text-ppc-black">
+              Pick where this runs<span className="text-ppc-purple-500">.</span>
             </div>
 
-            <div className="mt-8 space-y-6">
-              <Field label="Project · client">
+            <div className="mt-6 space-y-5">
+              <Field label="Project (client)">
                 <select
                   value={selectedProject}
                   onChange={(e) => { setSelectedProject(e.target.value); setSelectedAccounts([]); }}
@@ -315,28 +249,21 @@ export function AgentDetail() {
                 >
                   {PROJECTS.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.name}{p.industry ? ` · ${p.industry}` : ''}
+                      {p.name}{p.industry ? ` — ${p.industry}` : ''}
                     </option>
                   ))}
                 </select>
               </Field>
 
-              <Field
-                label="Accounts"
-                hint={
-                  selectedAccounts.length === 0
-                    ? `All ${projectAccounts.length} selected by default`
-                    : `${selectedAccounts.length} of ${projectAccounts.length} selected`
-                }
-              >
-                <div className="max-h-48 overflow-y-auto rounded-xl border border-white/8 bg-white/[0.02] p-1.5">
+              <Field label={`Accounts (${selectedAccounts.length || 'all'} selected)`}>
+                <div className="max-h-44 overflow-y-auto rounded-xl border border-ppc-neutral-100 p-1">
                   {projectAccounts.map((acc) => {
                     const checked = selectedAccounts.includes(acc.id);
                     return (
                       <label
                         key={acc.id}
-                        className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] transition-colors ${
-                          checked ? 'bg-ppc-purple-500/15' : 'hover:bg-white/[0.04]'
+                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-[13.5px] transition-colors ${
+                          checked ? 'bg-ppc-purple-50' : 'hover:bg-ppc-neutral-25'
                         }`}
                       >
                         <input
@@ -346,14 +273,9 @@ export function AgentDetail() {
                           className="h-4 w-4 accent-ppc-purple-500"
                         />
                         <div className="min-w-0 flex-1">
-                          <div className="truncate font-medium tracking-tight text-white">
-                            {acc.name}
-                          </div>
-                          <div className="tabular font-mono text-[10.5px] tracking-tight text-white/40">
-                            {acc.customerId}
-                          </div>
+                          <div className="truncate font-medium text-ppc-black">{acc.name}</div>
+                          <div className="font-mono text-[11px] text-ppc-neutral-400">{acc.customerId}</div>
                         </div>
-                        <HealthDot health={acc.health} />
                       </label>
                     );
                   })}
@@ -366,18 +288,14 @@ export function AgentDetail() {
                     <button
                       key={l.value}
                       onClick={() => setLaunchLevel(l.value)}
-                      className={`group rounded-xl border px-3.5 py-3 text-left transition-colors ${
+                      className={`rounded-xl border px-3 py-2.5 text-left text-[12.5px] transition-colors ${
                         launchLevel === l.value
-                          ? 'border-ppc-purple-500 bg-ppc-purple-500/15'
-                          : 'border-white/8 bg-white/[0.02] hover:border-ppc-purple-500/40'
+                          ? 'border-ppc-purple-500 bg-ppc-purple-50'
+                          : 'border-ppc-neutral-100 hover:border-ppc-purple-300'
                       }`}
                     >
-                      <div className="text-[13px] font-semibold tracking-tight text-white">
-                        {l.label}
-                      </div>
-                      <div className="mt-0.5 text-[11.5px] leading-snug tracking-tight text-white/55">
-                        {l.sub}
-                      </div>
+                      <div className="font-semibold text-ppc-black">{l.label}</div>
+                      <div className="mt-0.5 text-[11.5px] text-ppc-neutral-500">{l.sub}</div>
                     </button>
                   ))}
                 </div>
@@ -397,10 +315,7 @@ export function AgentDetail() {
                 </select>
               </Field>
 
-              <Field
-                label="Steer the agent"
-                hint="Optional · one sentence is plenty"
-              >
+              <Field label="Steer the agent (optional)">
                 <textarea
                   value={steer}
                   onChange={(e) => setSteer(e.target.value)}
@@ -412,62 +327,45 @@ export function AgentDetail() {
 
               <Field label="Run mode">
                 <div className="space-y-1.5">
-                  {RUN_MODES.map(([v, label, sub]) => {
+                  {RUN_MODES.map(([v, l, sub]) => {
                     const active = runMode === v;
                     return (
                       <button
                         key={v}
                         onClick={() => setRunMode(v)}
-                        className={`flex w-full items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-colors ${
+                        className={`flex w-full items-start gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-colors ${
                           active
-                            ? 'border-ppc-purple-500 bg-ppc-purple-500/15'
-                            : 'border-white/8 bg-white/[0.02] hover:border-ppc-purple-500/40'
+                            ? 'border-ppc-purple-500 bg-ppc-purple-50'
+                            : 'border-ppc-neutral-100 hover:border-ppc-purple-300'
                         }`}
                       >
-                        <span
-                          className={`grid h-4 w-4 shrink-0 place-items-center rounded-full border-2 ${
-                            active ? 'border-ppc-purple-500 bg-ppc-purple-500' : 'border-white/30 bg-transparent'
-                          }`}
-                        >
-                          {active && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                        <span className={`mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full border-2 ${
+                          active ? 'border-ppc-purple-500' : 'border-ppc-neutral-300'
+                        }`}>
+                          {active && <span className="h-1.5 w-1.5 rounded-full bg-ppc-purple-500" />}
                         </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-[13px] font-semibold tracking-tight text-white">
-                            {label}
-                          </span>
-                          <span className="block text-[11.5px] tracking-tight text-white/55">
-                            {sub}
-                          </span>
+                        <span>
+                          <span className="block text-[12.5px] font-semibold text-ppc-black">{l}</span>
+                          <span className="block text-[11.5px] text-ppc-neutral-500">{sub}</span>
                         </span>
                       </button>
                     );
                   })}
                 </div>
               </Field>
-            </div>
 
-            {/* Launch */}
-            <div className="mt-9 border-t border-white/8 pt-6">
-              <div className="flex justify-center">
-                <PrimaryCTA size="lg" onClick={handleLaunch}>
-                  <Sparkle size={17} weight="fill" />
-                  Launch agent
-                  <ArrowRight size={16} weight="bold" />
-                </PrimaryCTA>
-              </div>
+              <button
+                onClick={handleLaunch}
+                className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-md bg-ppc-purple-500 px-6 py-3.5 text-[14.5px] font-bold tracking-tight text-white shadow-[0_4px_14px_-4px_rgba(128,87,255,0.55)] transition-transform hover:-translate-y-[1px]"
+              >
+                <Sparkle size={15} weight="fill" />
+                Launch agent
+                <ArrowRight size={14} weight="bold" />
+              </button>
 
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-white/55">
-                <span className="inline-flex items-center gap-1.5">
-                  <Clock size={11} weight="duotone" className="text-ppc-purple-300" />
-                  <span className="tabular">{agent.expectedDuration}</span>
-                </span>
-                <span className="h-2.5 w-px bg-white/15" />
-                <span>{launchScope}</span>
-              </div>
-
-              <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-white/45">
-                <CheckCircle size={11} weight="duotone" />
-                Runs in background · email when ready
+              <div className="flex items-center justify-center gap-1.5 text-[11.5px] text-ppc-neutral-500">
+                <Clock size={11} weight="duotone" />
+                {agent.expectedDuration} · runs in background · email when ready
               </div>
             </div>
           </div>
@@ -477,37 +375,13 @@ export function AgentDetail() {
   );
 }
 
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <div className="mb-2 flex items-baseline justify-between gap-3">
-        <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/55">
-          {label}
-        </div>
-        {hint && (
-          <div className="text-[11px] tracking-tight text-white/45">
-            {hint}
-          </div>
-        )}
+      <div className="mb-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-500">
+        {label}
       </div>
       {children}
     </div>
   );
-}
-
-function HealthDot({ health }: { health: 'good' | 'warning' | 'attention' }) {
-  const { bg, ring } = {
-    good:      { bg: 'bg-ppc-success', ring: 'ring-ppc-success/20' },
-    warning:   { bg: 'bg-ppc-warning', ring: 'ring-ppc-warning/20' },
-    attention: { bg: 'bg-ppc-error',   ring: 'ring-ppc-error/20' },
-  }[health];
-  return <span className={`h-2 w-2 shrink-0 rounded-full ring-4 ${bg} ${ring}`} />;
 }
