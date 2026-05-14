@@ -16,15 +16,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* App-shell baseline. LIGHT canvas app-wide (soft lavender #F3F0FF,
- * matches /free-tools, /agents, /ai-consulting light sections on the
- * marketing site). Cards stay pure white. Dark sections are RESERVED
- * for hero MOMENTS only (StagePage canvas + selective page heroes) to
- * create editorial rhythm against the lavender body. */
+/* App-shell baseline. DARK canvas app-wide so the whole app reads as
+ * one product with the StagePage JSX. Marketing site alternates
+ * light/dark — the APP is dark, full stop.
+ *
+ * Surface palette (locked):
+ *   bg-1  = #0C0C0E   page canvas (Smoky Black)
+ *   bg-2  = #15151A   primary cards, sidebar surfaces
+ *   bg-3  = #1E1E24   raised tiles inside cards
+ *   fg-1  = white            text-white
+ *   fg-2  = rgba(255,255,255,0.70)   text-white/70
+ *   fg-3  = rgba(255,255,255,0.45)   text-white/45
+ *   border  rgba(255,255,255,0.08)   (hover: 0.14)
+ *   accent  ppc-purple-400 / 500 for links/hover. */
 html, body, #root {
   min-height: 100%;
-  background: #F3F0FF;
-  color: var(--ppc-black);
+  background: var(--ppc-black);
+  color: var(--ppc-white);
 }
 
 /* The brand CSS adds a global `a:hover { text-decoration: underline }` —

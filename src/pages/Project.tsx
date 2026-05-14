@@ -60,7 +60,7 @@ export function ProjectPage() {
       {/* Back rail */}
       <Link
         to="/"
-        className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ppc-neutral-500 transition-colors hover:text-ppc-purple-500"
+        className="inline-flex items-center gap-1.5 text-[13px] font-medium text-white/55 transition-colors hover:text-ppc-purple-500"
       >
         <ArrowLeft size={13} weight="bold" /> Dashboard
       </Link>
@@ -83,7 +83,7 @@ export function ProjectPage() {
       />
 
       {/* THIS-WEEK SURFACED — money/time moment, anchored to real run data */}
-      <section className="grid gap-x-14 gap-y-10 border-y border-ppc-neutral-100 py-12 sm:grid-cols-3">
+      <section className="grid gap-x-14 gap-y-10 border-y border-white/8 py-12 sm:grid-cols-3">
         <Stat
           eyebrow="Surfaced this week"
           value="$20.2K"
@@ -116,7 +116,7 @@ export function ProjectPage() {
           }
         />
         <div className="grid gap-8 sm:grid-cols-[1.4fr_1fr]">
-          <p className="max-w-[640px] text-[16.5px] leading-relaxed text-ppc-neutral-700">
+          <p className="max-w-[640px] text-[16.5px] leading-relaxed text-white/70">
             Personal injury law firm based in Ohio. Offer: contingency-fee representation
             (&ldquo;no fee unless we win&rdquo;). ICP: post-accident claimants aged 25 to 55
             within 48 hours of incident. Trust signals lean on settlement history and
@@ -137,22 +137,22 @@ export function ProjectPage() {
           eyebrow="Connected accounts"
           title={`${accounts.length} live ${accounts.length === 1 ? 'account' : 'accounts'}.`}
         />
-        <ul className="divide-y divide-ppc-neutral-100 rounded-2xl border border-ppc-neutral-100 bg-white">
+        <ul className="divide-y divide-white/8 rounded-2xl border border-white/8 bg-white/[0.04]">
           {accounts.map((acc) => {
             const m = ACCOUNT_METRICS[acc.id] ?? { spend30d: '—', trendPct: 0, campaigns: 0 };
             return (
               <li key={acc.id}>
                 <button
                   type="button"
-                  className="group flex w-full items-center gap-6 px-8 py-6 text-left transition-colors hover:bg-ppc-purple-50/30"
+                  className="group flex w-full items-center gap-6 px-8 py-6 text-left transition-colors hover:bg-ppc-purple-500/15/30"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[16px] font-semibold tracking-tight text-ppc-black">
+                    <div className="truncate text-[16px] font-semibold tracking-tight text-white">
                       {acc.name}
                     </div>
-                    <div className="mt-1 flex items-center gap-3 font-mono text-[11.5px] text-ppc-neutral-500">
+                    <div className="mt-1 flex items-center gap-3 font-mono text-[11.5px] text-white/55">
                       <span className="tabular">{acc.customerId}</span>
-                      <span className="text-ppc-neutral-300">·</span>
+                      <span className="text-white/25">·</span>
                       <span className="tabular">{m.campaigns} campaigns</span>
                     </div>
                   </div>
@@ -160,10 +160,10 @@ export function ProjectPage() {
                     <HealthPill health={acc.health} />
                   </div>
                   <div className="hidden text-right md:block">
-                    <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-500">
+                    <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-white/55">
                       30d spend
                     </div>
-                    <div className="tabular mt-1 text-[15px] font-bold text-ppc-black">
+                    <div className="tabular mt-1 text-[15px] font-bold text-white">
                       {m.spend30d}
                     </div>
                   </div>
@@ -171,7 +171,7 @@ export function ProjectPage() {
                   <ArrowRight
                     size={14}
                     weight="bold"
-                    className="text-ppc-neutral-300 transition-colors group-hover:text-ppc-purple-500"
+                    className="text-white/25 transition-colors group-hover:text-ppc-purple-500"
                   />
                 </button>
               </li>
@@ -186,33 +186,33 @@ export function ProjectPage() {
           eyebrow="Campaigns at a glance"
           title="Where the budget is going."
         />
-        <ul className="divide-y divide-ppc-neutral-100 rounded-2xl border border-ppc-neutral-100 bg-white">
+        <ul className="divide-y divide-white/8 rounded-2xl border border-white/8 bg-white/[0.04]">
           {CAMPAIGNS.map((c) => (
             <li key={c.name}>
               <div className="flex items-center gap-6 px-8 py-5">
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[15.5px] font-semibold tracking-tight text-ppc-black">
+                  <div className="truncate text-[15.5px] font-semibold tracking-tight text-white">
                     {c.name}
                   </div>
-                  <div className="mt-1 flex items-center gap-3 text-[12.5px] text-ppc-neutral-500">
+                  <div className="mt-1 flex items-center gap-3 text-[12.5px] text-white/55">
                     <span>{c.account}</span>
-                    <span className="text-ppc-neutral-300">·</span>
+                    <span className="text-white/25">·</span>
                     <span className="tabular font-mono text-[11.5px]">{c.budget}</span>
                   </div>
                 </div>
                 <div className="hidden text-right sm:block">
-                  <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-500">
+                  <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-white/55">
                     30d spend
                   </div>
-                  <div className="tabular mt-1 text-[14.5px] font-bold text-ppc-black">
+                  <div className="tabular mt-1 text-[14.5px] font-bold text-white">
                     {c.spend30d}
                   </div>
                 </div>
                 <div className="hidden text-right md:block">
-                  <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-500">
+                  <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-white/55">
                     CPA
                   </div>
-                  <div className="tabular mt-1 text-[14.5px] font-semibold text-ppc-neutral-700">
+                  <div className="tabular mt-1 text-[14.5px] font-semibold text-white/70">
                     {c.cpa}
                   </div>
                 </div>
@@ -230,23 +230,23 @@ export function ProjectPage() {
             eyebrow="Recent runs · this client"
             title="What's been on this account's desk."
           />
-          <ul className="divide-y divide-ppc-neutral-100 rounded-2xl border border-ppc-neutral-100 bg-white">
+          <ul className="divide-y divide-white/8 rounded-2xl border border-white/8 bg-white/[0.04]">
             {recentRuns.map((r) => (
               <li key={r.runId}>
                 <Link
                   to={`/reports/${r.runId}`}
-                  className="group flex items-center gap-6 px-8 py-6 transition-colors hover:bg-ppc-purple-50/30"
+                  className="group flex items-center gap-6 px-8 py-6 transition-colors hover:bg-ppc-purple-500/15/30"
                 >
                   <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ppc-purple-500 sm:w-44">
                     {r.agentName}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[16px] font-semibold tracking-tight text-ppc-black">
+                    <div className="truncate text-[16px] font-semibold tracking-tight text-white">
                       {r.headline}
                     </div>
-                    <div className="mt-0.5 flex items-center gap-3 text-[12.5px] text-ppc-neutral-500">
+                    <div className="mt-0.5 flex items-center gap-3 text-[12.5px] text-white/55">
                       <span className="tabular">{r.duration}</span>
-                      <span className="text-ppc-neutral-300">·</span>
+                      <span className="text-white/25">·</span>
                       <span>{r.finishedAt}</span>
                     </div>
                   </div>
@@ -257,7 +257,7 @@ export function ProjectPage() {
                   <ArrowRight
                     size={14}
                     weight="bold"
-                    className="text-ppc-neutral-300 transition-colors group-hover:text-ppc-purple-500"
+                    className="text-white/25 transition-colors group-hover:text-ppc-purple-500"
                   />
                 </Link>
               </li>
@@ -272,24 +272,24 @@ export function ProjectPage() {
           eyebrow="What's worth running next"
           title="Three plays for this client."
         />
-        <ul className="divide-y divide-ppc-neutral-100 rounded-2xl border border-ppc-neutral-100 bg-white">
+        <ul className="divide-y divide-white/8 rounded-2xl border border-white/8 bg-white/[0.04]">
           {suggested.map((a) => (
             <li key={a.slug}>
               <Link
                 to={`/agents/${a.slug}`}
-                className="group flex items-center gap-6 px-8 py-6 transition-colors hover:bg-ppc-purple-50/30"
+                className="group flex items-center gap-6 px-8 py-6 transition-colors hover:bg-ppc-purple-500/15/30"
               >
-                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-ppc-purple-50 text-[20px]">
+                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-ppc-purple-500/15 text-[20px]">
                   {a.emoji}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[17px] font-bold tracking-tight text-ppc-black">{a.name}</div>
-                  <div className="mt-1 max-w-[640px] text-[14px] leading-snug text-ppc-neutral-600">
+                  <div className="text-[17px] font-bold tracking-tight text-white">{a.name}</div>
+                  <div className="mt-1 max-w-[640px] text-[14px] leading-snug text-white/65">
                     {a.headline}
                   </div>
                 </div>
                 <div className="hidden text-right sm:block">
-                  <div className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-ppc-neutral-500">
+                  <div className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-white/55">
                     <Clock size={12} weight="duotone" /> {a.expectedDuration}
                   </div>
                 </div>
@@ -311,13 +311,13 @@ function Stat({ eyebrow, value, sub, trend }: {
 }) {
   return (
     <div>
-      <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-500">
+      <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-white/55">
         {eyebrow}
       </div>
-      <div className="tabular mt-4 text-[52px] font-extrabold leading-none tracking-[-0.035em] text-ppc-black">
+      <div className="tabular mt-4 text-[52px] font-extrabold leading-none tracking-[-0.035em] text-white">
         {value}
       </div>
-      <div className="mt-3 text-[13.5px] leading-snug text-ppc-neutral-600">{sub}</div>
+      <div className="mt-3 text-[13.5px] leading-snug text-white/65">{sub}</div>
       <div className="mt-1.5 font-mono text-[11px] uppercase tracking-wider text-ppc-purple-500">
         {trend}
       </div>
@@ -328,11 +328,11 @@ function Stat({ eyebrow, value, sub, trend }: {
 // ─── Context pill — small label/value card for the context grid ───────────
 function ContextPill({ label, value, warn }: { label: string; value: string; warn?: boolean }) {
   return (
-    <div className="rounded-2xl border border-ppc-neutral-100 bg-white px-5 py-4">
-      <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-500">
+    <div className="rounded-2xl border border-white/8 bg-white/[0.04] px-5 py-4">
+      <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-white/55">
         {label}
       </div>
-      <div className={`mt-1.5 text-[15px] font-semibold tracking-tight ${warn ? 'text-ppc-warning' : 'text-ppc-black'}`}>
+      <div className={`mt-1.5 text-[15px] font-semibold tracking-tight ${warn ? 'text-ppc-warning' : 'text-white'}`}>
         {value}
       </div>
     </div>
@@ -358,7 +358,7 @@ function HealthPill({ health }: { health: 'good' | 'warning' | 'attention' }) {
 function TrendBadge({ pct }: { pct: number }) {
   if (pct === 0) {
     return (
-      <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-ppc-neutral-500">
+      <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-white/55">
         <Minus size={13} weight="bold" /> flat
       </span>
     );
@@ -391,7 +391,7 @@ function CampaignTrend({ trend }: { trend: Trend }) {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-ppc-neutral-500">
+    <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-white/55">
       <Minus size={13} weight="bold" /> flat
     </span>
   );

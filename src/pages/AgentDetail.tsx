@@ -62,7 +62,7 @@ export function AgentDetail() {
 
   if (!agent) {
     return (
-      <div className="rounded-2xl border border-ppc-neutral-100 bg-white p-12 text-center">
+      <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-12 text-center">
         <div className="font-display text-[24px] font-bold tracking-tight">Agent not found.</div>
         <Link to="/agents" className="mt-3 inline-flex items-center gap-1 text-ppc-purple-500 hover:underline">
           <ArrowLeft size={14} /> Back to library
@@ -109,7 +109,7 @@ export function AgentDetail() {
       {/* Back link — quiet, editorial */}
       <Link
         to="/agents"
-        className="inline-flex items-center gap-1.5 text-[12.5px] font-medium tracking-tight text-ppc-neutral-500 transition-colors hover:text-ppc-purple-500"
+        className="inline-flex items-center gap-1.5 text-[12.5px] font-medium tracking-tight text-white/55 transition-colors hover:text-ppc-purple-500"
       >
         <ArrowLeft size={13} weight="bold" /> All agents
       </Link>
@@ -123,7 +123,7 @@ export function AgentDetail() {
           {/* HERO ───────────────────────────────────────────────────── */}
           <section>
             {/* Eyebrow: ordinal + category + agent name */}
-            <div className="flex items-center gap-3 font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
+            <div className="flex items-center gap-3 font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
               <span className="tabular text-ppc-purple-500">00{Math.min(AGENTS.findIndex((a) => a.slug === agent.slug) + 1, 99)}</span>
               <span className="h-px w-7 bg-ppc-neutral-200" />
               <span>{categoryLabel} agent</span>
@@ -132,33 +132,33 @@ export function AgentDetail() {
             {/* Agent identity row — emoji tile + name */}
             <div className="mt-7 flex items-center gap-3.5">
               <span
-                className="grid h-11 w-11 place-items-center rounded-2xl border border-ppc-neutral-100 bg-white text-[22px] leading-none shadow-ppc-sm"
+                className="grid h-11 w-11 place-items-center rounded-2xl border border-white/8 bg-white/[0.04] text-[22px] leading-none shadow-ppc-sm"
                 aria-hidden
               >
                 {agent.emoji}
               </span>
-              <div className="font-display text-[18px] font-semibold tracking-tight text-ppc-black">
+              <div className="font-display text-[18px] font-semibold tracking-tight text-white">
                 {agent.name}
               </div>
             </div>
 
             {/* Display H1 with purple period */}
-            <h1 className="mt-7 max-w-[760px] font-display text-[58px] font-extrabold leading-[0.95] tracking-[-0.035em] text-ppc-black sm:text-[68px]">
+            <h1 className="mt-7 max-w-[760px] font-display text-[58px] font-extrabold leading-[0.95] tracking-[-0.035em] text-white sm:text-[68px]">
               {headlineBody}
               <span className="text-ppc-purple-500">.</span>
             </h1>
 
             {/* Lede */}
-            <p className="mt-7 max-w-[640px] text-[18px] leading-[1.55] tracking-tight text-ppc-neutral-700">
+            <p className="mt-7 max-w-[640px] text-[18px] leading-[1.55] tracking-tight text-white/70">
               {agent.outcomeDescription}
             </p>
 
             {/* Quiet meta row — TIME + APPROVAL cues, never $ */}
-            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11.5px] uppercase tracking-[0.12em] text-ppc-neutral-500">
+            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11.5px] uppercase tracking-[0.12em] text-white/55">
               <span className="inline-flex items-center gap-1.5">
                 <Clock size={13} weight="duotone" className="text-ppc-purple-500" />
                 <span className="tabular">{agent.expectedDuration}</span>
-                <span className="text-ppc-neutral-400">· background</span>
+                <span className="text-white/40">· background</span>
               </span>
               <span className="h-3 w-px bg-ppc-neutral-200" />
               <span className="inline-flex items-center gap-1.5">
@@ -178,7 +178,7 @@ export function AgentDetail() {
 
           {/* STEW BUILT THIS ────────────────────────────────────────── */}
           <section>
-            <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
+            <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
               Built by
             </div>
             <div className="mt-5 flex items-start gap-5">
@@ -186,11 +186,11 @@ export function AgentDetail() {
                 <span aria-hidden>👨</span>
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-[13.5px] font-semibold tracking-tight text-ppc-black">
+                <div className="text-[13.5px] font-semibold tracking-tight text-white">
                   Stew Dunlop{' '}
-                  <span className="font-normal text-ppc-neutral-500">/ Founder, PPC.io</span>
+                  <span className="font-normal text-white/55">/ Founder, PPC.io</span>
                 </div>
-                <p className="mt-3 max-w-[640px] text-[16px] leading-[1.62] tracking-tight text-ppc-neutral-700">
+                <p className="mt-3 max-w-[640px] text-[16px] leading-[1.62] tracking-tight text-white/70">
                   After scaling an agency to 100+ client accounts with a team of 50, I saw the same thing every agency owner sees: the gap between <em className="font-serif italic text-ppc-purple-600">&ldquo;we know what to do&rdquo;</em> and <em className="font-serif italic text-ppc-purple-600">&ldquo;we have time to do it for every single account&rdquo;</em> gets wider every month. This agent closes that gap.
                 </p>
               </div>
@@ -251,14 +251,14 @@ export function AgentDetail() {
 
           {/* WHAT YOU'LL GET BACK ─────────────────────────────────── */}
           <section>
-            <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
+            <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
               What you&rsquo;ll get back
             </div>
-            <h2 className="mt-3 max-w-[640px] font-display text-[34px] font-bold leading-[1.05] tracking-[-0.02em] text-ppc-black sm:text-[38px]">
+            <h2 className="mt-3 max-w-[640px] font-display text-[34px] font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-[38px]">
               Client-ready, audit-ready
               <span className="text-ppc-purple-500">.</span>
             </h2>
-            <p className="mt-4 max-w-[600px] text-[16px] leading-[1.6] tracking-tight text-ppc-neutral-600">
+            <p className="mt-4 max-w-[600px] text-[16px] leading-[1.6] tracking-tight text-white/65">
               The output is the deliverable. Not raw data, not a model dump. Hand it straight to the meeting.
             </p>
 
@@ -266,34 +266,34 @@ export function AgentDetail() {
               {([
                 {
                   icon: Clock,
-                  title: <>A <span className="tabular font-semibold text-ppc-black">{agent.expectedDuration}</span> background run</>,
+                  title: <>A <span className="tabular font-semibold text-white">{agent.expectedDuration}</span> background run</>,
                   body: "Runs while you do other work. Email when it's done.",
                 },
                 {
                   icon: ChartLineUp,
-                  title: <>Prioritized findings with <span className="font-semibold text-ppc-black">reasoning + impact</span></>,
+                  title: <>Prioritized findings with <span className="font-semibold text-white">reasoning + impact</span></>,
                   body: 'Every recommendation backed by data + a confidence read. Nothing vibes-based.',
                 },
                 {
                   icon: FileText,
-                  title: <><span className="font-semibold text-ppc-black">&ldquo;Generate client report&rdquo;</span> path</>,
+                  title: <><span className="font-semibold text-white">&ldquo;Generate client report&rdquo;</span> path</>,
                   body: 'Output formatted to hand to your client. No copy-paste reshuffle.',
                 },
                 {
                   icon: ShieldCheck,
-                  title: <>Full audit trail of <span className="font-semibold text-ppc-black">defensible methodology</span></>,
+                  title: <>Full audit trail of <span className="font-semibold text-white">defensible methodology</span></>,
                   body: 'Every tool call. Every source. Every AI judgment. Open the receipts.',
                 },
               ] as Array<{ icon: typeof Clock; title: React.ReactNode; body: string }>).map((row, i) => (
                 <li key={i} className="flex items-start gap-5">
-                  <div className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-ppc-neutral-100 bg-white text-ppc-purple-500 shadow-ppc-sm">
+                  <div className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/8 bg-white/[0.04] text-ppc-purple-500 shadow-ppc-sm">
                     <row.icon size={18} weight="duotone" />
                   </div>
                   <div className="min-w-0 flex-1 leading-relaxed">
                     <div className="text-[16px] tracking-tight text-ppc-neutral-800">
                       {row.title}
                     </div>
-                    <div className="mt-1 text-[14px] leading-relaxed tracking-tight text-ppc-neutral-500">
+                    <div className="mt-1 text-[14px] leading-relaxed tracking-tight text-white/55">
                       {row.body}
                     </div>
                   </div>
@@ -307,14 +307,14 @@ export function AgentDetail() {
             RIGHT — Configure & launch (sticky)
             ═══════════════════════════════════════════════════════════════ */}
         <aside className="lg:sticky lg:top-10 lg:h-fit">
-          <div className="relative overflow-hidden rounded-3xl border border-ppc-neutral-100 bg-white p-8 shadow-ppc-lg">
+          <div className="relative overflow-hidden rounded-3xl border border-white/8 bg-white/[0.04] p-8 shadow-ppc-lg">
             {/* sheen along the top edge */}
             <span className="pointer-events-none absolute left-8 right-8 top-0 h-px bg-grad-sheen" />
 
-            <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
+            <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
               Configure &amp; launch
             </div>
-            <div className="mt-3 font-display text-[28px] font-bold leading-[1.05] tracking-[-0.025em] text-ppc-black">
+            <div className="mt-3 font-display text-[28px] font-bold leading-[1.05] tracking-[-0.025em] text-white">
               Pick where this runs<span className="text-ppc-purple-500">.</span>
             </div>
 
@@ -341,14 +341,14 @@ export function AgentDetail() {
                     : `${selectedAccounts.length} of ${projectAccounts.length} selected`
                 }
               >
-                <div className="max-h-48 overflow-y-auto rounded-xl border border-ppc-neutral-100 bg-ppc-neutral-25/40 p-1.5">
+                <div className="max-h-48 overflow-y-auto rounded-xl border border-white/8 bg-white/[0.02]/40 p-1.5">
                   {projectAccounts.map((acc) => {
                     const checked = selectedAccounts.includes(acc.id);
                     return (
                       <label
                         key={acc.id}
                         className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] transition-colors ${
-                          checked ? 'bg-ppc-purple-50/70' : 'hover:bg-white'
+                          checked ? 'bg-ppc-purple-500/15/70' : 'hover:bg-white/[0.04]'
                         }`}
                       >
                         <input
@@ -358,10 +358,10 @@ export function AgentDetail() {
                           className="h-4 w-4 accent-ppc-purple-500"
                         />
                         <div className="min-w-0 flex-1">
-                          <div className="truncate font-medium tracking-tight text-ppc-black">
+                          <div className="truncate font-medium tracking-tight text-white">
                             {acc.name}
                           </div>
-                          <div className="tabular font-mono text-[10.5px] tracking-tight text-ppc-neutral-400">
+                          <div className="tabular font-mono text-[10.5px] tracking-tight text-white/40">
                             {acc.customerId}
                           </div>
                         </div>
@@ -380,14 +380,14 @@ export function AgentDetail() {
                       onClick={() => setLaunchLevel(l.value)}
                       className={`group rounded-xl border px-3.5 py-3 text-left transition-all ${
                         launchLevel === l.value
-                          ? 'border-ppc-purple-500 bg-ppc-purple-50/80 shadow-[inset_0_0_0_1px_rgba(128,87,255,0.25)]'
-                          : 'border-ppc-neutral-100 bg-white hover:border-ppc-purple-300'
+                          ? 'border-ppc-purple-500 bg-ppc-purple-500/15/80 shadow-[inset_0_0_0_1px_rgba(128,87,255,0.25)]'
+                          : 'border-white/8 bg-white/[0.04] hover:border-ppc-purple-500/40'
                       }`}
                     >
-                      <div className="text-[13px] font-semibold tracking-tight text-ppc-black">
+                      <div className="text-[13px] font-semibold tracking-tight text-white">
                         {l.label}
                       </div>
-                      <div className="mt-0.5 text-[11.5px] leading-snug tracking-tight text-ppc-neutral-500">
+                      <div className="mt-0.5 text-[11.5px] leading-snug tracking-tight text-white/55">
                         {l.sub}
                       </div>
                     </button>
@@ -432,22 +432,22 @@ export function AgentDetail() {
                         onClick={() => setRunMode(v)}
                         className={`flex w-full items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-all ${
                           active
-                            ? 'border-ppc-purple-500 bg-ppc-purple-50/80'
-                            : 'border-ppc-neutral-100 bg-white hover:border-ppc-purple-300'
+                            ? 'border-ppc-purple-500 bg-ppc-purple-500/15/80'
+                            : 'border-white/8 bg-white/[0.04] hover:border-ppc-purple-500/40'
                         }`}
                       >
                         <span
                           className={`grid h-4 w-4 shrink-0 place-items-center rounded-full border-2 ${
-                            active ? 'border-ppc-purple-500 bg-ppc-purple-500' : 'border-ppc-neutral-300 bg-white'
+                            active ? 'border-ppc-purple-500 bg-ppc-purple-500' : 'border-ppc-neutral-300 bg-white/[0.04]'
                           }`}
                         >
-                          {active && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                          {active && <span className="h-1.5 w-1.5 rounded-full bg-white/[0.04]" />}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block text-[13px] font-semibold tracking-tight text-ppc-black">
+                          <span className="block text-[13px] font-semibold tracking-tight text-white">
                             {label}
                           </span>
-                          <span className="block text-[11.5px] tracking-tight text-ppc-neutral-500">
+                          <span className="block text-[11.5px] tracking-tight text-white/55">
                             {sub}
                           </span>
                         </span>
@@ -459,7 +459,7 @@ export function AgentDetail() {
             </div>
 
             {/* Launch — the marquee moment */}
-            <div className="mt-9 border-t border-ppc-neutral-100 pt-6">
+            <div className="mt-9 border-t border-white/8 pt-6">
               <div className="flex justify-center">
                 <PrimaryCTA size="lg" onClick={handleLaunch}>
                   <Sparkle size={17} weight="fill" />
@@ -468,7 +468,7 @@ export function AgentDetail() {
                 </PrimaryCTA>
               </div>
 
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-ppc-neutral-500">
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-white/55">
                 <span className="inline-flex items-center gap-1.5">
                   <Clock size={11} weight="duotone" className="text-ppc-purple-500" />
                   <span className="tabular">{agent.expectedDuration}</span>
@@ -477,7 +477,7 @@ export function AgentDetail() {
                 <span>{launchScope}</span>
               </div>
 
-              <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-ppc-neutral-400">
+              <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-white/40">
                 <CheckCircle size={11} weight="duotone" />
                 Runs in background · email when ready
               </div>
@@ -501,11 +501,11 @@ function Field({
   return (
     <div>
       <div className="mb-2 flex items-baseline justify-between gap-3">
-        <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ppc-neutral-500">
+        <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/55">
           {label}
         </div>
         {hint && (
-          <div className="text-[11px] tracking-tight text-ppc-neutral-400">
+          <div className="text-[11px] tracking-tight text-white/40">
             {hint}
           </div>
         )}

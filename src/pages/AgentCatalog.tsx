@@ -139,12 +139,12 @@ export function AgentCatalog() {
 
 function MetaStrip({ total }: { total: number }) {
   return (
-    <div className="-mt-4 flex flex-wrap items-center gap-x-10 gap-y-4 border-y border-ppc-neutral-100 py-5">
+    <div className="-mt-4 flex flex-wrap items-center gap-x-10 gap-y-4 border-y border-white/8 py-5">
       <MetaPair label="In the library" value={String(total).padStart(2, '0')} />
-      <MetaPair label="Run time range" value="6–45 min" />
+      <MetaPair label="Run time range" value="6 to 45 min" />
       <MetaPair label="Categories" value="07" />
       <MetaPair label="Context they share" value="One project brain" />
-      <div className="ml-auto inline-flex items-center gap-2 text-[12.5px] font-medium text-ppc-neutral-500">
+      <div className="ml-auto inline-flex items-center gap-2 text-[12.5px] font-medium text-white/55">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-ppc-success" />
         All systems ready
       </div>
@@ -155,10 +155,10 @@ function MetaStrip({ total }: { total: number }) {
 function MetaPair({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-400">
+      <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-white/45">
         {label}
       </span>
-      <span className="tabular font-display text-[19px] font-bold leading-none tracking-[-0.015em] text-ppc-black">
+      <span className="tabular font-display text-[19px] font-bold leading-none tracking-[-0.015em] text-white">
         {value}
       </span>
     </div>
@@ -182,10 +182,10 @@ function FilterRow({
           <button
             key={f.key}
             onClick={() => onSelect(f.key)}
-            className={`group inline-flex items-center gap-2 rounded-pill border px-4 py-2 text-[13.5px] font-semibold tracking-tight transition-all ${
+            className={`group inline-flex items-center gap-2 rounded-pill border px-4 py-2 text-[13.5px] font-semibold tracking-tight transition-colors ${
               isActive
                 ? 'border-ppc-purple-500 bg-ppc-purple-500 text-white shadow-[0_4px_14px_-4px_rgba(128,87,255,0.45)]'
-                : 'border-ppc-neutral-100 bg-white text-ppc-neutral-700 hover:-translate-y-[1px] hover:border-ppc-purple-300 hover:text-ppc-black'
+                : 'border-white/10 bg-white/[0.04] text-white/70 hover:border-ppc-purple-500/40 hover:bg-white/[0.06] hover:text-white'
             }`}
           >
             {f.label}
@@ -193,7 +193,7 @@ function FilterRow({
               className={`tabular rounded-md px-1.5 py-0.5 font-mono text-[10.5px] tracking-tight ${
                 isActive
                   ? 'bg-white/20 text-white'
-                  : 'bg-ppc-neutral-50 text-ppc-neutral-500 group-hover:bg-ppc-purple-50 group-hover:text-ppc-purple-600'
+                  : 'bg-white/[0.04] text-white/55 group-hover:bg-ppc-purple-500/15 group-hover:text-ppc-purple-300'
               }`}
             >
               {String(counts[f.key] ?? 0).padStart(2, '0')}
@@ -213,11 +213,11 @@ function ActiveCategoryLede({
 }) {
   return (
     <div className="-mt-8 flex flex-wrap items-baseline gap-x-5 gap-y-2">
-      <h2 className="font-display text-[34px] font-bold leading-[1.05] tracking-[-0.022em] text-ppc-black">
+      <h2 className="font-display text-[34px] font-bold leading-[1.05] tracking-[-0.022em] text-white">
         {CATEGORIES[category]?.description.replace(/\.$/, '')}
-        <span className="text-ppc-purple-500">.</span>
+        <span className="text-ppc-purple-400">.</span>
       </h2>
-      <span className="tabular font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
+      <span className="tabular font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-white/55">
         {String(count).padStart(2, '0')} · {CATEGORIES[category]?.label}
       </span>
     </div>
@@ -355,15 +355,15 @@ function SectionHead({
       <hr className="ppc-sheen mb-7" />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ppc-neutral-500">
+          <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-white/55">
             {String(index).padStart(2, '0')} · {eyebrow}
           </div>
-          <h2 className="mt-2 font-display text-[30px] font-bold leading-[1.05] tracking-[-0.022em] text-ppc-black">
+          <h2 className="mt-2 font-display text-[30px] font-bold leading-[1.05] tracking-[-0.022em] text-white">
             {body}
-            {hasPeriod && <span className="text-ppc-purple-500">.</span>}
+            {hasPeriod && <span className="text-ppc-purple-400">.</span>}
           </h2>
         </div>
-        <span className="tabular font-mono text-[11.5px] font-semibold uppercase tracking-[0.14em] text-ppc-neutral-400">
+        <span className="tabular font-mono text-[11.5px] font-semibold uppercase tracking-[0.14em] text-white/45">
           {String(count).padStart(2, '0')} {count === 1 ? 'agent' : 'agents'}
         </span>
       </div>
@@ -389,38 +389,37 @@ function AgentCard({ agent: a }: { agent: AgentDefinition }) {
   return (
     <Link
       to={`/agents/${a.slug}`}
-      className="group relative flex h-full flex-col rounded-2xl border border-ppc-neutral-100 bg-white p-8 shadow-ppc-sm transition-all hover:-translate-y-[2px] hover:border-ppc-purple-300 hover:shadow-ppc-md"
+      className="group relative flex h-full flex-col rounded-2xl border border-white/8 bg-white/[0.04] p-8 transition-colors hover:border-ppc-purple-500/40 hover:bg-white/[0.06]"
     >
       <div className="flex items-start justify-between gap-3">
         <span
-          className="grid h-12 w-12 place-items-center rounded-2xl bg-ppc-purple-50 text-[22px] transition-colors group-hover:bg-ppc-purple-100"
+          className="grid h-12 w-12 place-items-center rounded-2xl bg-ppc-purple-500/15 text-[22px] transition-colors group-hover:bg-ppc-purple-500/25"
           aria-hidden="true"
         >
           {a.emoji}
         </span>
-        <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ppc-neutral-400">
+        <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/45">
           {a.name}
         </span>
       </div>
 
-      <h3 className="mt-7 font-display text-[26px] font-bold leading-[1.08] tracking-[-0.022em] text-ppc-black">
+      <h3 className="mt-7 font-display text-[26px] font-bold leading-[1.08] tracking-[-0.022em] text-white">
         {headlineBody}
-        {hasPeriod && <span className="text-ppc-purple-500">.</span>}
+        {hasPeriod && <span className="text-ppc-purple-400">.</span>}
       </h3>
 
-      <p className="mt-3 text-[14.5px] leading-[1.55] tracking-tight text-ppc-neutral-600">
+      <p className="mt-3 text-[14.5px] leading-[1.55] tracking-tight text-white/65">
         {a.outcomeDescription}
       </p>
 
-      {/* Bottom meta — Clock + Open arrow. Sits on a hairline so the eye
-       *  reads it as "ground truth, not decoration." */}
-      <div className="mt-7 flex items-center justify-between border-t border-ppc-neutral-100 pt-5 text-[13px]">
-        <span className="inline-flex items-center gap-2 font-medium text-ppc-neutral-600">
-          <Clock size={13} weight="duotone" className="text-ppc-purple-500" />
+      {/* Bottom meta — Clock + Open arrow on a hairline. */}
+      <div className="mt-7 flex items-center justify-between border-t border-white/8 pt-5 text-[13px]">
+        <span className="inline-flex items-center gap-2 font-medium text-white/70">
+          <Clock size={13} weight="duotone" className="text-ppc-purple-300" />
           <span className="tabular">{a.expectedDuration}</span>
-          <span className="text-ppc-neutral-400">· background</span>
+          <span className="text-white/45">· background</span>
         </span>
-        <span className="inline-flex items-center gap-1 font-semibold text-ppc-purple-500 transition-transform group-hover:translate-x-1">
+        <span className="inline-flex items-center gap-1 font-semibold text-ppc-purple-300 transition-transform group-hover:translate-x-1">
           Open <ArrowUpRight size={13} weight="bold" />
         </span>
       </div>

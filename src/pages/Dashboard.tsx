@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, ArrowUpRight, Clock, Sparkle, TrendUp, Warning,
-  CheckCircle, Lightning, Rocket, ListBullets, FileText, Buildings,
-  Check,
+  CheckCircle, Lightning, Buildings, Check,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
 import { RECENT_RUNS_SUMMARY } from '../mock/runs';
@@ -10,18 +9,18 @@ import { PROJECTS } from '../mock/projects';
 
 // Dashboard · /
 //
-// The agency control room. Lifted into StagePage register so the app
-// reads as one product: same 68px purple-period display, same Space
-// Mono eyebrow, same editorial rhythm, same dark-canvas focal moment.
+// The agency control room on the smoky-black canvas. Lifted into StagePage
+// register so the whole app reads as one product: same 68px purple-period
+// display, Space-Mono eyebrow, dark surfaces, editorial rhythm.
 //
 // Three jobs, in priority order:
-//   1. Hero  — what TODAY is (date · 3 callouts · live pulse · CTA).
+//   1. Hero  — what TODAY is + agency vital signs anchored to the hero.
 //   2. Calls — the three findings that need a human decision now.
-//   3. Pulse — what's running and what just landed, as one stream.
-// Below that, dimmer support surfaces: suggested plays + client roll.
+//   3. Stream — what's running and what just landed.
+// Then a quieter bottom rail: suggested plays + client roll.
 //
-// Spacing: space-y-14 between thematic groups (not 10), tighter within
-// each so the page reads as ONE surface not seven disconnected cards.
+// Cluttered chrome (dev jump strip, extra stat tiles) removed per Stewart
+// 2026-05-14: "Dashboard is cluttered, simplify."
 
 export function Dashboard() {
   const featuredRun = RECENT_RUNS_SUMMARY[0]; // Competitor Spy showcase
@@ -34,12 +33,10 @@ export function Dashboard() {
 
   return (
     <div className="space-y-14">
-      {/* ── Hero · the focal dark moment ─────────────────────────────────
-          Smoky-black canvas + purple radial glow + 68px display headline
-          with the signature purple-period flourish. Carries the StagePage
-          register straight into the dashboard so the app reads as one
-          product. Pulse strip beneath the headline shows the live state
-          of the agency at a glance. */}
+      {/* ── Hero · the focal moment ──────────────────────────────────────
+          Boxed dark editorial block with the signature purple radial glow
+          + purple period flourish. Sits on the smoky-black canvas. Pulse
+          strip beneath shows the live state of the agency. */}
       <section className="ppc-dark ppc-dark--hero relative overflow-hidden rounded-3xl px-10 pb-9 pt-12 sm:px-14 sm:pb-10 sm:pt-14">
         <div className="relative">
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -59,7 +56,7 @@ export function Dashboard() {
           </div>
 
           <h1 className="mt-6 font-display text-[60px] font-extrabold leading-[0.96] tracking-[-0.035em] text-white sm:text-[68px]">
-            3 things need your eyes<span className="text-ppc-purple-500">.</span>
+            3 things need your eyes<span className="text-ppc-purple-400">.</span>
           </h1>
           <p className="mt-6 max-w-[560px] text-[18px] leading-[1.55] tracking-tight text-white/70">
             One spend leak burning today, two angles ready to take. Your background
@@ -84,8 +81,7 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Pulse strip — agency vital signs anchored to the hero so the
-            page never feels like a stack of disconnected cards. */}
+        {/* Pulse strip — agency vital signs anchored to the hero. */}
         <div className="relative mt-12 grid grid-cols-2 gap-x-8 gap-y-5 border-t border-white/10 pt-7 sm:grid-cols-4">
           <PulseStat label="Calls to make today" value="3" tone="alert" />
           <PulseStat label="Agents running" value="2" tone="live" />
@@ -94,31 +90,12 @@ export function Dashboard() {
         </div>
       </section>
 
-      {/* ── Jump strip · dev shortcuts ───────────────────────────────────
-          For Stewart / Mike / Jose while reviewing the mockup. Visually
-          attached to the hero rather than floating: same flow, quieter
-          chrome. Real users will never see this strip. */}
-      <section aria-label="Dev shortcuts" className="-mt-8">
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5 rounded-2xl border border-ppc-purple-200 bg-white/70 px-5 py-3.5 backdrop-blur-sm">
-          <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-purple-500">
-            Jump to
-          </div>
-          <JumpChip to="/agents/competitor-spy" icon={Rocket} label="Agent launch" sub="Competitor Spy" />
-          <JumpChip to="/agents/competitor-spy/run/run-competitor-spy-running" icon={Lightning} label="Agent running" sub="Stage 5 of 11" />
-          <JumpChip to="/reports/run-competitor-spy-completed" icon={FileText} label="Agent results" sub="Competitor Spy · completed" />
-          <JumpChip to="/reports/run-negative-keyword-completed" icon={FileText} label="Results · $12K waste" sub="Negative Keyword" />
-          <JumpChip to="/projects/smith-law" icon={Buildings} label="Project page" sub="Smith Law Group" />
-          <JumpChip to="/agents" icon={ListBullets} label="All agents" sub="28 in catalog" />
-        </div>
-      </section>
-
       {/* ── Calls to make · the work for today ──────────────────────────
-          Tighter rhythm than the rest of the page. Numbered rows on a
-          single white slab so the three findings read as one decision
+          Three numbered rows on one dark surface. Reads as one decision
           surface, not three independent cards. */}
       <section>
         <SectionEyebrow eyebrow="Calls to make today" count={3} />
-        <ul className="overflow-hidden rounded-2xl border border-ppc-neutral-100 bg-white">
+        <ul className="overflow-hidden rounded-2xl border border-white/8 bg-white/[0.04]">
           <AttentionRow
             num="01"
             tone="urgent"
@@ -152,29 +129,25 @@ export function Dashboard() {
         </ul>
       </section>
 
-      {/* ── Activity stream · running + just-finished, one surface ──────
-          The two used to be separate sections. Connecting them as one
-          stream tells a clearer story: this is the work-in-flight + the
-          freshest receipts. The featured run keeps its hero card, but
-          everything else sits in one tight rail. */}
+      {/* ── Activity stream · running + just-finished ────────────────── */}
       <section>
         <SectionEyebrow
           eyebrow="The work in flight"
           right={
-            <Link to="/runs" className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-ppc-purple-600 hover:underline">
+            <Link to="/runs" className="ppc-link inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-ppc-purple-300">
               Mission control <ArrowRight size={11} weight="bold" />
             </Link>
           }
         />
 
         {/* Running */}
-        <div className="mb-6 overflow-hidden rounded-2xl border border-ppc-neutral-100 bg-white">
-          <div className="flex items-center justify-between border-b border-ppc-neutral-100 bg-ppc-purple-50/40 px-6 py-2.5">
-            <span className="inline-flex items-center gap-2 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-purple-700">
+        <div className="mb-6 overflow-hidden rounded-2xl border border-white/8 bg-white/[0.04]">
+          <div className="flex items-center justify-between border-b border-white/8 bg-ppc-purple-500/10 px-6 py-2.5">
+            <span className="inline-flex items-center gap-2 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-purple-300">
               <span className="ppcio-live-dot inline-block h-1.5 w-1.5 rounded-full bg-ppc-purple-500" />
               Running now
             </span>
-            <span className="tabular text-[11.5px] font-medium text-ppc-purple-700">2</span>
+            <span className="tabular text-[11.5px] font-medium text-ppc-purple-300">2</span>
           </div>
           <RunningRow
             agent="Competitor Spy"
@@ -197,60 +170,60 @@ export function Dashboard() {
         {/* Featured just-finished run — the latest report given hero treatment */}
         <Link
           to={`/reports/${featuredRun.runId}`}
-          className="group block rounded-2xl border border-ppc-neutral-100 bg-white p-7 transition-all hover:border-ppc-purple-300 hover:shadow-ppc-md sm:p-9"
+          className="group block rounded-2xl border border-white/8 bg-white/[0.04] p-7 transition-colors hover:border-ppc-purple-500/40 hover:bg-white/[0.06] sm:p-9"
         >
           <div className="flex flex-wrap items-center gap-2 text-[11px]">
-            <span className="inline-flex items-center gap-1.5 rounded-md bg-ppc-success/10 px-2 py-0.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-success">
+            <span className="inline-flex items-center gap-1.5 rounded-md bg-ppc-success/15 px-2 py-0.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-success">
               <Check size={9} weight="bold" /> Just finished
             </span>
-            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-purple-600">
+            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-purple-300">
               {featuredRun.agentName}
             </span>
-            <span className="text-ppc-neutral-300">·</span>
-            <span className="text-ppc-neutral-500">{featuredRun.projectName}</span>
-            <span className="text-ppc-neutral-300">·</span>
-            <span className="tabular text-ppc-neutral-500">{featuredRun.finishedAt}</span>
+            <span className="text-white/30">·</span>
+            <span className="text-white/55">{featuredRun.projectName}</span>
+            <span className="text-white/30">·</span>
+            <span className="tabular text-white/55">{featuredRun.finishedAt}</span>
           </div>
-          <h3 className="mt-4 max-w-[720px] font-display text-[34px] font-bold leading-[1.04] tracking-[-0.025em] text-ppc-black sm:text-[38px]">
+          <h3 className="mt-4 max-w-[720px] font-display text-[34px] font-bold leading-[1.04] tracking-[-0.025em] text-white sm:text-[38px]">
             {featuredRun.headline}
-            <span className="text-ppc-purple-500">.</span>
+            <span className="text-ppc-purple-400">.</span>
           </h3>
           <div className="mt-5 flex flex-wrap items-center gap-x-7 gap-y-2.5 text-[13.5px]">
-            <span className="inline-flex items-center gap-1.5 text-ppc-neutral-600">
-              <Clock size={13} weight="duotone" className="text-ppc-neutral-400" />
-              <span className="tabular font-medium text-ppc-black">{featuredRun.duration}</span>
-              <span className="text-ppc-neutral-500">run</span>
+            <span className="inline-flex items-center gap-1.5 text-white/70">
+              <Clock size={13} weight="duotone" className="text-white/45" />
+              <span className="tabular font-medium text-white">{featuredRun.duration}</span>
+              <span className="text-white/55">run</span>
             </span>
             <span className="inline-flex items-center gap-1.5 text-ppc-success">
               <TrendUp size={13} weight="bold" />
               <span className="tabular font-semibold">{featuredRun.upside}</span>
-              <span className="font-normal text-ppc-neutral-500">est. upside</span>
+              <span className="font-normal text-white/55">est. upside</span>
             </span>
-            <span className="ml-auto inline-flex items-center gap-1.5 text-[13px] font-semibold text-ppc-purple-600 transition-[gap] group-hover:gap-2.5">
+            <span className="ml-auto inline-flex items-center gap-1.5 text-[13px] font-semibold text-ppc-purple-300 transition-[gap] group-hover:gap-2.5">
               Open report <ArrowUpRight size={13} weight="bold" />
             </span>
           </div>
         </Link>
 
         {otherRuns.length > 0 && (
-          <ul className="mt-3 divide-y divide-ppc-neutral-100 rounded-2xl border border-ppc-neutral-100 bg-white">
+          <ul className="mt-3 divide-y divide-white/8 rounded-2xl border border-white/8 bg-white/[0.04]">
             {otherRuns.map((r) => (
               <li key={r.runId}>
                 <Link
                   to={`/reports/${r.runId}`}
-                  className="group flex items-center gap-5 px-6 py-3.5 hover:bg-ppc-purple-50/30"
+                  className="group flex items-center gap-5 px-6 py-3.5 hover:bg-white/[0.04]"
                 >
-                  <span className="inline-grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-ppc-success/10 text-ppc-success">
+                  <span className="inline-grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-ppc-success/15 text-ppc-success">
                     <Check size={10} weight="bold" />
                   </span>
-                  <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-purple-600 sm:w-40">
+                  <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-purple-300 sm:w-40">
                     {r.agentName}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[14.5px] font-semibold tracking-tight text-ppc-black">
+                    <div className="truncate text-[14.5px] font-semibold tracking-tight text-white">
                       {r.headline}
                     </div>
-                    <div className="mt-0.5 text-[11.5px] text-ppc-neutral-500">
+                    <div className="mt-0.5 text-[11.5px] text-white/45">
                       {r.projectName} · {r.finishedAt}
                     </div>
                   </div>
@@ -258,7 +231,7 @@ export function Dashboard() {
                     <TrendUp size={11} weight="bold" />
                     <span className="tabular">{r.upside}</span>
                   </span>
-                  <ArrowRight size={12} weight="bold" className="text-ppc-neutral-300 group-hover:text-ppc-purple-500" />
+                  <ArrowRight size={12} weight="bold" className="text-white/30 group-hover:text-ppc-purple-300" />
                 </Link>
               </li>
             ))}
@@ -266,45 +239,41 @@ export function Dashboard() {
         )}
       </section>
 
-      {/* ── Two-column bottom rail · plays + clients ────────────────────
-          Below the fold. Suggested plays on the left, client roll on the
-          right. Both are quieter than the surfaces above, which is the
-          point: the eye lands on the hero + the calls + the stream first,
-          then drops to these context layers. */}
+      {/* ── Two-column bottom rail · plays + clients ──────────────────── */}
       <section className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
         <div>
           <SectionEyebrow
             eyebrow="Worth running next"
             right={
-              <Link to="/agents" className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-ppc-purple-600 hover:underline">
+              <Link to="/agents" className="ppc-link inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-ppc-purple-300">
                 All agents <ArrowRight size={11} weight="bold" />
               </Link>
             }
           />
-          <ul className="divide-y divide-ppc-neutral-100 rounded-2xl border border-ppc-neutral-100 bg-white">
+          <ul className="divide-y divide-white/8 rounded-2xl border border-white/8 bg-white/[0.04]">
             {suggested.map((a) => (
               <li key={a.slug}>
                 <Link
                   to={`/agents/${a.slug}`}
-                  className="group flex items-center gap-4 px-5 py-4 hover:bg-ppc-purple-50/30"
+                  className="group flex items-center gap-4 px-5 py-4 hover:bg-white/[0.04]"
                 >
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ppc-purple-50 text-[18px]">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ppc-purple-500/15 text-[18px]">
                     {a.emoji}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[15px] font-bold tracking-tight text-ppc-black">
+                    <div className="truncate text-[15px] font-bold tracking-tight text-white">
                       {a.name}
                     </div>
-                    <div className="mt-0.5 truncate text-[12.5px] text-ppc-neutral-600">
+                    <div className="mt-0.5 truncate text-[12.5px] text-white/55">
                       {a.headline}
                     </div>
                   </div>
                   <div className="hidden text-right sm:block">
-                    <div className="inline-flex items-center gap-1 text-[11px] font-medium tabular text-ppc-neutral-500">
+                    <div className="inline-flex items-center gap-1 text-[11px] font-medium tabular text-white/55">
                       <Clock size={11} weight="duotone" /> {a.expectedDuration}
                     </div>
                   </div>
-                  <ArrowRight size={12} weight="bold" className="text-ppc-neutral-300 transition-colors group-hover:text-ppc-purple-500" />
+                  <ArrowRight size={12} weight="bold" className="text-white/30 transition-colors group-hover:text-ppc-purple-300" />
                 </Link>
               </li>
             ))}
@@ -315,29 +284,29 @@ export function Dashboard() {
           <SectionEyebrow
             eyebrow="Your clients"
             right={
-              <span className="font-mono text-[11px] font-medium tabular text-ppc-neutral-500">
+              <Link to="/projects" className="font-mono text-[11px] font-medium tabular text-white/55 hover:text-white">
                 6 projects · 11 accounts
-              </span>
+              </Link>
             }
           />
-          <ul className="divide-y divide-ppc-neutral-100 rounded-2xl border border-ppc-neutral-100 bg-white">
+          <ul className="divide-y divide-white/8 rounded-2xl border border-white/8 bg-white/[0.04]">
             {PROJECTS.map((p) => (
               <li key={p.id}>
                 <Link
                   to={`/projects/${p.id}`}
-                  className="group flex items-center justify-between gap-3 px-5 py-3 hover:bg-ppc-purple-50/30"
+                  className="group flex items-center justify-between gap-3 px-5 py-3 hover:bg-white/[0.04]"
                 >
                   <div className="min-w-0">
-                    <div className="truncate text-[14px] font-semibold tracking-tight text-ppc-black">
+                    <div className="truncate text-[14px] font-semibold tracking-tight text-white">
                       {p.name}
                     </div>
-                    <div className="mt-0.5 truncate text-[11.5px] text-ppc-neutral-500">{p.industry}</div>
+                    <div className="mt-0.5 truncate text-[11.5px] text-white/45">{p.industry}</div>
                   </div>
                   <div className="flex shrink-0 items-center gap-3 text-[11px]">
-                    <span className="font-mono tabular text-ppc-neutral-400">
+                    <span className="font-mono tabular text-white/40">
                       {p.accountCount} {p.accountCount === 1 ? 'acct' : 'accts'}
                     </span>
-                    <ArrowRight size={11} weight="bold" className="text-ppc-neutral-300 transition-colors group-hover:text-ppc-purple-500" />
+                    <ArrowRight size={11} weight="bold" className="text-white/30 transition-colors group-hover:text-ppc-purple-300" />
                   </div>
                 </Link>
               </li>
@@ -350,18 +319,15 @@ export function Dashboard() {
 }
 
 // ─── Inline section header · StagePage-rhythm eyebrow ─────────────────────
-// Editorial label, no big H2, no heavy chrome. Just the eyebrow strip with
-// an optional count or right-aligned action. Matches the SectionLabel in
-// StagePage so headers across the app read at one volume.
 function SectionEyebrow({
   eyebrow, count, right,
 }: { eyebrow: string; count?: number; right?: React.ReactNode }) {
   return (
     <div className="mb-5 flex items-center justify-between gap-4">
-      <div className="flex items-center gap-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-500">
+      <div className="flex items-center gap-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-white/55">
         <span>{eyebrow}</span>
         {typeof count === 'number' && (
-          <span className="inline-grid h-[18px] min-w-[18px] place-items-center rounded-full bg-ppc-purple-100 px-1.5 text-[10.5px] font-bold tabular text-ppc-purple-700">
+          <span className="inline-grid h-[18px] min-w-[18px] place-items-center rounded-full bg-ppc-purple-500/15 px-1.5 text-[10.5px] font-bold tabular text-ppc-purple-300">
             {count}
           </span>
         )}
@@ -372,8 +338,6 @@ function SectionEyebrow({
 }
 
 // ─── Pulse stat (dark hero) ───────────────────────────────────────────────
-// Inline vital sign in the hero pulse strip. Big tabular number + tiny
-// label. Optional alert/live tone for the orange + purple variants.
 function PulseStat({
   value, label, tone,
 }: { value: string; label: string; tone?: 'alert' | 'live' }) {
@@ -395,33 +359,6 @@ function PulseStat({
   );
 }
 
-// ─── Jump chip · dev shortcut ─────────────────────────────────────────────
-function JumpChip({
-  to, icon: Icon, label, sub,
-}: {
-  to: string;
-  icon: typeof Sparkle;
-  label: string;
-  sub: string;
-}) {
-  return (
-    <Link
-      to={to}
-      className="group flex items-center gap-2.5 rounded-xl border border-ppc-neutral-100 bg-white px-3 py-1.5 transition-colors hover:border-ppc-purple-300"
-    >
-      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-ppc-purple-50 text-ppc-purple-500">
-        <Icon size={12} weight="duotone" />
-      </span>
-      <span className="flex flex-col leading-tight">
-        <span className="text-[12px] font-semibold tracking-tight text-ppc-black">
-          {label}
-        </span>
-        <span className="text-[10px] text-ppc-neutral-500">{sub}</span>
-      </span>
-    </Link>
-  );
-}
-
 // ─── Attention row · numbered call-to-action ──────────────────────────────
 function AttentionRow({
   num, tone, agent, project, finding, impact, cta, href,
@@ -432,17 +369,17 @@ function AttentionRow({
   cta: string; href: string;
 }) {
   const toneCls = tone === 'urgent'
-    ? { fg: 'text-ppc-error', icon: Warning,      bg: 'bg-ppc-error/10' }
-    : { fg: 'text-ppc-success', icon: CheckCircle, bg: 'bg-ppc-success/10' };
+    ? { fg: 'text-ppc-error', icon: Warning,      bg: 'bg-ppc-error/15' }
+    : { fg: 'text-ppc-success', icon: CheckCircle, bg: 'bg-ppc-success/15' };
   const Icon = toneCls.icon;
   return (
-    <li className="border-b border-ppc-neutral-100 last:border-b-0">
+    <li className="border-b border-white/8 last:border-b-0">
       <Link
         to={href}
-        className="group flex items-start gap-5 px-6 py-5 hover:bg-ppc-purple-50/30"
+        className="group flex items-start gap-5 px-6 py-5 hover:bg-white/[0.04]"
       >
         <div className="mt-0.5 flex items-center gap-3 shrink-0">
-          <span className="font-mono text-[12px] font-semibold tabular text-ppc-neutral-400">
+          <span className="font-mono text-[12px] font-semibold tabular text-white/40">
             {num}
           </span>
           <div className={`grid h-8 w-8 place-items-center rounded-xl ${toneCls.bg} ${toneCls.fg}`}>
@@ -451,13 +388,13 @@ function AttentionRow({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-[10.5px]">
-            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-purple-600">
+            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-purple-300">
               {agent}
             </span>
-            <span className="text-ppc-neutral-300">·</span>
-            <span className="text-ppc-neutral-500">{project}</span>
+            <span className="text-white/30">·</span>
+            <span className="text-white/55">{project}</span>
           </div>
-          <div className="mt-1.5 text-[15px] font-medium leading-snug tracking-tight text-ppc-black">
+          <div className="mt-1.5 text-[15px] font-medium leading-snug tracking-tight text-white">
             {finding}
           </div>
           <div className={`mt-1.5 inline-flex items-center gap-1.5 text-[12px] font-semibold ${toneCls.fg}`}>
@@ -467,7 +404,7 @@ function AttentionRow({
             {impact}
           </div>
         </div>
-        <div className="inline-flex shrink-0 items-center gap-1.5 self-center rounded-pill border border-ppc-neutral-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-ppc-black transition-colors group-hover:border-ppc-purple-300 group-hover:text-ppc-purple-600">
+        <div className="inline-flex shrink-0 items-center gap-1.5 self-center rounded-pill border border-white/15 bg-white/[0.04] px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition-colors group-hover:border-ppc-purple-500/40 group-hover:text-ppc-purple-300">
           {cta} <ArrowRight size={12} weight="bold" />
         </div>
       </Link>
@@ -476,8 +413,6 @@ function AttentionRow({
 }
 
 // ─── Running row · live agent with inline progress ────────────────────────
-// Adds a thin shimmer-bar at the bottom of each row so a glance shows
-// where each agent is in its run. Keeps the StagePage live-pulse muscle.
 function RunningRow({
   agent, project, stage, elapsed, progress, href,
 }: {
@@ -487,31 +422,31 @@ function RunningRow({
   return (
     <Link
       to={href}
-      className="group relative block border-b border-ppc-neutral-100 px-6 py-4 last:border-b-0 hover:bg-ppc-purple-50/30"
+      className="group relative block border-b border-white/8 px-6 py-4 last:border-b-0 hover:bg-white/[0.04]"
     >
       <div className="flex items-center gap-5">
         <span className="ppcio-live-dot inline-block h-2 w-2 shrink-0 rounded-full bg-ppc-purple-500" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 text-[10.5px]">
-            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-purple-600">
+            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-purple-300">
               {agent}
             </span>
-            <span className="text-ppc-neutral-300">·</span>
-            <span className="text-ppc-neutral-500">{project}</span>
+            <span className="text-white/30">·</span>
+            <span className="text-white/55">{project}</span>
           </div>
-          <div className="mt-1 truncate text-[14.5px] font-medium tracking-tight text-ppc-black">
+          <div className="mt-1 truncate text-[14.5px] font-medium tracking-tight text-white">
             {stage}
           </div>
         </div>
-        <span className="tabular hidden text-[12px] font-medium text-ppc-neutral-500 sm:block">
+        <span className="tabular hidden text-[12px] font-medium text-white/55 sm:block">
           {elapsed}
         </span>
-        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-600 transition-[gap] group-hover:gap-2">
+        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-300 transition-[gap] group-hover:gap-2">
           <Lightning size={12} weight="fill" /> Watch
         </span>
       </div>
-      {/* Inline progress shimmer — narrow, sits flush with the row bottom */}
-      <div className="absolute inset-x-6 -bottom-px h-px overflow-hidden bg-ppc-purple-100/60">
+      {/* Inline progress shimmer */}
+      <div className="absolute inset-x-6 -bottom-px h-px overflow-hidden bg-white/8">
         <div
           className="ppcio-live-bar h-full"
           style={{ width: `${progress}%` }}

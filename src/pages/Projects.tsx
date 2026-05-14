@@ -64,7 +64,7 @@ export function Projects() {
       />
 
       {/* Search row */}
-      <div className="flex items-center gap-3 border-y border-ppc-neutral-100 py-4">
+      <div className="flex items-center gap-3 border-y border-white/8 py-4">
         <MagnifyingGlass size={16} weight="duotone" className="text-ppc-neutral-400" />
         <input
           value={filter}
@@ -78,7 +78,7 @@ export function Projects() {
       </div>
 
       {/* Editorial rows */}
-      <ul className="divide-y divide-ppc-neutral-100 rounded-2xl border border-ppc-neutral-100 bg-white">
+      <ul className="divide-y divide-white/8 rounded-2xl border border-white/8 bg-white">
         {filtered.map((p) => {
           const a = ACTIVITY[p.id] ?? { lastRun: '—', agentsThisWeek: 0, upside: '—', tone: 'good' as const };
           return (
@@ -90,7 +90,7 @@ export function Projects() {
                 {/* Identity */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-3">
-                    <div className="text-[18px] font-semibold tracking-tight text-ppc-black">
+                    <div className="text-[18px] font-semibold tracking-tight text-white">
                       {p.name}
                     </div>
                     <HealthDot tone={a.tone} />
@@ -120,7 +120,7 @@ export function Projects() {
                   <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-400">
                     Agents this week
                   </div>
-                  <div className="tabular mt-1 text-[15px] font-semibold text-ppc-black">
+                  <div className="tabular mt-1 text-[15px] font-semibold text-white">
                     {a.agentsThisWeek}
                   </div>
                 </div>
@@ -166,7 +166,7 @@ function HealthDot({ tone }: { tone: 'good' | 'warning' | 'attention' }) {
     attention: { dot: 'bg-ppc-error',   label: 'Needs attention' },
   }[tone];
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-pill border border-ppc-neutral-100 bg-ppc-neutral-25 px-2.5 py-0.5 text-[11px] font-medium text-ppc-neutral-600">
+    <span className="inline-flex items-center gap-1.5 rounded-pill border border-white/8 bg-white/[0.04] px-2.5 py-0.5 text-[11px] font-medium text-white/65">
       <span className={`h-1.5 w-1.5 rounded-full ${cls.dot}`} />
       {cls.label}
     </span>

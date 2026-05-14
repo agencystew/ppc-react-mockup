@@ -1,6 +1,6 @@
 // Unified design primitives — the single source of truth for the editorial
-// rhythm across the app. Every page composes from these so the app reads
-// as ONE product, not seven floating pages.
+// rhythm across the app on its dark canvas. Every page composes from these
+// so the app reads as ONE product, not seven floating pages.
 //
 // The brief these answer:
 //   - One canonical card chrome (radius, border, padding, hover)
@@ -19,7 +19,7 @@
 //   Mono row     12-13px Space Mono 500, tabular-nums
 //
 // Hover treatment (locked):
-//   Cards/rows  → border-color → ppc-purple-300, NO underline, NO scale,
+//   Cards/rows  → border-color → ppc-purple-500/30, NO underline, NO scale,
 //                 small chevron translate inside the affordance only.
 //   Buttons     → as defined by .ppcio-cta / .btn-ghost / .btn-outline.
 
@@ -39,13 +39,12 @@ export function Eyebrow({
   className = '',
 }: {
   children: React.ReactNode;
-  tone?: 'neutral' | 'purple' | 'inverse';
+  tone?: 'neutral' | 'purple';
   className?: string;
 }) {
   const toneCls =
-    tone === 'purple'  ? 'text-ppc-purple-500'
-  : tone === 'inverse' ? 'text-white/70'
-  : 'text-ppc-neutral-500';
+    tone === 'purple'  ? 'text-ppc-purple-300'
+  : 'text-white/55';
   return (
     <div
       className={`font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] ${toneCls} ${className}`}
@@ -59,22 +58,19 @@ export function Eyebrow({
 
 export function DisplayH1({
   text,
-  tone = 'dark',
   className = '',
 }: {
   text: string;            // a trailing "." renders in purple
-  tone?: 'dark' | 'light'; // "dark" on light bg, "light" on dark bg
   className?: string;
 }) {
   const hasPeriod = text.endsWith('.');
   const body = hasPeriod ? text.slice(0, -1) : text;
-  const color = tone === 'light' ? 'text-white' : 'text-ppc-black';
   return (
     <h1
-      className={`font-display text-[52px] font-extrabold leading-[0.96] tracking-[-0.035em] sm:text-[62px] ${color} ${className}`}
+      className={`font-display text-[52px] font-extrabold leading-[0.96] tracking-[-0.035em] text-white sm:text-[62px] ${className}`}
     >
       {body}
-      {hasPeriod && <span className="text-ppc-purple-500">.</span>}
+      {hasPeriod && <span className="text-ppc-purple-400">.</span>}
     </h1>
   );
 }
@@ -92,10 +88,10 @@ export function SectionH2({
   const body = hasPeriod ? text.slice(0, -1) : text;
   return (
     <h2
-      className={`font-display text-[30px] font-bold leading-[1.08] tracking-[-0.020em] text-ppc-black sm:text-[34px] ${className}`}
+      className={`font-display text-[30px] font-bold leading-[1.08] tracking-[-0.020em] text-white sm:text-[34px] ${className}`}
     >
       {body}
-      {hasPeriod && <span className="text-ppc-purple-500">.</span>}
+      {hasPeriod && <span className="text-ppc-purple-400">.</span>}
     </h2>
   );
 }
@@ -117,9 +113,9 @@ export function PageHero({
     return (
       <section className="ppc-dark ppc-dark--hero relative overflow-hidden rounded-3xl px-10 py-12 sm:px-14 sm:py-14">
         <div className="relative">
-          <Eyebrow tone="inverse">{eyebrow}</Eyebrow>
+          <Eyebrow>{eyebrow}</Eyebrow>
           <div className="mt-3">
-            <DisplayH1 text={headline} tone="light" />
+            <DisplayH1 text={headline} />
           </div>
           {description && (
             <p className="mt-6 max-w-[600px] text-[17px] leading-[1.55] tracking-tight text-white/70">
@@ -137,10 +133,10 @@ export function PageHero({
       <div className="max-w-[820px]">
         <Eyebrow>{eyebrow}</Eyebrow>
         <div className="mt-3">
-          <DisplayH1 text={headline} tone="dark" />
+          <DisplayH1 text={headline} />
         </div>
         {description && (
-          <p className="mt-5 max-w-[620px] text-[17px] leading-[1.55] tracking-tight text-ppc-neutral-700">
+          <p className="mt-5 max-w-[620px] text-[17px] leading-[1.55] tracking-tight text-white/70">
             {description}
           </p>
         )}
@@ -174,9 +170,8 @@ export function SectionHeader({
 
 // ─── Editorial card ──────────────────────────────────────────────────────
 //
-// The canonical card chrome. White surface, soft border, small shadow,
-// generous padding, ONE hover treatment (border-color → purple-300 +
-// shadow lift). No translateY, no scale, no underline.
+// Canonical card chrome on the dark canvas: bg-white/4, border-white/8,
+// 2xl radius, generous padding, ONE hover treatment (purple border + glow).
 
 export function EditorialCard({
   as = 'div',
@@ -196,9 +191,9 @@ export function EditorialCard({
   : padding === 'lg' ? 'p-8 sm:p-10'
   : 'p-7';
   const base =
-    `block rounded-2xl border border-ppc-neutral-100 bg-white shadow-ppc-sm transition-colors ${pad} ${className}`;
+    `block rounded-2xl border border-white/8 bg-white/[0.04] transition-colors ${pad} ${className}`;
   const hover = (as === 'link' || as === 'button')
-    ? 'hover:border-ppc-purple-300 hover:shadow-ppc-md'
+    ? 'hover:border-ppc-purple-500/40 hover:bg-white/[0.06]'
     : '';
   if (as === 'link' && to) {
     return (
@@ -220,26 +215,22 @@ export function EditorialCard({
 // ─── Metric stat (eyebrow + display value + sub) ─────────────────────────
 
 export function MetricStat({
-  eyebrow, value, sub, trend, tone = 'dark',
+  eyebrow, value, sub, trend,
 }: {
   eyebrow: string;
   value: string;
   sub: string;
   trend?: string;
-  tone?: 'dark' | 'light';
 }) {
-  const valueColor   = tone === 'light' ? 'text-white' : 'text-ppc-black';
-  const subColor     = tone === 'light' ? 'text-white/60' : 'text-ppc-neutral-600';
-  const trendColor   = tone === 'light' ? 'text-ppc-purple-300' : 'text-ppc-purple-500';
   return (
     <div>
-      <Eyebrow tone={tone === 'light' ? 'inverse' : 'neutral'}>{eyebrow}</Eyebrow>
-      <div className={`tabular mt-3 font-display text-[40px] font-extrabold leading-none tracking-[-0.035em] sm:text-[44px] ${valueColor}`}>
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <div className="tabular mt-3 font-display text-[40px] font-extrabold leading-none tracking-[-0.035em] text-white sm:text-[44px]">
         {value}
       </div>
-      <div className={`mt-2 text-[13px] leading-snug ${subColor}`}>{sub}</div>
+      <div className="mt-2 text-[13px] leading-snug text-white/65">{sub}</div>
       {trend && (
-        <div className={`mt-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] ${trendColor}`}>
+        <div className="mt-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-purple-300">
           {trend}
         </div>
       )}
@@ -247,11 +238,11 @@ export function MetricStat({
   );
 }
 
-// ─── Editorial list (rounded white container with divider rows) ──────────
+// ─── Editorial list (rounded container with divider rows) ────────────────
 
 export function EditorialList({ children }: { children: React.ReactNode }) {
   return (
-    <ul className="divide-y divide-ppc-neutral-100 rounded-2xl border border-ppc-neutral-100 bg-white shadow-ppc-sm">
+    <ul className="divide-y divide-white/8 rounded-2xl border border-white/8 bg-white/[0.04]">
       {children}
     </ul>
   );
@@ -268,7 +259,7 @@ export function EditorialRow({
   onClick?: () => void;
 }) {
   const cls =
-    'group flex w-full items-center gap-5 px-7 py-5 text-left transition-colors hover:bg-ppc-purple-50/40';
+    'group flex w-full items-center gap-5 px-7 py-5 text-left transition-colors hover:bg-white/[0.04]';
   if (to) {
     return (
       <li>
@@ -289,7 +280,7 @@ export function ChevronLink({ to, children }: { to: string; children: React.Reac
   return (
     <Link
       to={to}
-      className="ppc-link inline-flex items-center gap-1.5 text-[13.5px] font-semibold tracking-tight text-ppc-purple-500 transition-colors hover:text-ppc-purple-700"
+      className="ppc-link inline-flex items-center gap-1.5 text-[13.5px] font-semibold tracking-tight text-ppc-purple-300 transition-colors hover:text-ppc-purple-200"
     >
       {children} <ArrowRight size={13} weight="bold" />
     </Link>
@@ -305,19 +296,15 @@ export function Sheen({ className = '' }: { className?: string }) {
 // ─── Secondary button ────────────────────────────────────────────────────
 
 export function SecondaryButton({
-  children, onClick, variant = 'light',
+  children, onClick,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
-  variant?: 'light' | 'dark';
 }) {
-  const cls = variant === 'dark'
-    ? 'border-white/15 text-white hover:bg-white/5'
-    : 'border-ppc-neutral-200 bg-white text-ppc-black hover:border-ppc-purple-300';
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-2 rounded-md border px-4 py-3 text-[14px] font-semibold tracking-tight transition-colors ${cls}`}
+      className="inline-flex items-center gap-2 rounded-md border border-white/15 px-4 py-3 text-[14px] font-semibold tracking-tight text-white transition-colors hover:bg-white/5"
     >
       {children}
     </button>

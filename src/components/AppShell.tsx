@@ -7,19 +7,17 @@ import {
 } from '@phosphor-icons/react';
 import { PROJECTS, CURRENT_PROJECT_ID } from '../mock/projects';
 
-// AppShell — classic SaaS layout:
+// AppShell — classic SaaS layout on a dark canvas.
+//
 //   ┌──────────────┬─────────────────────────────┐
 //   │  Sidebar     │  Main content               │
-//   │  (240/72px)  │  (editorial, breathable)    │
+//   │  bg #15151A  │  bg #0C0C0E (Smoky Black)   │
 //   └──────────────┴─────────────────────────────┘
 //
-// Sidebar pattern lifted from ppc-io-saas/_lovable-prototype/src/
-// components/CollapsibleSidebar.tsx — that's the SaaS muscle memory
-// the team already has. Persisted collapse state via localStorage.
-//
-// Project switcher pinned at the top of the sidebar (multi-account
-// agency teams switch clients constantly). Each section is grouped
-// under a Space-Mono eyebrow label.
+// Whole app reads at the StagePage register: dark page bg, white type,
+// purple-400 active accents, white/8 dividers. Sidebar is bg-2 (#15151A),
+// content slot is bg-1 (#0C0C0E from body). Sidebar collapse persists in
+// localStorage.
 
 const STORAGE_KEY = 'ppcio-sidebar-collapsed';
 
@@ -38,7 +36,7 @@ export function AppShell() {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-ppc-neutral-25 font-sans text-ppc-black">
+    <div className="flex min-h-screen w-full bg-ppc-black font-sans text-white">
       <Sidebar collapsed={collapsed} onToggle={toggle} />
       <main className="flex min-w-0 flex-1 flex-col">
         <div className="mx-auto w-full max-w-[1240px] px-8 py-10 lg:px-12 lg:py-12">
@@ -59,7 +57,7 @@ interface SidebarProps {
 function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside
-      className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-ppc-neutral-100 bg-white transition-[width] duration-200 ${
+      className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-white/8 bg-[#15151A] transition-[width] duration-200 ${
         collapsed ? 'w-[72px]' : 'w-[240px]'
       }`}
     >
@@ -94,19 +92,19 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
 function BrandRow({ collapsed, onToggle }: SidebarProps) {
   return (
-    <div className={`flex h-14 items-center border-b border-ppc-neutral-100 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
+    <div className={`flex h-14 items-center border-b border-white/8 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
       {!collapsed && (
         <NavLink to="/" className="flex items-center gap-2">
           <span className="grid h-6 w-6 place-items-center rounded-md bg-ppc-purple-500 text-[12px] font-extrabold leading-none text-white">
             ɪ
           </span>
-          <span className="text-[14.5px] font-bold tracking-tight text-ppc-black">ppc.io</span>
+          <span className="text-[14.5px] font-bold tracking-tight text-white">ppc.io</span>
         </NavLink>
       )}
       <button
         onClick={onToggle}
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        className="grid h-8 w-8 place-items-center rounded-md text-ppc-neutral-500 hover:bg-ppc-neutral-50 hover:text-ppc-black"
+        className="grid h-8 w-8 place-items-center rounded-md text-white/45 hover:bg-white/5 hover:text-white"
       >
         <SidebarSimple
           size={16}
@@ -129,11 +127,11 @@ function ProjectSwitcher({ collapsed }: { collapsed: boolean }) {
 
   if (collapsed) {
     return (
-      <div className="flex justify-center border-b border-ppc-neutral-100 px-2 py-3">
+      <div className="flex justify-center border-b border-white/8 px-2 py-3">
         <button
           onClick={() => setOpen(!open)}
           title={current.name}
-          className="grid h-9 w-9 place-items-center rounded-lg bg-ppc-purple-50 text-ppc-purple-500 hover:bg-ppc-purple-100"
+          className="grid h-9 w-9 place-items-center rounded-lg bg-ppc-purple-500/15 text-ppc-purple-300 hover:bg-ppc-purple-500/25"
         >
           <Buildings size={16} weight="duotone" />
         </button>
@@ -142,20 +140,20 @@ function ProjectSwitcher({ collapsed }: { collapsed: boolean }) {
   }
 
   return (
-    <div className="relative border-b border-ppc-neutral-100 px-3 py-3">
+    <div className="relative border-b border-white/8 px-3 py-3">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-ppc-neutral-100 bg-ppc-neutral-25 px-3 py-2.5 text-left transition-colors hover:border-ppc-purple-300"
+        className="flex w-full items-center justify-between gap-2 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-left transition-colors hover:border-ppc-purple-500/40 hover:bg-white/[0.05]"
       >
         <span className="flex min-w-0 items-center gap-2.5">
-          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-ppc-purple-50 text-ppc-purple-500">
+          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-ppc-purple-500/15 text-ppc-purple-300">
             <Buildings size={14} weight="duotone" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[13.5px] font-semibold leading-tight text-ppc-black">
+            <span className="block truncate text-[13.5px] font-semibold leading-tight text-white">
               {current.name}
             </span>
-            <span className="block truncate text-[11.5px] text-ppc-neutral-500">
+            <span className="block truncate text-[11.5px] text-white/45">
               {current.accountCount} {current.accountCount === 1 ? 'account' : 'accounts'}
             </span>
           </span>
@@ -163,20 +161,20 @@ function ProjectSwitcher({ collapsed }: { collapsed: boolean }) {
         <CaretDown
           size={12}
           weight="bold"
-          className={`shrink-0 text-ppc-neutral-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`shrink-0 text-white/40 transition-transform ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
       {open && (
-        <div className="absolute left-3 right-3 top-full z-20 mt-1.5 overflow-hidden rounded-xl border border-ppc-neutral-100 bg-white shadow-ppc-lg">
-          <div className="flex items-center gap-2 border-b border-ppc-neutral-100 px-3 py-2.5">
-            <MagnifyingGlass size={14} className="text-ppc-neutral-400" />
+        <div className="absolute left-3 right-3 top-full z-20 mt-1.5 overflow-hidden rounded-xl border border-white/10 bg-[#1E1E24] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)]">
+          <div className="flex items-center gap-2 border-b border-white/8 px-3 py-2.5">
+            <MagnifyingGlass size={14} className="text-white/40" />
             <input
               autoFocus
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               placeholder="Search clients..."
-              className="w-full bg-transparent text-[13px] outline-none placeholder:text-ppc-neutral-400"
+              className="w-full bg-transparent text-[13px] text-white outline-none placeholder:text-white/40"
             />
           </div>
           <ul className="max-h-72 overflow-y-auto py-1.5">
@@ -184,22 +182,22 @@ function ProjectSwitcher({ collapsed }: { collapsed: boolean }) {
               <li key={p.id}>
                 <button
                   onClick={() => { setOpen(false); navigate(`/projects/${p.id}`); }}
-                  className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-[13px] hover:bg-ppc-purple-50 ${
-                    p.id === CURRENT_PROJECT_ID ? 'bg-ppc-purple-50/60' : ''
+                  className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-[13px] hover:bg-ppc-purple-500/10 ${
+                    p.id === CURRENT_PROJECT_ID ? 'bg-ppc-purple-500/10' : ''
                   }`}
                 >
                   <span className="min-w-0">
-                    <span className="block truncate font-semibold text-ppc-black">{p.name}</span>
-                    <span className="block truncate text-[11.5px] text-ppc-neutral-500">{p.industry}</span>
+                    <span className="block truncate font-semibold text-white">{p.name}</span>
+                    <span className="block truncate text-[11.5px] text-white/45">{p.industry}</span>
                   </span>
-                  <span className="font-mono text-[11px] text-ppc-neutral-400">
+                  <span className="font-mono text-[11px] text-white/40">
                     {p.accountCount}
                   </span>
                 </button>
               </li>
             ))}
             {filtered.length === 0 && (
-              <li className="px-3 py-5 text-center text-[12px] text-ppc-neutral-400">
+              <li className="px-3 py-5 text-center text-[12px] text-white/40">
                 No clients match "{filter}"
               </li>
             )}
@@ -213,18 +211,18 @@ function ProjectSwitcher({ collapsed }: { collapsed: boolean }) {
 function SearchRow({ collapsed }: { collapsed: boolean }) {
   if (collapsed) return null;
   return (
-    <div className="border-b border-ppc-neutral-100 px-3 py-3">
+    <div className="border-b border-white/8 px-3 py-3">
       <div className="relative">
         <MagnifyingGlass
           size={14}
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ppc-neutral-400"
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
         />
         <input
           readOnly
           placeholder="Search..."
-          className="w-full cursor-pointer rounded-lg border border-ppc-neutral-100 bg-ppc-neutral-25 py-2 pl-8 pr-12 text-[13px] outline-none placeholder:text-ppc-neutral-400 hover:border-ppc-purple-300"
+          className="w-full cursor-pointer rounded-lg border border-white/8 bg-white/[0.03] py-2 pl-8 pr-12 text-[13px] text-white outline-none placeholder:text-white/40 hover:border-ppc-purple-500/40"
         />
-        <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded border border-ppc-neutral-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-ppc-neutral-500">
+        <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded border border-white/10 bg-white/[0.05] px-1.5 py-0.5 font-mono text-[10px] text-white/55">
           ⌘K
         </kbd>
       </div>
@@ -240,7 +238,7 @@ function NavSection({
   return (
     <div className="mt-4 first:mt-3">
       {!collapsed && (
-        <div className="mb-1.5 px-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-400">
+        <div className="mb-1.5 px-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-white/40">
           {eyebrow}
         </div>
       )}
@@ -269,8 +267,8 @@ function Item({
             collapsed ? 'justify-center px-2 py-2' : 'gap-2.5 px-3 py-2'
           } ${
             isActive
-              ? 'bg-ppc-purple-50 font-semibold text-ppc-purple-700'
-              : 'font-medium text-ppc-neutral-700 hover:bg-ppc-neutral-25 hover:text-ppc-black'
+              ? 'bg-ppc-purple-500/15 font-semibold text-ppc-purple-300'
+              : 'font-medium text-white/70 hover:bg-white/5 hover:text-white'
           }`
         }
       >
@@ -279,7 +277,7 @@ function Item({
             <Icon
               size={16}
               weight={isActive ? 'fill' : 'duotone'}
-              className={isActive ? 'text-ppc-purple-500' : 'text-ppc-neutral-400 group-hover:text-ppc-purple-500'}
+              className={isActive ? 'text-ppc-purple-300' : 'text-white/45 group-hover:text-ppc-purple-300'}
             />
             {!collapsed && <span>{label}</span>}
           </>
@@ -292,7 +290,7 @@ function Item({
 function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
-      <div className="flex justify-center border-t border-ppc-neutral-100 px-2 py-3">
+      <div className="flex justify-center border-t border-white/8 px-2 py-3">
         <button
           title="Stewart Dunlop"
           className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-300 to-ppc-purple-500 text-[12px] font-bold text-white"
@@ -303,19 +301,19 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
     );
   }
   return (
-    <div className="border-t border-ppc-neutral-100 px-3 py-3">
-      <div className="flex items-center gap-3 rounded-xl border border-ppc-neutral-100 bg-ppc-neutral-25 px-3 py-2.5">
+    <div className="border-t border-white/8 px-3 py-3">
+      <div className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
         <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-300 to-ppc-purple-500 text-[11.5px] font-bold text-white">
           SD
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[13px] font-semibold leading-tight text-ppc-black">
+          <span className="block truncate text-[13px] font-semibold leading-tight text-white">
             Stewart Dunlop
           </span>
-          <span className="block truncate text-[11.5px] text-ppc-neutral-500">stewart@ppc.io</span>
+          <span className="block truncate text-[11.5px] text-white/45">stewart@ppc.io</span>
         </span>
       </div>
-      <div className="mt-3 flex items-center justify-between px-1 text-[11px] text-ppc-neutral-400">
+      <div className="mt-3 flex items-center justify-between px-1 text-[11px] text-white/40">
         <span className="inline-flex items-center gap-1">
           <Sparkle size={11} weight="duotone" /> Beta
         </span>

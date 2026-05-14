@@ -1,10 +1,17 @@
 // Page hero primitive.
 //
-// Carries the JSX rhythm into every page:
-//   eyebrow → massive display H1 with single purple period → 1-line description.
+// The app canvas is dark (#0C0C0E Smoky Black). Both variants render light
+// type on dark — the difference is presence:
 //
-// Use ONCE per page, at the top. Same typographic muscle memory as the
-// StagePage hero, so the app reads as one product.
+//   variant="light"  → inline hero, sits flush on the page canvas.
+//                      Used by every working surface page.
+//   variant="dark"   → boxed editorial block with radial glow + sheen.
+//                      Use sparingly — for the catalog hero and the
+//                      occasional "moment" surface.
+//
+// Eyebrow → 56-68px display H1 with single purple-period flourish → 1-line
+// description. Same typographic muscle memory as the StagePage hero, so
+// the app reads as one product.
 
 interface PageHeroProps {
   eyebrow: string;
@@ -14,9 +21,6 @@ interface PageHeroProps {
   description?: string;
   // Optional right-aligned actions (buttons, links).
   actions?: React.ReactNode;
-  // Treat this hero as a dark editorial block (rare — use sparingly,
-  // only when the page is leading with a moment that deserves the
-  // smoky-black canvas).
   variant?: 'light' | 'dark';
 }
 
@@ -33,7 +37,7 @@ export function PageHero({ eyebrow, headline, description, actions, variant = 'l
           </div>
           <h1 className="mt-4 max-w-[820px] font-display text-[60px] font-extrabold leading-[0.96] tracking-[-0.035em] text-white sm:text-[72px]">
             {headlineBody}
-            {hasPeriod && <span className="text-ppc-purple-500">.</span>}
+            {hasPeriod && <span className="text-ppc-purple-400">.</span>}
           </h1>
           {description && (
             <p className="mt-7 max-w-[600px] text-[18px] leading-[1.55] tracking-tight text-white/70">
@@ -46,18 +50,19 @@ export function PageHero({ eyebrow, headline, description, actions, variant = 'l
     );
   }
 
+  // light variant — sits inline on the page's smoky-black canvas
   return (
     <section className="flex flex-wrap items-end justify-between gap-6">
       <div className="max-w-[820px]">
-        <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-500">
+        <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.08em] text-white/55">
           {eyebrow}
         </div>
-        <h1 className="mt-4 font-display text-[56px] font-extrabold leading-[0.96] tracking-[-0.035em] text-ppc-black sm:text-[64px]">
+        <h1 className="mt-4 font-display text-[56px] font-extrabold leading-[0.96] tracking-[-0.035em] text-white sm:text-[64px]">
           {headlineBody}
-          {hasPeriod && <span className="text-ppc-purple-500">.</span>}
+          {hasPeriod && <span className="text-ppc-purple-400">.</span>}
         </h1>
         {description && (
-          <p className="mt-6 max-w-[640px] text-[18px] leading-[1.55] tracking-tight text-ppc-neutral-600">
+          <p className="mt-6 max-w-[640px] text-[18px] leading-[1.55] tracking-tight text-white/70">
             {description}
           </p>
         )}
@@ -83,12 +88,12 @@ export function SectionHeader({
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-500">
+        <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.08em] text-white/55">
           {eyebrow}
         </div>
-        <h2 className="mt-2 font-display text-[34px] font-bold leading-[1.05] tracking-[-0.02em] text-ppc-black">
+        <h2 className="mt-2 font-display text-[34px] font-bold leading-[1.05] tracking-[-0.02em] text-white">
           {body}
-          {hasPeriod && <span className="text-ppc-purple-500">.</span>}
+          {hasPeriod && <span className="text-ppc-purple-400">.</span>}
         </h2>
       </div>
       {action}
@@ -121,16 +126,19 @@ export function PrimaryCTA({
 export function SecondaryButton({
   children,
   onClick,
-  variant = 'light',
+  variant = 'dark',
 }: {
   children: React.ReactNode;
   onClick?: () => void;
+  // Both variants render ON the dark canvas — only differ in tone.
   variant?: 'light' | 'dark';
 }) {
+  // "dark" = white outline on dark (default).
+  // "light" = filled white pill on dark — louder secondary, rare.
   const cls =
-    variant === 'dark'
-      ? 'border-white/15 text-white hover:bg-white/5'
-      : 'border-ppc-neutral-200 bg-white text-ppc-black hover:border-ppc-purple-300';
+    variant === 'light'
+      ? 'border-white/0 bg-white text-ppc-black hover:bg-white/90'
+      : 'border-white/15 text-white hover:bg-white/5';
   return (
     <button
       onClick={onClick}
