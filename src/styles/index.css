@@ -1,0 +1,155 @@
+/* PPC.io React mockup — global styles
+ *
+ * Load order matters:
+ *   1. Brand tokens (colors_and_type.css)  — :root custom properties + base type
+ *   2. Brand snippets (ppc-snippets.css)   — .ppc-* utility classes
+ *   3. Tailwind utilities                  — atomic helpers
+ *
+ * Tokens live in src/styles/colors_and_type.css. Tailwind theme in
+ * tailwind.config.js mirrors them — both forms work side by side.
+ */
+
+@import './colors_and_type.css';
+@import './ppc-snippets.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* App-shell baseline. The brand CSS sets html/body fonts + color; we
+ * just ensure the page bg matches the marketing site's soft lavender
+ * surface (matches /free-tools, /agents, /ai-consulting light sections).
+ * Cards stay pure white for separation. */
+html, body, #root {
+  min-height: 100%;
+  background: #F3F0FF;
+}
+
+/* Tabular numbers on data displays. Used in stage page durations,
+ * dashboards, finding cards. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Live-pulse dot + shimmer bar for the running-state agent page.
+ * Kept here so the StagePage component is purely structural. */
+@keyframes ppcio-live-beat {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(128, 87, 255, 0.6);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.78);
+    box-shadow: 0 0 0 7px rgba(128, 87, 255, 0);
+  }
+}
+@keyframes ppcio-bar-shimmer {
+  0%   { background-position: -280px 0; }
+  100% { background-position: 280px 0; }
+}
+@keyframes ppcio-card-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.13),
+      0 18px 40px -18px rgba(128, 87, 255, 0.25),
+      0 0 0 0 rgba(128, 87, 255, 0);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.13),
+      0 18px 40px -18px rgba(128, 87, 255, 0.45),
+      0 0 24px -4px rgba(128, 87, 255, 0.18);
+  }
+}
+.ppcio-live-dot  { animation: ppcio-live-beat 1.6s ease-in-out infinite; }
+
+/* Marquee CTA — the "subscribe" / "request a video proposal" button from
+ * ppc.io. Purple-500 fill, 2px purple-300 border, deep two-layer shadow,
+ * pulsing glow halo, smooth scaleY hover. Use ONCE per page as the
+ * primary action. */
+@keyframes ppcio-cta-pulse {
+  0%, 100% { box-shadow: var(--shadow-cta), 0 0 0 0 rgba(128, 87, 255, 0.45); }
+  50%      { box-shadow: var(--shadow-cta), 0 0 0 14px rgba(128, 87, 255, 0); }
+}
+.ppcio-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 22px;
+  background: var(--ppc-purple-500);
+  border: 2px solid var(--ppc-purple-300);
+  border-radius: var(--radius-md);
+  color: var(--ppc-white);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.010em;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: var(--shadow-cta);
+  animation: ppcio-cta-pulse 2.8s ease-in-out infinite;
+  transition: transform 350ms cubic-bezier(0.47, 0, 0.23, 1.25),
+              box-shadow 200ms ease;
+}
+.ppcio-cta:hover {
+  transform: scaleY(1.034);
+  box-shadow: var(--shadow-cta-hover);
+  animation-play-state: paused;
+}
+.ppcio-cta:active { transform: scale(0.98); }
+.ppcio-cta--lg { padding: 16px 28px; font-size: 17px; }
+.ppcio-live-bar  {
+  background: linear-gradient(
+    90deg,
+    #8057FF 0%, #8057FF 35%, #A88CFF 50%, #8057FF 65%, #8057FF 100%
+  );
+  background-size: 560px 100%;
+  animation: ppcio-bar-shimmer 2.6s linear infinite;
+}
+.ppcio-agent-card { animation: ppcio-card-glow 4s ease-in-out infinite; }
+
+/* Hero accent word treatment — serif italic + multi-color gradient.
+ * Matches the live ppc.io "AI Agents" / "AI Consulting" hero word.
+ * Use sparingly: one accent word per hero, never more. */
+.ppc-hero-accent {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 700;
+  background: var(--grad-text-accent);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Form primitives — used in Agent Detail configure form. Kept here so the
+ * page itself stays focused on layout, not field chrome. */
+.ppc-select,
+.ppc-textarea,
+.ppc-input {
+  width: 100%;
+  border: 1px solid var(--ppc-neutral-100);
+  border-radius: 12px;
+  background: var(--ppc-white);
+  padding: 10px 12px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ppc-black);
+  outline: none;
+  transition: border-color 150ms ease;
+}
+.ppc-select:hover,
+.ppc-textarea:hover,
+.ppc-input:hover { border-color: var(--ppc-purple-300); }
+.ppc-select:focus,
+.ppc-textarea:focus,
+.ppc-input:focus {
+  border-color: var(--ppc-purple-500);
+  box-shadow: 0 0 0 3px rgba(128, 87, 255, 0.15);
+}
+.ppc-textarea { resize: vertical; min-height: 64px; }

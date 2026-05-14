@@ -1,0 +1,142 @@
+// Page hero primitive.
+//
+// Carries the JSX rhythm into every page:
+//   eyebrow → massive display H1 with single purple period → 1-line description.
+//
+// Use ONCE per page, at the top. Same typographic muscle memory as the
+// StagePage hero, so the app reads as one product.
+
+interface PageHeroProps {
+  eyebrow: string;
+  // Headline. A trailing period is automatically rendered in purple.
+  headline: string;
+  // 1-2 line description. Sits at max-width 640 for readability.
+  description?: string;
+  // Optional right-aligned actions (buttons, links).
+  actions?: React.ReactNode;
+  // Treat this hero as a dark editorial block (rare — use sparingly,
+  // only when the page is leading with a moment that deserves the
+  // smoky-black canvas).
+  variant?: 'light' | 'dark';
+}
+
+export function PageHero({ eyebrow, headline, description, actions, variant = 'light' }: PageHeroProps) {
+  const hasPeriod = headline.endsWith('.');
+  const headlineBody = hasPeriod ? headline.slice(0, -1) : headline;
+
+  if (variant === 'dark') {
+    return (
+      <section className="ppc-dark ppc-dark--hero relative overflow-hidden rounded-3xl px-10 py-12 sm:px-14 sm:py-14">
+        <div className="relative">
+          <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.08em] text-white/60">
+            {eyebrow}
+          </div>
+          <h1 className="mt-4 max-w-[820px] font-display text-[60px] font-extrabold leading-[0.96] tracking-[-0.035em] text-white sm:text-[72px]">
+            {headlineBody}
+            {hasPeriod && <span className="text-ppc-purple-500">.</span>}
+          </h1>
+          {description && (
+            <p className="mt-7 max-w-[600px] text-[18px] leading-[1.55] tracking-tight text-white/70">
+              {description}
+            </p>
+          )}
+          {actions && <div className="mt-9 flex flex-wrap gap-2.5">{actions}</div>}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="flex flex-wrap items-end justify-between gap-6">
+      <div className="max-w-[820px]">
+        <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-500">
+          {eyebrow}
+        </div>
+        <h1 className="mt-4 font-display text-[56px] font-extrabold leading-[0.96] tracking-[-0.035em] text-ppc-black sm:text-[64px]">
+          {headlineBody}
+          {hasPeriod && <span className="text-ppc-purple-500">.</span>}
+        </h1>
+        {description && (
+          <p className="mt-6 max-w-[640px] text-[18px] leading-[1.55] tracking-tight text-ppc-neutral-600">
+            {description}
+          </p>
+        )}
+      </div>
+      {actions && <div className="flex flex-wrap gap-2.5">{actions}</div>}
+    </section>
+  );
+}
+
+// Subsection header — same rhythm at smaller scale. Use to introduce
+// non-hero blocks below the page hero. Eyebrow + tightish H2.
+export function SectionHeader({
+  eyebrow,
+  title,
+  action,
+}: {
+  eyebrow: string;
+  title: string;
+  action?: React.ReactNode;
+}) {
+  const hasPeriod = title.endsWith('.');
+  const body = hasPeriod ? title.slice(0, -1) : title;
+  return (
+    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-500">
+          {eyebrow}
+        </div>
+        <h2 className="mt-2 font-display text-[34px] font-bold leading-[1.05] tracking-[-0.02em] text-ppc-black">
+          {body}
+          {hasPeriod && <span className="text-ppc-purple-500">.</span>}
+        </h2>
+      </div>
+      {action}
+    </div>
+  );
+}
+
+// CTA primitive — the "subscribe" marquee button from ppc.io. Purple-500
+// fill, 2px purple-300 border, two-layer shadow, continuous pulse glow,
+// scaleY hover. Use ONCE per page as the primary action.
+export function PrimaryCTA({
+  children,
+  onClick,
+  size = 'md',
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  size?: 'md' | 'lg';
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`ppcio-cta ${size === 'lg' ? 'ppcio-cta--lg' : ''}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function SecondaryButton({
+  children,
+  onClick,
+  variant = 'light',
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: 'light' | 'dark';
+}) {
+  const cls =
+    variant === 'dark'
+      ? 'border-white/15 text-white hover:bg-white/5'
+      : 'border-ppc-neutral-200 bg-white text-ppc-black hover:border-ppc-purple-300';
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center gap-2 rounded-pill border px-5 py-3 text-[14px] font-semibold tracking-tight transition-colors ${cls}`}
+    >
+      {children}
+    </button>
+  );
+}

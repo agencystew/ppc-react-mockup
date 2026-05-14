@@ -1,0 +1,349 @@
+/* PPC.io Design System — Colors & Type
+ * Source: PPC.fig (Branding + DS pages)
+ * Brand primary: #8057FF (Bright Lavender / "Accent Purple")
+ * Surface black: #0C0C0E ("Smoky Black")
+ */
+
+/* ---------- Fonts ----------
+ * Canonical stack matches the live ppc.io site (see ppc-frontend/src/components/Head.astro).
+ *
+ *   Figtree    → body, UI, buttons, nav, most headlines (weights 500/600/700/800, italic 500/600)
+ *   Outfit     → display headlines on marketing surfaces (weights 400/600/700/800).
+ *                Used for hero h1 and large section titles. Optional — Figtree 700 also works
+ *                for editorial pages (e.g. ads-intelligence reports).
+ *   Space Mono → data, eyebrows, small numeric ticks, ad-preview URLs (400/700)
+ *
+ * For local dev with no network: Figtree TTFs are bundled in ./fonts/ — the @font-face
+ * blocks below load them. Outfit + Space Mono come from Google Fonts only (no local TTFs).
+ *
+ * For production: delete these @font-face + @import blocks and load the single Google Fonts
+ * URL from Head.astro instead. The URL is canonicalised at the top of STARTER.html.
+ */
+/* LOCAL DEV: skip the brand bundle's local @font-face block — we don't ship
+ * the TTFs in this mockup, so the local refs 404 and the browser falls back
+ * to the system stack instead of using the Google Fonts copy below.
+ *
+ * Fonts come exclusively from index.html's <link rel="stylesheet"> tag.
+ */
+
+:root {
+  /* ====================================================================
+   * COLOR TOKENS
+   * ==================================================================== */
+
+  /* Brand accent — the PPC.io purple. Used for primary buttons, logo,
+   * highlight strokes, glow, CTA lightning bolts, link underlines. */
+  --ppc-purple-50:  #F3F0FF;
+  --ppc-purple-100: #E9E3FF;
+  --ppc-purple-200: #D3C6FF;
+  --ppc-purple-300: #B08EF4;  /* softer violet, used in strokes */
+  --ppc-purple-400: #A88CFF;  /* "Bright Lavender" from brand slide */
+  --ppc-purple-500: #8057FF;  /* PRIMARY brand color ("Accent Color") */
+  --ppc-purple-600: #7C45CB;
+  --ppc-purple-700: #532CCC;  /* deep violet — gradient end */
+  --ppc-purple-800: #3B1F99;
+  --ppc-purple-900: #170E30;  /* "Primary" color from DS swatches */
+
+  /* Neutral / base — the cool gray scale used for text + surfaces.
+   * Derived from the file's most-used neutrals. Black is NOT pure #000;
+   * the brand explicitly uses "Smoky Black" #0C0C0E. */
+  --ppc-white:      #FFFFFF;
+  --ppc-neutral-25: #FAFAFA;
+  --ppc-neutral-50: #F2F4F7;
+  --ppc-neutral-100:#E5E5F9;
+  --ppc-neutral-200:#DCDCDC;
+  --ppc-neutral-300:#C5C5E2;
+  --ppc-neutral-400:#A2A2C1;
+  --ppc-neutral-500:#80809C;
+  --ppc-neutral-600:#646477;  /* body text on light */
+  --ppc-neutral-700:#525266;
+  --ppc-neutral-800:#40404F;
+  --ppc-neutral-900:#26262F;
+  --ppc-neutral-950:#16161A;
+  --ppc-black:      #0C0C0E;  /* "Smoky Black" — brand-defined */
+
+  /* Semantic */
+  --ppc-success-500:#17B26A;
+  --ppc-success-50: #ECFDF3;
+  --ppc-success-900:#053321;
+  --ppc-warning-500:#FDB022;
+  --ppc-warning-50: #FFFAEB;
+  --ppc-warning-900:#4E1D09;
+  --ppc-error-500:  #F04438;
+  --ppc-error-50:   #FEF3F2;
+  --ppc-error-900:  #55160C;
+
+  /* Semantic aliases — use these in product UI */
+  --color-fg-1: var(--ppc-black);           /* primary text */
+  --color-fg-2: var(--ppc-neutral-600);     /* secondary text / supporting */
+  --color-fg-3: var(--ppc-neutral-400);     /* muted / placeholder */
+  --color-fg-on-accent: var(--ppc-white);
+  --color-fg-accent: var(--ppc-purple-500);
+
+  --color-bg-1: var(--ppc-white);           /* default page */
+  --color-bg-2: var(--ppc-neutral-25);      /* card/alt row */
+  --color-bg-3: var(--ppc-neutral-50);      /* inset */
+  --color-bg-inverse: var(--ppc-black);     /* dark sections */
+  --color-bg-inverse-2: #15151A;
+  --color-bg-accent: var(--ppc-purple-500);
+  --color-bg-accent-soft: var(--ppc-purple-50);
+
+  --color-border-1: var(--ppc-neutral-100);
+  --color-border-2: var(--ppc-neutral-200);
+  --color-border-strong: var(--ppc-neutral-300);
+  --color-border-inverse: rgba(255,255,255,0.08);
+
+  /* Gradients — the signature motifs.
+   * --grad-text-accent is the multi-stop gradient used on the hero "AI" word
+   * on ppc.io (maps to .gradient-text-2 in the live-site main.css). */
+  --grad-purple-cta:
+    linear-gradient(180deg, #8057FF 0%, #532CCC 100%);
+  --grad-purple-sheen:
+    linear-gradient(90deg, rgba(128,87,255,0) 0%, #7C45CB 51%, rgba(121,52,153,0) 100%);
+  --grad-hero-night:
+    radial-gradient(120% 80% at 50% 0%, #1A1030 0%, #0C0C0E 60%);
+  --grad-text-accent:
+    linear-gradient(86deg, #8057FF 6.62%, #FFB58B 94.93%, #7CF3FB 110.55%);
+  --grad-text-warm:
+    linear-gradient(90deg, #8158FE 27%, #EDBE9B 100%);
+  --grad-text-mono:
+    linear-gradient(90deg, #FFFFFF 0%, #999999 100%);
+
+  /* ====================================================================
+   * TYPE TOKENS — base
+   * ==================================================================== */
+  /* The live ppc.io site uses Figtree for everything. The only exception is
+   * the homepage hero H1, which uses PF-Marlet-Display (proprietary serif,
+   * loaded via Adobe Typekit). --font-display and --font-sans are therefore
+   * the SAME family — two names, one font — so headlines and body share
+   * rhythm. Use --font-serif ONLY on the hero H1 (or similar "hero moment"
+   * title). Everything else: Figtree, full stop.
+   *
+   * Outfit is in the live-site Google Fonts URL but not actually applied to
+   * any element we could find. We keep it loaded for parity, not for use.
+   */
+  --font-sans:    'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-ui:      'Figtree', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Figtree', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:    'Space Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  /* --font-serif: hero H1 only.
+   *   Production: load PF-Marlet-Display via Typekit (use.typekit.net/<kit>.css)
+   *   Fallback:   Playfair Display (free, via Google Fonts) is the closest
+   *               open serif analog — load it alongside Figtree in <head>.
+   */
+  --font-serif: 'PF-Marlet-Display', 'Playfair Display', 'Figtree', Georgia, serif;
+
+  /* Brand sets the display-size letter-spacing quite tight (-0.035em at
+   * 84px, -0.020em at 254px). We keep this graduated. */
+  --tracking-display-xl: -0.035em;
+  --tracking-display:    -0.020em;
+  --tracking-body:       -0.01em;
+  --tracking-ui:         0em;
+
+  --leading-display: 0.965;   /* from brand slides: 0.9650 */
+  --leading-heading: 1.10;
+  --leading-body:    1.50;
+  --leading-tight:   1.23;    /* UI labels */
+
+  /* ====================================================================
+   * RADII, SHADOW, SPACE
+   * ==================================================================== */
+  --radius-xs:  4px;
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-xl:  20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
+  --radius-pill: 9999px;
+
+  --shadow-xs: 0 1px 2px rgba(16,24,40,0.05);
+  --shadow-sm: 0 1px 3px rgba(16,24,40,0.08), 0 1px 2px rgba(16,24,40,0.04);
+  --shadow-md: 0 4px 8px -2px rgba(16,24,40,0.08), 0 2px 4px -2px rgba(16,24,40,0.04);
+  --shadow-lg: 0 4px 6px -2px rgba(16,24,40,0.03), 0 12px 16px -4px rgba(16,24,40,0.08);
+  --shadow-xl: 0 8px 10px -4px rgba(16,24,40,0.04), 0 20px 24px -4px rgba(16,24,40,0.10);
+  --shadow-glow-purple: 0 0 0 4px rgba(128,87,255,0.18), 0 8px 24px rgba(128,87,255,0.35);
+  /* --shadow-cta: the live .btn on ppc.io uses a two-layer shadow — a deep
+   * purple outer bloom + a pink inner glow. Matched from src/styles/main.css. */
+  --shadow-cta:       0 4px 18.4px #463186, 0 0 12.7px #d185ec inset;
+  --shadow-cta-hover: 0 0 31.9px rgba(116,90,198,0.8), 0 0 12.7px #d185ec inset;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ====================================================================
+   * SEMANTIC TYPE ROLES
+   * ==================================================================== */
+  /* Hero / title slide — 254px "Brand Guidelines" style */
+  --display-2xl-size: clamp(72px, 10vw, 180px);
+  --display-2xl-weight: 700;
+  --display-2xl-tracking: var(--tracking-display);
+  --display-2xl-leading: var(--leading-display);
+
+  /* H1 — e.g. "Colors" page title at 98px */
+  --h1-size: clamp(44px, 6vw, 84px);
+  --h1-weight: 700;
+  --h1-tracking: var(--tracking-display-xl);
+  --h1-leading: var(--leading-display);
+
+  --h2-size: 48px;
+  --h2-weight: 700;
+  --h2-tracking: var(--tracking-display);
+  --h2-leading: 1.08;
+
+  --h3-size: 32px;
+  --h3-weight: 700;
+  --h3-tracking: -0.020em;
+  --h3-leading: 1.15;
+
+  --h4-size: 24px;
+  --h4-weight: 700;
+  --h4-tracking: -0.020em;
+  --h4-leading: 1.25;
+
+  --h5-size: 20px;
+  --h5-weight: 700;
+  --h5-tracking: -0.010em;
+  --h5-leading: 1.30;
+
+  /* Body — default reading size */
+  --body-lg-size: 18px;
+  --body-lg-leading: 1.55;
+
+  --body-size: 16px;
+  --body-leading: 1.50;
+
+  --body-sm-size: 14px;
+  --body-sm-leading: 1.45;
+
+  /* UI label — used for buttons, menu items, pills */
+  --label-size: 14px;
+  --label-weight: 600;
+  --label-leading: 1.23;
+  --label-tracking: -0.010em;
+
+  /* Micro / eyebrow */
+  --eyebrow-size: 12px;
+  --eyebrow-weight: 700;
+  --eyebrow-tracking: 0.06em;
+  --eyebrow-transform: uppercase;
+
+  /* Mono / data */
+  --mono-size: 12px;
+  --mono-weight: 500;
+}
+
+/* ======================================================================
+ * BASE ELEMENT STYLES
+ * ====================================================================== */
+html, body {
+  font-family: var(--font-sans);
+  color: var(--color-fg-1);
+  background: var(--color-bg-1);
+  font-size: var(--body-size);
+  line-height: var(--body-leading);
+  letter-spacing: var(--tracking-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, .ppc-h1 {
+  font-family: var(--font-sans);
+  font-weight: var(--h1-weight);
+  font-size: var(--h1-size);
+  line-height: var(--h1-leading);
+  letter-spacing: var(--h1-tracking);
+  color: var(--color-fg-1);
+  text-wrap: balance;
+  margin: 0;
+}
+h2, .ppc-h2 {
+  font-weight: var(--h2-weight);
+  font-size: var(--h2-size);
+  line-height: var(--h2-leading);
+  letter-spacing: var(--h2-tracking);
+  text-wrap: balance;
+  margin: 0;
+}
+h3, .ppc-h3 {
+  font-weight: var(--h3-weight);
+  font-size: var(--h3-size);
+  line-height: var(--h3-leading);
+  letter-spacing: var(--h3-tracking);
+  text-wrap: balance;
+  margin: 0;
+}
+h4, .ppc-h4 {
+  font-weight: var(--h4-weight);
+  font-size: var(--h4-size);
+  line-height: var(--h4-leading);
+  letter-spacing: var(--h4-tracking);
+  margin: 0;
+}
+h5, .ppc-h5 {
+  font-weight: var(--h5-weight);
+  font-size: var(--h5-size);
+  line-height: var(--h5-leading);
+  letter-spacing: var(--h5-tracking);
+  margin: 0;
+}
+
+p, .ppc-body { margin: 0 0 1em; text-wrap: pretty; }
+.ppc-body-lg { font-size: var(--body-lg-size); line-height: var(--body-lg-leading); }
+.ppc-body-sm { font-size: var(--body-sm-size); line-height: var(--body-sm-leading); }
+
+.ppc-display-2xl {
+  font-weight: var(--display-2xl-weight);
+  font-size: var(--display-2xl-size);
+  line-height: var(--display-2xl-leading);
+  letter-spacing: var(--display-2xl-tracking);
+}
+
+.ppc-eyebrow {
+  font-size: var(--eyebrow-size);
+  font-weight: var(--eyebrow-weight);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: var(--eyebrow-transform);
+  color: var(--color-fg-2);
+}
+
+.ppc-label {
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  line-height: var(--label-leading);
+  letter-spacing: var(--label-tracking);
+}
+
+code, .ppc-mono {
+  font-family: var(--font-mono);
+  font-size: var(--mono-size);
+  font-weight: var(--mono-weight);
+}
+
+a { color: var(--color-fg-accent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Dark section helper — flip tokens inside any .ppc-dark */
+.ppc-dark {
+  --color-fg-1: var(--ppc-white);
+  --color-fg-2: rgba(255,255,255,0.72);
+  --color-fg-3: rgba(255,255,255,0.45);
+  --color-bg-1: var(--ppc-black);
+  --color-bg-2: #15151A;
+  --color-bg-3: #1E1E24;
+  --color-border-1: rgba(255,255,255,0.08);
+  --color-border-2: rgba(255,255,255,0.14);
+  background: var(--color-bg-1);
+  color: var(--color-fg-1);
+}
