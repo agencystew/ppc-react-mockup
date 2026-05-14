@@ -183,9 +183,9 @@ export function AgentCatalog() {
           The featured agent is rendered as a mint Sticker (the page's one
           tilted element). Below it, Caveat #2: "most run this week".
           ================================================================= */}
-      <section className="bg-ppc-canvas">
+      <section className="bg-canvas">
         {/* Sticky filter strip */}
-        <div className="sticky top-0 z-10 bg-ppc-canvas/95 backdrop-blur">
+        <div className="sticky top-0 z-10 bg-canvas/95 backdrop-blur">
           <div className="mx-auto max-w-[1280px] px-6 py-4 md:px-12">
             <div className="-mx-2 flex gap-2 overflow-x-auto px-2 md:flex-wrap md:overflow-visible">
               {FILTERS.map((f) => {

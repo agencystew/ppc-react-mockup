@@ -243,11 +243,11 @@ export function ProjectPage() {
                 </div>
 
                 {/* Dark-card "Launch →" — white pill, ink text, ink border,
-                    4px pure-black offset shadow. Defined inline because
+                    4px ink offset shadow. Defined inline because
                     PillButton's three variants all read poorly on dark. */}
                 <Link
                   to={`/agents/${agent.slug}?project=${project.id}`}
-                  className="inline-flex w-fit items-center gap-2 rounded-full border-[2px] border-ink bg-white px-6 py-2.5 text-[17px] font-display font-bold text-ink shadow-[4px_4px_0_#000] transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000]"
+                  className="inline-flex w-fit items-center gap-2 rounded-full border-[2px] border-ink bg-white px-6 py-2.5 text-[17px] font-display font-bold text-ink shadow-[4px_4px_0_#0F0A1E] transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#0F0A1E]"
                 >
                   Launch →
                 </Link>

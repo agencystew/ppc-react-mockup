@@ -53,7 +53,7 @@ const FINDINGS: FindingCard[] = [
     number: '03',
     headline: 'Pricing buried behind a click.',
     body:
-      'The single highest-intent question on the page — "what does this cost" — sits four scrolls down. Three rivals lead with a price band in the hero.',
+      'The single highest-intent question on the page, "what does this cost", sits four scrolls down. Three rivals lead with a price band in the hero.',
   },
 ];
 

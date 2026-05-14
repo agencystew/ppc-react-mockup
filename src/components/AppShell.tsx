@@ -45,7 +45,6 @@ const STORAGE_KEY = 'ppcio-sidebar-collapsed';
 
 export function AppShell() {
   const [collapsed, setCollapsed] = useState(false);
-  const { pathname } = useLocation();
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -58,19 +57,11 @@ export function AppShell() {
     localStorage.setItem(STORAGE_KEY, String(next));
   };
 
-  const fullBleed = pathname.startsWith('/chat');
-
   return (
     <div className="flex min-h-screen w-full font-sans text-ppc-black">
       <Sidebar collapsed={collapsed} onToggle={toggle} />
       <main className="flex min-w-0 flex-1 flex-col">
-        {fullBleed ? (
-          <Outlet />
-        ) : (
-          <div className="mx-auto w-full max-w-[1240px] px-8 py-10 lg:px-12 lg:py-12">
-            <Outlet />
-          </div>
-        )}
+        <Outlet />
       </main>
     </div>
   );
@@ -714,30 +705,6 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
         </span>
         <DotsThree size={15} weight="bold" className="text-white/45" />
       </button>
-      <div className="flex items-center justify-between px-1">
-        <span
-          className="inline-flex items-center gap-[6px] text-[10px] font-semibold uppercase leading-none text-[#B08EF4]"
-          style={{
-            fontFamily: '"Courier New", ui-monospace, monospace',
-            letterSpacing: '0.14em',
-          }}
-        >
-          <span
-            className="h-[5px] w-[5px] rounded-full bg-[#A88CFF]"
-            style={{ boxShadow: '0 0 0 2px rgba(127,90,240,0.30), 0 0 6px rgba(127,90,240,0.65)' }}
-          />
-          Beta
-        </span>
-        <span
-          className="text-[10px] leading-none text-white/55"
-          style={{
-            fontFamily: '"Courier New", ui-monospace, monospace',
-            letterSpacing: '0.06em',
-          }}
-        >
-          <span className="tabular-nums">~22</span> h/wk saved
-        </span>
-      </div>
     </div>
   );
 }
