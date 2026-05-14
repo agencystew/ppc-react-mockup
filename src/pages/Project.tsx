@@ -1,69 +1,84 @@
 import { useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import {
-  ArrowRight, ArrowUp, ArrowDown, Lightning, Sun, Moon, DotsThree,
-  ClipboardText, FunnelSimple, Target, Crosshair, Broadcast,
-  ShoppingCartSimple, PencilSimple, FileText, ChatCircleDots,
-  ArrowUpRight, Command,
+  ArrowRight, ArrowUp, ArrowDown,
+  Lightning, CaretDown,
+  ChatCircleDots, Command,
+  Detective, Microscope, Drop,
 } from '@phosphor-icons/react';
 import { PROJECTS } from '../mock/projects';
 
 // Project detail · /projects/:id
 //
-// Faithful port of Stewart's reference mockup. Six sections, top to bottom:
-//   1. Breadcrumb + connection status + run-agent CTA
-//   2. Hero — avatar + name + industry + critical/warn pill
-//   3. Tabs row (Overview default; others stubbed)
-//   4. "What should we work on?" — agent grid (8 specialists)
-//   5. Recent activity — 5 findings rows w/ money + status
-//   6. Performance KPI quad + Daily spend trend chart
-//   7. Campaigns — Top performers vs Needs attention
-//   8. "Ask about X" command bar
+// Editorial-grade dashboard. Light page with a single signature moment —
+// three dark "Run an agent" cards in the middle and a dark command bar at
+// the foot. Every section title is punctuated by a purple period, the
+// page's visual leitmotif.
 //
-// Theme: light + dark toggle at top-right, same pattern as /projects.
+// Sections, top to bottom:
+//   1. Breadcrumb + Run agent CTA
+//   2. Hero (avatar, name, industry, critical/warning pill)
+//   3. Tabs (Overview default; others stubbed)
+//   4. Today's brief — 3 prioritised findings, money on the right
+//   5. Run an agent — 3 dark agent cards (signature moment)
+//   6. Performance — 4 KPI cards + Daily spend trend chart
+//   7. Recent activity — vertical timeline
+//   8. Campaigns — Top performers vs Needs attention
+//   9. Ask-about command bar (dark)
 
-type Theme = 'light' | 'dark';
+// ─── Tokens ────────────────────────────────────────────────────────────
+// Mockup palette. Locked. Kept inline so the page reads top to bottom.
+const C = {
+  pageBg:    '#f7f6fc',
+  ink:       '#18181b',
+  neutral7:  '#3f3f46',
+  neutral6:  '#52525b',
+  neutral5:  '#71717a',
+  neutral4:  '#a1a1aa',
+  neutral3:  '#d4d4d8',
+  border:    '#ebeaf2',
+  rowBorder: '#f4f3f9',
+  cardBg:    '#ffffff',
+  purple:    '#7c6dff',
+  purpleSoft:'#c9c1ff',
+  green:     '#16a34a',
+  greenDot:  '#22c55e',
+  greenSoft: '#052e16',
+  amber:     '#d97706',
+  amberDot:  '#f59e0b',
+  red:       '#dc2626',
+  redDot:    '#ef4444',
+
+  // Dark surfaces — for the agent cards + command bar.
+  darkBg:     '#0a0a0f',
+  darkBorder: '#1a1a22',
+  darkText:   '#b8b8c0',
+  darkMuted:  '#7a7a86',
+  darkKbdBg:  'rgba(255,255,255,0.04)',
+  darkKbdBor: '#1f1f28',
+} as const;
 
 // ─── Mock data ─────────────────────────────────────────────────────────
-const AGENT_CARDS = [
-  { slug: 'account-audit',     icon: ClipboardText,      title: 'Account audit',     sub: 'Full 312-point sweep' },
-  { slug: 'negative-keyword',  icon: FunnelSimple,       title: 'Negative keywords', sub: 'Search term mining' },
-  { slug: 'landing-page',      icon: Target,             title: 'Landing pages',     sub: 'CRO + message match' },
-  { slug: 'pmax',              icon: Crosshair,          title: 'PMAX advisor',      sub: 'Asset group tuning' },
-  { slug: 'competitor-spy',    icon: Broadcast,          title: 'Competitive intel', sub: 'Track competitor shifts' },
-  { slug: 'shopping-feed',     icon: ShoppingCartSimple, title: 'Shopping audit',    sub: 'Feed + structure' },
-  { slug: 'ad-copy',           icon: PencilSimple,       title: 'Ad copy analyst',   sub: 'RSA strength check' },
-  { slug: 'client-reporting',  icon: FileText,           title: 'Client briefing',   sub: 'Weekly summary' },
-] as const;
 
-type FindingTone = 'critical' | 'warning' | 'idle';
+type FindingTone = 'critical' | 'warning';
 interface Finding {
   tone: FindingTone;
   title: string;
   source: string;
   meta: string;
-  rightTop: string;
+  rightTop: React.ReactNode;
   rightTopColor: string;
   rightBottom: string;
-  failedBadge?: boolean;
 }
+
 const FINDINGS: Finding[] = [
   {
     tone: 'critical',
-    title: 'ROAS reading 0.00x across all 152 campaigns',
-    source: 'Tracking Audit',
-    meta: '4h ago · GA4 value imports stopped Apr 27',
-    rightTop: 'Critical fix',
-    rightTopColor: 'text-[#f87171]',
-    rightBottom: 'tracking broken',
-  },
-  {
-    tone: 'warning',
     title: 'Wasted spend in non-converting search terms',
     source: 'Search Term Audit',
     meta: '2h ago · 47 negative candidates surfaced',
-    rightTop: '$4,200/mo',
-    rightTopColor: 'text-[#22c55e]',
+    rightTop: <><span className="tabular">$4,200</span><span className="text-[10px] font-normal text-[#a1a1aa]">/mo</span></>,
+    rightTopColor: 'text-[#16a34a]',
     rightBottom: 'recoverable',
   },
   {
@@ -71,8 +86,8 @@ const FINDINGS: Finding[] = [
     title: 'CPA up 43% in or_sud_search',
     source: 'CPA Monitor',
     meta: '1d ago · $76 to $109 week over week',
-    rightTop: '$1,200/mo',
-    rightTopColor: 'text-[#fbbf24]',
+    rightTop: <><span className="tabular">$1,200</span><span className="text-[10px] font-normal text-[#a1a1aa]">/mo</span></>,
+    rightTopColor: 'text-[#d97706]',
     rightBottom: 'at risk',
   },
   {
@@ -81,395 +96,362 @@ const FINDINGS: Finding[] = [
     source: 'PMAX Asset Review',
     meta: '5h ago · headline and description swaps recommended',
     rightTop: 'CTR uplift',
-    rightTopColor: '',
-    rightBottom: 'est. 0.4–0.8pp',
-  },
-  {
-    tone: 'idle',
-    title: 'Wasted Spend Finder',
-    source: '',
-    meta: '5d ago · conversion data returned 0 results · retry available',
-    rightTop: 'Retry',
-    rightTopColor: 'text-[#7c6dff]',
-    rightBottom: '',
-    failedBadge: true,
+    rightTopColor: 'text-[#3f3f46]',
+    rightBottom: 'est. 0.4 to 0.8pp',
   },
 ];
+
+const AGENT_CARDS = [
+  {
+    slug: 'competitor-spy',
+    icon: Detective,
+    chipBg: 'rgba(251,191,36,0.12)',
+    chipFg: '#fbbf24',
+    title: 'Competitor Spy',
+    blurb: 'A live read on every competitor in your auction. The angles, the spend, the gaps.',
+  },
+  {
+    slug: 'deep-account-audit',
+    icon: Microscope,
+    chipBg: 'rgba(96,165,250,0.12)',
+    chipFg: '#60a5fa',
+    title: 'Deep Account Audit',
+    blurb: 'Structure, alignment, waste, growth ceilings. Client-ready output you hand straight to the meeting.',
+  },
+  {
+    slug: 'spend-leak',
+    icon: Drop,
+    chipBg: 'rgba(34,211,238,0.12)',
+    chipFg: '#22d3ee',
+    title: 'Spend Leak Detector',
+    blurb: "Every place your budget is bleeding without conversions, ranked by what's recoverable.",
+  },
+] as const;
 
 interface KpiCard {
   label: string;
   value: string;
   delta: string;
-  deltaTone: 'down-good' | 'up-good' | 'up-bad' | 'flat';
+  deltaTone: 'up-bad' | 'up-good' | 'down-good' | 'flat';
   spark: number[];
-  sparkColor: string;
 }
 const KPI_CARDS: KpiCard[] = [
-  { label: 'Spend',       value: '$87,575', delta: '132.8%', deltaTone: 'up-bad',   spark: [12,10,14,10,9,8,11,9,8,7], sparkColor: '#8a7dff' },
-  { label: 'Conversions', value: '1,118',   delta: '193.1%', deltaTone: 'up-good',  spark: [16,15,13,12,11,10,9,8,7,6], sparkColor: '#8a7dff' },
-  { label: 'CPA',         value: '$78.27',  delta: '20.5%',  deltaTone: 'down-good',spark: [8,9,10,11,12,13,14,15,16,17], sparkColor: '#8a7dff' },
-  { label: 'CTR',         value: '3.42%',   delta: '-0.3%',  deltaTone: 'flat',     spark: [12,12,11,12,12,11,12,11,12,11], sparkColor: '#8a7dff' },
+  { label: 'Spend',       value: '$87,575', delta: '132.8%', deltaTone: 'up-bad',    spark: [16,14,11,11, 9, 7, 5, 4, 7, 9,12] },
+  { label: 'Conversions', value: '1,118',   delta: '193.1%', deltaTone: 'up-good',   spark: [18,17,14,12,11, 9, 8, 6, 5, 4, 3] },
+  { label: 'CPA',         value: '$78.27',  delta: '20.5%',  deltaTone: 'down-good', spark: [ 4, 6, 8, 9,11,12,14,15,14,15,16] },
+  { label: 'CTR',         value: '3.42%',   delta: '-0.3%',  deltaTone: 'flat',      spark: [10, 9,11,10,12,10,11,10,12,11,13] },
 ];
 
-// 28-point daily series for the Daily spend trend chart.
+// Daily spend, 32 points, follows mockup's mountain shape.
 const SPEND_TREND = [
-  4000, 4600, 5200, 5600, 5400, 5300, 5500, 5400, 5100, 4700, 4400, 4500, 5000, 5300,
-  5500, 5400, 5300, 5500, 5800, 6200, 6800, 7200, 7000, 6500, 5800, 5200, 4700, 4300,
+  3100,3300,3550,3800,4000,4400,4900,5100,5300,5500,5700,5900,
+  6050,6200,6350,6450,6550,6500,6300,6050,5800,5500,5250,5000,
+  4800,4650,4500,4350,4200,4050,3950,3850,
 ];
 
-interface Campaign {
-  name: string; spend: string; conv: string; cpa: string; cpaTone: 'good' | 'bad' | 'neutral';
-  is: string;
-  spark: number[]; sparkColor: string;
-}
+interface Campaign { name: string; meta: string; cpaTone?: 'bad' | 'good' | 'neutral'; cpa: string; }
 const TOP_CAMPAIGNS: Campaign[] = [
-  { name: 'oh_brand_search', spend: '$5,274', conv: '126 conv', cpa: '$42',  cpaTone: 'good',    is: '18% IS', spark: [10,9,8,9,7,8,6,7],  sparkColor: '#22C55E' },
-  { name: 'or_brand_search', spend: '$4,810', conv: '56 conv',  cpa: '$86',  cpaTone: 'neutral', is: '93% IS', spark: [11,10,9,8,7,6,6,5], sparkColor: '#22C55E' },
-  { name: 'wa_brand_search', spend: '$5,453', conv: '55 conv',  cpa: '$99',  cpaTone: 'neutral', is: '85% IS', spark: [10,9,10,8,9,7,8,6], sparkColor: '#22C55E' },
-  { name: 'oh_sud_search',   spend: '$5,362', conv: '87 conv',  cpa: '$62',  cpaTone: 'neutral', is: '15% IS', spark: [9,10,8,9,7,9,7,8],  sparkColor: '#8057FF' },
+  { name: 'oh_brand_search', meta: '$5,274 · 126 conv',  cpa: '$42 CPA', cpaTone: 'good'    },
+  { name: 'or_brand_search', meta: '$4,810 · 56 conv',   cpa: '$86 CPA', cpaTone: 'neutral' },
+  { name: 'oh_sud_search',   meta: '$5,362 · 87 conv',   cpa: '$62 CPA', cpaTone: 'neutral' },
 ];
 const BAD_CAMPAIGNS: Campaign[] = [
-  { name: 'nm_sud_search',   spend: '$2,603', conv: '9 conv',  cpa: '$289', cpaTone: 'bad',     is: '41% IS',      spark: [6,7,8,9,10,11,12,13],  sparkColor: '#EF4444' },
-  { name: 'nc_brand_search', spend: '$5,043', conv: '28 conv', cpa: '$180', cpaTone: 'bad',     is: '84% IS',      spark: [7,8,9,10,11,11,12,12], sparkColor: '#EF4444' },
-  { name: 'co_sud_search',   spend: '$2,990', conv: '19 conv', cpa: '$157', cpaTone: 'bad',     is: '19% IS',      spark: [9,10,10,11,12,12,13,13], sparkColor: '#EF4444' },
-  { name: 'wa_sud_video',    spend: '$1,926', conv: '33 conv', cpa: '$58',  cpaTone: 'neutral', is: '13k clicks',  spark: [8,9,9,10,11,12,13,14], sparkColor: '#FBBF24' },
+  { name: 'nm_sud_search',   meta: '$2,603 · 9 conv',    cpa: '$289 CPA', cpaTone: 'bad' },
+  { name: 'nc_brand_search', meta: '$5,043 · 28 conv',   cpa: '$180 CPA', cpaTone: 'bad' },
+  { name: 'co_sud_search',   meta: '$2,990 · 19 conv',   cpa: '$157 CPA', cpaTone: 'bad' },
 ];
 
-// ─── Theme tokens ──────────────────────────────────────────────────────
-function tokens(theme: Theme) {
-  const dark = theme === 'dark';
-  return {
-    dark,
-    pageBg:     dark ? 'bg-[#0a0a0f]'     : 'bg-transparent',
-    pageRing:   dark ? 'border border-[#1a1a22]' : '',
-    pageRadius: dark ? 'rounded-[14px]'   : '',
-    pagePad:    dark ? 'px-7 py-7'        : '',
+interface ActivityRow { title: string; meta: string; when: string; }
+const ACTIVITY: ActivityRow[] = [
+  { title: 'Search Term Audit', meta: 'Surfaced 47 negative keyword candidates · $4,200/mo recoverable', when: '2h ago' },
+  { title: 'PMAX Asset Review', meta: 'Flagged 3 assets rated "Poor" with replacement suggestions',       when: '5h ago' },
+  { title: 'CPA Monitor',       meta: 'Detected anomaly: or_sud_search CPA up 43% week over week',         when: '1d ago' },
+];
 
-    fgPrimary:  dark ? 'text-white'       : 'text-ppc-black',
-    fgBody:     dark ? 'text-[#b8b8c0]'   : 'text-ppc-neutral-700',
-    fgMuted:    dark ? 'text-[#7a7a86]'   : 'text-ppc-neutral-500',
-    fgDim:      dark ? 'text-[#5a5a66]'   : 'text-ppc-neutral-400',
-    fgEyebrow:  dark ? 'text-[#6a6a76]'   : 'text-ppc-neutral-500',
-
-    cardBg:       dark ? 'bg-[#101016]'                 : 'bg-white',
-    cardBorder:   dark ? 'border-[#1a1a22]'             : 'border-ppc-neutral-100',
-    rowBorder:    dark ? 'border-[#14141a]'             : 'border-ppc-neutral-100',
-    cardHover:    dark ? 'hover:border-[#2a2a36]'       : 'hover:border-ppc-purple-200',
-
-    rowHover:     dark ? 'hover:bg-white/[0.02]'        : 'hover:bg-ppc-neutral-25',
-    rowHighlight: dark ? 'bg-[rgba(124,109,255,0.05)]'  : 'bg-ppc-purple-50/40',
-
-    iconChipBg: dark ? 'bg-[rgba(124,109,255,0.12)]' : 'bg-ppc-purple-50',
-    iconChipFg: dark ? 'text-[#a89fff]'              : 'text-ppc-purple-500',
-
-    purpleLink: dark ? 'text-[#a89fff]' : 'text-ppc-purple-500',
-
-    kbdBg:     dark ? 'bg-[rgba(255,255,255,0.06)]' : 'bg-ppc-neutral-50',
-    kbdBorder: dark ? 'border-[#2a2a36]'             : 'border-ppc-neutral-200',
-    kbdFg:     dark ? 'text-[#b8b8c0]'              : 'text-ppc-neutral-600',
-
-    segmentBg:        dark ? 'bg-[rgba(255,255,255,0.04)]' : 'bg-ppc-neutral-50',
-    segmentActiveBg:  dark ? 'bg-[#1f1f28]'                : 'bg-white',
-    segmentActiveFg:  dark ? 'text-white'                  : 'text-ppc-black',
-    segmentInactiveFg:dark ? 'text-[#7a7a86]'              : 'text-ppc-neutral-500',
-    segmentBorder:    dark ? 'border-[#2a2a36]'            : 'border-ppc-neutral-200',
-
-    tabActiveFg:   dark ? 'text-white'      : 'text-ppc-black',
-    tabInactiveFg: dark ? 'text-[#7a7a86]'  : 'text-ppc-neutral-500',
-    tabBorder:     dark ? 'border-[#1a1a22]' : 'border-ppc-neutral-100',
-
-    pillCritBg:     dark ? 'bg-[rgba(239,68,68,0.12)]'      : 'bg-ppc-error/10',
-    pillCritFg:     dark ? 'text-[#fca5a5]'                 : 'text-ppc-error',
-    pillCritBorder: dark ? 'border-[rgba(239,68,68,0.25)]'  : 'border-ppc-error/20',
-
-    statusOk:    dark ? 'text-[#7a7a86]' : 'text-ppc-neutral-500',
-
-    chartGrid:  dark ? '#1a1a22' : '#E5E5F9',
-    chartAxis:  dark ? '#5a5a66' : '#80809C',
-    chartLine:  dark ? '#8a7dff' : '#8057FF',
-  };
-}
+// ─── Avatar palette ────────────────────────────────────────────────────
+const AVATAR: Record<string, { bg: string; fg: string }> = {
+  'boulder-care':       { bg: '#22C55E', fg: '#052E16' },
+  'the-hoth':           { bg: '#EF4444', fg: '#450A0A' },
+  'durable':            { bg: '#14B8A6', fg: '#042F2C' },
+  'linkbuilder':        { bg: '#65D6A1', fg: '#053723' },
+  'livingyoung':        { bg: '#3B82F6', fg: '#0B1F4F' },
+  'authority-builders': { bg: '#5B7CF8', fg: '#0E1A4D' },
+  'edwin-novel':        { bg: '#D946A8', fg: '#3F0D2E' },
+  'flock':              { bg: '#C08A2E', fg: '#3A2406' },
+};
 
 // ─── Page ──────────────────────────────────────────────────────────────
 export function ProjectPage() {
   const { id } = useParams();
   const project = PROJECTS.find((p) => p.id === id);
-  const [theme, setTheme] = useState<Theme>('light');
-  const t = tokens(theme);
-
   if (!project) return <Navigate to="/projects" replace />;
-
-  const avatarMap: Record<string, { bg: string; fg: string }> = {
-    'boulder-care':       { bg: '#22C55E', fg: '#052E16' },
-    'the-hoth':           { bg: '#EF4444', fg: '#450A0A' },
-    'durable':            { bg: '#14B8A6', fg: '#042F2C' },
-    'linkbuilder':        { bg: '#65D6A1', fg: '#053723' },
-    'livingyoung':        { bg: '#3B82F6', fg: '#0B1F4F' },
-    'authority-builders': { bg: '#5B7CF8', fg: '#0E1A4D' },
-    'edwin-novel':        { bg: '#D946A8', fg: '#3F0D2E' },
-    'flock':              { bg: '#C08A2E', fg: '#3A2406' },
-  };
-  const avatar = avatarMap[project.id] ?? { bg: '#8057FF', fg: '#FFFFFF' };
+  const avatar = AVATAR[project.id] ?? { bg: '#7F5AF0', fg: '#FFFFFF' };
 
   return (
-    <div>
-      <div className="mb-4 flex justify-end">
-        <ThemeToggle theme={theme} onChange={setTheme} />
+    <div
+      className="rounded-[14px] border px-7 py-7 sm:px-8 sm:py-8"
+      style={{ background: C.pageBg, borderColor: '#e8e6f0', color: C.ink }}
+    >
+      {/* ── 1. Breadcrumb + Run agent ─────────────────────────────── */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center gap-1.5 text-[11px]" style={{ color: C.neutral5 }}>
+          <Link to="/projects" className="hover:text-[#18181b] transition-colors">Projects</Link>
+          <span style={{ color: C.neutral3 }}>/</span>
+          <span style={{ color: C.neutral7 }}>{project.name}</span>
+        </div>
+        <button
+          className="inline-flex items-center gap-1.5 rounded-[8px] px-3.5 py-2 text-[13px] font-medium text-white shadow-[0_1px_2px_rgba(124,109,255,0.35)] transition-transform hover:-translate-y-px"
+          style={{ background: C.purple }}
+        >
+          <Lightning size={14} weight="fill" />
+          Run agent
+          <CaretDown size={11} weight="bold" className="opacity-70" />
+        </button>
       </div>
 
-      <div className={`${t.pageBg} ${t.pageRing} ${t.pageRadius} ${t.pagePad}`}>
-        {/* ─── 1. Breadcrumb + connection + dots ───────────────────── */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5 text-[13px]">
-            <span className="grid h-7 w-7 place-items-center rounded-[6px] bg-ppc-purple-500 text-[12px] font-bold text-white">io</span>
-            <Link to="/projects" className={`font-medium ${t.fgMuted}`}>Projects</Link>
-            <span className={t.fgDim}>/</span>
-            <span className={`font-medium ${t.fgPrimary}`}>{project.name}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className={`inline-flex items-center gap-1.5 text-[12px] ${t.statusOk}`}>
-              <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" />
-              Connected
-              <span className={t.fgDim}>·</span>
-              synced 4m
+      {/* ── 2. Hero ───────────────────────────────────────────────── */}
+      <header className="mt-5 flex items-center gap-4">
+        <div
+          className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[10px] text-[16px] font-semibold"
+          style={{ background: avatar.bg, color: avatar.fg }}
+        >
+          {project.name.charAt(0)}
+        </div>
+        <div className="min-w-0">
+          <h1
+            className="text-[26px] font-semibold leading-[1.1]"
+            style={{ color: C.ink, letterSpacing: '-0.018em' }}
+          >
+            {project.name}
+          </h1>
+          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11.5px]" style={{ color: C.neutral5 }}>
+            <span>{project.industry}</span>
+            <span style={{ color: C.neutral3 }}>·</span>
+            <span>Lead gen</span>
+            <span style={{ color: C.neutral3 }}>·</span>
+            <span className="inline-flex items-center gap-1.5" style={{ color: C.red }}>
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: C.redDot }} />
+              1 critical, 3 warnings
             </span>
-            <button className={`grid h-7 w-7 place-items-center rounded-[6px] ${t.fgMuted} ${t.rowHover}`}>
-              <DotsThree size={16} weight="bold" />
-            </button>
           </div>
         </div>
+      </header>
 
-        {/* ─── 2. Hero ──────────────────────────────────────────────── */}
-        <header className="mt-6 flex items-start justify-between gap-6">
-          <div className="flex items-start gap-4">
-            <div
-              className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-[12px] text-[34px] font-medium"
-              style={{ background: avatar.bg, color: avatar.fg }}
+      {/* ── 3. Tabs ───────────────────────────────────────────────── */}
+      <nav
+        className="mt-6 flex items-center gap-0 border-b text-[12px]"
+        style={{ borderColor: C.border }}
+      >
+        <Tab active>Overview</Tab>
+        <Tab>Business context</Tab>
+        <Tab>Competitors</Tab>
+        <Tab>AI instructions</Tab>
+        <Tab>Settings</Tab>
+      </nav>
+
+      {/* ── 4. Today's brief ──────────────────────────────────────── */}
+      <SectionHeading
+        title="Today's brief"
+        sub={
+          <>
+            <span className="tabular">4</span> findings · est.{' '}
+            <span className="tabular font-medium" style={{ color: C.green }}>$5,400/mo</span>{' '}
+            recoverable · updated 2h ago
+          </>
+        }
+        right={<HeaderLink to="#">Run all audits</HeaderLink>}
+        marginTop="mt-6"
+      />
+
+      <div
+        className="mt-3.5 overflow-hidden rounded-[10px] border"
+        style={{ background: C.cardBg, borderColor: C.border }}
+      >
+        {FINDINGS.map((f, i) => {
+          const isLast = i === FINDINGS.length - 1;
+          const dot = f.tone === 'critical' ? C.redDot : C.amberDot;
+          return (
+            <a
+              key={i}
+              href="#"
+              className="grid grid-cols-[14px_1fr_auto_14px] items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-[#fafafd]"
+              style={{
+                borderBottom: isLast ? 'none' : `1px solid ${C.rowBorder}`,
+              }}
             >
-              {project.name.charAt(0)}
-            </div>
-            <div className="pt-1">
-              <h1 className={`text-[36px] font-bold leading-[1] tracking-[-0.02em] ${t.fgPrimary}`}>
-                {project.name}
-              </h1>
-              <div className={`mt-2 flex flex-wrap items-center gap-3 text-[13.5px] ${t.fgMuted}`}>
-                <span>{project.industry}</span>
-                <span className={t.fgDim}>·</span>
-                <span>Lead gen</span>
-                <span
-                  className={`ml-1 inline-flex items-center gap-1.5 rounded-pill border ${t.pillCritBorder} ${t.pillCritBg} px-2.5 py-1 text-[12px] font-medium ${t.pillCritFg}`}
-                >
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#ef4444]" />
-                  1 critical
-                  <span className="text-[#7a7a86]">·</span>
-                  3 warnings
-                </span>
+              <span
+                className="h-[7px] w-[7px] rounded-full"
+                style={{
+                  background: dot,
+                  boxShadow: f.tone === 'critical' ? `0 0 0 3px rgba(239,68,68,0.12)` : 'none',
+                }}
+              />
+              <div className="min-w-0">
+                <div className="truncate text-[13.5px] font-medium leading-tight" style={{ color: C.ink }}>
+                  {f.title}
+                </div>
+                <div className="mt-1 text-[11px]" style={{ color: C.neutral5 }}>
+                  <span>{f.source}</span>
+                  <span className="mx-1.5" style={{ color: C.neutral3 }}>·</span>
+                  {f.meta}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className={`text-[13px] font-semibold leading-none ${f.rightTopColor}`}>
+                  {f.rightTop}
+                </div>
+                <div className="mt-1 text-[10px]" style={{ color: C.neutral4 }}>
+                  {f.rightBottom}
+                </div>
+              </div>
+              <ArrowRight size={13} weight="bold" style={{ color: C.neutral4 }} />
+            </a>
+          );
+        })}
+      </div>
+
+      {/* ── 5. Run an agent — signature dark cards ───────────────── */}
+      <SectionHeading
+        title="Run an agent"
+        right={<HeaderLink to="/agents">Browse all 24</HeaderLink>}
+        marginTop="mt-12"
+      />
+
+      <div className="mt-3.5 grid grid-cols-1 gap-3 md:grid-cols-3">
+        {AGENT_CARDS.map((a) => {
+          const Icon = a.icon;
+          return (
+            <Link
+              key={a.slug}
+              to={`/agents/${a.slug}`}
+              className="group relative flex flex-col rounded-[12px] border p-5 transition-all duration-200 hover:-translate-y-px hover:border-[#2a2a36]"
+              style={{ background: C.darkBg, borderColor: C.darkBorder }}
+            >
+              <div
+                className="grid h-[42px] w-[42px] place-items-center rounded-[10px]"
+                style={{ background: a.chipBg }}
+              >
+                <Icon size={22} weight="duotone" style={{ color: a.chipFg }} />
+              </div>
+
+              <div className="mt-5 text-[15px] font-medium leading-snug tracking-[-0.005em] text-white">
+                {a.title}<span style={{ color: C.purpleSoft }}>.</span>
+              </div>
+              <div className="mt-2 flex-1 text-[12px] leading-[1.55]" style={{ color: C.darkText }}>
+                {a.blurb}
+              </div>
+
+              <div
+                className="mt-5 inline-flex items-center gap-1 text-[12px] font-medium"
+                style={{ color: C.purpleSoft }}
+              >
+                Send in
+                <ArrowRight size={12} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* ── 6. Performance ────────────────────────────────────────── */}
+      <SectionHeading
+        title="Performance"
+        right={
+          <button
+            className="inline-flex items-center gap-1.5 rounded-[6px] border bg-white px-2.5 py-1 text-[11px] font-medium"
+            style={{ borderColor: C.border, color: C.neutral7 }}
+          >
+            Last 30 days
+            <CaretDown size={10} weight="bold" style={{ color: C.neutral4 }} />
+          </button>
+        }
+        marginTop="mt-12"
+      />
+
+      <div className="mt-3.5 grid grid-cols-2 gap-2.5 md:grid-cols-4">
+        {KPI_CARDS.map((k) => (
+          <KpiCardBlock key={k.label} kpi={k} />
+        ))}
+      </div>
+
+      <DailyTrendChart data={SPEND_TREND} />
+
+      {/* ── 7. Recent activity ───────────────────────────────────── */}
+      <SectionHeading
+        title="Recent activity"
+        right={
+          <Link to="#" className="text-[12px] font-medium" style={{ color: C.purple }}>
+            View all
+          </Link>
+        }
+        marginTop="mt-10"
+      />
+
+      <div className="relative mt-3.5 pl-1">
+        <div
+          className="absolute bottom-3 left-[5.5px] top-3 w-px"
+          style={{ background: C.border }}
+        />
+        {ACTIVITY.map((a) => (
+          <div key={a.title} className="relative flex items-start gap-4 py-2.5">
+            <span
+              className="relative z-10 mt-1.5 h-[11px] w-[11px] shrink-0 rounded-full"
+              style={{
+                background: C.greenDot,
+                boxShadow: `0 0 0 2px ${C.pageBg}`,
+              }}
+            />
+            <div className="flex flex-1 items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-[13px] font-medium" style={{ color: C.ink }}>
+                  {a.title}
+                </div>
+                <div className="mt-0.5 text-[11px]" style={{ color: C.neutral5 }}>
+                  {a.meta}
+                </div>
+              </div>
+              <div className="text-[11px] whitespace-nowrap" style={{ color: C.neutral4 }}>
+                {a.when}
               </div>
             </div>
           </div>
-          <button className={`inline-flex items-center gap-2 rounded-[10px] border px-4 py-2.5 text-[13.5px] font-medium ${t.cardBorder} ${t.fgPrimary} ${t.cardHover}`}>
-            <Lightning size={14} weight="fill" className={t.iconChipFg} />
-            Run agent
-          </button>
-        </header>
+        ))}
+      </div>
 
-        {/* ─── 3. Tabs ──────────────────────────────────────────────── */}
-        <div className={`mt-7 border-b ${t.tabBorder}`}>
-          <nav className="flex items-center gap-7 text-[13.5px]">
-            <Tab t={t} active>Overview</Tab>
-            <Tab t={t}>Business context</Tab>
-            <Tab t={t}>Competitors</Tab>
-            <Tab t={t}>AI instructions</Tab>
-            <Tab t={t}>Reports</Tab>
-            <Tab t={t}>Settings</Tab>
-          </nav>
-        </div>
+      {/* ── 8. Campaigns ─────────────────────────────────────────── */}
+      <SectionHeading
+        title="Campaigns"
+        sub={<><span className="tabular">152</span> total · <span className="tabular">8</span> types</>}
+        right={
+          <Link to="#" className="inline-flex items-center gap-1 text-[12px] font-medium" style={{ color: C.purple }}>
+            View all <ArrowRight size={11} weight="bold" />
+          </Link>
+        }
+        marginTop="mt-10"
+      />
 
-        {/* ─── 4. What should we work on? ──────────────────────────── */}
-        <section className="mt-9">
-          <h2 className={`text-[26px] font-bold leading-none tracking-[-0.015em] ${t.fgPrimary}`}>
-            What should we work on?
-          </h2>
-          <p className={`mt-2 flex items-center gap-2 text-[13px] ${t.fgMuted}`}>
-            Launch a specialist, or hit
-            <Kbd t={t}><Command size={10} weight="bold" />K</Kbd>
-            to ask anything
-          </p>
+      <div className="mt-3.5 grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <CampaignCard title="Top performers" tone="good" items={TOP_CAMPAIGNS} />
+        <CampaignCard title="Needs attention" tone="bad"  items={BAD_CAMPAIGNS} />
+      </div>
 
-          <div className="mt-6 flex items-end justify-between">
-            <div className={`font-mono text-[10.5px] font-medium uppercase tracking-[0.16em] ${t.fgEyebrow}`}>
-              Agents
-            </div>
-            <Link to="/agents" className={`inline-flex items-center gap-1 text-[12.5px] font-semibold ${t.purpleLink}`}>
-              All 14 agents <ArrowRight size={11} weight="bold" />
-            </Link>
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
-            {AGENT_CARDS.map((a) => {
-              const Icon = a.icon;
-              return (
-                <Link
-                  key={a.slug}
-                  to={`/agents/${a.slug}`}
-                  className={`group rounded-[12px] border ${t.cardBorder} ${t.cardBg} p-4 transition-colors ${t.cardHover}`}
-                >
-                  <div className={`flex h-9 w-9 items-center justify-center rounded-[8px] ${t.iconChipBg}`}>
-                    <Icon size={17} weight="duotone" className={t.iconChipFg} />
-                  </div>
-                  <div className={`mt-7 text-[14.5px] font-semibold leading-tight tracking-tight ${t.fgPrimary}`}>
-                    {a.title}
-                  </div>
-                  <div className={`mt-1 text-[12px] ${t.fgMuted}`}>
-                    {a.sub}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ─── 5. Recent activity ──────────────────────────────────── */}
-        <section className="mt-12">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <h2 className={`text-[22px] font-bold leading-none tracking-[-0.015em] ${t.fgPrimary}`}>
-                Recent activity
-              </h2>
-              <p className={`mt-2 text-[12.5px] ${t.fgMuted}`}>
-                <span className="tabular">4</span> open findings · est.
-                <span className="tabular ml-1 font-medium text-[#22c55e]">$5,400/mo</span>
-                <span className="ml-1">recoverable</span>
-              </p>
-            </div>
-            <Link to="/reports/run-competitor-spy-completed" className={`inline-flex items-center gap-1 text-[12.5px] font-semibold ${t.purpleLink}`}>
-              View all <ArrowRight size={11} weight="bold" />
-            </Link>
-          </div>
-
-          <div className={`mt-4 overflow-hidden rounded-[12px] border ${t.cardBorder} ${t.cardBg}`}>
-            {FINDINGS.map((f, i) => {
-              const dotColor =
-                f.tone === 'critical' ? '#ef4444' :
-                f.tone === 'warning'  ? '#fbbf24' :
-                                        '#5a5a66';
-              const isLast = i === FINDINGS.length - 1;
-              const highlight = i === 0;
-              return (
-                <div
-                  key={i}
-                  className={[
-                    'flex items-center gap-4 px-5 py-4',
-                    !isLast ? `border-b ${t.rowBorder}` : '',
-                    highlight ? t.rowHighlight : '',
-                  ].join(' ')}
-                >
-                  <span
-                    className="h-[7px] w-[7px] shrink-0 rounded-full"
-                    style={{
-                      background: dotColor,
-                      boxShadow: f.tone === 'critical' ? '0 0 0 3px rgba(239,68,68,0.18)' : 'none',
-                    }}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className={`flex items-center gap-2 text-[14px] font-semibold ${t.fgPrimary}`}>
-                      <span className="truncate">{f.title}</span>
-                      {f.failedBadge && (
-                        <span className={`rounded-[5px] border ${t.pillCritBorder} ${t.pillCritBg} px-1.5 py-px text-[10.5px] font-medium ${t.pillCritFg}`}>
-                          Failed
-                        </span>
-                      )}
-                    </div>
-                    <div className={`mt-1 text-[12px] ${t.fgMuted}`}>
-                      {f.source && <span>{f.source}</span>}
-                      {f.source && <span className={`mx-1.5 ${t.fgDim}`}>·</span>}
-                      {f.meta}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className={`tabular text-[13.5px] font-semibold ${f.rightTopColor || t.fgPrimary}`}>
-                      {f.rightTop}
-                    </div>
-                    {f.rightBottom && (
-                      <div className={`text-[11.5px] ${t.fgMuted}`}>{f.rightBottom}</div>
-                    )}
-                  </div>
-                  <ArrowRight size={12} weight="bold" className={t.fgDim} />
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ─── 6. Performance ──────────────────────────────────────── */}
-        <section className="mt-12">
-          <div className="flex items-end justify-between gap-4">
-            <h2 className={`text-[22px] font-bold leading-none tracking-[-0.015em] ${t.fgPrimary}`}>
-              Performance
-            </h2>
-            <span className={`text-[12px] ${t.fgMuted}`}>last 30 days vs prior</span>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-            {KPI_CARDS.map((k) => {
-              const deltaColor =
-                k.deltaTone === 'down-good' ? 'text-[#22c55e]' :
-                k.deltaTone === 'up-good'   ? 'text-[#22c55e]' :
-                k.deltaTone === 'up-bad'    ? 'text-[#f87171]' :
-                                              t.fgMuted;
-              return (
-                <div key={k.label} className={`rounded-[12px] border ${t.cardBorder} ${t.cardBg} px-4 py-4`}>
-                  <div className={`font-mono text-[10px] font-medium uppercase tracking-[0.12em] ${t.fgEyebrow}`}>
-                    {k.label}
-                  </div>
-                  <div className={`tabular mt-2.5 text-[26px] font-bold leading-none tracking-[-0.015em] ${t.fgPrimary}`}>
-                    {k.value}
-                  </div>
-                  <div className={`tabular mt-2 inline-flex items-center gap-1 text-[12px] font-medium ${deltaColor}`}>
-                    {k.deltaTone === 'up-good' || k.deltaTone === 'up-bad'   ? <ArrowUp size={10} weight="bold" /> :
-                     k.deltaTone === 'down-good'                              ? <ArrowDown size={10} weight="bold" /> :
-                                                                                <ArrowRight size={10} weight="bold" />}
-                    {k.delta}
-                  </div>
-                  <Sparkline points={k.spark} w={170} h={26} accent={k.sparkColor} className="mt-3" />
-                </div>
-              );
-            })}
-          </div>
-
-          <DailyTrendChart t={t} theme={theme} data={SPEND_TREND} />
-        </section>
-
-        {/* ─── 7. Campaigns ────────────────────────────────────────── */}
-        <section className="mt-12">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <h2 className={`text-[22px] font-bold leading-none tracking-[-0.015em] ${t.fgPrimary}`}>
-                Campaigns
-              </h2>
-              <p className={`mt-2 text-[12.5px] ${t.fgMuted}`}>
-                <span className="tabular">152</span> total · <span className="tabular">8</span> types
-              </p>
-            </div>
-            <Link to="#" className={`inline-flex items-center gap-1 text-[12.5px] font-semibold ${t.purpleLink}`}>
-              View all <ArrowRight size={11} weight="bold" />
-            </Link>
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-            <CampaignCard t={t} title="Top performers" tone="good" items={TOP_CAMPAIGNS} />
-            <CampaignCard t={t} title="Needs attention" tone="bad" items={BAD_CAMPAIGNS} />
-          </div>
-        </section>
-
-        {/* ─── 8. Command bar ──────────────────────────────────────── */}
-        <div className={`mt-10 flex items-center gap-3 rounded-[12px] border ${t.cardBorder} ${t.cardBg} px-4 py-3.5`}>
-          <ChatCircleDots size={16} weight="duotone" className={t.iconChipFg} />
-          <span className={`flex-1 text-[13.5px] ${t.fgMuted}`}>
-            Ask about <span className={t.fgBody}>{project.name}</span> · try "where am I wasting spend?"
-          </span>
-          <Kbd t={t}><Command size={10} weight="bold" />K</Kbd>
-        </div>
+      {/* ── 9. Ask command bar ───────────────────────────────────── */}
+      <div
+        className="mt-8 flex items-center gap-3 rounded-[12px] border px-4 py-3.5"
+        style={{ background: C.darkBg, borderColor: C.darkBorder }}
+      >
+        <ChatCircleDots size={17} weight="duotone" style={{ color: C.purpleSoft }} />
+        <span className="flex-1 text-[13px]" style={{ color: C.darkText }}>
+          Ask about <span style={{ color: '#ffffff' }}>{project.name}</span>
+          <span className="mx-1.5" style={{ color: C.darkMuted }}>·</span>
+          try "where am I wasting spend?"
+        </span>
+        <kbd
+          className="inline-flex items-center gap-[2px] rounded-[5px] border px-1.5 py-0.5 font-mono text-[10px] font-medium"
+          style={{ background: C.darkKbdBg, borderColor: C.darkKbdBor, color: C.darkText }}
+        >
+          <Command size={9} weight="bold" />K
+        </kbd>
       </div>
     </div>
   );
@@ -477,78 +459,120 @@ export function ProjectPage() {
 
 // ─── Subcomponents ─────────────────────────────────────────────────────
 
-type Tokens = ReturnType<typeof tokens>;
-
-function ThemeToggle({ theme, onChange }: { theme: Theme; onChange: (t: Theme) => void }) {
-  const isDark = theme === 'dark';
+function SectionHeading({
+  title, sub, right, marginTop = 'mt-10',
+}: {
+  title: string;
+  sub?: React.ReactNode;
+  right?: React.ReactNode;
+  marginTop?: string;
+}) {
   return (
-    <div className="inline-flex items-center gap-1 rounded-pill border border-ppc-neutral-200 bg-white p-[3px] shadow-ppc-sm">
-      <button
-        onClick={() => onChange('light')}
-        className={`inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-[11px] font-semibold tracking-tight transition-colors ${
-          !isDark ? 'bg-ppc-black text-white' : 'text-ppc-neutral-500 hover:text-ppc-black'
-        }`}
-      >
-        <Sun size={11} weight="bold" /> Light
-      </button>
-      <button
-        onClick={() => onChange('dark')}
-        className={`inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-[11px] font-semibold tracking-tight transition-colors ${
-          isDark ? 'bg-ppc-black text-white' : 'text-ppc-neutral-500 hover:text-ppc-black'
-        }`}
-      >
-        <Moon size={11} weight="bold" /> Dark
-      </button>
+    <div className={`${marginTop} flex items-baseline justify-between gap-4`}>
+      <div>
+        <h2
+          className="text-[16px] font-medium leading-tight"
+          style={{ color: C.ink, letterSpacing: '-0.01em' }}
+        >
+          {title}<span style={{ color: C.purple }}>.</span>
+        </h2>
+        {sub && (
+          <p className="mt-1 text-[11px]" style={{ color: C.neutral5 }}>
+            {sub}
+          </p>
+        )}
+      </div>
+      {right}
     </div>
   );
 }
 
-function Tab({ children, active = false, t }: { children: React.ReactNode; active?: boolean; t: Tokens }) {
+function HeaderLink({ children, to }: { children: React.ReactNode; to: string }) {
+  return (
+    <Link
+      to={to}
+      className="inline-flex items-center gap-1 text-[12px] font-medium transition-colors"
+      style={{ color: C.purple }}
+    >
+      {children}
+      <ArrowRight size={11} weight="bold" />
+    </Link>
+  );
+}
+
+function Tab({ children, active = false }: { children: React.ReactNode; active?: boolean }) {
   return (
     <button
-      className={`relative -mb-px border-b-2 pb-3 pt-1 text-[13.5px] font-medium transition-colors ${
-        active
-          ? `${t.tabActiveFg} border-[#7c6dff]`
-          : `${t.tabInactiveFg} border-transparent`
-      }`}
+      className="-mb-px border-b-2 px-3.5 py-2.5 transition-colors"
+      style={{
+        color: active ? C.ink : C.neutral5,
+        fontWeight: active ? 500 : 400,
+        borderColor: active ? C.purple : 'transparent',
+      }}
     >
       {children}
     </button>
   );
 }
 
-function Kbd({ t, children }: { t: Tokens; children: React.ReactNode }) {
+function KpiCardBlock({ kpi }: { kpi: KpiCard }) {
+  const deltaColor =
+    kpi.deltaTone === 'up-bad'    ? C.red :
+    kpi.deltaTone === 'up-good'   ? C.green :
+    kpi.deltaTone === 'down-good' ? C.green :
+                                    C.neutral5;
+  const Arrow =
+    kpi.deltaTone === 'flat'      ? ArrowRight :
+    kpi.deltaTone === 'down-good' ? ArrowDown :
+                                    ArrowUp;
   return (
-    <kbd className={`inline-flex items-center gap-[2px] rounded-[5px] border ${t.kbdBorder} ${t.kbdBg} px-1.5 py-0.5 font-mono text-[10.5px] font-medium ${t.kbdFg}`}>
-      {children}
-    </kbd>
+    <div
+      className="rounded-[10px] border px-3.5 py-3.5"
+      style={{ background: C.cardBg, borderColor: C.border }}
+    >
+      <div
+        className="text-[10px] font-medium uppercase"
+        style={{ color: C.neutral5, letterSpacing: '0.1em' }}
+      >
+        {kpi.label}
+      </div>
+      <div className="tabular mt-2 text-[20px] font-semibold leading-none tracking-[-0.01em]" style={{ color: C.ink }}>
+        {kpi.value}
+      </div>
+      <div className="tabular mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium" style={{ color: deltaColor }}>
+        <Arrow size={10} weight="bold" />
+        {kpi.delta}
+      </div>
+      <Sparkline points={kpi.spark} color={C.purple} className="mt-1.5" />
+    </div>
   );
 }
 
-function Sparkline({
-  points, w, h, accent, className = '',
-}: { points: number[]; w: number; h: number; accent: string; className?: string }) {
-  const max = 22;
-  const stepX = w / (points.length - 1);
+function Sparkline({ points, color, className = '' }: { points: number[]; color: string; className?: string }) {
+  const W = 120, H = 22, max = 22;
+  const stepX = W / (points.length - 1);
   const path = points
     .map((y, i) => `${i === 0 ? 'M' : 'L'}${(i * stepX).toFixed(2)},${y.toFixed(2)}`)
     .join(' ');
   return (
-    <svg width={w} height={h} viewBox={`0 0 ${w} ${max}`} className={`block ${className}`} preserveAspectRatio="none">
-      <path d={path} fill="none" stroke={accent} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="100%" height={H} viewBox={`0 0 ${W} ${max}`} className={`block ${className}`} preserveAspectRatio="none">
+      <path d={path} fill="none" stroke={color} strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function DailyTrendChart({ t, theme, data }: { t: Tokens; theme: Theme; data: number[] }) {
+function DailyTrendChart({ data }: { data: number[] }) {
   const [metric, setMetric] = useState<'spend' | 'conv' | 'cpa' | 'ctr'>('spend');
-  const W = 1100;
-  const H = 240;
-  const padL = 36;
-  const padR = 12;
-  const padT = 18;
-  const padB = 30;
-  const maxY = 8000;
+  const segments = [
+    { id: 'spend', label: 'Spend' },
+    { id: 'conv',  label: 'Conv' },
+    { id: 'cpa',   label: 'CPA' },
+    { id: 'ctr',   label: 'CTR' },
+  ] as const;
+
+  const W = 600, H = 130;
+  const padL = 0, padR = 0, padT = 6, padB = 22;
+  const maxY = Math.max(...data) * 1.1;
   const innerW = W - padL - padR;
   const innerH = H - padT - padB;
 
@@ -576,121 +600,105 @@ function DailyTrendChart({ t, theme, data }: { t: Tokens; theme: Theme; data: nu
 
   const line = smoothPath(pts);
   const area = `${line} L ${pts[pts.length - 1].x.toFixed(2)} ${(padT + innerH).toFixed(2)} L ${pts[0].x.toFixed(2)} ${(padT + innerH).toFixed(2)} Z`;
-  const fillId = theme === 'dark' ? 'projectChartFillDark' : 'projectChartFillLight';
 
-  const xTicks = [
-    { label: '14 Apr', i: 0 },
-    { label: '22 Apr', i: Math.round(data.length / 3) },
-    { label: '30 Apr', i: Math.round((2 * data.length) / 3) },
-    { label: '8 May',  i: data.length - 1 },
-  ];
-
-  const segments = [
-    { id: 'spend', label: 'Spend' },
-    { id: 'conv',  label: 'Conv' },
-    { id: 'cpa',   label: 'CPA' },
-    { id: 'ctr',   label: 'CTR' },
-  ] as const;
+  const xLabels = ['14 Apr', '20 Apr', '26 Apr', '2 May', '8 May', '14 May'];
 
   return (
-    <div className={`mt-3 rounded-[12px] border ${t.cardBorder} ${t.cardBg}`}>
-      <div className="flex items-center justify-between px-5 pt-4">
-        <div className={`text-[13.5px] font-semibold ${t.fgPrimary}`}>Daily spend trend</div>
-        <div className={`inline-flex gap-px rounded-[8px] border ${t.segmentBorder} ${t.segmentBg} p-[2px]`}>
-          {segments.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setMetric(s.id)}
-              className={`rounded-[6px] px-3 py-1 text-[12px] font-medium transition-colors ${
-                metric === s.id ? `${t.segmentActiveBg} ${t.segmentActiveFg}` : t.segmentInactiveFg
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
+    <div
+      className="mt-3 rounded-[10px] border px-4 pb-3 pt-3.5"
+      style={{ background: C.cardBg, borderColor: C.border }}
+    >
+      <div className="flex items-center justify-between">
+        <div className="text-[12px]" style={{ color: C.neutral7 }}>Daily spend trend</div>
+        <div
+          className="inline-flex gap-[2px] rounded-[6px] p-[3px]"
+          style={{ background: '#f4f3f9' }}
+        >
+          {segments.map((s) => {
+            const active = metric === s.id;
+            return (
+              <button
+                key={s.id}
+                onClick={() => setMetric(s.id)}
+                className="rounded-[4px] px-2.5 py-1 text-[11px] font-medium transition-colors"
+                style={{
+                  background: active ? '#ffffff' : 'transparent',
+                  color:      active ? C.ink     : C.neutral5,
+                  border:     active ? `1px solid ${C.border}` : '1px solid transparent',
+                }}
+              >
+                {s.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="px-2 pb-3 pt-2">
-        <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" style={{ height: H }} preserveAspectRatio="none">
+      <div className="mt-3.5">
+        <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
           <defs>
-            <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"  stopColor={t.chartLine} stopOpacity={theme === 'dark' ? 0.22 : 0.18} />
-              <stop offset="100%" stopColor={t.chartLine} stopOpacity={0} />
+            <linearGradient id="projChartFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"  stopColor={C.purple} stopOpacity={0.18} />
+              <stop offset="100%" stopColor={C.purple} stopOpacity={0} />
             </linearGradient>
           </defs>
-
-          {[0, 0.5, 1].map((p, idx) => {
-            const y = padT + innerH * p;
-            const value = Math.round((1 - p) * maxY);
-            return (
-              <g key={idx}>
-                <line x1={padL} x2={W - padR} y1={y} y2={y} stroke={t.chartGrid} strokeWidth={1} strokeDasharray={p === 1 ? '0' : '3 3'} />
-                <text x={padL - 8} y={y + 4} textAnchor="end" fontSize={10} fill={t.chartAxis}>
-                  {value === 0 ? '0' : `${value / 1000}k`}
-                </text>
-              </g>
-            );
-          })}
-
-          <path d={area} fill={`url(#${fillId})`} />
-          <path d={line} fill="none" stroke={t.chartLine} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-
-          {xTicks.map((tk) => (
-            <text
-              key={tk.label}
-              x={padL + (tk.i / (data.length - 1)) * innerW}
-              y={H - 8}
-              textAnchor={tk.i === 0 ? 'start' : tk.i === data.length - 1 ? 'end' : 'middle'}
-              fontSize={11}
-              fill={t.chartAxis}
-            >
-              {tk.label}
-            </text>
-          ))}
+          <path d={area} fill="url(#projChartFill)" />
+          <path d={line} fill="none" stroke={C.purple} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
         </svg>
+        <div className="mt-2 flex justify-between text-[10px] tabular" style={{ color: C.neutral4 }}>
+          {xLabels.map((l) => <span key={l}>{l}</span>)}
+        </div>
       </div>
     </div>
   );
 }
 
 function CampaignCard({
-  t, title, tone, items,
-}: { t: Tokens; title: string; tone: 'good' | 'bad'; items: Campaign[] }) {
-  const dotColor = tone === 'good' ? '#22c55e' : '#ef4444';
-  const titleColor = tone === 'good' ? 'text-[#22c55e]' : 'text-[#ef4444]';
+  title, tone, items,
+}: {
+  title: string;
+  tone: 'good' | 'bad';
+  items: Campaign[];
+}) {
+  const dot   = tone === 'good' ? C.greenDot : C.redDot;
+  const label = tone === 'good' ? C.green    : C.red;
   return (
-    <div className={`rounded-[12px] border ${t.cardBorder} ${t.cardBg} px-5 py-5`}>
-      <div className="flex items-center gap-2">
-        <span className="h-[7px] w-[7px] rounded-full" style={{ background: dotColor }} />
-        <span className={`text-[13.5px] font-semibold ${titleColor}`}>{title}</span>
+    <div
+      className="rounded-[10px] border px-4 py-3.5"
+      style={{ background: C.cardBg, borderColor: C.border }}
+    >
+      <div className="mb-2.5 flex items-center gap-1.5">
+        <span className="h-1.5 w-1.5 rounded-full" style={{ background: dot }} />
+        <span
+          className="font-mono text-[10px] font-medium uppercase"
+          style={{ color: label, letterSpacing: '0.12em' }}
+        >
+          {title}
+        </span>
       </div>
-      <ul className="mt-4 space-y-3.5">
-        {items.map((c) => (
-          <li key={c.name} className="flex items-center gap-3">
-            <div className="min-w-0 flex-1">
-              <div className={`text-[14px] font-semibold tracking-tight ${t.fgPrimary}`}>
+      <div>
+        {items.map((c, i) => {
+          const isLast = i === items.length - 1;
+          const cpaColor = c.cpaTone === 'bad' ? C.red : c.cpaTone === 'good' ? C.green : C.neutral7;
+          return (
+            <a
+              key={c.name}
+              href="#"
+              className="block py-2.5 transition-colors hover:bg-[#fafafd]"
+              style={{ borderBottom: isLast ? 'none' : `1px solid ${C.rowBorder}` }}
+            >
+              <div className="font-mono text-[12px] font-medium" style={{ color: C.ink }}>
                 {c.name}
               </div>
-              <div className={`mt-0.5 text-[12px] ${t.fgMuted}`}>
-                <span className="tabular">{c.spend}</span>
-                <span className={`mx-1.5 ${t.fgDim}`}>·</span>
-                <span className="tabular">{c.conv}</span>
-                <span className={`mx-1.5 ${t.fgDim}`}>·</span>
-                <span className={`tabular ${
-                  c.cpaTone === 'bad'  ? 'text-[#f87171]' :
-                  c.cpaTone === 'good' ? 'text-[#22c55e]' : ''
-                }`}>{c.cpa}</span>
-                <span className="ml-1">CPA</span>
-                <span className={`mx-1.5 ${t.fgDim}`}>·</span>
-                <span className="tabular">{c.is}</span>
+              <div className="mt-1 tabular text-[10.5px]" style={{ color: C.neutral5 }}>
+                {c.meta}
+                <span className="mx-1.5" style={{ color: C.neutral3 }}>·</span>
+                <span style={{ color: cpaColor, fontWeight: c.cpaTone === 'bad' ? 600 : 400 }}>{c.cpa}</span>
               </div>
-            </div>
-            <Sparkline points={c.spark} w={64} h={20} accent={c.sparkColor} />
-            <ArrowUpRight size={12} weight="bold" className={t.fgDim} />
-          </li>
-        ))}
-      </ul>
+            </a>
+          );
+        })}
+      </div>
     </div>
   );
 }
