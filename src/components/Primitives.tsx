@@ -70,7 +70,7 @@ export function DisplayH1({
       className={`font-display text-[52px] font-extrabold leading-[0.96] tracking-[-0.035em] text-white sm:text-[62px] ${className}`}
     >
       {body}
-      {hasPeriod && <span className="text-ppc-purple-400">.</span>}
+      {hasPeriod && <span className="text-ppc-purple-500">.</span>}
     </h1>
   );
 }
@@ -91,7 +91,7 @@ export function SectionH2({
       className={`font-display text-[30px] font-bold leading-[1.08] tracking-[-0.020em] text-white sm:text-[34px] ${className}`}
     >
       {body}
-      {hasPeriod && <span className="text-ppc-purple-400">.</span>}
+      {hasPeriod && <span className="text-ppc-purple-500">.</span>}
     </h2>
   );
 }

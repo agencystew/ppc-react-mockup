@@ -57,7 +57,7 @@ interface SidebarProps {
 function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside
-      className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-[#1A1A22] bg-[#0A0A0F] transition-[width] duration-200 ${
+      className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-[#1E1830] bg-ppc-sidebar transition-[width] duration-200 ${
         collapsed ? 'w-[72px]' : 'w-[260px]'
       }`}
     >
@@ -115,7 +115,7 @@ function BrandRow({ collapsed, onToggle }: SidebarProps) {
       <button
         onClick={onToggle}
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        className="grid h-8 w-8 place-items-center rounded-md text-[#7A7A86] hover:bg-[#15151C] hover:text-white"
+        className="grid h-8 w-8 place-items-center rounded-md text-[#7A7A86] hover:bg-[#15101F] hover:text-white"
       >
         <SidebarSimple
           size={16}
@@ -135,7 +135,7 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
       <div className="flex justify-center px-2 pb-3">
         <button
           title="Search"
-          className="grid h-9 w-9 place-items-center rounded-md text-[#7A7A86] hover:bg-[#15151C] hover:text-white"
+          className="grid h-9 w-9 place-items-center rounded-md text-[#7A7A86] hover:bg-[#15101F] hover:text-white"
         >
           <MagnifyingGlass size={15} />
         </button>
@@ -152,9 +152,9 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
         <input
           readOnly
           placeholder="Search or jump to"
-          className="w-full cursor-pointer rounded-lg border border-[#1A1A22] bg-[#15151C] py-[8px] pl-8 pr-12 text-[13px] text-white outline-none placeholder:text-[#6A6A78] hover:border-[#26262F]"
+          className="w-full cursor-pointer rounded-lg border border-[#1E1830] bg-[#15101F] py-[8px] pl-8 pr-12 text-[13px] text-white outline-none placeholder:text-[#6A6A78] hover:border-white/14"
         />
-        <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-[#26262F] bg-[#0F0F17] px-[5px] py-[1px] font-mono text-[10.5px] text-[#7A7A86]">
+        <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-white/14 bg-[#15101F] px-[5px] py-[1px] font-mono text-[10.5px] text-[#7A7A86]">
           ⌘K
         </kbd>
       </div>
@@ -191,7 +191,7 @@ function MainNavItem({
         } ${
           active
             ? 'bg-ppc-purple-700 font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]'
-            : 'font-medium text-[#CFCFD9] hover:bg-[#15151C] hover:text-white'
+            : 'font-medium text-[#CFCFD9] hover:bg-[#15101F] hover:text-white'
         }`;
       }}
     >
@@ -259,7 +259,7 @@ function ItemGroup({
         className={`group flex w-full items-center justify-center rounded-lg px-2 py-2 transition-colors ${
           inSection
             ? 'bg-ppc-purple-700 text-white'
-            : 'text-[#CFCFD9] hover:bg-[#15151C] hover:text-white'
+            : 'text-[#CFCFD9] hover:bg-[#15101F] hover:text-white'
         }`}
       >
         <Icon
@@ -279,7 +279,7 @@ function ItemGroup({
         className={`group flex w-full items-center gap-2.5 rounded-lg px-3 py-[8px] text-left text-[14px] transition-colors ${
           inSection
             ? 'bg-ppc-purple-700 font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]'
-            : 'font-medium text-[#CFCFD9] hover:bg-[#15151C] hover:text-white'
+            : 'font-medium text-[#CFCFD9] hover:bg-[#15101F] hover:text-white'
         }`}
       >
         <Icon
@@ -297,7 +297,7 @@ function ItemGroup({
       </button>
 
       {open && (
-        <ul className="mb-1 ml-[26px] mt-0.5 flex flex-col gap-px border-l border-[#1A1A22] pl-2">
+        <ul className="mb-1 ml-[26px] mt-0.5 flex flex-col gap-px border-l border-[#1E1830] pl-2">
           {pages.map((sp) => (
             <li key={sp.to}>
               <NavLink
@@ -307,7 +307,7 @@ function ItemGroup({
                   `block rounded-md px-2 py-[6px] text-[13px] transition-colors ${
                     isActive
                       ? 'bg-ppc-purple-700 font-semibold text-white'
-                      : 'font-medium text-[#9A9AA5] hover:bg-[#15151C] hover:text-white'
+                      : 'font-medium text-[#9A9AA5] hover:bg-[#15101F] hover:text-white'
                   }`
                 }
               >
@@ -326,7 +326,7 @@ function ItemGroup({
 function ProjectsSection({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
-      <div className="mt-3 flex flex-col items-center gap-1.5 border-t border-[#1A1A22] pt-3">
+      <div className="mt-3 flex flex-col items-center gap-1.5 border-t border-[#1E1830] pt-3">
         {PROJECTS.map((p) => (
           <NavLink
             key={p.id}
@@ -334,7 +334,7 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
             title={p.name}
             className={({ isActive }) =>
               `grid h-8 w-8 place-items-center rounded-md text-[12px] font-semibold ${
-                isActive ? 'ring-2 ring-ppc-purple-400/70 ring-offset-2 ring-offset-[#0A0A0F]' : ''
+                isActive ? 'ring-2 ring-ppc-purple-400/70 ring-offset-2 ring-offset-ppc-sidebar' : ''
               }`
             }
             style={{ background: projectColor(p.id).bg, color: projectColor(p.id).fg }}
@@ -357,7 +357,7 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
         </div>
         <button
           title="New project"
-          className="grid h-5 w-5 place-items-center rounded text-[#7A7A86] hover:bg-[#15151C] hover:text-white"
+          className="grid h-5 w-5 place-items-center rounded text-[#7A7A86] hover:bg-[#15101F] hover:text-white"
         >
           <Plus size={12} weight="bold" />
         </button>
@@ -384,7 +384,7 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
                   `group flex items-center gap-2.5 overflow-hidden rounded-lg px-3 py-[7px] text-[13.5px] transition-colors ${
                     isActive
                       ? 'bg-ppc-purple-700 font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.06)_inset]'
-                      : 'font-medium text-[#CFCFD9] hover:bg-[#15151C] hover:text-white'
+                      : 'font-medium text-[#CFCFD9] hover:bg-[#15101F] hover:text-white'
                   }`
                 }
               >
@@ -467,7 +467,7 @@ function projectStatus(projectId: string): 'red' | 'yellow' | 'green' {
 function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
-      <div className="flex justify-center border-t border-[#1A1A22] px-2 py-3">
+      <div className="flex justify-center border-t border-[#1E1830] px-2 py-3">
         <button
           title="Stewart Dunlop"
           className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-300 to-ppc-purple-500 text-[12px] font-bold text-white"
@@ -478,8 +478,8 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
     );
   }
   return (
-    <div className="border-t border-[#1A1A22] px-3 pt-3 pb-3">
-      <button className="mb-2 flex w-full items-center gap-2.5 rounded-xl border border-[#1A1A22] bg-[#15151C] px-2.5 py-2 text-left transition-colors hover:border-[#26262F]">
+    <div className="border-t border-[#1E1830] px-3 pt-3 pb-3">
+      <button className="mb-2 flex w-full items-center gap-2.5 rounded-xl border border-[#1E1830] bg-[#15101F] px-2.5 py-2 text-left transition-colors hover:border-white/14">
         <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-300 to-ppc-purple-500 text-[11.5px] font-bold text-white">
           SD
         </span>
@@ -495,7 +495,7 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
         <span className="inline-flex items-center gap-1.5 font-semibold text-ppc-purple-300">
           <span
             className="h-[5px] w-[5px] rounded-full bg-ppc-purple-400"
-            style={{ boxShadow: '0 0 0 2px rgba(128,87,255,0.30)' }}
+            style={{ boxShadow: '0 0 0 2px rgba(127,90,240,0.30)' }}
           />
           Beta
         </span>

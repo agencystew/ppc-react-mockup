@@ -1,0 +1,158 @@
+<!--
+  PPC.io v5 source artifact · 01 of 03
+  Agent configure surface (Boulder Care · Competitor Spy)
+  Demonstrates Surface Type 02: light canvas + dark hero block, white work cards,
+  segmented chip controls, sticky dark CTA bar with radial purple glow.
+  Source: Stewart, 2026-05-14.
+-->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/figtree@5.1.0/700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/figtree@5.1.0/800.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/figtree@5.1.0/500.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/figtree@5.1.0/400.css">
+
+<style>
+.fig { font-family: 'Figtree', system-ui, sans-serif; }
+.fig-h2 { font-family: 'Figtree', system-ui, sans-serif; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; }
+.fig-h-plan { font-family: 'Figtree', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.025em; line-height: 1.0; }
+.phase-badge { background: #1a1625; color: white; font-family: 'Figtree', sans-serif; font-size: 10px; font-weight: 500; padding: 4px 9px; border-radius: 4px; letter-spacing: 0.8px; }
+.phase-badge-accent { background: #7f5af0; color: white; font-family: 'Figtree', sans-serif; font-size: 10px; font-weight: 500; padding: 4px 9px; border-radius: 4px; letter-spacing: 0.8px; }
+.phase-title { margin: 0; font-family: 'Figtree', sans-serif; font-size: 17px; font-weight: 500; color: #1a1625; letter-spacing: -0.005em; }
+.phase-time { margin-left: auto; font-size: 11px; color: #6b6480; font-family: 'Courier New', monospace; }
+.stage-row { display: flex; align-items: baseline; gap: 12px; padding: 9px 0; border-bottom: 0.5px solid #ECEAFA; }
+.stage-row-last { display: flex; align-items: baseline; gap: 12px; padding: 9px 0; }
+.stage-num { font-family: 'Courier New', monospace; font-size: 11px; color: #b0a9c2; min-width: 18px; }
+.stage-name { margin: 0; font-size: 13px; color: #1a1625; font-weight: 500; min-width: 160px; }
+.stage-desc { margin: 0; font-size: 12px; color: #6b6480; flex: 1; }
+.stage-time { font-size: 11px; color: #b0a9c2; font-family: 'Courier New', monospace; }
+</style>
+
+<div class="fig" style="background: #ECEAFA; border-radius: 12px; padding: 24px;">
+
+  <div style="margin-bottom: 18px;">
+    <p style="font-family: 'Courier New', monospace; font-size: 11px; color: #6b6480; margin: 0 0 4px; letter-spacing: 1.2px;">PPC.IO · DESIGN SYSTEM · 02 / 05 · v5</p>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #6b6480; margin-bottom: 22px;">
+    <div style="width: 18px; height: 18px; background: #5DCAA5; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: white; font-weight: 500;">B</div>
+    <span>Boulder Care</span>
+    <span style="color: #b0a9c2;">/</span>
+    <span>Agents</span>
+    <span style="color: #b0a9c2;">/</span>
+    <span style="color: #1a1625; font-weight: 500;">🕵️ Competitor Spy</span>
+    <span style="margin-left: auto; font-size: 11px; color: #6b6480;">Last run 2d ago</span>
+  </div>
+
+  <div style="margin-bottom: 24px;">
+    <h2 class="fig-h2" style="margin: 0 0 6px; font-size: 36px; color: #1a1625;"><span style="margin-right: 8px;">🕵️</span>Competitor Spy<span style="color: #7f5af0;">.</span></h2>
+    <p style="margin: 0; font-size: 14px; color: #6b6480; line-height: 1.6; max-width: 92%;">Maps each rival's spend, copy, and auction position. Surfaces where you can take share back.</p>
+  </div>
+
+  <div style="background: white; border: 0.5px solid #d9d4ec; border-radius: 14px; padding: 32px 30px; margin-bottom: 14px;">
+
+    <div style="margin-bottom: 28px;">
+      <p style="margin: 0 0 8px; font-family: 'Courier New', monospace; font-size: 11px; color: #7f5af0; letter-spacing: 1.4px;">THE PLAN · 11 STAGES · ~6 MIN ESTIMATED</p>
+      <h2 class="fig-h-plan" style="margin: 0; font-size: 38px; color: #1a1625;">How Competitor Spy thinks<span style="color: #7f5af0;">.</span></h2>
+    </div>
+
+    <div style="margin-bottom: 22px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <span class="phase-badge">PHASE 01</span>
+        <p class="phase-title">Map the field</p>
+        <span class="phase-time">~2m 15s</span>
+      </div>
+      <div style="border-left: 1.5px solid #ECEAFA; padding-left: 16px; margin-left: 6px;">
+        <div class="stage-row"><span class="stage-num">01</span><p class="stage-name">Competitor discovery</p><p class="stage-desc">Who else lives in your auction</p><span class="stage-time">~18s</span></div>
+        <div class="stage-row"><span class="stage-num">02</span><p class="stage-name">Auction intelligence</p><p class="stage-desc">Who's bidding when, where, how hard</p><span class="stage-time">~45s</span></div>
+        <div class="stage-row-last"><span class="stage-num">03</span><p class="stage-name">Spend tracker</p><p class="stage-desc">Modeling each rival's monthly budget</p><span class="stage-time">~1m 12s</span></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 22px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <span class="phase-badge">PHASE 02</span>
+        <p class="phase-title">Read what they're doing</p>
+        <span class="phase-time">~3m 16s</span>
+      </div>
+      <div style="border-left: 1.5px solid #ECEAFA; padding-left: 16px; margin-left: 6px;">
+        <div class="stage-row"><span class="stage-num">04</span><p class="stage-name">Copy analyst</p><p class="stage-desc">What every rival is promising in their ads</p><span class="stage-time">~38s</span></div>
+        <div class="stage-row"><span class="stage-num">05</span><p class="stage-name">Headline patterns</p><p class="stage-desc">The angles they all reach for</p><span class="stage-time">~42s</span></div>
+        <div class="stage-row"><span class="stage-num">06</span><p class="stage-name">Page detective</p><p class="stage-desc">Walking each funnel page by page</p><span class="stage-time">~1m 22s</span></div>
+        <div class="stage-row-last"><span class="stage-num">07</span><p class="stage-name">Trust signal scanner</p><p class="stage-desc">Reviews, ratings, social proof inventory</p><span class="stage-time">~34s</span></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <span class="phase-badge-accent">PHASE 03</span>
+        <p class="phase-title">Find your edge</p>
+        <span class="phase-time">~1m 41s</span>
+      </div>
+      <div style="border-left: 1.5px solid #EEEDFE; padding-left: 16px; margin-left: 6px;">
+        <div class="stage-row"><span class="stage-num">08</span><p class="stage-name">Gap finder</p><p class="stage-desc">Angles nobody is taking yet</p><span class="stage-time">~28s</span></div>
+        <div class="stage-row"><span class="stage-num">09</span><p class="stage-name">Vulnerability scan</p><p class="stage-desc">Where each rival is weakest</p><span class="stage-time">~31s</span></div>
+        <div class="stage-row"><span class="stage-num">10</span><p class="stage-name">Share shift model</p><p class="stage-desc">Who's gaining, who's losing, why</p><span class="stage-time">~24s</span></div>
+        <div class="stage-row-last"><span class="stage-num">11</span><p class="stage-name">Brief writer</p><p class="stage-desc">Compiling the actionable intel</p><span class="stage-time">~18s</span></div>
+      </div>
+    </div>
+
+    <div style="background: #EEEDFE; border-radius: 12px; padding: 20px 22px;">
+      <p style="margin: 0 0 14px; font-family: 'Figtree', sans-serif; font-weight: 500; font-size: 15px; color: #1a1625;">You walk away with</p>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; gap: 12px;"><div style="width: 5px; height: 5px; background: #534AB7; border-radius: 50%; flex-shrink: 0; margin-top: 8px;"></div><div><p style="margin: 0 0 2px; font-size: 13px; font-weight: 500; color: #1a1625;">Executive brief</p><p style="margin: 0; font-size: 12px; color: #534AB7; line-height: 1.55;">Written like a senior strategist would write it</p></div></div>
+        <div style="display: flex; gap: 12px;"><div style="width: 5px; height: 5px; background: #534AB7; border-radius: 50%; flex-shrink: 0; margin-top: 8px;"></div><div><p style="margin: 0 0 2px; font-size: 13px; font-weight: 500; color: #1a1625;">Auction map</p><p style="margin: 0; font-size: 12px; color: #534AB7; line-height: 1.55;">Where each rival sits and at what bid intensity</p></div></div>
+        <div style="display: flex; gap: 12px;"><div style="width: 5px; height: 5px; background: #534AB7; border-radius: 50%; flex-shrink: 0; margin-top: 8px;"></div><div><p style="margin: 0 0 2px; font-size: 13px; font-weight: 500; color: #1a1625;">Copy gap analysis</p><p style="margin: 0; font-size: 12px; color: #534AB7; line-height: 1.55;">The messaging angles your rivals are missing</p></div></div>
+        <div style="display: flex; gap: 12px;"><div style="width: 5px; height: 5px; background: #534AB7; border-radius: 50%; flex-shrink: 0; margin-top: 8px;"></div><div><p style="margin: 0 0 2px; font-size: 13px; font-weight: 500; color: #1a1625;">Action queue</p><p style="margin: 0; font-size: 12px; color: #534AB7; line-height: 1.55;">5 to 10 specific moves ranked by impact</p></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="background: white; border: 0.5px solid #d9d4ec; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+      <p style="margin: 0; font-size: 15px; font-weight: 500; color: #1a1625;">Tune it</p>
+      <span style="font-size: 12px; color: #6b6480;">Defaults work for most accounts</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+      <div>
+        <p style="margin: 0 0 6px; font-size: 12px; color: #6b6480; font-weight: 500;">Time window</p>
+        <div style="display: inline-flex; background: #ECEAFA; border-radius: 8px; padding: 3px; gap: 2px;">
+          <span style="padding: 5px 10px; font-size: 12px; color: #6b6480; cursor: pointer; border-radius: 6px;">30d</span>
+          <span style="padding: 5px 10px; font-size: 12px; color: #1a1625; background: white; border-radius: 6px; font-weight: 500;">60d</span>
+          <span style="padding: 5px 10px; font-size: 12px; color: #6b6480; cursor: pointer; border-radius: 6px;">90d</span>
+        </div>
+      </div>
+      <div>
+        <p style="margin: 0 0 6px; font-size: 12px; color: #6b6480; font-weight: 500;">Depth</p>
+        <div style="display: inline-flex; background: #ECEAFA; border-radius: 8px; padding: 3px; gap: 2px;">
+          <span style="padding: 5px 10px; font-size: 12px; color: #6b6480; cursor: pointer; border-radius: 6px;">Quick</span>
+          <span style="padding: 5px 10px; font-size: 12px; color: #1a1625; background: white; border-radius: 6px; font-weight: 500;">Standard</span>
+          <span style="padding: 5px 10px; font-size: 12px; color: #6b6480; cursor: pointer; border-radius: 6px;">Deep</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <p style="margin: 0 0 8px; font-size: 12px; color: #6b6480; font-weight: 500;">Competitors · 4 selected</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+        <span style="background: #EEEDFE; color: #3C3489; font-size: 12px; padding: 4px 10px; border-radius: 12px;">hims.com</span>
+        <span style="background: #EEEDFE; color: #3C3489; font-size: 12px; padding: 4px 10px; border-radius: 12px;">ro.co</span>
+        <span style="background: #EEEDFE; color: #3C3489; font-size: 12px; padding: 4px 10px; border-radius: 12px;">keeps.com</span>
+        <span style="background: #EEEDFE; color: #3C3489; font-size: 12px; padding: 4px 10px; border-radius: 12px;">getbluechew.com</span>
+        <span style="background: white; border: 1px dashed #b0a9c2; color: #6b6480; font-size: 12px; padding: 4px 10px; border-radius: 12px; cursor: pointer;">+ Add</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: #0F0A1E; border-radius: 14px; padding: 22px 24px; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -50px; right: -50px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(127, 90, 240, 0.3) 0%, transparent 60%); border-radius: 50%;"></div>
+    <div style="display: flex; align-items: center; gap: 14px; position: relative;">
+      <div style="flex: 1;">
+        <p style="margin: 0 0 4px; font-size: 15px; font-weight: 500; color: white;"><span style="margin-right: 6px;">🕵️</span>Send Competitor Spy in</p>
+        <p style="margin: 0; font-size: 12px; color: #b8aeda;">Boulder Care · Standard depth · 4 rivals · ~6 min estimated · runs in background</p>
+      </div>
+      <button style="background: #7f5af0; color: white; border: none; padding: 11px 22px; border-radius: 8px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 6px; position: relative;">Run agent</button>
+    </div>
+  </div>
+
+</div>

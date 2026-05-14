@@ -104,7 +104,7 @@ export function Dashboard() {
           label="Activity"
           count={LIVE_RUNS.length + RECENT_RUNS_SUMMARY.length}
           action={
-            <Link to="/runs" className="ppc-link inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500">
+            <Link to="/runs" className="ppc-link inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-neutral-600 transition-colors hover:text-ppc-purple-500">
               Mission control <ArrowRight size={12} weight="bold" />
             </Link>
           }
@@ -127,7 +127,7 @@ export function Dashboard() {
           label="Worth running next"
           count={suggested.length}
           action={
-            <Link to="/agents" className="ppc-link inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500">
+            <Link to="/agents" className="ppc-link inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-neutral-600 transition-colors hover:text-ppc-purple-500">
               All agents <ArrowRight size={12} weight="bold" />
             </Link>
           }
@@ -156,7 +156,7 @@ export function Dashboard() {
                     <span className="tabular">{a.expectedDuration}</span>
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500 transition-[gap] group-hover:gap-2">
+                <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-neutral-600 transition-[gap,color] group-hover:gap-2 group-hover:text-ppc-purple-500">
                   Launch <ArrowRight size={12} weight="bold" />
                 </span>
               </Link>
@@ -207,7 +207,7 @@ function LiveRow({
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 text-[11px]">
-            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-purple-500">
+            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-neutral-600">
               Running · {agentName}
             </span>
             <span className="text-ppc-neutral-300">·</span>
@@ -220,7 +220,7 @@ function LiveRow({
         <span className="tabular hidden text-[12.5px] font-medium text-ppc-neutral-500 sm:block">
           {elapsed}
         </span>
-        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500 transition-[gap] group-hover:gap-2">
+        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-neutral-600 transition-[gap,color] group-hover:gap-2 group-hover:text-ppc-purple-500">
           Watch <ArrowUpRight size={12} weight="bold" />
         </span>
       </Link>
@@ -242,7 +242,7 @@ function FinishedRow({
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-[11px]">
-            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-purple-500">
+            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-neutral-600">
               {agentName}
             </span>
             <span className="text-ppc-neutral-300">·</span>
@@ -264,7 +264,7 @@ function FinishedRow({
             <span className="tabular">{upside}</span>
           </span>
         </div>
-        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500 transition-[gap] group-hover:gap-2">
+        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-neutral-600 transition-[gap,color] group-hover:gap-2 group-hover:text-ppc-purple-500">
           Report <ArrowUpRight size={12} weight="bold" />
         </span>
       </Link>

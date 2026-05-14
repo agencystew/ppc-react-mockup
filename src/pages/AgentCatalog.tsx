@@ -149,7 +149,7 @@ function SectionHead({
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-3 border-b border-ppc-neutral-100 pb-3">
       <div className="flex items-baseline gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
-        <span className="tabular text-ppc-purple-500">{String(index).padStart(2, '0')}</span>
+        <span className="tabular text-ppc-text-faint">{String(index).padStart(2, '0')}</span>
         <span className="text-ppc-black">{label}</span>
         <span className="text-ppc-neutral-300">·</span>
         <span className="text-ppc-neutral-500 normal-case tracking-tight">{description}</span>
@@ -185,7 +185,7 @@ function AgentCard({ agent: a }: { agent: AgentDefinition }) {
 
       <h3 className="mt-6 font-display text-[24px] font-bold leading-[1.1] tracking-[-0.02em] text-ppc-black">
         {headlineBody}
-        {hasPeriod && <span className="text-ppc-purple-500">.</span>}
+        {hasPeriod && <span className="text-ppc-black">.</span>}
       </h3>
 
       <p className="mt-3 text-[14px] leading-[1.55] tracking-tight text-ppc-neutral-600">
@@ -198,7 +198,7 @@ function AgentCard({ agent: a }: { agent: AgentDefinition }) {
           <span className="tabular">{a.expectedDuration}</span>
           <span className="text-ppc-neutral-400">· background</span>
         </span>
-        <span className="inline-flex items-center gap-1 font-semibold text-ppc-purple-500 transition-[gap] group-hover:gap-2">
+        <span className="inline-flex items-center gap-1 font-semibold text-ppc-neutral-600 transition-[gap,color] group-hover:gap-2 group-hover:text-ppc-purple-500">
           Open <ArrowUpRight size={12} weight="bold" />
         </span>
       </div>

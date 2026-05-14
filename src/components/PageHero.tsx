@@ -37,7 +37,7 @@ export function PageHero({ eyebrow, headline, description, actions, variant = 'l
           </div>
           <h1 className="mt-4 max-w-[820px] font-display text-[60px] font-extrabold leading-[0.96] tracking-[-0.035em] text-white sm:text-[72px]">
             {headlineBody}
-            {hasPeriod && <span className="text-ppc-purple-400">.</span>}
+            {hasPeriod && <span className="text-ppc-purple-500">.</span>}
           </h1>
           {description && (
             <p className="mt-7 max-w-[600px] text-[18px] leading-[1.55] tracking-tight text-white/70">
@@ -59,7 +59,7 @@ export function PageHero({ eyebrow, headline, description, actions, variant = 'l
         </div>
         <h1 className="mt-4 font-display text-[56px] font-extrabold leading-[0.96] tracking-[-0.035em] text-white sm:text-[64px]">
           {headlineBody}
-          {hasPeriod && <span className="text-ppc-purple-400">.</span>}
+          {hasPeriod && <span className="text-ppc-purple-500">.</span>}
         </h1>
         {description && (
           <p className="mt-6 max-w-[640px] text-[18px] leading-[1.55] tracking-tight text-white/70">
@@ -93,7 +93,7 @@ export function SectionHeader({
         </div>
         <h2 className="mt-2 font-display text-[34px] font-bold leading-[1.05] tracking-[-0.02em] text-white">
           {body}
-          {hasPeriod && <span className="text-ppc-purple-400">.</span>}
+          {hasPeriod && <span className="text-ppc-purple-500">.</span>}
         </h2>
       </div>
       {action}

@@ -1,7 +1,14 @@
 /* PPC.io Design System — Colors & Type
- * Source: PPC.fig (Branding + DS pages)
- * Brand primary: #8057FF (Bright Lavender / "Accent Purple")
- * Surface black: #0C0C0E ("Smoky Black")
+ *
+ * v5 ("moments not modes") — supersedes the prior canonical brand for app surfaces.
+ * Spec: ../../docs/design-system/DESIGN-SYSTEM.md
+ * Source artifacts: ../../docs/design-system/v5-source-artifacts/*.html
+ *
+ * v5 brand primary: #7F5AF0 (was #8057FF)
+ * v5 sidebar dark: #0F0A1E (was #0C0C0E "Smoky Black")
+ * v5 canvas:       #ECEAFA (lavender — never pure white on app surfaces)
+ *
+ * Marketing site (~/ppc-frontend/) is a separate decision and stays on legacy tokens.
  */
 
 /* ---------- Fonts ----------
@@ -38,11 +45,31 @@
   --ppc-purple-200: #D3C6FF;
   --ppc-purple-300: #B08EF4;  /* softer violet, used in strokes */
   --ppc-purple-400: #A88CFF;  /* "Bright Lavender" from brand slide */
-  --ppc-purple-500: #8057FF;  /* PRIMARY brand color ("Accent Color") */
+  --ppc-purple-500: #7F5AF0;  /* v5 PRIMARY (was #8057FF) — use ONCE per screen max */
   --ppc-purple-600: #7C45CB;
-  --ppc-purple-700: #532CCC;  /* deep violet — gradient end */
-  --ppc-purple-800: #3B1F99;
+  --ppc-purple-700: #534AB7;  /* v5 accent text/icons (was #532CCC) */
+  --ppc-purple-800: #3C3489;  /* v5 chip text (was #3B1F99) */
   --ppc-purple-900: #170E30;  /* "Primary" color from DS swatches */
+
+  /* ====================================================================
+   * v5 SURFACE TOKENS  ("moments not modes")
+   * ==================================================================== */
+  --ppc-sidebar:      #0F0A1E;  /* Surface 01 — always dark rail */
+  --ppc-canvas:       #ECEAFA;  /* Lavender — main bg, never pure white */
+  --ppc-card:         #FFFFFF;
+  --ppc-card-border:  #d9d4ec;  /* 0.5px solid on every card */
+  --ppc-panel-soft:   #EEEDFE;  /* "You walk away with" panel + chip bg */
+
+  /* v5 text scale */
+  --ppc-ink:          #1a1625;  /* primary text on light */
+  --ppc-text-muted:   #6b6480;  /* secondary text */
+  --ppc-text-faint:   #b0a9c2;  /* stage numbers, timing, faint UI */
+  --ppc-text-on-dark: #b8aeda;  /* sub-text inside dark hero / sticky CTA */
+
+  /* v5 status strips (3px left-border on white cards — Surface 04) */
+  --ppc-status-critical: #E24B4A;
+  --ppc-status-warning:  #BA7517;
+  --ppc-status-healthy:  #5DCAA5;
 
   /* Neutral / base — the cool gray scale used for text + surfaces.
    * Derived from the file's most-used neutrals. Black is NOT pure #000;
@@ -80,13 +107,13 @@
   --color-fg-on-accent: var(--ppc-white);
   --color-fg-accent: var(--ppc-purple-500);
 
-  --color-bg-1: var(--ppc-white);           /* default page */
-  --color-bg-2: var(--ppc-neutral-25);      /* card/alt row */
-  --color-bg-3: var(--ppc-neutral-50);      /* inset */
-  --color-bg-inverse: var(--ppc-black);     /* dark sections */
-  --color-bg-inverse-2: #15151A;
+  --color-bg-1: var(--ppc-canvas);          /* v5: main page is lavender, never white */
+  --color-bg-2: var(--ppc-card);            /* v5: cards are white */
+  --color-bg-3: var(--ppc-panel-soft);      /* v5: inset panels are soft purple */
+  --color-bg-inverse: var(--ppc-sidebar);   /* v5: dark surfaces use sidebar dark */
+  --color-bg-inverse-2: #15101F;
   --color-bg-accent: var(--ppc-purple-500);
-  --color-bg-accent-soft: var(--ppc-purple-50);
+  --color-bg-accent-soft: var(--ppc-panel-soft);
 
   --color-border-1: var(--ppc-neutral-100);
   --color-border-2: var(--ppc-neutral-200);
@@ -97,13 +124,18 @@
    * --grad-text-accent is the multi-stop gradient used on the hero "AI" word
    * on ppc.io (maps to .gradient-text-2 in the live-site main.css). */
   --grad-purple-cta:
-    linear-gradient(180deg, #8057FF 0%, #532CCC 100%);
+    linear-gradient(180deg, #7F5AF0 0%, #534AB7 100%);
   --grad-purple-sheen:
-    linear-gradient(90deg, rgba(128,87,255,0) 0%, #7C45CB 51%, rgba(121,52,153,0) 100%);
+    linear-gradient(90deg, rgba(127,90,240,0) 0%, #534AB7 51%, rgba(83,74,183,0) 100%);
   --grad-hero-night:
-    radial-gradient(120% 80% at 50% 0%, #1A1030 0%, #0C0C0E 60%);
+    radial-gradient(120% 80% at 50% 0%, #1A1030 0%, #0F0A1E 60%);
   --grad-text-accent:
-    linear-gradient(86deg, #8057FF 6.62%, #FFB58B 94.93%, #7CF3FB 110.55%);
+    linear-gradient(86deg, #7F5AF0 6.62%, #FFB58B 94.93%, #7CF3FB 110.55%);
+  /* v5 hero radial — drop into the top-right of any dark hero / sticky CTA */
+  --grad-hero-glow:
+    radial-gradient(circle, rgba(127,90,240,0.30) 0%, transparent 60%);
+  --grad-hero-glow-soft:
+    radial-gradient(circle, rgba(127,90,240,0.25) 0%, transparent 65%);
   --grad-text-warm:
     linear-gradient(90deg, #8158FE 27%, #EDBE9B 100%);
   --grad-text-mono:
@@ -124,8 +156,8 @@
    */
   --font-sans:    'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-ui:      'Figtree', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Figtree', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono:    'Space Mono', ui-monospace, Menlo, Consolas, monospace;
+  --font-display: 'Figtree', ui-sans-serif, system-ui, -apple-system, sans-serif;  /* v5: Figtree 800/900 for display, not Outfit */
+  --font-mono:    'Courier New', ui-monospace, Menlo, Consolas, monospace;          /* v5: eyebrows + timing use Courier New */
 
   /* --font-serif: hero H1 only.
    *   Production: load PF-Marlet-Display via Typekit (use.typekit.net/<kit>.css)
@@ -334,14 +366,17 @@ code, .ppc-mono {
 a { color: var(--color-fg-accent); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
-/* Dark section helper — flip tokens inside any .ppc-dark */
+/* Dark section helper — flip tokens inside any .ppc-dark
+ * v5: dark surfaces use --ppc-sidebar (#0F0A1E), not --ppc-black, so the
+ * sidebar (Surface 01), dark hero blocks (Surface 02), and full-canvas drama
+ * (Surface 03) all share one dark color. */
 .ppc-dark {
   --color-fg-1: var(--ppc-white);
-  --color-fg-2: rgba(255,255,255,0.72);
+  --color-fg-2: var(--ppc-text-on-dark);
   --color-fg-3: rgba(255,255,255,0.45);
-  --color-bg-1: var(--ppc-black);
-  --color-bg-2: #15151A;
-  --color-bg-3: #1E1E24;
+  --color-bg-1: var(--ppc-sidebar);
+  --color-bg-2: #15101F;
+  --color-bg-3: #1E1830;
   --color-border-1: rgba(255,255,255,0.08);
   --color-border-2: rgba(255,255,255,0.14);
   background: var(--color-bg-1);

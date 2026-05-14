@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowLeft, ArrowRight, Clock, CheckCircle, Sparkle,
-  Brain, Lightning, ChartLineUp, EnvelopeSimple, ShieldCheck, FileText,
+  ArrowLeft, ArrowRight, Clock, Sparkle,
+  Brain, Lightning, ChartLineUp, EnvelopeSimple, ShieldCheck,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
 import { PROJECTS, ACCOUNTS, CURRENT_PROJECT_ID } from '../mock/projects';
@@ -97,7 +97,7 @@ export function AgentDetail() {
           {/* HERO */}
           <section>
             <div className="flex items-center gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
-              <span className="tabular text-ppc-purple-500">
+              <span className="tabular text-ppc-text-faint">
                 {String(AGENTS.findIndex((a) => a.slug === agent.slug) + 1).padStart(2, '0')}
               </span>
               <span className="h-px w-7 bg-ppc-neutral-200" />
@@ -128,18 +128,18 @@ export function AgentDetail() {
             {/* Quiet meta row — TIME + APPROVAL cues */}
             <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ppc-neutral-500">
               <span className="inline-flex items-center gap-1.5">
-                <Clock size={12} weight="duotone" className="text-ppc-purple-500" />
+                <Clock size={12} weight="duotone" className="text-ppc-neutral-400" />
                 <span className="tabular">{agent.expectedDuration}</span>
                 <span className="text-ppc-neutral-400">· background</span>
               </span>
               <span className="h-3 w-px bg-ppc-neutral-200" />
               <span className="inline-flex items-center gap-1.5">
-                <EnvelopeSimple size={12} weight="duotone" className="text-ppc-purple-500" />
+                <EnvelopeSimple size={12} weight="duotone" className="text-ppc-neutral-400" />
                 Email when ready
               </span>
               <span className="h-3 w-px bg-ppc-neutral-200" />
               <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck size={12} weight="duotone" className="text-ppc-purple-500" />
+                <ShieldCheck size={12} weight="duotone" className="text-ppc-neutral-400" />
                 Client-ready output
               </span>
             </div>
@@ -156,7 +156,7 @@ export function AgentDetail() {
                   Stew built this <span className="font-normal text-ppc-neutral-500">/ founder, PPC.io</span>
                 </div>
                 <p className="mt-2 max-w-[600px] text-ppc-neutral-700">
-                  After scaling an agency to 100+ client accounts with a team of 50, I saw the same thing every agency owner sees: the gap between <em className="text-ppc-purple-500">we know what to do</em> and <em className="text-ppc-purple-500">we have time to do it for every single account</em> gets wider every month. This agent closes that gap.
+                  After scaling an agency to 100+ client accounts with a team of 50, I saw the same thing every agency owner sees: the gap between <span className="font-semibold text-ppc-black">we know what to do</span> and <span className="font-semibold text-ppc-black">we have time to do it for every single account</span> gets wider every month. This agent closes that gap.
                 </p>
               </div>
             </div>
@@ -201,7 +201,7 @@ export function AgentDetail() {
             </div>
           </section>
 
-          {/* WHAT YOU'LL GET BACK — light editorial */}
+          {/* WHAT YOU'LL GET BACK — v5 "You walk away with" soft-purple panel */}
           <section>
             <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
               What you'll get back
@@ -209,24 +209,26 @@ export function AgentDetail() {
             <h2 className="mt-3 font-display text-[26px] font-bold leading-[1.05] tracking-[-0.02em] text-ppc-black">
               Client-ready, audit-ready<span className="text-ppc-purple-500">.</span>
             </h2>
-            <ul className="mt-6 space-y-3 text-[15px] leading-[1.55] text-ppc-neutral-700">
-              {[
-                { icon: Clock,        title: `${agent.expectedDuration} in the background`, sub: "You'll get an email when it's done." },
-                { icon: CheckCircle,  title: 'Prioritized findings with impact', sub: 'Reasoning and estimated impact per finding.' },
-                { icon: FileText,     title: 'Generate client report', sub: 'Hand it to your client as-is. No editing.' },
-                { icon: ShieldCheck,  title: 'Full audit trail', sub: 'Every tool call, every source, every AI judgment.' },
-              ].map((row, i) => (
-                <li key={i} className="flex items-start gap-4 rounded-xl border border-ppc-neutral-100 bg-white px-5 py-4">
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-ppc-purple-50 text-ppc-purple-500">
-                    <row.icon size={16} weight="duotone" />
-                  </span>
-                  <div>
-                    <div className="text-[14.5px] font-semibold text-ppc-black">{row.title}</div>
-                    <div className="mt-0.5 text-[13.5px] text-ppc-neutral-600">{row.sub}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+
+            <div className="mt-6 rounded-card bg-ppc-panel-soft px-7 py-6">
+              <div className="text-[15px] font-semibold text-ppc-ink">You walk away with</div>
+              <ul className="mt-4 space-y-3.5">
+                {[
+                  { title: `${agent.expectedDuration} in the background`, sub: "You'll get an email when it's done." },
+                  { title: 'Prioritized findings with impact',            sub: 'Reasoning and estimated impact per finding.' },
+                  { title: 'Generate client report',                      sub: 'Hand it to your client as-is. No editing.' },
+                  { title: 'Full audit trail',                            sub: 'Every tool call, every source, every AI judgment.' },
+                ].map((row, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="mt-2 h-[5px] w-[5px] shrink-0 rounded-full bg-ppc-purple-700" />
+                    <div>
+                      <div className="text-[13.5px] font-semibold text-ppc-ink">{row.title}</div>
+                      <div className="mt-0.5 text-[12.5px] leading-[1.55] text-ppc-purple-700">{row.sub}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </section>
         </div>
 
