@@ -12,6 +12,13 @@ export default {
   theme: {
     extend: {
       colors: {
+        /* v2 short tokens — Foundation phase 2026-05-14.
+         * Used by brand primitives (Sticker, PillButton, Caveat, Mascot) and
+         * the v2 page rebuilds. Legacy ppc-* tokens preserved below. */
+        ink: '#0F0A1E',
+        redorange: '#F24A2E',
+        mint: '#BFE9CC',
+        ivory: '#FAF7F0',
         ppc: {
           /* PRIMARY purple — v5: #7F5AF0. Use ONCE per screen max. */
           purple: {
@@ -74,6 +81,7 @@ export default {
         display: ['Figtree', 'ui-sans-serif', 'system-ui', 'sans-serif'],  /* v5: display = Figtree 800/900, not Outfit */
         mono:    ['"Courier New"', 'ui-monospace', 'Menlo', 'Consolas', 'monospace'],  /* v5: eyebrows + timing */
         serif:   ['PF-Marlet-Display', 'Playfair Display', 'Figtree', 'Georgia', 'serif'],
+        hand:    ['Caveat', 'cursive'],  /* v2 — red-orange handwritten annotation */
       },
       letterSpacing: {
         'display-xl': '-0.035em',  /* Figtree 900 / 88px */
@@ -101,6 +109,9 @@ export default {
         /* No drop-shadows on cards on lavender. Border is the edge. */
         'ppc-glow':  '0 0 0 4px rgba(127,90,240,0.18), 0 8px 24px rgba(127,90,240,0.35)',
         'ppc-cta':   '0 4px 18.4px #463186, 0 0 12.7px #d185ec inset',
+        /* v2 primitives — hard offset shadow (after-click sticker recipe). */
+        'sticker':   '6px 6px 0 #0F0A1E',
+        'btn':       '0 4px 0 #0F0A1E',
       },
       backgroundImage: {
         /* v5 hero radial — drop into the top-right of any dark hero / sticky CTA */

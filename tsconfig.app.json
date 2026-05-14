@@ -21,5 +21,9 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  /* v2 reset: archived v1 pages stay in-repo as reference only — page-rebuild
+     agents read them, they're not part of the active build. Their imports
+     reference paths that no longer resolve relative to _archive/v1/. */
+  "exclude": ["src/pages/_archive", "src/_archive"]
 }

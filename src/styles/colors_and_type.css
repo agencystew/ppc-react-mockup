@@ -35,6 +35,23 @@
 
 :root {
   /* ====================================================================
+   * v2 BRAND PRIMITIVES  (Foundation phase, 2026-05-14)
+   * The full v2 system uses these short names. Pages and the four brand
+   * primitives (Sticker, PillButton, Caveat, Mascot) read from these
+   * directly. The longer --ppc-* vars below are preserved for AppShell
+   * and legacy components and remain untouched.
+   * ==================================================================== */
+  --ink: #0F0A1E;
+  --canvas: #ECEAFA;
+  --purple: #7F5AF0;
+  --redorange: #F24A2E;
+  --mint: #BFE9CC;
+  --ivory: #FAF7F0;
+  --font-display: 'Figtree', system-ui, sans-serif;
+  --font-hand: 'Caveat', cursive;
+  --font-mono: 'Courier New', ui-monospace, monospace;
+
+  /* ====================================================================
    * COLOR TOKENS
    * ==================================================================== */
 
