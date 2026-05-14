@@ -1,30 +1,48 @@
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, ArrowUpRight, Clock, Sparkle, TrendUp, Warning,
-  CheckCircle, Lightning, Buildings, Check,
+  ArrowRight, ArrowUpRight, Clock, Sparkle, TrendUp, CheckCircle,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
 import { RECENT_RUNS_SUMMARY } from '../mock/runs';
-import { PROJECTS } from '../mock/projects';
 
 // Dashboard · /
 //
-// The agency control room on the smoky-black canvas. Lifted into StagePage
-// register so the whole app reads as one product: same 68px purple-period
-// display, Space-Mono eyebrow, dark surfaces, editorial rhythm.
+// Three moments. That's it.
 //
-// Three jobs, in priority order:
-//   1. Hero  — what TODAY is + agency vital signs anchored to the hero.
-//   2. Calls — the three findings that need a human decision now.
-//   3. Stream — what's running and what just landed.
-// Then a quieter bottom rail: suggested plays + client roll.
+//   1. Dark hero — today's standout finding (the moment most worth seeing
+//      when the user opens the app).
+//   2. Activity stream — every recent run, status-tagged (running / done).
+//      Merged so the user has one place to scan, not five lists.
+//   3. Suggested next — three plays for this week, slim wide rows.
 //
-// Cluttered chrome (dev jump strip, extra stat tiles) removed per Stewart
-// 2026-05-14: "Dashboard is cluttered, simplify."
+// Per Stewart 2026-05-14: "Sharpen, don't rebuild. Strip to 3 sections max."
+// Cuts: KPI strip, jump strip, calls-to-make slab, client roll, featured
+// run preview, multi-list duplication. The Reports and Projects pages own
+// those surfaces.
+
+const TODAY = 'Thursday · 14 May';
+
+// Live runs (mock — in prod from the agent_runs API). Stage strings come
+// straight from the StagePage running fixture so muscle-memory is preserved.
+const LIVE_RUNS = [
+  {
+    runId: 'run-competitor-spy-running',
+    agentName: 'Competitor Spy',
+    projectName: 'Smith Law Group',
+    stage: 'Sizing their spend · Stage 5 of 11',
+    elapsed: '11m 21s',
+  },
+  {
+    runId: 'run-weekly-audit',
+    agentName: 'Weekly Audit',
+    projectName: 'Northstar Dental',
+    stage: 'Walking the alignment chain · Stage 3 of 7',
+    elapsed: '4m 02s',
+  },
+];
 
 export function Dashboard() {
-  const featuredRun = RECENT_RUNS_SUMMARY[0]; // Competitor Spy showcase
-  const otherRuns = RECENT_RUNS_SUMMARY.slice(1);
+  const featured = RECENT_RUNS_SUMMARY[0]; // The standout finding
   const suggested = [
     AGENTS.find((a) => a.slug === 'weekly-audit')!,
     AGENTS.find((a) => a.slug === 'spend-leak')!,
@@ -33,425 +51,223 @@ export function Dashboard() {
 
   return (
     <div className="space-y-14">
-      {/* ── Hero · the focal moment ──────────────────────────────────────
-          Boxed dark editorial block with the signature purple radial glow
-          + purple period flourish. Sits on the smoky-black canvas. Pulse
-          strip beneath shows the live state of the agency. */}
-      <section className="ppc-dark ppc-dark--hero relative overflow-hidden rounded-3xl px-10 pb-9 pt-12 sm:px-14 sm:pb-10 sm:pt-14">
+      {/* ═══ 1 · HERO ════════════════════════════════════════════════════
+          Dark editorial MOMENT, not a wall. Compact rounded card so the
+          light page bg dominates the surface area below. Today's standout
+          finding + open-the-report CTA. */}
+      <section className="ppc-dark ppc-dark--hero relative overflow-hidden rounded-3xl px-8 py-8 sm:px-10 sm:py-10">
         <div className="relative">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3 font-mono text-[11.5px] font-semibold uppercase tracking-[0.08em] text-white/65">
-              <span>Thursday · 14 May</span>
-              <span className="opacity-40">·</span>
-              <span className="inline-flex items-center gap-2">
-                <span className="ppcio-live-dot inline-block h-1.5 w-1.5 rounded-full bg-ppc-purple-500" />
-                <span>2 agents running</span>
-              </span>
-            </div>
-            <div className="inline-flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-white/55">
-              <Buildings size={12} weight="duotone" /> 6 clients
-              <span className="opacity-40">·</span>
-              <span className="tabular">11 accounts</span>
-            </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-white/55">
+            <span>{TODAY}</span>
+            <span className="inline-flex items-center gap-2 text-white/70">
+              <span className="ppcio-live-dot inline-block h-1.5 w-1.5 rounded-full bg-ppc-purple-500" />
+              <span>{LIVE_RUNS.length} agents running</span>
+            </span>
           </div>
 
-          <h1 className="mt-6 font-display text-[60px] font-extrabold leading-[0.96] tracking-[-0.035em] text-white sm:text-[68px]">
-            3 things need your eyes<span className="text-ppc-purple-400">.</span>
+          <div className="mt-5 inline-flex items-center gap-2 rounded-pill border border-ppc-purple-500/30 bg-ppc-purple-500/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ppc-purple-300">
+            <span className="inline-block h-1 w-1 rounded-full bg-ppc-purple-500" />
+            Today's headline finding
+          </div>
+
+          <h1 className="mt-3 max-w-[760px] font-display text-[42px] font-extrabold leading-[1.02] tracking-[-0.028em] text-white sm:text-[48px]">
+            {featured.headline}<span className="text-ppc-purple-500">.</span>
           </h1>
-          <p className="mt-6 max-w-[560px] text-[18px] leading-[1.55] tracking-tight text-white/70">
-            One spend leak burning today, two angles ready to take. Your background
-            agents are still running on the rest.
+          <p className="mt-4 max-w-[560px] text-[15px] leading-[1.55] tracking-tight text-white/65">
+            {featured.agentName} on {featured.projectName} · finished {featured.finishedAt}.
           </p>
 
-          <div className="mt-9 flex flex-wrap items-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center gap-2.5">
             <Link
-              to="/agents"
-              className="ppcio-cta"
+              to={`/reports/${featured.runId}`}
+              className="inline-flex items-center gap-2 rounded-md bg-ppc-purple-500 px-4 py-2.5 text-[13.5px] font-semibold tracking-tight text-white shadow-[0_4px_14px_-4px_rgba(128,87,255,0.55)] transition-transform hover:-translate-y-[1px]"
             >
-              <Sparkle size={16} weight="fill" />
-              Run an agent
-              <ArrowRight size={14} weight="bold" />
+              <Sparkle size={13} weight="fill" />
+              Open the report
+              <ArrowRight size={12} weight="bold" />
             </Link>
             <Link
-              to="/runs"
-              className="inline-flex items-center gap-2 rounded-md border border-white/15 px-4 py-3 text-[14px] font-semibold tracking-tight text-white transition-colors hover:bg-white/5"
+              to="/agents"
+              className="inline-flex items-center gap-2 rounded-md border border-white/15 px-3.5 py-2.5 text-[13.5px] font-semibold tracking-tight text-white/85 transition-colors hover:bg-white/5"
             >
-              Mission control <ArrowRight size={13} weight="bold" />
+              Run another agent <ArrowRight size={12} weight="bold" />
             </Link>
           </div>
         </div>
-
-        {/* Pulse strip — agency vital signs anchored to the hero. */}
-        <div className="relative mt-12 grid grid-cols-2 gap-x-8 gap-y-5 border-t border-white/10 pt-7 sm:grid-cols-4">
-          <PulseStat label="Calls to make today" value="3" tone="alert" />
-          <PulseStat label="Agents running" value="2" tone="live" />
-          <PulseStat label="Reports this week" value="14" />
-          <PulseStat label="Hours of analysis saved" value="22h" />
-        </div>
       </section>
 
-      {/* ── Calls to make · the work for today ──────────────────────────
-          Three numbered rows on one dark surface. Reads as one decision
-          surface, not three independent cards. */}
-      <section>
-        <SectionEyebrow eyebrow="Calls to make today" count={3} />
-        <ul className="overflow-hidden rounded-2xl border border-white/8 bg-white/[0.04]">
-          <AttentionRow
-            num="01"
-            tone="urgent"
-            agent="Spend Leak Detector"
-            project="Rocket Pet Insurance"
-            finding="Quote form misfiring on /quote/ca, 0 conversions in 6 days while spend continues."
-            impact="$3,400 burned this week"
-            cta="Pause campaign"
-            href="/reports/run-spend-leak-rocket"
-          />
-          <AttentionRow
-            num="02"
-            tone="opportunity"
-            agent="Competitor Spy"
-            project="Smith Law Group"
-            finding='Unclaimed "same-day case review" angle, 3 rivals on adjacent timeline copy at 0.81% CTR.'
-            impact="Build this campaign"
-            cta="Draft variants"
-            href="/reports/run-competitor-spy-completed"
-          />
-          <AttentionRow
-            num="03"
-            tone="opportunity"
-            agent="Negative Keyword"
-            project="Smith Law Group"
-            finding="187 brand-safe negatives ready to deploy, blocks 24% of zero-conversion spend across 8 campaigns."
-            impact="Deploy in one click"
-            cta="Apply 187 negatives"
-            href="/reports/run-negative-keyword-completed"
-          />
-        </ul>
-      </section>
-
-      {/* ── Activity stream · running + just-finished ────────────────── */}
+      {/* ═══ 2 · ACTIVITY STREAM ════════════════════════════════════════
+          One list. Live runs first, finished runs after. Same row shape so
+          the eye scans cleanly. No double sections. */}
       <section>
         <SectionEyebrow
-          eyebrow="The work in flight"
-          right={
-            <Link to="/runs" className="ppc-link inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-ppc-purple-300">
-              Mission control <ArrowRight size={11} weight="bold" />
+          label="Activity"
+          count={LIVE_RUNS.length + RECENT_RUNS_SUMMARY.length}
+          action={
+            <Link to="/runs" className="ppc-link inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500">
+              Mission control <ArrowRight size={12} weight="bold" />
             </Link>
           }
         />
-
-        {/* Running */}
-        <div className="mb-6 overflow-hidden rounded-2xl border border-white/8 bg-white/[0.04]">
-          <div className="flex items-center justify-between border-b border-white/8 bg-ppc-purple-500/10 px-6 py-2.5">
-            <span className="inline-flex items-center gap-2 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-purple-300">
-              <span className="ppcio-live-dot inline-block h-1.5 w-1.5 rounded-full bg-ppc-purple-500" />
-              Running now
-            </span>
-            <span className="tabular text-[11.5px] font-medium text-ppc-purple-300">2</span>
-          </div>
-          <RunningRow
-            agent="Competitor Spy"
-            project="Smith Law Group"
-            stage="Sizing their spend · Stage 5 of 11"
-            elapsed="11m 21s"
-            progress={45}
-            href="/agents/competitor-spy/run/run-competitor-spy-running"
-          />
-          <RunningRow
-            agent="Weekly Audit"
-            project="Northstar Dental"
-            stage="Walking the alignment chain · Stage 3 of 7"
-            elapsed="4m 02s"
-            progress={28}
-            href="/agents/weekly-audit/run/run-weekly-audit"
-          />
-        </div>
-
-        {/* Featured just-finished run — the latest report given hero treatment */}
-        <Link
-          to={`/reports/${featuredRun.runId}`}
-          className="group block rounded-2xl border border-white/8 bg-white/[0.04] p-7 transition-colors hover:border-ppc-purple-500/40 hover:bg-white/[0.06] sm:p-9"
-        >
-          <div className="flex flex-wrap items-center gap-2 text-[11px]">
-            <span className="inline-flex items-center gap-1.5 rounded-md bg-ppc-success/15 px-2 py-0.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-success">
-              <Check size={9} weight="bold" /> Just finished
-            </span>
-            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-purple-300">
-              {featuredRun.agentName}
-            </span>
-            <span className="text-white/30">·</span>
-            <span className="text-white/55">{featuredRun.projectName}</span>
-            <span className="text-white/30">·</span>
-            <span className="tabular text-white/55">{featuredRun.finishedAt}</span>
-          </div>
-          <h3 className="mt-4 max-w-[720px] font-display text-[34px] font-bold leading-[1.04] tracking-[-0.025em] text-white sm:text-[38px]">
-            {featuredRun.headline}
-            <span className="text-ppc-purple-400">.</span>
-          </h3>
-          <div className="mt-5 flex flex-wrap items-center gap-x-7 gap-y-2.5 text-[13.5px]">
-            <span className="inline-flex items-center gap-1.5 text-white/70">
-              <Clock size={13} weight="duotone" className="text-white/45" />
-              <span className="tabular font-medium text-white">{featuredRun.duration}</span>
-              <span className="text-white/55">run</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-ppc-success">
-              <TrendUp size={13} weight="bold" />
-              <span className="tabular font-semibold">{featuredRun.upside}</span>
-              <span className="font-normal text-white/55">est. upside</span>
-            </span>
-            <span className="ml-auto inline-flex items-center gap-1.5 text-[13px] font-semibold text-ppc-purple-300 transition-[gap] group-hover:gap-2.5">
-              Open report <ArrowUpRight size={13} weight="bold" />
-            </span>
-          </div>
-        </Link>
-
-        {otherRuns.length > 0 && (
-          <ul className="mt-3 divide-y divide-white/8 rounded-2xl border border-white/8 bg-white/[0.04]">
-            {otherRuns.map((r) => (
-              <li key={r.runId}>
-                <Link
-                  to={`/reports/${r.runId}`}
-                  className="group flex items-center gap-5 px-6 py-3.5 hover:bg-white/[0.04]"
-                >
-                  <span className="inline-grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-ppc-success/15 text-ppc-success">
-                    <Check size={10} weight="bold" />
-                  </span>
-                  <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-purple-300 sm:w-40">
-                    {r.agentName}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[14.5px] font-semibold tracking-tight text-white">
-                      {r.headline}
-                    </div>
-                    <div className="mt-0.5 text-[11.5px] text-white/45">
-                      {r.projectName} · {r.finishedAt}
-                    </div>
-                  </div>
-                  <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-success">
-                    <TrendUp size={11} weight="bold" />
-                    <span className="tabular">{r.upside}</span>
-                  </span>
-                  <ArrowRight size={12} weight="bold" className="text-white/30 group-hover:text-ppc-purple-300" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+        <ul className="divide-y divide-ppc-neutral-100 overflow-hidden rounded-2xl border border-ppc-neutral-100 bg-white">
+          {LIVE_RUNS.map((r) => (
+            <LiveRow key={r.runId} {...r} />
+          ))}
+          {RECENT_RUNS_SUMMARY.map((r) => (
+            <FinishedRow key={r.runId} {...r} />
+          ))}
+        </ul>
       </section>
 
-      {/* ── Two-column bottom rail · plays + clients ──────────────────── */}
-      <section className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
-        <div>
-          <SectionEyebrow
-            eyebrow="Worth running next"
-            right={
-              <Link to="/agents" className="ppc-link inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-ppc-purple-300">
-                All agents <ArrowRight size={11} weight="bold" />
+      {/* ═══ 3 · SUGGESTED NEXT ═════════════════════════════════════════
+          Three plays for this week. Slim wide rows so the picker doesn't
+          fight with the activity stream for attention. */}
+      <section>
+        <SectionEyebrow
+          label="Worth running next"
+          count={suggested.length}
+          action={
+            <Link to="/agents" className="ppc-link inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500">
+              All agents <ArrowRight size={12} weight="bold" />
+            </Link>
+          }
+        />
+        <ul className="divide-y divide-ppc-neutral-100 overflow-hidden rounded-2xl border border-ppc-neutral-100 bg-white">
+          {suggested.map((a) => (
+            <li key={a.slug}>
+              <Link
+                to={`/agents/${a.slug}`}
+                className="group flex items-center gap-5 px-7 py-5 transition-colors hover:bg-ppc-purple-50/40"
+              >
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-ppc-purple-50 text-[20px]">
+                  {a.emoji}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[16px] font-bold tracking-tight text-ppc-black">
+                    {a.name}
+                  </div>
+                  <div className="mt-0.5 max-w-[560px] truncate text-[13.5px] text-ppc-neutral-600">
+                    {a.headline}
+                  </div>
+                </div>
+                <div className="hidden text-right sm:block">
+                  <div className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ppc-neutral-500">
+                    <Clock size={11} weight="duotone" />
+                    <span className="tabular">{a.expectedDuration}</span>
+                  </div>
+                </div>
+                <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500 transition-[gap] group-hover:gap-2">
+                  Launch <ArrowRight size={12} weight="bold" />
+                </span>
               </Link>
-            }
-          />
-          <ul className="divide-y divide-white/8 rounded-2xl border border-white/8 bg-white/[0.04]">
-            {suggested.map((a) => (
-              <li key={a.slug}>
-                <Link
-                  to={`/agents/${a.slug}`}
-                  className="group flex items-center gap-4 px-5 py-4 hover:bg-white/[0.04]"
-                >
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ppc-purple-500/15 text-[18px]">
-                    {a.emoji}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[15px] font-bold tracking-tight text-white">
-                      {a.name}
-                    </div>
-                    <div className="mt-0.5 truncate text-[12.5px] text-white/55">
-                      {a.headline}
-                    </div>
-                  </div>
-                  <div className="hidden text-right sm:block">
-                    <div className="inline-flex items-center gap-1 text-[11px] font-medium tabular text-white/55">
-                      <Clock size={11} weight="duotone" /> {a.expectedDuration}
-                    </div>
-                  </div>
-                  <ArrowRight size={12} weight="bold" className="text-white/30 transition-colors group-hover:text-ppc-purple-300" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <SectionEyebrow
-            eyebrow="Your clients"
-            right={
-              <Link to="/projects" className="font-mono text-[11px] font-medium tabular text-white/55 hover:text-white">
-                6 projects · 11 accounts
-              </Link>
-            }
-          />
-          <ul className="divide-y divide-white/8 rounded-2xl border border-white/8 bg-white/[0.04]">
-            {PROJECTS.map((p) => (
-              <li key={p.id}>
-                <Link
-                  to={`/projects/${p.id}`}
-                  className="group flex items-center justify-between gap-3 px-5 py-3 hover:bg-white/[0.04]"
-                >
-                  <div className="min-w-0">
-                    <div className="truncate text-[14px] font-semibold tracking-tight text-white">
-                      {p.name}
-                    </div>
-                    <div className="mt-0.5 truncate text-[11.5px] text-white/45">{p.industry}</div>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-3 text-[11px]">
-                    <span className="font-mono tabular text-white/40">
-                      {p.accountCount} {p.accountCount === 1 ? 'acct' : 'accts'}
-                    </span>
-                    <ArrowRight size={11} weight="bold" className="text-white/30 transition-colors group-hover:text-ppc-purple-300" />
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+            </li>
+          ))}
+        </ul>
       </section>
     </div>
   );
 }
 
-// ─── Inline section header · StagePage-rhythm eyebrow ─────────────────────
+// ─── Section eyebrow with optional count chip + action link ─────────────
 function SectionEyebrow({
-  eyebrow, count, right,
-}: { eyebrow: string; count?: number; right?: React.ReactNode }) {
+  label, count, action,
+}: {
+  label: string;
+  count?: number;
+  action?: React.ReactNode;
+}) {
   return (
-    <div className="mb-5 flex items-center justify-between gap-4">
-      <div className="flex items-center gap-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-white/55">
-        <span>{eyebrow}</span>
-        {typeof count === 'number' && (
-          <span className="inline-grid h-[18px] min-w-[18px] place-items-center rounded-full bg-ppc-purple-500/15 px-1.5 text-[10.5px] font-bold tabular text-ppc-purple-300">
-            {count}
+    <div className="mb-5 flex items-end justify-between gap-3">
+      <div className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
+        <span>{label}</span>
+        {count !== undefined && (
+          <span className="tabular rounded-md bg-ppc-neutral-100 px-1.5 py-0.5 text-[10.5px] text-ppc-neutral-600">
+            {String(count).padStart(2, '0')}
           </span>
         )}
       </div>
-      {right}
+      {action}
     </div>
   );
 }
 
-// ─── Pulse stat (dark hero) ───────────────────────────────────────────────
-function PulseStat({
-  value, label, tone,
-}: { value: string; label: string; tone?: 'alert' | 'live' }) {
-  const dot = tone === 'alert'
-    ? 'bg-ppc-warning shadow-[0_0_0_4px_rgba(253,176,34,0.18)]'
-    : tone === 'live'
-    ? 'ppcio-live-dot bg-ppc-purple-500'
-    : null;
-  return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-baseline gap-2">
-        {dot && <span className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />}
-        <span className="tabular font-display text-[34px] font-bold leading-none tracking-[-0.025em] text-white">
-          {value}
-        </span>
-      </div>
-      <div className="text-[12px] leading-snug tracking-tight text-white/55">{label}</div>
-    </div>
-  );
-}
+// ─── Row primitives ─────────────────────────────────────────────────────
 
-// ─── Attention row · numbered call-to-action ──────────────────────────────
-function AttentionRow({
-  num, tone, agent, project, finding, impact, cta, href,
-}: {
-  num: string;
-  tone: 'urgent' | 'opportunity';
-  agent: string; project: string; finding: string; impact: string;
-  cta: string; href: string;
-}) {
-  const toneCls = tone === 'urgent'
-    ? { fg: 'text-ppc-error', icon: Warning,      bg: 'bg-ppc-error/15' }
-    : { fg: 'text-ppc-success', icon: CheckCircle, bg: 'bg-ppc-success/15' };
-  const Icon = toneCls.icon;
+function LiveRow({
+  runId, agentName, projectName, stage, elapsed,
+}: typeof LIVE_RUNS[number]) {
   return (
-    <li className="border-b border-white/8 last:border-b-0">
+    <li>
       <Link
-        to={href}
-        className="group flex items-start gap-5 px-6 py-5 hover:bg-white/[0.04]"
+        to={`/agents/competitor-spy/run/${runId}`}
+        className="group flex items-center gap-5 px-7 py-5 transition-colors hover:bg-ppc-purple-50/40"
       >
-        <div className="mt-0.5 flex items-center gap-3 shrink-0">
-          <span className="font-mono text-[12px] font-semibold tabular text-white/40">
-            {num}
-          </span>
-          <div className={`grid h-8 w-8 place-items-center rounded-xl ${toneCls.bg} ${toneCls.fg}`}>
-            <Icon size={14} weight="fill" />
-          </div>
-        </div>
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ppc-purple-50">
+          <span className="ppcio-live-dot inline-block h-2 w-2 rounded-full bg-ppc-purple-500" />
+        </span>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 text-[10.5px]">
-            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-purple-300">
-              {agent}
+          <div className="flex items-center gap-2 text-[11px]">
+            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-purple-500">
+              Running · {agentName}
             </span>
-            <span className="text-white/30">·</span>
-            <span className="text-white/55">{project}</span>
+            <span className="text-ppc-neutral-300">·</span>
+            <span className="text-ppc-neutral-500">{projectName}</span>
           </div>
-          <div className="mt-1.5 text-[15px] font-medium leading-snug tracking-tight text-white">
-            {finding}
-          </div>
-          <div className={`mt-1.5 inline-flex items-center gap-1.5 text-[12px] font-semibold ${toneCls.fg}`}>
-            {tone === 'urgent'
-              ? <span className="text-[13px] leading-none">↓</span>
-              : <TrendUp size={11} weight="bold" />}
-            {impact}
+          <div className="mt-1 truncate text-[14.5px] font-medium tracking-tight text-ppc-black">
+            {stage}
           </div>
         </div>
-        <div className="inline-flex shrink-0 items-center gap-1.5 self-center rounded-pill border border-white/15 bg-white/[0.04] px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition-colors group-hover:border-ppc-purple-500/40 group-hover:text-ppc-purple-300">
-          {cta} <ArrowRight size={12} weight="bold" />
-        </div>
+        <span className="tabular hidden text-[12.5px] font-medium text-ppc-neutral-500 sm:block">
+          {elapsed}
+        </span>
+        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500 transition-[gap] group-hover:gap-2">
+          Watch <ArrowUpRight size={12} weight="bold" />
+        </span>
       </Link>
     </li>
   );
 }
 
-// ─── Running row · live agent with inline progress ────────────────────────
-function RunningRow({
-  agent, project, stage, elapsed, progress, href,
-}: {
-  agent: string; project: string; stage: string; elapsed: string;
-  progress: number; href: string;
-}) {
+function FinishedRow({
+  runId, agentName, projectName, headline, finishedAt, duration, upside,
+}: typeof RECENT_RUNS_SUMMARY[number]) {
   return (
-    <Link
-      to={href}
-      className="group relative block border-b border-white/8 px-6 py-4 last:border-b-0 hover:bg-white/[0.04]"
-    >
-      <div className="flex items-center gap-5">
-        <span className="ppcio-live-dot inline-block h-2 w-2 shrink-0 rounded-full bg-ppc-purple-500" />
+    <li>
+      <Link
+        to={`/reports/${runId}`}
+        className="group flex items-center gap-5 px-7 py-5 transition-colors hover:bg-ppc-purple-50/40"
+      >
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ppc-success/15 text-ppc-success">
+          <CheckCircle size={14} weight="fill" />
+        </span>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 text-[10.5px]">
-            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-purple-300">
-              {agent}
+          <div className="flex flex-wrap items-center gap-2 text-[11px]">
+            <span className="font-mono font-semibold uppercase tracking-[0.08em] text-ppc-purple-500">
+              {agentName}
             </span>
-            <span className="text-white/30">·</span>
-            <span className="text-white/55">{project}</span>
+            <span className="text-ppc-neutral-300">·</span>
+            <span className="text-ppc-neutral-500">{projectName}</span>
+            <span className="text-ppc-neutral-300">·</span>
+            <span className="tabular text-ppc-neutral-500">{finishedAt}</span>
           </div>
-          <div className="mt-1 truncate text-[14.5px] font-medium tracking-tight text-white">
-            {stage}
+          <div className="mt-1 truncate text-[15px] font-semibold tracking-tight text-ppc-black">
+            {headline}
           </div>
         </div>
-        <span className="tabular hidden text-[12px] font-medium text-white/55 sm:block">
-          {elapsed}
+        <div className="hidden items-center gap-4 text-[12.5px] sm:flex">
+          <span className="inline-flex items-center gap-1 text-ppc-neutral-500">
+            <Clock size={11} weight="duotone" />
+            <span className="tabular">{duration}</span>
+          </span>
+          <span className="inline-flex items-center gap-1 font-semibold text-ppc-success">
+            <TrendUp size={12} weight="bold" />
+            <span className="tabular">{upside}</span>
+          </span>
+        </div>
+        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500 transition-[gap] group-hover:gap-2">
+          Report <ArrowUpRight size={12} weight="bold" />
         </span>
-        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-300 transition-[gap] group-hover:gap-2">
-          <Lightning size={12} weight="fill" /> Watch
-        </span>
-      </div>
-      {/* Inline progress shimmer */}
-      <div className="absolute inset-x-6 -bottom-px h-px overflow-hidden bg-white/8">
-        <div
-          className="ppcio-live-bar h-full"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-    </Link>
+      </Link>
+    </li>
   );
 }
