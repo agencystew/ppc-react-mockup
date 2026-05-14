@@ -1,0 +1,119 @@
+import { Link } from 'react-router-dom';
+import { ArrowRight, Sparkle, MagnifyingGlass } from '@phosphor-icons/react';
+import { useState } from 'react';
+import { PROJECTS, ACCOUNTS } from '../mock/projects';
+
+// Projects · /projects
+//
+// THE LIST PAGE. Shows every client/project the agency manages so the user
+// can pick one. Distinct from /projects/:id which is the dossier.
+//
+// Dark canvas, editorial rhythm. Each row carries the StagePage cadence —
+// big project name, mono health pills, account count + spend + trend.
+export function Projects() {
+  const [filter, setFilter] = useState('');
+  const filtered = PROJECTS.filter((p) =>
+    p.name.toLowerCase().includes(filter.toLowerCase()) ||
+    (p.industry ?? '').toLowerCase().includes(filter.toLowerCase()),
+  );
+
+  return (
+    <div className="space-y-10">
+      {/* Hero — eyebrow + purple-period H1 */}
+      <header>
+        <div className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
+          Your clients · {PROJECTS.length} projects · {ACCOUNTS.length} accounts
+        </div>
+        <h1 className="mt-5 font-display text-[60px] font-extrabold leading-[0.96] tracking-[-0.035em] text-white sm:text-[68px]">
+          Every client you manage<span className="text-ppc-purple-500">.</span>
+        </h1>
+        <p className="mt-6 max-w-[640px] text-[18px] leading-[1.55] tracking-tight text-white/70">
+          Click a client to open the dossier — context, accounts, campaigns,
+          and what your agents have surfaced this week.
+        </p>
+      </header>
+
+      {/* Search + new client */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-y border-white/10 py-5">
+        <div className="relative w-full max-w-md">
+          <MagnifyingGlass
+            size={14}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40"
+          />
+          <input
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder="Filter clients by name or industry…"
+            className="w-full rounded-pill border border-white/10 bg-white/[0.04] py-2.5 pl-9 pr-4 text-[14px] text-white placeholder:text-white/40 focus:border-ppc-purple-500 focus:outline-none"
+          />
+        </div>
+        <Link to="/agents" className="ppcio-cta">
+          <Sparkle size={16} weight="fill" />
+          Run an agent
+          <ArrowRight size={14} weight="bold" />
+        </Link>
+      </div>
+
+      {/* Editorial project rows */}
+      <ul className="divide-y divide-white/8 overflow-hidden rounded-2xl border border-white/8 bg-white/[0.03]">
+        {filtered.map((p, i) => {
+          const projectAccounts = ACCOUNTS.filter((a) => a.projectId === p.id);
+          const attention = projectAccounts.filter(
+            (a) => a.health === 'attention' || a.health === 'warning',
+          ).length;
+          return (
+            <li key={p.id}>
+              <Link
+                to={`/projects/${p.id}`}
+                className="group flex items-center gap-6 px-8 py-7 transition-colors hover:bg-white/[0.04]"
+              >
+                <div className="font-mono text-[11.5px] font-semibold tabular text-ppc-purple-400 sm:w-10">
+                  {String(i + 1).padStart(2, '0')}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-display text-[22px] font-bold leading-tight tracking-tight text-white">
+                    {p.name}
+                    <span className="text-ppc-purple-500">.</span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-3 font-mono text-[11.5px] text-white/55">
+                    <span>{p.industry}</span>
+                    <span className="opacity-40">·</span>
+                    <span className="tabular">
+                      {p.accountCount} {p.accountCount === 1 ? 'account' : 'accounts'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Health summary */}
+                <div className="hidden text-right sm:block">
+                  {attention > 0 ? (
+                    <div className="inline-flex items-center gap-1.5 rounded-pill border border-ppc-warning/30 bg-ppc-warning/10 px-3 py-1 text-[12px] font-semibold text-ppc-warning">
+                      <span className="h-1.5 w-1.5 rounded-full bg-ppc-warning" />
+                      {attention} account{attention === 1 ? '' : 's'} need eyes
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 rounded-pill border border-ppc-success/30 bg-ppc-success/10 px-3 py-1 text-[12px] font-semibold text-ppc-success">
+                      <span className="h-1.5 w-1.5 rounded-full bg-ppc-success" />
+                      All healthy
+                    </div>
+                  )}
+                </div>
+
+                <ArrowRight
+                  size={14}
+                  weight="bold"
+                  className="text-white/30 transition-all group-hover:translate-x-1 group-hover:text-ppc-purple-400"
+                />
+              </Link>
+            </li>
+          );
+        })}
+        {filtered.length === 0 && (
+          <li className="px-8 py-12 text-center text-[14px] text-white/50">
+            No clients match "{filter}".
+          </li>
+        )}
+      </ul>
+    </div>
+  );
+}

@@ -16,14 +16,29 @@
 @tailwind components;
 @tailwind utilities;
 
-/* App-shell baseline. The brand CSS sets html/body fonts + color; we
- * just ensure the page bg matches the marketing site's soft lavender
- * surface (matches /free-tools, /agents, /ai-consulting light sections).
- * Cards stay pure white for separation. */
+/* App-shell baseline. Dark canvas app-wide so the whole app reads like
+ * the StagePage JSX. The marketing site alternates light/dark — the APP
+ * is dark, full stop. Surface palette:
+ *   bg-1  = #0C0C0E   (Smoky Black — page canvas)
+ *   bg-2  = #15151A   (sidebar, primary cards)
+ *   bg-3  = #1E1E24   (raised tiles inside cards)
+ *   fg-1  = white     fg-2 = white/70    fg-3 = white/45
+ *   border = rgba(255,255,255,0.08)  (hover: 0.14)
+ *
+ * Form primitives lower down in this file get a dark-mode override too. */
 html, body, #root {
   min-height: 100%;
-  background: #F3F0FF;
+  background: var(--ppc-black);
+  color: var(--ppc-white);
 }
+
+/* The brand CSS adds a global `a:hover { text-decoration: underline }` —
+ * which makes every <Link>-wrapped card underline ALL its child text on
+ * hover (catalog cards, run rows, project tiles, etc.). Reset that here
+ * and only keep underline on explicit `.ppc-link` text links. */
+a:hover { text-decoration: none; }
+.ppc-link:hover,
+a.ppc-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 /* Tabular numbers on data displays. Used in stage page durations,
  * dashboards, finding cards. */
@@ -127,29 +142,40 @@ html, body, #root {
   color: transparent;
 }
 
-/* Form primitives — used in Agent Detail configure form. Kept here so the
- * page itself stays focused on layout, not field chrome. */
+/* Form primitives — used in Agent Detail configure form. Dark-mode
+ * variant since the app is now smoky-black app-wide. */
 .ppc-select,
 .ppc-textarea,
 .ppc-input {
   width: 100%;
-  border: 1px solid var(--ppc-neutral-100);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 12px;
-  background: var(--ppc-white);
+  background: rgba(255, 255, 255, 0.04);
   padding: 10px 12px;
   font-family: var(--font-sans);
   font-size: 14px;
-  color: var(--ppc-black);
+  color: var(--ppc-white);
   outline: none;
-  transition: border-color 150ms ease;
+  transition: border-color 150ms ease, background 150ms ease;
 }
+.ppc-select::placeholder,
+.ppc-textarea::placeholder,
+.ppc-input::placeholder { color: rgba(255, 255, 255, 0.4); }
 .ppc-select:hover,
 .ppc-textarea:hover,
-.ppc-input:hover { border-color: var(--ppc-purple-300); }
+.ppc-input:hover {
+  border-color: rgba(255, 255, 255, 0.20);
+  background: rgba(255, 255, 255, 0.06);
+}
 .ppc-select:focus,
 .ppc-textarea:focus,
 .ppc-input:focus {
   border-color: var(--ppc-purple-500);
-  box-shadow: 0 0 0 3px rgba(128, 87, 255, 0.15);
+  background: rgba(128, 87, 255, 0.06);
+  box-shadow: 0 0 0 3px rgba(128, 87, 255, 0.20);
 }
 .ppc-textarea { resize: vertical; min-height: 64px; }
+.ppc-select option {
+  background: var(--ppc-black);
+  color: var(--ppc-white);
+}

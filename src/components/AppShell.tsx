@@ -71,7 +71,7 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <NavSection eyebrow="App" collapsed={collapsed}>
           <Item to="/"               icon={House}        label="Dashboard"      collapsed={collapsed} end />
           <Item to="/agents"         icon={Robot}        label="Agents"         collapsed={collapsed} />
-          <Item to={`/projects/${CURRENT_PROJECT_ID}`} icon={Folder} label="Projects" collapsed={collapsed} />
+          <Item to="/projects" icon={Folder} label="Projects" collapsed={collapsed} />
           <Item to="/reports/run-competitor-spy-completed" icon={ChartLineUp} label="Reports" collapsed={collapsed} />
           <Item to="/runs"           icon={Lightning}    label="Mission Control" collapsed={collapsed} />
         </NavSection>
