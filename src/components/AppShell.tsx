@@ -6,6 +6,7 @@ import {
   CaretRight, DotsThree,
 } from '@phosphor-icons/react';
 import { PROJECTS, ACCOUNTS } from '../mock/projects';
+import { SIDEBAR_REPORT_PAGES } from '../mock/reports';
 
 /* AppShell — "Inhabited Dark" sidebar.
  *
@@ -25,6 +26,20 @@ const AGENT_PAGES: SubPage[] = [
   { label: 'Detail · Launch', to: '/agents/competitor-spy' },
   { label: 'Loading',         to: '/agents/competitor-spy/loading/run-competitor-spy-running' },
 ];
+
+// Reports dropdown — index + every individual report keyed by runId.
+// Source: SIDEBAR_REPORT_PAGES in mock/reports.ts (single source of truth).
+const REPORT_PAGES: SubPage[] = [
+  { label: 'All reports', to: '/reports' },
+  ...SIDEBAR_REPORT_PAGES.map((r) => ({
+    label: truncate(r.label, 32),
+    to: `/reports/${r.runId}`,
+  })),
+];
+
+function truncate(s: string, max: number) {
+  return s.length > max ? s.slice(0, max - 1).trimEnd() + '…' : s;
+}
 
 const STORAGE_KEY = 'ppcio-sidebar-collapsed';
 
@@ -105,12 +120,12 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
             collapsed={collapsed}
             runningCount={4}
           />
-          <MainNavItem
-            to="/reports/run-competitor-spy-completed"
+          <ItemGroup
             icon={ChartLineUp}
             label="Reports"
+            basePath="/reports"
+            pages={REPORT_PAGES}
             collapsed={collapsed}
-            activeMatch={(p) => p.startsWith('/reports')}
           />
           <ProjectsSection collapsed={collapsed} />
         </nav>

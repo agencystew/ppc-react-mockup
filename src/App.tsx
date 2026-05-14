@@ -5,6 +5,7 @@ import { AgentCatalog } from './pages/AgentCatalog';
 import { AgentDetail } from './pages/AgentDetail';
 import { AgentRunning } from './pages/AgentRunning';
 import { AgentResults } from './pages/AgentResults';
+import { Reports } from './pages/Reports';
 import { Projects } from './pages/Projects';
 import { ProjectPage } from './pages/Project';
 import { Chat } from './pages/Chat';
@@ -26,12 +27,14 @@ export default function App() {
            /agents              — catalog (28 specialists)
            /agents/:slug        — agent detail + launch form
            /agents/:slug/loading/:runId — agent LOADING (running state)
-           /reports/:runId      — agent REPORT (completed state)
+           /reports             — REPORTS inbox (list view, sorted by urgency)
+           /reports/:runId      — single REPORT (completed agent results)
            Old running URL still works for backward-compat redirects. */}
         <Route path="agents" element={<AgentCatalog />} />
         <Route path="agents/:slug" element={<AgentDetail />} />
         <Route path="agents/:slug/loading/:runId" element={<AgentRunning />} />
         <Route path="agents/:slug/run/:runId" element={<AgentRunning />} />
+        <Route path="reports" element={<Reports />} />
         <Route path="reports/:runId" element={<AgentResults />} />
 
         {/* Projects surfaces ------------------------------------------------
