@@ -1,294 +1,249 @@
-// Dashboard — v2 nuclear rebuild.
-//
-// Three spreads, no more:
-//   A · Hero          dark editorial cover (bg-ink, 60vh)
-//                     "Good morning, Stewart." 96px display + one Caveat.
-//   B · Running rail  canvas, horizontal scroll of in-flight agents.
-//   C · Verdicts      canvas, two Sticker cards (one tilted, one square).
-//
-// Discipline rules (locked):
-//   1 · 5 font sizes total: 96 / 56 / 32 / 17 / 14. Nothing in between.
-//   2 · One tilted element on the page — the first Sticker in Spread C.
-//   3 · One mascot, empty state only.
-//   4 · One Caveat — the "the live stack" arrow in Spread A.
-//   5 · Three spreads. No KPI grids, no eyebrows, no chips.
-
 import { Link } from 'react-router-dom';
-import { Caveat } from '../components/brand/Caveat';
-import { Mascot } from '../components/brand/Mascot';
-import { PillButton } from '../components/brand/PillButton';
-import { Sticker } from '../components/brand/Sticker';
-import { NEEDS_TODAY } from '../mock/reports';
+import { CaretRight, Sparkle } from '@phosphor-icons/react';
+import { PROJECTS, ACCOUNTS } from '../mock/projects';
+import { AGENTS } from '../mock/agents';
+import { RECENT_RUNS_SUMMARY } from '../mock/runs';
 
-// ─── DEMO_RUNS ────────────────────────────────────────────────────────────
-// Four in-flight agents for Spread B. Inline because mock/runs.ts only has
-// ONE running fixture (run-competitor-spy-running) and the rail needs four.
-// Project names + agent names line up with the canonical 8-client roster.
-const DEMO_RUNS: Array<{
-  runId: string;
-  slug: string;
-  agentName: string;
-  projectName: string;
-  stage: { current: number; total: number };
-  stageLabel: string;
-  progressPct: number;
-}> = [
-  {
-    runId: 'run-competitor-spy-running',
-    slug: 'competitor-spy',
-    agentName: 'Competitor Spy',
-    projectName: 'Boulder Care',
-    stage: { current: 5, total: 11 },
-    stageLabel: 'Modeling spend signals across rivals',
-    progressPct: 45,
-  },
-  {
-    runId: 'run-deep-audit-durable',
-    slug: 'deep-account-audit',
-    agentName: 'Deep Account Audit',
-    projectName: 'Durable',
-    stage: { current: 3, total: 9 },
-    stageLabel: 'Scoring keyword-to-ad alignment',
-    progressPct: 33,
-  },
-  {
-    runId: 'run-negative-keyword-flock',
-    slug: 'negative-keyword',
-    agentName: 'Negative Keyword',
-    projectName: 'Flock',
-    stage: { current: 7, total: 8 },
-    stageLabel: 'Simulating against 12-month converters',
-    progressPct: 87,
-  },
-  {
-    runId: 'run-ad-copy-livingyoung',
-    slug: 'ad-copy',
-    agentName: 'Ad Copy',
-    projectName: 'LivingYoung Center',
-    stage: { current: 2, total: 6 },
-    stageLabel: 'Lifting buyer language from reviews',
-    progressPct: 28,
-  },
+// Dashboard · /
+//
+// v5 home — "What do you wanna work on?"
+// Source artifact: docs/design-system/v5-source-artifacts/04-home-dashboard.html
+//
+//   1 · Greeting strip       Morning, Stewy · THU · 14 MAY
+//   2 · Black hero card      Giant question + chat input + 6 specialist chips
+//                            (+ "All N →" purple chip linking to /agents)
+//   3 · Your accounts panel  2×2 grid of client cards with status dots
+//   4 · While you were away  Mixed feed of completed + live runs
+
+const TODAY = 'THU · 14 MAY';
+
+// Quick-action chips — six headline specialists. Emojis match the v5 source
+// artifact (intentionally distinct from the mock-agent emojis on /agents).
+const QUICK_CHIPS: { slug: string; emoji: string; label: string }[] = [
+  { slug: 'competitor-spy',     emoji: '🕵️',  label: 'Spy on competitors' },
+  { slug: 'negative-keyword',   emoji: '🧹',  label: 'Mine negatives' },
+  { slug: 'deep-account-audit', emoji: '📊',  label: 'Audit an account' },
+  { slug: 'pmax',               emoji: '🎯',  label: 'Tune PMAX' },
+  { slug: 'ad-copy',            emoji: '✍️',  label: 'Write copy' },
+  { slug: 'shopping-feed',      emoji: '🛒',  label: 'Audit shopping feed' },
 ];
 
-// ─── Page ─────────────────────────────────────────────────────────────────
+// Per-project home-dashboard meta. Kept local to the dashboard so the canonical
+// PROJECTS mock stays minimal. Avatar bg uses the same color rhythm as the v5
+// source artifact (green / orange / blue / purple).
+const ACCOUNT_META: Record<string, { industry: string; spend: string; bg: string }> = {
+  'boulder-care':       { industry: 'Addiction Recovery', spend: '$83k/mo', bg: '#22C55E' },
+  'the-hoth':           { industry: 'SEO Software',       spend: '$13k/mo', bg: '#EF4444' },
+  'durable':            { industry: 'AI Website Builder', spend: '$20k/mo', bg: '#14B8A6' },
+  'linkbuilder':        { industry: 'SEO Tool',           spend: '$1.3k/mo', bg: '#65D6A1' },
+  'livingyoung':        { industry: 'Med Spa',            spend: '$8.4k/mo', bg: '#3B82F6' },
+  'authority-builders': { industry: 'Link Building',      spend: '$6.8k/mo', bg: '#5B7CF8' },
+  'edwin-novel':        { industry: 'D2C Jewelry',        spend: '$6.9k/mo', bg: '#D946A8' },
+  'flock':              { industry: 'Travel SaaS',        spend: '$0.5k/mo', bg: '#C08A2E' },
+};
+
+// One live run for the bottom of the "While you were away" stream.
+const LIVE_RUN = {
+  runId: 'run-deep-account-audit-durable',
+  agentName: 'Account Audit',
+  emoji: '📊',
+  projectName: 'Durable',
+  stageCurrent: 8,
+  stageTotal: 12,
+  stageDescription: 'Currently auditing PMAX asset groups',
+};
 
 export function Dashboard() {
-  const runningCount = DEMO_RUNS.length;
-  const verdicts = NEEDS_TODAY.slice(0, 2);
-  const isEmpty = runningCount === 0 && verdicts.length === 0;
-
-  if (isEmpty) {
-    return <EmptyState />;
-  }
+  const visibleAccounts = PROJECTS.slice(0, 4);
 
   return (
-    <div className="bg-canvas text-ink">
-      <SpreadHero
-        runningCount={runningCount}
-        verdictCount={verdicts.length}
-      />
-      <SpreadRunning runs={DEMO_RUNS} />
-      <SpreadVerdicts verdicts={verdicts} />
-    </div>
-  );
-}
-
-// ─── Spread A · Hero ──────────────────────────────────────────────────────
-
-function SpreadHero({
-  runningCount,
-  verdictCount,
-}: {
-  runningCount: number;
-  verdictCount: number;
-}) {
-  // Subline mirrors the spec verbatim ("Four agents running. Two reports
-  // waiting."). The DEMO_RUNS array is fixed at length 4 and verdicts is
-  // sliced to 2, so the word forms match; we still pass the live counts
-  // in so the page stays honest if someone trims the data.
-  const subline = `${spellOut(runningCount)} agents running. ${spellOut(verdictCount)} reports waiting.`;
-
-  return (
-    <section
-      className="relative w-full bg-ink"
-      style={{ minHeight: '60vh' }}
-    >
-      <div className="mx-auto flex min-h-[60vh] max-w-[1280px] flex-col justify-center px-8 py-20 sm:px-12 md:px-16">
-        <h1 className="font-display text-[56px] font-black leading-[0.96] tracking-[-0.035em] text-white md:text-[96px]">
-          Good morning, Stewart.
-        </h1>
-
-        {/* Caveat sits between H1 and subline, angled DOWN-LEFT so the arrow
-            lands on the first words of the subline ("Four agents running").
-            That's the live-stack reference the spec calls for. */}
-        <div className="mt-8 ml-4 hidden sm:flex">
-          <Caveat text="the live stack" arrow="down-left" />
+    <div className="space-y-4">
+      {/* ═══ 1 · GREETING STRIP ════════════════════════════════════════════ */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <span className="grid h-[22px] w-[22px] place-items-center rounded-[5px] bg-ppc-purple-500 text-[10px] font-semibold text-white">
+            io
+          </span>
+          <span className="text-[13px] text-ppc-text-muted">Morning, Stewy</span>
         </div>
-
-        <p className="mt-6 max-w-[640px] font-sans text-[17px] font-medium leading-[1.55] text-white/70">
-          {subline}
-        </p>
-
-        <div className="mt-10">
-          <PillButton variant="primary" href="/agents">
-            Open running stack &rarr;
-          </PillButton>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── Spread B · Running rail ──────────────────────────────────────────────
-
-function SpreadRunning({ runs }: { runs: typeof DEMO_RUNS }) {
-  return (
-    <section className="w-full bg-canvas">
-      <div className="mx-auto max-w-[1280px] px-8 pt-24 pb-12 sm:px-12 md:px-16">
-        <h2 className="font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ink">
-          Running now
-        </h2>
+        <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ppc-text-muted">
+          {TODAY}
+        </span>
       </div>
 
-      {/* Edge-bleed horizontal rail. Left padding keeps the first card aligned
-          to the page gutter; trailing padding lets the last card breathe past
-          the right edge so the scroll feels intentional. */}
-      <div className="overflow-x-auto pb-20">
-        <ul className="flex gap-6 px-8 sm:px-12 md:px-16">
-          {runs.map((run) => (
-            <li key={run.runId} className="shrink-0">
-              <RunningCard run={run} />
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
+      {/* ═══ 2 · BLACK HERO ═══════════════════════════════════════════════
+          The "moment" that anchors the home view. Pure black (not the
+          ppc-sidebar tint) per source artifact. Two radial purple glows. */}
+      <section className="relative overflow-hidden rounded-[18px] bg-black px-10 pt-16 pb-12 sm:px-12">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-32 h-[440px] w-[440px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.28) 0%, transparent 60%)' }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-20 left-[15%] h-[260px] w-[260px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.08) 0%, transparent 65%)' }}
+        />
 
-function RunningCard({ run }: { run: (typeof DEMO_RUNS)[number] }) {
-  const href = `/agents/${run.slug}/run/${run.runId}`;
-  // Two-link composition: the whole card is clickable via the outer Link, the
-  // ghost PillButton sits inside as a visual affordance (the spec calls for
-  // a ghost PillButton pinned bottom-right). React Router won't fire two
-  // navigations because the inner anchor stops propagation by default; the
-  // outer Link still takes any click outside the pill, which is the intent.
-  return (
-    <div className="group relative h-[180px] w-[340px] rounded-2xl border-2 border-ink bg-white md:w-[380px]">
-      <Link
-        to={href}
-        aria-label={`Open ${run.agentName} run for ${run.projectName}`}
-        className="absolute inset-0 z-0 rounded-2xl transition-transform group-hover:-translate-y-[2px]"
-      />
+        <div className="relative">
+          <h1 className="font-display text-[56px] font-black leading-[0.92] tracking-[-0.035em] text-white sm:text-[72px]">
+            What do you<br />wanna work on<span className="text-ppc-purple-500">?</span>
+          </h1>
 
-      <div className="relative z-10 flex h-full flex-col justify-between p-6">
-        <div>
-          <h3 className="font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ink">
-            {run.agentName}
-          </h3>
-          <p className="mt-1 font-mono text-[14px] leading-[1.4] text-ink/70">
-            Stage {pad2(run.stage.current)} / {pad2(run.stage.total)} &middot; {run.projectName}
-          </p>
-        </div>
-
-        <div className="flex items-end justify-between gap-4">
-          <div className="flex-1 pr-2">
-            <p className="mb-2 font-mono text-[14px] leading-[1.3] text-ink/70">
-              {run.stageLabel}
-            </p>
-            <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-ink/10">
-              <div
-                className="absolute inset-y-0 left-0 bg-mint"
-                style={{ width: `${run.progressPct}%` }}
-              />
-            </div>
+          <div className="mt-9 flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3.5">
+            <Sparkle size={17} weight="fill" className="text-ppc-text-on-dark" />
+            <span className="flex-1 text-[14px] text-white/55">Ask anything, or send a specialist in</span>
+            <kbd className="rounded-[5px] border border-white/10 bg-white/[0.08] px-2 py-[3px] font-mono text-[11px] text-ppc-text-on-dark">
+              ⌘K
+            </kbd>
           </div>
-          <PillButton
-            variant="ghost"
-            href={href}
-            className="!px-4 !py-2 !text-[17px]"
-          >
-            Open &rarr;
-          </PillButton>
-        </div>
-      </div>
-    </div>
-  );
-}
 
-// ─── Spread C · Verdicts waiting ──────────────────────────────────────────
-
-function SpreadVerdicts({ verdicts }: { verdicts: typeof NEEDS_TODAY }) {
-  return (
-    <section className="w-full bg-canvas">
-      <div className="mx-auto max-w-[1280px] px-8 pt-12 pb-32 sm:px-12 md:px-16">
-        <h2 className="font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ink">
-          Verdicts waiting
-        </h2>
-
-        <div className="mt-12 grid gap-12 md:grid-cols-2 md:gap-10">
-          {verdicts.map((v, i) => (
-            <div key={v.id} className="flex">
-              <Sticker
-                variant={i === 0 ? 'mint' : 'default'}
-                tilt={i === 0 ? -2 : undefined}
-                className="w-full max-w-[560px] p-8 sm:p-10"
+          <div className="mt-5 flex flex-wrap gap-1.5">
+            {QUICK_CHIPS.map((chip) => (
+              <Link
+                key={chip.slug}
+                to={`/agents/${chip.slug}`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3.5 py-[7px] text-[12px] text-white transition-colors hover:bg-white/[0.10]"
               >
-                <div className="flex h-full flex-col justify-between gap-8">
-                  <div>
-                    <h3 className="font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ink">
-                      {v.headline}
-                    </h3>
-                    <p className="mt-4 font-sans text-[17px] font-medium leading-[1.5] text-ink/70">
-                      {v.projectName}
-                    </p>
-                  </div>
-                  <div>
-                    <PillButton variant="ghost" href={`/reports/${v.runId}`}>
-                      Open verdict &rarr;
-                    </PillButton>
+                <span aria-hidden className="text-[13px]">{chip.emoji}</span>
+                {chip.label}
+              </Link>
+            ))}
+            <Link
+              to="/agents"
+              className="inline-flex items-center gap-1.5 rounded-full border border-ppc-purple-500/40 bg-ppc-purple-500/20 px-3.5 py-[7px] text-[12px] font-medium text-white transition-colors hover:bg-ppc-purple-500/30"
+            >
+              All {AGENTS.length} →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 3 · YOUR ACCOUNTS ════════════════════════════════════════════
+          White card on lavender. Status dot is the v5 Surface 04 cue
+          (critical / warning / healthy from --ppc-status-*). */}
+      <section className="rounded-card border-[0.5px] border-ppc-card-border bg-ppc-card px-5 py-[18px]">
+        <div className="mb-3.5 flex items-center justify-between">
+          <h2 className="text-[16px] font-medium text-ppc-ink">
+            Your accounts<span className="text-ppc-purple-500">.</span>
+          </h2>
+          <Link
+            to="/projects"
+            className="text-[12px] font-medium text-ppc-purple-500 hover:underline"
+          >
+            All {PROJECTS.length} →
+          </Link>
+        </div>
+
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          {visibleAccounts.map((p) => {
+            const meta = ACCOUNT_META[p.id];
+            return (
+              <Link
+                key={p.id}
+                to={`/projects/${p.id}`}
+                className="flex items-center gap-2.5 rounded-[10px] border-[0.5px] border-ppc-canvas px-3.5 py-3 transition-colors hover:border-ppc-purple-300"
+              >
+                <span
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-[8px] text-[13px] font-medium text-white"
+                  style={{ background: meta?.bg ?? '#7F5AF0' }}
+                >
+                  {p.name.charAt(0)}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[13px] font-medium text-ppc-ink">{p.name}</div>
+                  <div className="truncate text-[11px] text-ppc-text-muted">
+                    {meta?.industry ?? p.industry} · {meta?.spend ?? '—'}
                   </div>
                 </div>
-              </Sticker>
-            </div>
-          ))}
+                <StatusDot health={projectHealth(p.id)} />
+              </Link>
+            );
+          })}
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-// ─── Empty state ──────────────────────────────────────────────────────────
-
-function EmptyState() {
-  return (
-    <div className="grid min-h-[80vh] place-items-center bg-canvas px-8 py-20 text-center">
-      <div className="flex flex-col items-center">
-        <Mascot pose="wave" size={200} />
-        <h1 className="mt-10 max-w-[680px] font-display text-[56px] font-black leading-[1.0] tracking-[-0.035em] text-ink">
-          First run hasn’t happened yet.
-        </h1>
-        <p className="mt-6 max-w-[520px] font-sans text-[17px] font-medium leading-[1.55] text-ink/70">
-          Pick an agent to get started.
-        </p>
-        <div className="mt-10">
-          <PillButton variant="primary" href="/agents">
-            Pick an agent &rarr;
-          </PillButton>
+      {/* ═══ 4 · WHILE YOU WERE AWAY ══════════════════════════════════════
+          Mixed feed: completed runs (from RECENT_RUNS_SUMMARY) + one live
+          run pinned at the bottom. Watch-live is the only purple in-row. */}
+      <section className="overflow-hidden rounded-card border-[0.5px] border-ppc-card-border bg-ppc-card">
+        <div className="flex items-center justify-between border-b-[0.5px] border-ppc-canvas px-5 py-4">
+          <h2 className="text-[16px] font-medium text-ppc-ink">
+            While you were away<span className="text-ppc-purple-500">.</span>
+          </h2>
+          <Link
+            to="/runs"
+            className="text-[12px] font-medium text-ppc-purple-500 hover:underline"
+          >
+            See all →
+          </Link>
         </div>
-      </div>
+
+        {RECENT_RUNS_SUMMARY.slice(0, 2).map((r) => (
+          <CompletedRow key={r.runId} run={r} />
+        ))}
+        <LiveRow run={LIVE_RUN} />
+      </section>
     </div>
   );
 }
 
-// ─── helpers ──────────────────────────────────────────────────────────────
+// ─── Atoms ───────────────────────────────────────────────────────────────
 
-function pad2(n: number): string {
-  return n < 10 ? `0${n}` : String(n);
+function StatusDot({ health }: { health: 'good' | 'warning' | 'attention' }) {
+  const bg =
+    health === 'attention' ? 'bg-ppc-status-critical'
+  : health === 'warning'   ? 'bg-ppc-status-warning'
+  : 'bg-ppc-status-healthy';
+  return <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${bg}`} />;
 }
 
-function spellOut(n: number): string {
-  const words = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
-  return words[n] ?? String(n);
+function projectHealth(projectId: string): 'good' | 'warning' | 'attention' {
+  const accounts = ACCOUNTS.filter((a) => a.projectId === projectId);
+  if (accounts.some((a) => a.health === 'attention')) return 'attention';
+  if (accounts.some((a) => a.health === 'warning'))   return 'warning';
+  return 'good';
+}
+
+function CompletedRow({ run }: { run: typeof RECENT_RUNS_SUMMARY[number] }) {
+  const agent = AGENTS.find((a) => a.name === run.agentName);
+  return (
+    <Link
+      to={`/reports/${run.runId}`}
+      className="group flex items-center gap-3.5 border-b-[0.5px] border-ppc-canvas px-5 py-3.5 transition-colors hover:bg-ppc-canvas/50 last:border-b-0"
+    >
+      <span aria-hidden className="text-[22px] leading-none">{agent?.emoji ?? '✨'}</span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[14px] text-ppc-ink">
+          <span className="font-medium">{run.agentName}</span> wrapped on {run.projectName}
+        </p>
+        <p className="mt-0.5 truncate text-[12px] text-ppc-text-muted">{run.headline}</p>
+      </div>
+      <span className="hidden text-[11px] text-ppc-text-muted sm:inline">{run.finishedAt}</span>
+      <CaretRight size={14} weight="bold" className="text-ppc-text-faint" />
+    </Link>
+  );
+}
+
+function LiveRow({ run }: { run: typeof LIVE_RUN }) {
+  return (
+    <Link
+      to={`/agents/competitor-spy/run/${run.runId}`}
+      className="group flex items-center gap-3.5 px-5 py-3.5 transition-colors hover:bg-ppc-canvas/50"
+    >
+      <span aria-hidden className="text-[22px] leading-none">{run.emoji}</span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[14px] text-ppc-ink">
+          <span className="font-medium">{run.agentName}</span> running on {run.projectName} · stage {run.stageCurrent} of {run.stageTotal}
+        </p>
+        <p className="mt-0.5 flex items-center gap-1.5 truncate text-[12px] text-ppc-text-muted">
+          <span className="ppcio-live-dot inline-block h-[5px] w-[5px] rounded-full bg-ppc-status-healthy" />
+          {run.stageDescription}
+        </p>
+      </div>
+      <span className="text-[11px] font-medium text-ppc-purple-500">Watch live</span>
+      <CaretRight size={14} weight="bold" className="text-ppc-text-faint" />
+    </Link>
+  );
 }

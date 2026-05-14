@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppShell } from './components/AppShell';
+
+/* v1 (canonical / live) */
 import { Dashboard } from './pages/Dashboard';
 import { AgentCatalog } from './pages/AgentCatalog';
 import { AgentDetail } from './pages/AgentDetail';
@@ -9,32 +11,33 @@ import { Reports } from './pages/Reports';
 import { Projects } from './pages/Projects';
 import { ProjectPage } from './pages/Project';
 import { Chat } from './pages/Chat';
+
+/* v2 (parked for comparison — same routes prefixed with /v2) */
+import { Dashboard as V2Dashboard } from './pages/_v2/Dashboard';
+import { AgentCatalog as V2AgentCatalog } from './pages/_v2/AgentCatalog';
+import { AgentDetail as V2AgentDetail } from './pages/_v2/AgentDetail';
+import { AgentRunning as V2AgentRunning } from './pages/_v2/AgentRunning';
+import { AgentResults as V2AgentResults } from './pages/_v2/AgentResults';
+import { Reports as V2Reports } from './pages/_v2/Reports';
+import { Projects as V2Projects } from './pages/_v2/Projects';
+import { ProjectPage as V2ProjectPage } from './pages/_v2/Project';
+import { Chat as V2Chat } from './pages/_v2/Chat';
+
 import { DevPrimitives } from './pages/_dev/Primitives';
 
 export default function App() {
   return (
     <Routes>
-      {/* Hidden v2 QA route — renders the four brand primitives in isolation,
-          outside the AppShell layout. Used by page-rebuild agents only. */}
+      {/* v2 brand primitives QA route — outside AppShell. */}
       <Route path="_dev/primitives" element={<DevPrimitives />} />
 
       <Route element={<AppShell />}>
+        {/* ─── v1 (canonical / live) ─────────────────────────────────── */}
         <Route index element={<Dashboard />} />
 
-        {/* Chat surfaces ----------------------------------------------------
-           /chat            — pre-chat (empty state, dark hero)
-           /chat/:chatId    — active conversation playback
-           Both render the inner chat-history rail on the left. */}
         <Route path="chat" element={<Chat />} />
         <Route path="chat/:chatId" element={<Chat />} />
 
-        {/* Agent surfaces ---------------------------------------------------
-           /agents              — catalog (28 specialists)
-           /agents/:slug        — agent detail + launch form
-           /agents/:slug/loading/:runId — agent LOADING (running state)
-           /reports             — REPORTS inbox (list view, sorted by urgency)
-           /reports/:runId      — single REPORT (completed agent results)
-           Old running URL still works for backward-compat redirects. */}
         <Route path="agents" element={<AgentCatalog />} />
         <Route path="agents/:slug" element={<AgentDetail />} />
         <Route path="agents/:slug/loading/:runId" element={<AgentRunning />} />
@@ -42,11 +45,26 @@ export default function App() {
         <Route path="reports" element={<Reports />} />
         <Route path="reports/:runId" element={<AgentResults />} />
 
-        {/* Projects surfaces ------------------------------------------------
-           /projects        — LIST of every client
-           /projects/:id    — DOSSIER for one client */}
         <Route path="projects" element={<Projects />} />
         <Route path="projects/:id" element={<ProjectPage />} />
+
+        {/* ─── v2 (parked for A/B comparison) ─────────────────────────
+           Same routes as v1, prefixed with /v2.  Swap "/v2" in/out of any
+           URL to compare:  /agents  ↔  /v2/agents.  AppShell wraps both. */}
+        <Route path="v2" element={<V2Dashboard />} />
+
+        <Route path="v2/chat" element={<V2Chat />} />
+        <Route path="v2/chat/:chatId" element={<V2Chat />} />
+
+        <Route path="v2/agents" element={<V2AgentCatalog />} />
+        <Route path="v2/agents/:slug" element={<V2AgentDetail />} />
+        <Route path="v2/agents/:slug/loading/:runId" element={<V2AgentRunning />} />
+        <Route path="v2/agents/:slug/run/:runId" element={<V2AgentRunning />} />
+        <Route path="v2/reports" element={<V2Reports />} />
+        <Route path="v2/reports/:runId" element={<V2AgentResults />} />
+
+        <Route path="v2/projects" element={<V2Projects />} />
+        <Route path="v2/projects/:id" element={<V2ProjectPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
