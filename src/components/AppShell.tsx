@@ -45,6 +45,7 @@ const STORAGE_KEY = 'ppcio-sidebar-collapsed';
 
 export function AppShell() {
   const [collapsed, setCollapsed] = useState(false);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -57,11 +58,28 @@ export function AppShell() {
     localStorage.setItem(STORAGE_KEY, String(next));
   };
 
+  /* Layout posture per route family:
+   *  - /chat, /chat/:id and /v2/chat, /v2/chat/:id  → full-bleed (chat surface owns its own 3-col)
+   *  - /v2/*                                         → full-bleed (v2 pages own their own bands)
+   *  - everything else (v1 canonical)                → padded max-w-[1240px] wrapper
+   *
+   * v1 pages were authored against this wrapper, so removing it breaks their spacing. */
+  const isChat = pathname === '/chat' || pathname.startsWith('/chat/')
+              || pathname === '/v2/chat' || pathname.startsWith('/v2/chat/');
+  const isV2 = pathname === '/v2' || pathname.startsWith('/v2/');
+  const fullBleed = isChat || isV2;
+
   return (
     <div className="flex min-h-screen w-full font-sans text-ppc-black">
       <Sidebar collapsed={collapsed} onToggle={toggle} />
       <main className="flex min-w-0 flex-1 flex-col">
-        <Outlet />
+        {fullBleed ? (
+          <Outlet />
+        ) : (
+          <div className="mx-auto w-full max-w-[1240px] px-8 py-10 lg:px-12 lg:py-12">
+            <Outlet />
+          </div>
+        )}
       </main>
     </div>
   );
