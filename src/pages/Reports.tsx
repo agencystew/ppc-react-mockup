@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import {
   MagnifyingGlass, CaretDown, ArrowRight, ArrowUp, ArrowDown, Sparkle,
-  Coffee, Check, PaperPlaneTilt, PushPin, Rows, SquaresFour, Lightning,
+  Check, PaperPlaneTilt, PushPin, Rows, SquaresFour, Lightning,
+  Compass,
 } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -216,7 +217,7 @@ interface OperatorProps {
 
 function OperatorView({
   counts, rows, density, setDensity, query, setQuery,
-  projectId, setProject, bucket, setBucket, urgent,
+  projectId, setProject, bucket, setBucket,
 }: OperatorProps) {
   return (
     <>
@@ -296,19 +297,21 @@ function OperatorView({
           boxShadow: '0 1px 0 rgba(255,255,255,0.6) inset, 0 1px 2px rgba(15,10,30,0.025)',
         }}
       >
-        <div className="flex items-center justify-between border-b border-[#ECEAFA] px-6 py-3.5">
-          <div className="flex items-center gap-2.5">
-            <Sparkle size={13} weight="fill" className="text-ppc-purple-500" />
-            <span className="font-display text-[14.5px] font-semibold tracking-[-0.012em] text-ppc-ink">
-              Inbox
+        <div className="flex items-center justify-between border-b border-[#ECEAFA] px-6 py-4">
+          <div className="flex items-baseline gap-3">
+            <span className="inline-flex items-center gap-2">
+              <Sparkle size={15} weight="fill" className="text-ppc-purple-500" />
+              <span className="font-display text-[17px] font-bold tracking-[-0.012em] text-ppc-ink">
+                Inbox
+              </span>
             </span>
-            <span className="mono-eyebrow text-ppc-text-faint">
-              · last 30 days · sorted by what needs you
+            <span className="text-[12.5px] text-ppc-text-muted">
+              Last 30 days <span className="text-ppc-text-faint/55">·</span> sorted by what needs you
             </span>
           </div>
-          <span className="mono-eyebrow text-ppc-text-faint">
+          <span className="text-[12.5px] text-ppc-text-muted">
             <span className="tabular-nums font-semibold text-ppc-ink">{rows.length}</span>
-            <span className="text-ppc-text-faint/60"> / {counts.all}</span>
+            <span className="text-ppc-text-faint/55"> / {counts.all}</span>
           </span>
         </div>
 
@@ -326,8 +329,13 @@ function OperatorView({
         </ul>
       </section>
 
-      {/* AI INSIGHT — the earned-dark footer payoff, matches /projects */}
-      {urgent && <MostUrgentFooter report={urgent} />}
+      {/* DISCOVERIES CTA — replaces the dark "most urgent" footer.
+          Reports = the raw firehose. Discoveries = the briefing layer
+          that compiles every report into a single executive read across
+          the portfolio. The CTA lives here because once you're done
+          triaging the inbox, the natural next step is "show me the
+          bigger picture across all projects". */}
+      <DiscoveriesCta />
     </>
   );
 }
@@ -340,27 +348,27 @@ function CompactRow({ report, index }: { report: FlatReport; index: number }) {
     <li className="row reveal-row group" style={{ animationDelay: `${300 + index * 26}ms` }}>
       <Link
         to={`/reports/${report.runId}`}
-        className="grid grid-cols-[180px_1fr_140px_92px_28px] items-center gap-3 px-6 py-[14px]"
+        className="grid grid-cols-[190px_1fr_148px_100px_28px] items-center gap-3 px-6 py-[18px]"
       >
         <ProjectTag id={report.projectId} name={report.projectName} />
         <div className="min-w-0">
           <div className="flex items-center gap-2 truncate">
-            <span className="text-[14px] leading-none">{report.agentEmoji}</span>
-            <span className="truncate text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink group-hover:text-ppc-purple-700">
+            <span className="text-[16px] leading-none">{report.agentEmoji}</span>
+            <span className="truncate text-[15px] font-semibold tracking-[-0.008em] text-ppc-ink group-hover:text-ppc-purple-700">
               {report.headline}
             </span>
-            {report.pinned && <PushPin size={11} weight="fill" className="shrink-0 text-ppc-purple-400" />}
+            {report.pinned && <PushPin size={12} weight="fill" className="shrink-0 text-ppc-purple-400" />}
           </div>
-          <div className="mt-[2px] truncate text-[11.5px] text-ppc-text-muted">
+          <div className="mt-[3px] truncate text-[12.5px] text-ppc-text-muted">
             {report.agentName} <span className="text-ppc-text-faint/60">·</span> {report.subline}
           </div>
         </div>
         <BucketPill bucket={report.bucket} status={report.status} />
         <div className="text-right">
-          <span className="text-[11.5px] tabular-nums text-ppc-text-muted">{report.finishedLabel}</span>
+          <span className="text-[12.5px] tabular-nums text-ppc-text-muted">{report.finishedLabel}</span>
         </div>
         <ArrowRight
-          size={12}
+          size={13}
           weight="bold"
           className="justify-self-end text-ppc-text-faint transition-transform duration-200 group-hover:translate-x-[2px] group-hover:text-ppc-purple-500"
         />
@@ -454,144 +462,80 @@ function Pill({ bg, fg, dot, children }: { bg: string; fg: string; dot: string; 
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   FOOTER — "Most urgent today" earned-dark payoff (mirrors /projects)  */
+   DISCOVERIES CTA — light invitation card under the inbox
 
-function MostUrgentFooter({ report }: { report: FlatReport }) {
+   Reports surfaces every individual finding. Discoveries is the next
+   layer up — a weekly executive read that compiles every report into
+   one narrative across the portfolio ("here's what your AI noticed
+   this week, ranked by impact"). The CTA lives at the bottom of /reports
+   because that's where the operator finishes triage and wants the
+   bigger picture. Light card, no dark hero — Reports already has the
+   inbox card as the page's main weight; a second dark moment would
+   make the page bottom-heavy.                                          */
+
+function DiscoveriesCta() {
   return (
     <Link
-      to={`/reports/${report.runId}`}
-      className="reveal group relative block overflow-hidden rounded-[20px]"
+      to="/discoveries"
+      className="reveal group relative block overflow-hidden rounded-[18px] transition-all hover:-translate-y-[1px]"
       style={{
         animationDelay: '320ms',
-        background: 'radial-gradient(120% 90% at 78% 0%, #1F1340 0%, #120B26 55%, #0A0617 100%)',
-        boxShadow: '0 1px 0 rgba(127,90,240,0.10) inset, 0 16px 36px -22px rgba(127,90,240,0.45), 0 1px 0 rgba(255,255,255,0.06) inset',
+        background: 'linear-gradient(180deg, #FFFFFF 0%, #FAF7FF 100%)',
+        border: '0.5px solid #d9d4ec',
+        boxShadow: '0 1px 0 rgba(255,255,255,0.7) inset, 0 10px 30px -22px rgba(127,90,240,0.25)',
       }}
     >
+      {/* Faint purple wash from the right — a whisper, not a hero */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-24 -top-32 h-[420px] w-[420px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.40) 0%, rgba(127,90,240,0.10) 38%, transparent 70%)' }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-32 -left-20 h-[340px] w-[340px] rounded-full"
+        className="pointer-events-none absolute -right-24 -top-24 h-[360px] w-[360px] rounded-full opacity-50 transition-opacity duration-500 group-hover:opacity-90"
         style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.10) 0%, transparent 65%)' }}
       />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.5]"
-        style={{
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.024) 1px, transparent 1px)',
-          backgroundSize: '3px 3px',
-          mixBlendMode: 'overlay',
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-14 top-0 h-px"
-        style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(127,90,240,0.55) 45%, rgba(127,90,240,0.85) 50%, rgba(127,90,240,0.55) 55%, transparent 100%)' }}
-      />
 
-      <div className="relative grid grid-cols-[1.35fr_1fr] items-center gap-6 px-9 py-9">
+      <div className="relative grid items-center gap-6 px-7 py-7 md:grid-cols-[1.4fr_auto] md:px-9 md:py-8">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.04] px-3 py-[5px] mono-eyebrow text-white/65">
-            <Sparkle size={11} weight="fill" className="text-[#C7B0FF]" />
-            Most urgent today
-            <span className="text-white/30">·</span>
-            <span className="text-base leading-none">{report.agentEmoji}</span>
-            <span className="font-medium text-white/85">{report.agentName}</span>
-            <span className="text-white/30">·</span>
-            <span>{report.projectName}</span>
-          </div>
-          <h2 className="mt-4 font-display text-[34px] font-extrabold leading-[1.06] tracking-[-0.024em] text-white">
-            {report.headline}
-            <em
-              className="font-serif italic font-bold not-italic ml-[2px]"
-              style={{
-                fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif',
-                fontStyle: 'italic',
-                background: 'linear-gradient(90deg, #E8DDFF 0%, #C7B0FF 60%, #A88CFF 100%)',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                color: 'transparent',
-              }}
-            >
-              .
-            </em>
-          </h2>
-          {report.whyNow && (
-            <p className="mt-3 max-w-[560px] text-[13.5px] leading-[1.55] text-white/65">
-              {report.whyNow}
-            </p>
-          )}
-          <div className="mt-6 flex items-center gap-3">
+          <div className="inline-flex items-center gap-2">
             <span
-              className="group/btn inline-flex items-center gap-2 rounded-[11px] px-4 py-[10px] text-[13px] font-semibold tracking-tight text-white transition-all"
+              className="grid h-[28px] w-[28px] place-items-center rounded-[8px]"
               style={{
-                background: 'linear-gradient(180deg, #9676F7 0%, #7F5AF0 50%, #6543DA 100%)',
-                boxShadow: '0 1px 0 rgba(255,255,255,0.25) inset, 0 0 0 1px rgba(127,90,240,0.7), 0 12px 28px -10px rgba(127,90,240,0.65)',
+                background: 'linear-gradient(155deg, #E9E3FF 0%, #D3C6FF 100%)',
+                boxShadow: 'inset 0 0 0 0.5px rgba(127,90,240,0.25)',
               }}
             >
-              Open report
-              <ArrowRight size={12} weight="bold" className="transition-transform group-hover:translate-x-[2px]" />
+              <Compass size={14} weight="duotone" className="text-ppc-purple-700" />
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[11.5px] text-white/55">
-              <Coffee size={12} weight="duotone" />
-              Finished {report.finishedLabel.toLowerCase()}
-            </span>
+            <span className="mono-eyebrow text-ppc-purple-700">Discoveries</span>
+            <span className="text-ppc-text-faint">·</span>
+            <span className="mono-eyebrow text-ppc-text-faint">weekly briefing across all projects</span>
           </div>
+
+          <h2 className="mt-3.5 font-display text-[28px] font-extrabold leading-[1.06] tracking-[-0.022em] text-ppc-ink md:text-[32px]">
+            See the bigger picture across your roster<span className="text-ppc-purple-500">.</span>
+          </h2>
+          <p className="mt-2.5 max-w-[60ch] text-[14px] leading-[1.55] text-ppc-text-muted">
+            Discoveries compiles every report from every project into a single executive read —
+            patterns that span clients, themes your specialists are flagging, and what's worth
+            your attention this week. The forest, not the trees.
+          </p>
         </div>
 
-        <div className="relative">
-          <div
-            className="rounded-[14px] px-6 py-5"
+        <div className="flex items-center md:justify-end">
+          <span
+            className="group/cta inline-flex items-center gap-2 rounded-[12px] px-[18px] py-[12px] text-[14px] font-semibold tracking-tight text-white transition-all"
             style={{
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%)',
-              border: '0.5px solid rgba(255,255,255,0.10)',
+              background: 'linear-gradient(180deg, #8E6BF5 0%, #7F5AF0 50%, #6E47E0 100%)',
+              boxShadow: '0 1px 0 rgba(255,255,255,0.22) inset, 0 0 0 1px rgba(127,90,240,0.55), 0 12px 28px -10px rgba(127,90,240,0.55)',
             }}
           >
-            <div className="mono-eyebrow text-white/55">
-              {report.primaryMetricLabel ?? 'Upside if applied'}
-            </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="tabular-nums font-display text-[44px] font-extrabold leading-none tracking-[-0.028em] text-white">
-                {report.primaryMetric}
-              </span>
-            </div>
-            <div className="mt-1.5 text-[11.5px] text-white/55">
-              Across this account
-            </div>
-            <div className="mt-4">
-              <FooterSparkline />
-            </div>
-          </div>
+            Open Discoveries
+            <ArrowRight size={13} weight="bold" className="transition-transform duration-200 group-hover:translate-x-[3px]" />
+          </span>
         </div>
       </div>
     </Link>
   );
 }
 
-function FooterSparkline() {
-  return (
-    <svg width="340" height="48" viewBox="0 0 340 22" className="block" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="rp-footer-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#C7B0FF" stopOpacity="0.32" />
-          <stop offset="100%" stopColor="#C7B0FF" stopOpacity="0" />
-        </linearGradient>
-        <filter id="rp-footer-glow" x="-20%" y="-50%" width="140%" height="200%">
-          <feGaussianBlur stdDeviation="0.7" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-      <path d="M0,18 L28,15 L56,17 L85,13 L113,14 L141,9 L170,11 L198,7 L227,9 L255,5 L283,7 L312,3 L340,5 L340,22 L0,22 Z" fill="url(#rp-footer-grad)" stroke="none" />
-      <path d="M0,18 L28,15 L56,17 L85,13 L113,14 L141,9 L170,11 L198,7 L227,9 L255,5 L283,7 L312,3 L340,5" fill="none" stroke="#C7B0FF" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" filter="url(#rp-footer-glow)" />
-    </svg>
-  );
-}
 
 /* ═══════════════════════════════════════════════════════════════════
    KPI CARD — copy-cat of /projects KpiCard for visual continuity      */
@@ -605,43 +549,20 @@ function KpiCard({
   spark: number[];
   accent: string;
 }) {
+  /* Brand-correct: WHITE cards, mirrors /projects KpiCard byte-for-byte
+   * for visual continuity. Earlier dark variant was off-brand — Reports
+   * lives in the same lavender canvas family as Projects. */
   const semantic = delta.good ? (delta.tone === 'down' ? 'up' : 'down') : delta.tone;
   const palette = semantic === 'up'
-    ? { fg: '#86EFAC', bg: 'rgba(134,239,172,0.12)', Icon: ArrowUp }
-    : { fg: '#FCA5A5', bg: 'rgba(248,113,113,0.12)', Icon: ArrowDown };
+    ? { fg: '#1F8458', bg: '#E2F4EC', Icon: ArrowUp }
+    : { fg: '#C5301B', bg: '#FBE6E5', Icon: ArrowDown };
   return (
     <div
-      className="kpi-card group relative overflow-hidden rounded-[14px] px-5 pb-4 pt-4"
-      style={{
-        background: 'radial-gradient(130% 100% at 90% 0%, #1B1138 0%, #0F0A1E 55%, #0A0617 100%)',
-        boxShadow: '0 1px 0 rgba(255,255,255,0.06) inset, 0 14px 30px -20px rgba(127,90,240,0.40)',
-      }}
+      className="kpi-card group relative overflow-hidden rounded-[14px] bg-white px-5 pb-4 pt-4"
+      style={{ border: '0.5px solid #d9d4ec', boxShadow: '0 1px 0 rgba(255,255,255,0.7) inset' }}
     >
-      {/* Top-right purple bloom — soft, brighter on hover */}
-      <div
-        aria-hidden
-        className="kpi-bloom pointer-events-none absolute -right-16 -top-20 h-[180px] w-[180px] rounded-full"
-        style={{ background: `radial-gradient(circle, ${accent}40 0%, ${accent}10 40%, transparent 70%)` }}
-      />
-      {/* Sheen line at the very top */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-6 top-0 h-px"
-        style={{ background: `linear-gradient(90deg, transparent 0%, ${accent}66 50%, transparent 100%)` }}
-      />
-      {/* Grain */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-40"
-        style={{
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.022) 1px, transparent 1px)',
-          backgroundSize: '3px 3px',
-          mixBlendMode: 'overlay',
-        }}
-      />
-
-      <div className="relative flex items-start justify-between gap-3">
-        <div className="mono-eyebrow text-white/55">{label}</div>
+      <div className="flex items-start justify-between gap-3">
+        <div className="mono-eyebrow text-ppc-text-faint">{label}</div>
         <span
           className="tabular-nums inline-flex items-center gap-[3px] rounded-[6px] px-[7px] py-[2px] text-[11px] font-semibold"
           style={{ color: palette.fg, background: palette.bg }}
@@ -650,12 +571,17 @@ function KpiCard({
           {delta.pct.toFixed(1)}%
         </span>
       </div>
-      <div className="relative mt-2.5 font-display text-[30px] font-extrabold leading-[1.0] tracking-[-0.024em] tabular-nums text-white">
+      <div className="mt-2.5 font-display text-[30px] font-extrabold leading-[1.0] tracking-[-0.024em] tabular-nums text-ppc-ink">
         {value}
       </div>
-      <div className="relative mt-3 -mb-1">
+      <div className="mt-3 -mb-1">
         <KpiSparkline points={spark} accent={accent} />
       </div>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-6 bottom-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{ background: `linear-gradient(90deg, transparent 0%, ${accent}80 50%, transparent 100%)` }}
+      />
     </div>
   );
 }
@@ -670,27 +596,12 @@ function KpiSparkline({ points, accent }: { points: number[]; accent: string }) 
     <svg width={w} height={h} viewBox={`0 0 ${w} ${max}`} className="block" preserveAspectRatio="none">
       <defs>
         <linearGradient id={`kpi-${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={accent} stopOpacity="0.55" />
+          <stop offset="0%" stopColor={accent} stopOpacity="0.32" />
           <stop offset="100%" stopColor={accent} stopOpacity="0" />
         </linearGradient>
-        <filter id={`kpi-g-${id}`} x="-20%" y="-50%" width="140%" height="200%">
-          <feGaussianBlur stdDeviation="0.6" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
       <path d={fillPath} fill={`url(#kpi-${id})`} stroke="none" />
-      <path
-        d={linePath}
-        fill="none"
-        stroke={accent}
-        strokeWidth={1.7}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        filter={`url(#kpi-g-${id})`}
-      />
+      <path d={linePath} fill="none" stroke={accent} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -792,41 +703,39 @@ function ProjectPicker({ value, onChange }: { value: string; onChange: (id: stri
 
       {open && (
         <div
-          className="absolute left-0 top-full mt-2 w-[260px] overflow-hidden rounded-[12px] bg-white"
+          className="absolute left-0 top-full mt-2 w-[300px] overflow-hidden rounded-[12px] bg-white font-sans"
           style={{
             zIndex: 50,
             border: '0.5px solid #d9d4ec',
             boxShadow: '0 18px 36px -18px rgba(15,10,30,0.22), 0 2px 6px rgba(15,10,30,0.06)',
           }}
         >
-          <div className="px-3 pb-1.5 pt-2.5">
-            <span className="mono-eyebrow text-ppc-text-faint">Filter by project</span>
+          <div className="border-b border-[#ECEAFA] px-4 pb-2 pt-3">
+            <span className="text-[12.5px] font-semibold text-ppc-ink">Filter by project</span>
           </div>
 
           <button
             type="button"
             onClick={() => { onChange('all'); setOpen(false); }}
             className={[
-              'flex w-full items-center gap-2.5 px-3 py-[8px] text-left text-[13px] font-semibold tracking-[-0.005em] transition-colors',
-              value === 'all'
-                ? 'bg-[#F3F0FF] text-ppc-purple-700'
-                : 'text-ppc-ink hover:bg-[#F8F5FF]',
+              'flex w-full items-center gap-3 px-4 py-[10px] text-left text-[14px] font-semibold tracking-[-0.005em] transition-colors',
+              value === 'all' ? 'bg-[#F3F0FF] text-ppc-purple-700' : 'text-ppc-ink hover:bg-[#F8F5FF]',
             ].join(' ')}
           >
             <span
-              className="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-[6px] text-[11px] font-bold text-ppc-purple-700"
+              className="grid h-[26px] w-[26px] shrink-0 place-items-center rounded-[7px] text-[12px] font-bold text-ppc-purple-700"
               style={{ background: '#E9E3FF', boxShadow: 'inset 0 0 0 0.5px rgba(127,90,240,0.20)' }}
             >
               ★
             </span>
             <span className="flex-1">All projects</span>
-            <span className="mono-eyebrow text-ppc-text-faint">{PROJECTS.length}</span>
-            {value === 'all' && <Check size={12} weight="bold" className="text-ppc-purple-500" />}
+            <span className="tabular-nums text-[12px] font-semibold text-ppc-text-muted">{PROJECTS.length}</span>
+            {value === 'all' && <Check size={13} weight="bold" className="text-ppc-purple-500" />}
           </button>
 
-          <div className="my-1 h-px bg-[#ECEAFA]" />
+          <div className="h-px bg-[#ECEAFA]" />
 
-          <ul className="max-h-[300px] overflow-y-auto pb-1.5">
+          <ul className="max-h-[340px] overflow-y-auto py-1">
             {PROJECTS.map((p) => {
               const isActive = value === p.id;
               return (
@@ -835,20 +744,22 @@ function ProjectPicker({ value, onChange }: { value: string; onChange: (id: stri
                     type="button"
                     onClick={() => { onChange(p.id); setOpen(false); }}
                     className={[
-                      'flex w-full items-center gap-2.5 px-3 py-[8px] text-left text-[13px] font-medium tracking-[-0.005em] transition-colors',
-                      isActive
-                        ? 'bg-[#F3F0FF] text-ppc-purple-700'
-                        : 'text-ppc-ink hover:bg-[#F8F5FF]',
+                      'flex w-full items-center gap-3 px-4 py-[9px] text-left transition-colors',
+                      isActive ? 'bg-[#F3F0FF]' : 'hover:bg-[#F8F5FF]',
                     ].join(' ')}
                   >
-                    <AvatarPip id={p.id} name={p.name} size={22} />
-                    <span className="flex-1 truncate">{p.name}</span>
-                    {p.industry && (
-                      <span className="hidden truncate text-[10.5px] text-ppc-text-faint sm:inline-block">
-                        {p.industry}
+                    <AvatarPip id={p.id} name={p.name} size={26} />
+                    <span className="min-w-0 flex-1">
+                      <span className={`block truncate text-[14px] font-semibold tracking-[-0.005em] ${isActive ? 'text-ppc-purple-700' : 'text-ppc-ink'}`}>
+                        {p.name}
                       </span>
-                    )}
-                    {isActive && <Check size={12} weight="bold" className="text-ppc-purple-500" />}
+                      {p.industry && (
+                        <span className="mt-[2px] block truncate text-[11.5px] text-ppc-text-muted">
+                          {p.industry}
+                        </span>
+                      )}
+                    </span>
+                    {isActive && <Check size={13} weight="bold" className="text-ppc-purple-500" />}
                   </button>
                 </li>
               );
@@ -1177,17 +1088,12 @@ const PAGE_STYLES = `
     background: linear-gradient(90deg, rgba(127,90,240,0.055) 0%, rgba(127,90,240,0.018) 38%, transparent 100%);
   }
 
-  /* Dark KPI cards — gentle lift + brighter bloom on hover */
+  /* KPI card — gentle hover lift (matches /projects) */
   .kpi-card {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   .kpi-card:hover {
     transform: translateY(-1px);
-    box-shadow:
-      0 1px 0 rgba(255,255,255,0.08) inset,
-      0 0 0 1px rgba(127,90,240,0.35),
-      0 18px 36px -18px rgba(127,90,240,0.55);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset, 0 12px 28px -16px rgba(127,90,240,0.20);
   }
-  .kpi-bloom { transition: opacity 0.35s ease, transform 0.35s ease; opacity: 0.85; }
-  .kpi-card:hover .kpi-bloom { opacity: 1; transform: scale(1.08); }
 `;
