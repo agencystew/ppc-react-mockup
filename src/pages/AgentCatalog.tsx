@@ -174,37 +174,46 @@ export function AgentCatalog() {
 function HeroBlock() {
   return (
     <section className="grid gap-6 lg:grid-cols-[1fr_440px]">
+      {/* Left column splits into "top cluster" (eyebrow + H1) and "bottom
+       * cluster" (search + chips). The bottom cluster gets `mt-auto` so
+       * it sinks to the bottom of the row alongside the ScheduleCard CTA
+       * — otherwise the taller card creates a huge dead zone under the
+       * chips (Stewart 2026-05-15). */}
       <div className="flex min-w-0 flex-col">
-        <span className="inline-flex items-center gap-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ppc-purple-700">
-          <Sparkle size={10} weight="fill" />
-          Agents
-        </span>
-
-        <h1 className="mt-3 font-display text-[42px] font-black leading-[1.02] tracking-[-0.028em] text-ppc-ink sm:text-[48px]">
-          What do you want
-          <br />
-          to{' '}
-          <span
-            className="font-serif italic font-bold text-ppc-purple-500"
-            style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-          >
-            accomplish
+        <div>
+          <span className="inline-flex items-center gap-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ppc-purple-700">
+            <Sparkle size={10} weight="fill" />
+            Agents
           </span>
-          <P char="?" />
-        </h1>
 
-        <SearchBar />
-
-        <div className="mt-4 flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 text-[12px] text-ppc-text-muted">Try asking:</span>
-          {SUGGESTIONS.map((s) => (
-            <button
-              key={s}
-              className="rounded-full border-[0.5px] border-ppc-card-border bg-white px-3 py-[6px] text-[12px] font-medium text-ppc-text-muted transition-all hover:-translate-y-[0.5px] hover:border-ppc-purple-300 hover:text-ppc-ink"
+          <h1 className="mt-3 font-display text-[42px] font-black leading-[1.02] tracking-[-0.028em] text-ppc-ink sm:text-[48px]">
+            What do you want
+            <br />
+            to{' '}
+            <span
+              className="font-serif italic font-bold text-ppc-purple-500"
+              style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
             >
-              {s}
-            </button>
-          ))}
+              accomplish
+            </span>
+            <P char="?" />
+          </h1>
+        </div>
+
+        <div className="mt-auto pt-8">
+          <SearchBar />
+
+          <div className="mt-4 flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 text-[12px] text-ppc-text-muted">Try asking:</span>
+            {SUGGESTIONS.map((s) => (
+              <button
+                key={s}
+                className="rounded-full border-[0.5px] border-ppc-card-border bg-white px-3 py-[6px] text-[12px] font-medium text-ppc-text-muted transition-all hover:-translate-y-[0.5px] hover:border-ppc-purple-300 hover:text-ppc-ink"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -217,7 +226,7 @@ function SearchBar() {
   return (
     <form
       onSubmit={(e) => e.preventDefault()}
-      className="mt-7 flex items-center gap-2 rounded-[14px] border-[0.5px] border-ppc-card-border bg-white py-2.5 pl-4 pr-2.5 shadow-[0_2px_10px_-6px_rgba(15,10,30,0.08)] focus-within:border-ppc-purple-300 focus-within:shadow-[0_0_0_4px_rgba(127,90,240,0.10),0_4px_14px_-6px_rgba(127,90,240,0.25)]"
+      className="flex items-center gap-2 rounded-[14px] border-[0.5px] border-ppc-card-border bg-white py-2.5 pl-4 pr-2.5 shadow-[0_2px_10px_-6px_rgba(15,10,30,0.08)] focus-within:border-ppc-purple-300 focus-within:shadow-[0_0_0_4px_rgba(127,90,240,0.10),0_4px_14px_-6px_rgba(127,90,240,0.25)]"
     >
       <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-ppc-text-muted" />
       <input
