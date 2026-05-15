@@ -57,7 +57,7 @@ function CompetitorSpyReport({ run }: { run: AgentRun }) {
     <div className="font-sans text-ppc-ink">
       <Breadcrumbs trail={['Reports', run.parentAgent.name, projectName]} />
       <TitleRow agentName={run.parentAgent.name} onJumpToAudit={() => setTab('full')} />
-      <MetaLine date="May 13, 2025" time="2:14 PM" rivals={8} />
+      <MetaLine date="May 13, 2025" time="2:14 PM" />
       <HeroCard run={run} />
       <Tabs active={tab} onChange={setTab} />
       {tab === 'summary' && <SummaryView run={run} onSeeFullReport={() => setTab('full')} />}
@@ -133,7 +133,7 @@ function TitleRow({
 function OnTrackPill() {
   return (
     <span
-      className="inline-flex items-center gap-[6px] rounded-full px-[11px] py-[5px] text-[12px] font-semibold"
+      className="inline-flex items-center gap-2 rounded-full px-[14px] py-[7px] text-[13.5px] font-semibold"
       style={{
         background: '#DEF7E7',
         color: '#1F8A5A',
@@ -142,13 +142,13 @@ function OnTrackPill() {
     >
       <span
         aria-hidden
-        className="h-[6px] w-[6px] rounded-full"
+        className="h-[7px] w-[7px] rounded-full"
         style={{
           background: '#1F8A5A',
           boxShadow: '0 0 0 3px rgba(31,138,90,0.18)',
         }}
       />
-      On track
+      Completed
     </span>
   );
 }
@@ -199,22 +199,12 @@ function PrimaryButton({
 
 // ─── Meta line ───────────────────────────────────────────────────────────
 
-function MetaLine({
-  date,
-  time,
-  rivals,
-}: {
-  date: string;
-  time: string;
-  rivals: number;
-}) {
+function MetaLine({ date, time }: { date: string; time: string }) {
   return (
     <p className="mb-7 text-[13.5px] text-ppc-text-muted">
       Generated {date}
       <span className="mx-2 text-ppc-text-faint">·</span>
       {time}
-      <span className="mx-2 text-ppc-text-faint">·</span>
-      Compared to {rivals} rivals
     </p>
   );
 }
