@@ -177,13 +177,10 @@ function GreetingStrip() {
   return (
     <div className="flex items-end justify-between gap-4">
       <div>
-        <p className="flex items-center gap-2 text-[16px] font-medium tracking-[-0.005em] text-ppc-ink">
+        <h1 className="flex items-center gap-3 font-display text-[48px] font-black leading-[1.05] tracking-[-0.02em] text-ppc-ink">
           Morning, Stewy
-          <span aria-hidden className="inline-block text-[18px] leading-none">👋</span>
-        </p>
-        <p className="mt-1 text-[13px] text-ppc-text-muted">
-          Portfolio signals, projects, and what your agents found overnight.
-        </p>
+          <span aria-hidden className="inline-block text-[44px] leading-none">👋</span>
+        </h1>
       </div>
       <span
         className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-[7px] font-mono text-[11px] uppercase tracking-[0.10em] text-ppc-ink"
