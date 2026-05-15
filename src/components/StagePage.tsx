@@ -441,10 +441,12 @@ function MissionFeedCard({
 }) {
   return (
     <section
-      className="overflow-hidden rounded-[16px] bg-white"
+      className="relative overflow-hidden rounded-[16px]"
       style={{
+        background:
+          'radial-gradient(140% 100% at 0% 0%, #1A1230 0%, #0F0A1E 45%, #07050D 100%)',
         boxShadow:
-          '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.10)',
+          '0 0 0 1px rgba(255,255,255,0.05), 0 30px 60px -30px rgba(15,10,30,0.55)',
       }}
     >
       <ActivePanel active={active} />
@@ -459,20 +461,21 @@ function ActivePanel({ active }: { active: AgentStageRunning }) {
     <div
       className="relative overflow-hidden px-7 pb-7 pt-6 sm:px-8 sm:pb-8 sm:pt-7"
       style={{
-        background:
-          'linear-gradient(165deg, #F3EFFD 0%, #ECE4FB 55%, #E3D8F9 100%)',
-        borderBottom: '0.5px solid #d9d4ec',
+        // Subtle purple wash on top of the radial base — keeps the
+        // "active zone" feeling alive without breaking the dark canvas.
+        borderBottom: '0.5px solid rgba(255,255,255,0.06)',
       }}
     >
-      {/* Soft purple bloom — atmosphere, never a ring */}
+      {/* Top-right purple bloom — atmosphere, not a ring */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-24 -top-24 h-[320px] w-[320px] rounded-full"
+        className="pointer-events-none absolute -right-24 -top-24 h-[360px] w-[360px] rounded-full"
         style={{
           background:
             'radial-gradient(circle, rgba(127,90,240,0.22) 0%, rgba(127,90,240,0.06) 45%, transparent 70%)',
         }}
       />
+      {/* Bottom-left soft glow for depth */}
       <span
         aria-hidden
         className="pointer-events-none absolute -left-20 bottom-[-100px] h-[260px] w-[260px] rounded-full"
@@ -484,18 +487,18 @@ function ActivePanel({ active }: { active: AgentStageRunning }) {
 
       <div className="relative flex flex-wrap items-center justify-between gap-3">
         <RunningPulse />
-        <span className="tabular-nums font-display text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">
+        <span className="tabular-nums font-display text-[15px] font-semibold tracking-[-0.005em] text-white">
           {active.elapsed}
         </span>
       </div>
 
-      <p className="relative mt-4 max-w-[640px] font-display text-[20px] font-semibold leading-[1.32] tracking-[-0.012em] text-ppc-ink sm:text-[22px]">
+      <p className="relative mt-4 max-w-[640px] font-display text-[20px] font-semibold leading-[1.32] tracking-[-0.012em] text-white sm:text-[22px]">
         {active.task}
       </p>
 
       <div
         className="relative mt-6 h-[5px] overflow-hidden rounded-full"
-        style={{ background: 'rgba(255,255,255,0.65)' }}
+        style={{ background: 'rgba(255,255,255,0.07)' }}
       >
         <div
           className="h-full rounded-full"
@@ -503,7 +506,7 @@ function ActivePanel({ active }: { active: AgentStageRunning }) {
             width: `${progress}%`,
             background:
               'linear-gradient(90deg, #A88CFF 0%, #7F5AF0 60%, #534AB7 100%)',
-            boxShadow: '0 0 10px rgba(127,90,240,0.35)',
+            boxShadow: '0 0 12px rgba(127,90,240,0.55)',
             transition: 'width 600ms ease-out',
           }}
         />
@@ -517,15 +520,15 @@ function RunningPulse() {
     <span
       className="inline-flex items-center gap-2 text-[10.5px] font-bold uppercase leading-none tracking-[0.18em]"
       style={{
-        color: '#534AB7',
+        color: '#C9B5FF',
         fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
       }}
     >
       <span
         className="ppcio-live-dot relative inline-block h-[7px] w-[7px] rounded-full"
         style={{
-          background: '#7F5AF0',
-          boxShadow: '0 0 0 3px rgba(127,90,240,0.18)',
+          background: '#C9B5FF',
+          boxShadow: '0 0 0 3px rgba(127,90,240,0.30), 0 0 10px rgba(201,181,255,0.55)',
         }}
       />
       Running
@@ -548,21 +551,21 @@ function StepRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
   return (
     <li
       className="flex items-start gap-5 py-[18px]"
-      style={{ borderBottom: isLast ? 'none' : '0.5px solid #eee9f5' }}
+      style={{ borderBottom: isLast ? 'none' : '0.5px solid rgba(255,255,255,0.05)' }}
     >
       <span
         className="mt-[3px] grid h-[20px] w-[20px] shrink-0 place-items-center rounded-full"
         style={{
-          background: '#E6F7EE',
-          boxShadow: 'inset 0 0 0 0.5px rgba(31,138,90,0.25)',
+          background: 'rgba(93,202,165,0.14)',
+          boxShadow: 'inset 0 0 0 0.5px rgba(93,202,165,0.40)',
         }}
       >
-        <Check size={11} weight="bold" style={{ color: '#1F8A5A' }} />
+        <Check size={11} weight="bold" style={{ color: '#5DCAA5' }} />
       </span>
       <span
         className="tabular-nums shrink-0 pt-[4px] text-[11.5px] font-semibold uppercase tracking-[0.08em]"
         style={{
-          color: '#b0a9c2',
+          color: 'rgba(255,255,255,0.42)',
           fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
           width: 64,
         }}
@@ -570,10 +573,10 @@ function StepRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
         {step.time}
       </span>
       <div className="min-w-0 flex-1 leading-snug">
-        <p className="text-[14.5px] font-semibold tracking-[-0.005em] text-ppc-ink">
+        <p className="text-[14.5px] font-semibold tracking-[-0.005em] text-white">
           {step.title}
         </p>
-        <p className="mt-[3px] text-[13px] leading-[1.5] text-ppc-text-muted">
+        <p className="mt-[3px] text-[13px] leading-[1.5]" style={{ color: 'rgba(255,255,255,0.55)' }}>
           {step.description}
         </p>
       </div>
