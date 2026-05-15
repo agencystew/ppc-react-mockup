@@ -3,8 +3,6 @@ import { useParams, Link, Navigate } from 'react-router-dom';
 import {
   ArrowRight, ArrowUp, ArrowDown,
   Lightning, CaretDown, CaretRight,
-  ChatCircleDots, Command,
-  Detective, Microscope, Drop,
 } from '@phosphor-icons/react';
 import { PROJECTS } from '../mock/projects';
 
@@ -41,14 +39,6 @@ const C = {
   amberDot:  '#f59e0b',
   red:       '#dc2626',
   redDot:    '#ef4444',
-
-  // Dark surfaces (agent cards + ask command bar).
-  darkBg:     '#0a0a0f',
-  darkBorder: '#1a1a22',
-  darkText:   '#b8b8c0',
-  darkMuted:  '#7a7a86',
-  darkKbdBg:  '#13131a',
-  darkKbdBor: '#1f1f28',
 } as const;
 
 // ─── Data ──────────────────────────────────────────────────────────────
@@ -92,33 +82,6 @@ const FINDINGS: Finding[] = [
     rightBottom: 'est. 0.4–0.8pp',
   },
 ];
-
-const AGENT_CARDS = [
-  {
-    slug: 'competitor-spy',
-    icon: Detective,
-    chipBg: 'rgba(251,191,36,0.14)',
-    chipFg: '#FCD34D',
-    title: 'Competitor Spy',
-    blurb: 'A live read on every competitor in your auction. The angles, the spend, the gaps.',
-  },
-  {
-    slug: 'deep-account-audit',
-    icon: Microscope,
-    chipBg: 'rgba(96,165,250,0.14)',
-    chipFg: '#93C5FD',
-    title: 'Deep Account Audit',
-    blurb: 'Structure, alignment, waste, growth ceilings. Client-ready output you hand straight to the meeting.',
-  },
-  {
-    slug: 'spend-leak',
-    icon: Drop,
-    chipBg: 'rgba(34,211,238,0.14)',
-    chipFg: '#67E8F9',
-    title: 'Spend Leak Detector',
-    blurb: "Every place your budget is bleeding without conversions, ranked by what's recoverable.",
-  },
-] as const;
 
 interface KpiCard {
   label: string;
@@ -303,52 +266,7 @@ export function ProjectPage() {
         })}
       </div>
 
-      {/* ── 5. Run an agent — signature dark cards ─────────────────
-         Project-scoped links: clicking from inside a project keeps you in scope.
-         AgentDetail reads useParams().id and pre-fills the launch panel. */}
-      <SectionHeading
-        title="Run an agent"
-        right={<HeaderLink to={`/projects/${project.id}/agents`}>Browse all 24</HeaderLink>}
-        marginTop="mt-14"
-      />
-
-      <div className="mt-5 grid grid-cols-1 gap-3.5 md:grid-cols-3">
-        {AGENT_CARDS.map((a) => {
-          const Icon = a.icon;
-          return (
-            <Link
-              key={a.slug}
-              to={`/projects/${project.id}/agents/${a.slug}`}
-              className="group relative flex flex-col rounded-[14px] border px-6 py-7 transition-all duration-200 hover:-translate-y-px hover:border-[#2a2a36]"
-              style={{ background: C.darkBg, borderColor: C.darkBorder, minHeight: 240 }}
-            >
-              <div
-                className="grid h-[48px] w-[48px] place-items-center rounded-[12px]"
-                style={{ background: a.chipBg }}
-              >
-                <Icon size={26} weight="duotone" style={{ color: a.chipFg }} />
-              </div>
-
-              <div className="mt-7 text-[20px] font-semibold leading-snug tracking-[-0.01em] text-white">
-                {a.title}<span style={{ color: C.purpleSoft }}>.</span>
-              </div>
-              <div className="mt-3 flex-1 text-[13px] leading-[1.55]" style={{ color: C.darkText }}>
-                {a.blurb}
-              </div>
-
-              <div
-                className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-semibold"
-                style={{ color: C.purpleSoft }}
-              >
-                Send in
-                <ArrowRight size={13} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* ── 6. Performance ────────────────────────────────────────── */}
+      {/* ── 5. Performance ────────────────────────────────────────── */}
       <SectionHeading
         title="Performance"
         right={
@@ -430,24 +348,6 @@ export function ProjectPage() {
         <CampaignCard title="Needs attention" tone="bad"  items={BAD_CAMPAIGNS} />
       </div>
 
-      {/* ── 9. Ask command bar ───────────────────────────────────── */}
-      <div
-        className="mt-10 flex items-center gap-3.5 rounded-[14px] border px-5 py-4"
-        style={{ background: C.darkBg, borderColor: C.darkBorder }}
-      >
-        <ChatCircleDots size={19} weight="duotone" style={{ color: C.purpleSoft }} />
-        <span className="flex-1 text-[14px]" style={{ color: C.darkText }}>
-          Ask about <span style={{ color: '#ffffff' }}>{project.name}</span>
-          <span className="mx-2" style={{ color: C.darkMuted }}>·</span>
-          try "where am I wasting spend?"
-        </span>
-        <kbd
-          className="inline-flex items-center gap-[3px] rounded-[6px] border px-2 py-1 font-mono text-[11px] font-medium"
-          style={{ background: C.darkKbdBg, borderColor: C.darkKbdBor, color: C.darkText }}
-        >
-          <Command size={10} weight="bold" />K
-        </kbd>
-      </div>
     </div>
   );
 }
