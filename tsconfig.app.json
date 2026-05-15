@@ -26,6 +26,21 @@
      agents read them, they're not part of the active build. Their imports
      reference paths that no longer resolve from their new archive locations.
      Glob covers _archive at any nesting depth (e.g. src/pages/_v3/_archive/,
-     src/mock/_archive/). */
-  "exclude": ["**/_archive/**", "src/pages/_archive", "src/_archive"]
+     src/mock/_archive/).
+
+     The src/pages/_v3 trio (ReportAudit/Bloomberg/Magazine + components/)
+     remain on disk on the branch tip but no longer referenced from App.tsx
+     after the v3 single-rebuild switched to ReportV3.tsx. They have known
+     type errors against the current Section shape and are being archived
+     by the parallel v3 agent; excluded here so this v4-summary preview
+     branch can ship a Vercel build while that cleanup lands. */
+  "exclude": [
+    "**/_archive/**",
+    "src/pages/_archive",
+    "src/_archive",
+    "src/pages/_v3/ReportAudit.tsx",
+    "src/pages/_v3/ReportBloomberg.tsx",
+    "src/pages/_v3/ReportMagazine.tsx",
+    "src/pages/_v3/components"
+  ]
 }
