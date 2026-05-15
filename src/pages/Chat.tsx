@@ -6,7 +6,7 @@ import {
   ChartBar, Coins, Users, Info, Broadcast, Files, Target, Plus,
   CalendarBlank,
 } from '@phosphor-icons/react';
-import { SPECIALIST_CHIPS, findChatThread } from '../mock/chats';
+import { CHAT_HISTORY, SPECIALIST_CHIPS, findChatThread } from '../mock/chats';
 import type {
   ChatActionChip, ChatChart, ChatFactorsCard, ChatMessage,
   ChatRunningCard, ChatThread,
@@ -70,6 +70,12 @@ const NEUTRAL_AVATAR: AvatarToken = {
 function avatarForId(id: string | undefined): AvatarToken {
   if (!id) return NEUTRAL_AVATAR;
   return PROJECT_AVATARS[id] ?? NEUTRAL_AVATAR;
+}
+
+function avatarForLabel(label: string): AvatarToken {
+  const project = PROJECTS.find((p) => p.name === label);
+  if (!project) return NEUTRAL_AVATAR;
+  return PROJECT_AVATARS[project.id] ?? NEUTRAL_AVATAR;
 }
 
 /* ═══ PRE-CHAT STATE ═══════════════════════════════════════════════════════ */
@@ -211,7 +217,7 @@ function Hero({ project }: { project: typeof PROJECTS[number] }) {
     <section className="pt-8 lg:pt-12">
       <h1 className="text-center font-display text-[40px] font-extrabold leading-[1.05] tracking-[-0.025em] text-ppc-ink sm:text-[44px]">
         Ask anything about your<br />
-        Google Ads <PerformanceWord />
+        PPC <PerformanceWord />
       </h1>
       <p className="mt-4 text-center text-[14.5px] leading-[1.55] text-ppc-text-muted">
         Get answers, uncover insights, and take action.
