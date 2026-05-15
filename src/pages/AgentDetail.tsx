@@ -82,9 +82,8 @@ export function AgentDetail() {
         {/* ═══ LEFT — editorial story ═══════════════════════════════════════ */}
         <div className="min-w-0 space-y-12">
           <HeroCard agent={agent} />
-          <BuiltBy />
           <HowItThinks steps={agent.thinkingSteps} />
-          <WhatYouGet expectedDuration={agent.expectedDuration} />
+          <WhatYouGet />
         </div>
 
         {/* ═══ RIGHT — sticky launch rail ═══════════════════════════════════ */}
@@ -273,40 +272,6 @@ function MetaPill({
       <span className="text-white/75">{icon}</span>
       {children}
     </span>
-  );
-}
-
-// ─── Built by Stew ───────────────────────────────────────────────────────
-
-function BuiltBy() {
-  return (
-    <section className="flex flex-wrap items-start gap-5">
-      <span
-        className="grid h-[54px] w-[54px] shrink-0 place-items-center overflow-hidden rounded-full text-[18px] font-bold text-white"
-        style={{
-          background: 'linear-gradient(135deg, #C7B0FF 0%, #7F5AF0 60%, #5A3FE0 100%)',
-          boxShadow:
-            '0 0 0 4px #ECEAFA, 0 0 0 5px rgba(127,90,240,0.30), 0 8px 18px -8px rgba(127,90,240,0.45)',
-        }}
-        aria-hidden
-      >
-        SD
-      </span>
-      <div className="min-w-0 max-w-[560px]">
-        <p className="text-[13px] font-mono uppercase tracking-[0.12em] text-ppc-text-muted">
-          Built by Stew
-          <span className="ml-2 normal-case tracking-normal text-ppc-text-faint">
-            Founder, PPC.io
-          </span>
-        </p>
-        <p className="mt-2 text-[15px] leading-[1.65] text-ppc-ink/80">
-          After scaling an agency to 100+ accounts with a team of 50, I saw the same
-          gap every operator sees: <span className="font-semibold text-ppc-ink">we know what to do</span> and
-          {' '}<span className="font-semibold text-ppc-ink">we have time to do it for every account</span> grow
-          further apart every month. This agent closes that gap.
-        </p>
-      </div>
-    </section>
   );
 }
 

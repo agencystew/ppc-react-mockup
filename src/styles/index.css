@@ -87,6 +87,24 @@ a.ppc-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 }
 .ppcio-live-dot  { animation: ppcio-live-beat 1.6s ease-in-out infinite; }
 
+/* Hero headline period — pulses to signify an active agent. Used on the
+ * running view (e.g. "Sizing their spend." where the period glows). */
+@keyframes ppcio-period-pulse {
+  0%, 100% {
+    opacity: 1;
+    text-shadow: 0 0 0 rgba(127, 90, 240, 0);
+  }
+  50% {
+    opacity: 0.55;
+    text-shadow: 0 0 26px rgba(127, 90, 240, 0.65);
+  }
+}
+.ppcio-period-pulse {
+  display: inline-block;
+  animation: ppcio-period-pulse 1.6s ease-in-out infinite;
+  will-change: opacity;
+}
+
 /* Marquee CTA — the "subscribe" / "request a video proposal" button from
  * ppc.io. Purple-500 fill, 2px purple-300 border, deep two-layer shadow,
  * pulsing glow halo, smooth scaleY hover. Use ONCE per page as the
