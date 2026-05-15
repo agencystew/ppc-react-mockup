@@ -6,6 +6,7 @@ import {
   Sparkle, PaperPlaneTilt,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
+import { PROJECTS } from '../mock/projects';
 import type { AgentCategory, AgentDefinition } from '../types/agent';
 
 // Agent Catalog · /agents
@@ -172,8 +173,8 @@ export function AgentCatalog() {
 
 function HeroBlock() {
   return (
-    <section className="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <div className="flex flex-col">
+    <section className="grid gap-6 lg:grid-cols-[1fr_440px]">
+      <div className="flex min-w-0 flex-col">
         <span className="inline-flex items-center gap-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ppc-purple-700">
           <Sparkle size={10} weight="fill" />
           Agents
@@ -207,7 +208,7 @@ function HeroBlock() {
         </div>
       </div>
 
-      <AiAdvisorCard />
+      <ScheduleCard projectCount={PROJECTS.length} />
     </section>
   );
 }
@@ -235,81 +236,163 @@ function SearchBar() {
   );
 }
 
-function AiAdvisorCard() {
+// ─── Schedule card — THE primary action on /agents ──────────────────────
+//
+// Stewart 2026-05-15: "this is like the MOST important concept in the
+// entire app." Users describe their accounts to the AI; the AI designs
+// a per-project launch plan that runs the right agents at the right
+// cadence. Discoverable post-onboarding for adjustments, too.
+//
+// Visual job: out-weigh everything else above the fold. Big headline,
+// generous padding, decorative plan-stack motif, primary CTA.
+
+function ScheduleCard({ projectCount }: { projectCount: number }) {
   return (
     <Link
-      to="/chat"
-      className="group relative flex flex-col justify-between overflow-hidden rounded-[16px] p-5 text-white transition-transform hover:-translate-y-[1px]"
+      to="/chat?intent=schedule"
+      className="group relative flex min-h-[360px] flex-col overflow-hidden rounded-[20px] p-7 text-white transition-transform hover:-translate-y-[1px] sm:p-8"
       style={{
         background:
-          'linear-gradient(155deg, #1A1030 0%, #0F0A1E 60%, #07050D 100%)',
+          'linear-gradient(160deg, #261850 0%, #150D2C 55%, #0A0618 100%)',
         boxShadow:
-          'inset 0 0 0 1px rgba(127,90,240,0.22), 0 8px 24px -14px rgba(127,90,240,0.45)',
+          'inset 0 0 0 1px rgba(127,90,240,0.30), 0 14px 40px -18px rgba(127,90,240,0.55)',
       }}
     >
-      {/* Top-right purple bloom */}
+      {/* Top-right purple bloom — stronger than the prior advisor card */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-10 -top-12 h-[200px] w-[200px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.34) 0%, transparent 60%)' }}
+        className="pointer-events-none absolute -right-12 -top-16 h-[300px] w-[300px] rounded-full"
+        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.42) 0%, transparent 60%)' }}
       />
-      {/* Faint bottom-left whisper */}
+      {/* Soft underglow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-16 -left-10 h-[180px] w-[180px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.14) 0%, transparent 65%)' }}
+        className="pointer-events-none absolute -bottom-20 -left-10 h-[260px] w-[260px] rounded-full"
+        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.18) 0%, transparent 65%)' }}
       />
+      {/* Decorative plan-stack motif — three faint stacked cards in the
+        top-right, suggesting "a schedule of plays." Aria-hidden. */}
+      <PlanStackMotif />
 
-      <div className="relative">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-white/55">
-          AI Advisor
-        </span>
-        <h3 className="mt-2 font-display text-[18px] font-bold leading-[1.18] tracking-[-0.015em]">
-          Your strategic
-          <br />
-          copilot<span className="text-ppc-purple-300">.</span>
-        </h3>
-        <p className="mt-1.5 max-w-[180px] text-[12px] leading-[1.5] text-white/65">
-          Ask anything about your account or goals.
-        </p>
-      </div>
-
-      <div className="relative mt-4 flex items-end justify-between gap-3">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1.5 text-[12px] font-semibold text-white ring-1 ring-inset ring-white/12 transition-colors group-hover:bg-white/[0.10]">
-          Ask AI
-          <ArrowRight size={11} weight="bold" />
+      <div className="relative flex items-start justify-between gap-4">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-2.5 py-[5px] font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-white/75 ring-1 ring-inset ring-white/10">
+          <span className="h-[5px] w-[5px] rounded-full bg-[#A88CFF] shadow-[0_0_8px_rgba(168,140,255,0.85)]" />
+          Agent Schedule
         </span>
         <AdvisorOrb />
+      </div>
+
+      <h2
+        className="relative mt-5 font-display font-black leading-[1.02] tracking-[-0.026em]"
+        style={{ fontSize: 'clamp(28px, 3.4vw, 36px)' }}
+      >
+        Create your
+        <br />
+        agent{' '}
+        <span
+          className="font-serif italic font-bold text-[#C7B0FF]"
+          style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
+        >
+          schedule
+        </span>
+        <span
+          className="font-serif italic text-[#C7B0FF]"
+          style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
+        >
+          .
+        </span>
+      </h2>
+
+      <p className="relative mt-4 max-w-[340px] text-[14px] leading-[1.55] text-white/72">
+        Tell us about your accounts. We&rsquo;ll design a launch plan that
+        runs the right agents, on the right cadence, for every project.
+      </p>
+
+      <div className="relative mt-auto pt-6">
+        <div className="flex items-center justify-between gap-3">
+          <span
+            className="inline-flex items-center gap-2 rounded-[12px] px-5 py-[12px] text-[14.5px] font-semibold tracking-tight text-white transition-all group-hover:-translate-y-[1px]"
+            style={{
+              background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 55%, #534AB7 100%)',
+              boxShadow:
+                'inset 0 1px 0 rgba(255,255,255,0.22), 0 10px 26px -10px rgba(127,90,240,0.75)',
+            }}
+          >
+            <Sparkle size={14} weight="fill" />
+            Start the conversation
+            <ArrowRight size={13} weight="bold" className="transition-transform group-hover:translate-x-[1px]" />
+          </span>
+
+          <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-white/45">
+            {projectCount} project{projectCount === 1 ? '' : 's'}
+          </span>
+        </div>
+
+        <p className="mt-3 text-[12px] text-white/45">
+          Already onboarded? Adjust an existing schedule any time.
+        </p>
       </div>
     </Link>
   );
 }
 
-// Small mascot — a glowing orb with a faint robot silhouette. Phosphor
-// Robot inside a soft purple bloom, no emoji.
+// Mascot orb — Phosphor Robot inside a soft purple bloom. Used inline
+// with the eyebrow on the ScheduleCard.
 function AdvisorOrb() {
   return (
-    <div className="relative h-[58px] w-[58px] shrink-0">
+    <div className="relative h-[64px] w-[64px] shrink-0">
       <div
         aria-hidden
         className="absolute inset-0 rounded-full"
         style={{
           background:
-            'radial-gradient(circle at 30% 30%, rgba(168,140,255,0.42) 0%, rgba(127,90,240,0.18) 45%, transparent 70%)',
+            'radial-gradient(circle at 30% 30%, rgba(168,140,255,0.50) 0%, rgba(127,90,240,0.22) 45%, transparent 70%)',
         }}
       />
       <div
-        className="absolute inset-[6px] grid place-items-center rounded-full"
+        className="absolute inset-[7px] grid place-items-center rounded-full"
         style={{
           background:
-            'linear-gradient(155deg, #2A1B58 0%, #170E30 100%)',
+            'linear-gradient(155deg, #3A2670 0%, #170E30 100%)',
           boxShadow:
-            'inset 0 0 0 1px rgba(199,176,255,0.22), 0 0 14px -2px rgba(127,90,240,0.45)',
+            'inset 0 0 0 1px rgba(199,176,255,0.30), 0 0 18px -2px rgba(127,90,240,0.55)',
         }}
       >
-        <Robot size={22} weight="duotone" className="text-[#C7B0FF]" />
+        <Robot size={26} weight="duotone" className="text-[#C7B0FF]" />
       </div>
     </div>
+  );
+}
+
+// Three faint stacked cards behind the headline — visual shorthand for
+// "a schedule of plays". Purely decorative.
+function PlanStackMotif() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 220 140"
+      className="pointer-events-none absolute right-[-30px] top-[140px] h-[140px] w-[220px] opacity-[0.18]"
+    >
+      <defs>
+        <linearGradient id="planStackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"  stopColor="#C7B0FF" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0.4" />
+        </linearGradient>
+      </defs>
+      {/* back card */}
+      <rect x="48" y="22" width="160" height="32" rx="9"
+        fill="none" stroke="url(#planStackGrad)" strokeWidth="1" />
+      {/* mid card */}
+      <rect x="34" y="60" width="170" height="32" rx="9"
+        fill="none" stroke="url(#planStackGrad)" strokeWidth="1.1" />
+      {/* front card */}
+      <rect x="18" y="98" width="180" height="32" rx="9"
+        fill="none" stroke="url(#planStackGrad)" strokeWidth="1.2" />
+      {/* dots on each card */}
+      <circle cx="62" cy="38" r="2" fill="#C7B0FF" />
+      <circle cx="48" cy="76" r="2" fill="#C7B0FF" />
+      <circle cx="32" cy="114" r="2" fill="#C7B0FF" />
+    </svg>
   );
 }
 
