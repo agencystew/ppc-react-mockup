@@ -279,48 +279,49 @@ function HeroCard({ run }: { run: AgentRun }) {
         }}
       />
 
-      {/* Perspective grid floor — the "stage" the mascot stands on */}
+      {/* Perspective grid floor — confined to the mascot side so the
+          centre of the card doesn't read as an empty stage. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] overflow-hidden"
+        className="pointer-events-none absolute right-0 top-[12%] hidden h-[78%] w-[36%] overflow-hidden sm:block"
         style={{
           maskImage:
-            'radial-gradient(ellipse 75% 100% at 50% 100%, black 0%, rgba(0,0,0,0.6) 50%, transparent 80%)',
+            'radial-gradient(ellipse 85% 90% at 75% 70%, black 0%, rgba(0,0,0,0.55) 45%, transparent 78%)',
           WebkitMaskImage:
-            'radial-gradient(ellipse 75% 100% at 50% 100%, black 0%, rgba(0,0,0,0.6) 50%, transparent 80%)',
+            'radial-gradient(ellipse 85% 90% at 75% 70%, black 0%, rgba(0,0,0,0.55) 45%, transparent 78%)',
         }}
       >
         <span
-          className="absolute inset-x-[-20%] bottom-0 h-[200%]"
+          className="absolute inset-x-[-30%] bottom-0 h-[200%]"
           style={{
             backgroundImage: `
-              linear-gradient(rgba(159,134,255,0.22) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(159,134,255,0.22) 1px, transparent 1px)
+              linear-gradient(rgba(159,134,255,0.20) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(159,134,255,0.20) 1px, transparent 1px)
             `,
-            backgroundSize: '54px 54px',
-            transform: 'perspective(580px) rotateX(62deg)',
+            backgroundSize: '48px 48px',
+            transform: 'perspective(560px) rotateX(58deg)',
             transformOrigin: 'center bottom',
           }}
         />
       </span>
 
-      <div className="relative grid gap-5 px-9 pb-6 pt-9 sm:grid-cols-[1fr_minmax(280px,360px)] sm:gap-8 sm:px-10 sm:pt-10">
+      <div className="relative grid gap-4 px-9 pb-5 pt-8 sm:grid-cols-[1fr_240px] sm:gap-5 sm:px-10 sm:pt-9">
         {/* Copy column */}
         <div className="min-w-0">
-          <h2
-            className="font-serif italic font-medium text-[38px] leading-[1.04] tracking-[-0.015em] text-white sm:text-[46px]"
-          >
+          <h2 className="font-display text-[42px] font-black leading-[1.0] tracking-[-0.03em] text-white sm:text-[58px]">
             {body}
             {hasPeriod && <span style={{ color: '#9F86FF' }}>.</span>}
           </h2>
-          <p className="mt-4 max-w-[460px] text-[14px] leading-[1.55] text-white/65">
+          <p className="mt-4 max-w-[520px] text-[14px] leading-[1.55] text-white/65">
             {run.description}
           </p>
         </div>
 
-        {/* Mascot column */}
-        <div className="relative flex items-end justify-end sm:items-center">
-          <SpyMascot />
+        {/* Mascot column — vertically centered with copy, no empty stage */}
+        <div className="relative flex items-center justify-end">
+          <div className="scale-[0.88] origin-right">
+            <SpyMascot />
+          </div>
         </div>
       </div>
 
