@@ -386,7 +386,11 @@ function RecommendedCarousel({ agents }: { agents: AgentDefinition[] }) {
 
         <div
           ref={scrollerRef}
-          className="-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          /* pt-3.5 (14px) leaves enough room above the cards for the
+           * HIGH IMPACT badge's -top-2 (8px) overhang to render without
+           * being clipped — overflow-x:auto silently forces overflow-y:auto
+           * in browsers, so any negative-top child would otherwise be cut. */
+          className="-mx-1 -mt-3.5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2 pt-3.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {agents.map((a, i) => (
             <RecommendedCard
