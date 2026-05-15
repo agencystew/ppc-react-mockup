@@ -32,24 +32,21 @@ import { AGENTS } from '../mock/agents';
  * is intentionally restrained — the only "moment" of colour tension is
  * the red spike bar in the CPA chart. Reference: Stewart 2026-05-15. */
 
+/* DO NOT add a Navigate redirect from /chat → first thread. Stewart wants
+ * PreChat to render at /chat (the "Ask anything…" hero + Trust strip +
+ * Popular grid + Specialist row) WITH the rail on the left. Redirect was
+ * tried twice (82d2172, 45d87f9) and reverted both times. Stewart 2026-05-15:
+ * "i wanted /chat to show the lovely pre chat area we built". */
 export function Chat() {
   const { chatId } = useParams<{ chatId?: string }>();
   const activeThread = findChatThread(chatId);
-
-  // /chat with no thread selected → land on the first thread so users always
-  // see the active-chat surface (with rail), never the legacy PreChat hero.
-  if (!activeThread) {
-    const fallback = CHAT_HISTORY[0];
-    return fallback
-      ? <Navigate to={`/chat/${fallback.id}`} replace />
-      : <PreChat />;
-  }
-
   return (
     <div className="flex min-h-screen w-full">
-      <ChatHistoryRail activeId={activeThread.id} />
+      <ChatHistoryRail activeId={activeThread?.id} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <ActiveChat thread={activeThread} />
+        {activeThread
+          ? <ActiveChat thread={activeThread} />
+          : <PreChat />}
       </div>
     </div>
   );
