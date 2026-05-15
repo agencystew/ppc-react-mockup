@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, ArrowUp, ArrowDown, CaretRight, Lightning, Sparkle,
+  ArrowRight, ArrowUp, ArrowDown, CaretRight, Sparkle,
   MagnifyingGlass, Funnel, ChartBar, ShieldCheck, Target, Megaphone,
 } from '@phosphor-icons/react';
 import { PROJECTS, ACCOUNTS } from '../mock/projects';
@@ -157,9 +157,6 @@ const ACTIVITY: ActivityRow[] = [
     finishedAt: 'Yesterday',
   },
 ];
-
-const TOTAL_RUNS = ACTIVITY.length + 2;        // includes 2 pre-feed runs
-const TOTAL_PROJECTS_TOUCHED = 3;
 
 /* ════════════════════════════════════════════════════════════════════ */
 
@@ -703,79 +700,52 @@ function AiVerdict() {
       />
 
       <div className="relative">
-        <span
-          className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-white/55"
-          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-        >
-          <span className="h-[5px] w-[5px] rounded-full bg-[#9F86FF]" />
-          AI verdict
-        </span>
-        <h3 className="mt-3 font-display text-[28px] font-black leading-[1.05] tracking-[-0.022em] text-white sm:text-[30px]">
-          You're winning in 7 accounts.<br />
-          Fix 1 issue, unlock <span style={{ color: '#9F86FF' }}>$12.4K</span><span style={{ color: '#9F86FF' }}>.</span>
+        <h3 className="font-display text-[32px] font-black leading-[1.04] tracking-[-0.022em] text-white sm:text-[36px]">
+          Ask anything about your accounts<span style={{ color: '#9F86FF' }}>.</span>
         </h3>
-        <p className="mt-3 max-w-[440px] text-[13px] leading-[1.55] text-white/60">
-          The HOTH's CPA jumped 38% over 30 days. Spend Leak Detector and Negative Keyword
-          have priors that match the pattern.
+        <p className="mt-3 max-w-[440px] text-[13.5px] leading-[1.55] text-white/60">
+          Your AI strategist has read every report, every campaign, every conversion. Ask away.
         </p>
 
         <Link
-          to="/projects/the-hoth"
-          className="mt-5 inline-flex items-center gap-2 rounded-full px-[16px] py-[10px] text-[13px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
-          style={{
-            background:
-              'linear-gradient(135deg, #9F86FF 0%, #7F5AF0 50%, #6A45E2 100%)',
-            boxShadow:
-              '0 4px 18px rgba(70,49,134,0.55), 0 0 12px rgba(209,133,236,0.45) inset, 0 0 0 1px rgba(255,255,255,0.10)',
-          }}
+          to="/chat"
+          className="mt-6 flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3.5 transition-colors hover:border-white/[0.20] hover:bg-white/[0.10]"
         >
-          <Lightning size={13} weight="fill" />
-          See recommendations
+          <Sparkle size={17} weight="fill" className="text-[#9F86FF]" />
+          <span className="flex-1 text-[14px] text-white/55">What do you want to know?</span>
+          <kbd
+            className="rounded-[5px] border border-white/10 bg-white/[0.08] px-2 py-[3px] font-mono text-[11px] text-white/65"
+            style={{ fontFamily: '"Courier New", ui-monospace, Menlo, monospace' }}
+          >
+            ⌘K
+          </kbd>
         </Link>
 
-        {/* Stat strip */}
-        <div className="mt-7 grid grid-cols-3 gap-3">
-          <DarkStat value="7" label="Winning accounts" />
-          <DarkStat value="1" label="Critical issue" />
-          <DarkStat value="$12.4K" label="Est. unlock" highlight />
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          <ChatChip>Why is The HOTH's CPA up?</ChatChip>
+          <ChatChip>What's working on Boulder Care?</ChatChip>
+          <ChatChip>Compare last week vs this week</ChatChip>
         </div>
       </div>
     </article>
   );
 }
 
-function DarkStat({
-  value,
-  label,
-  highlight,
-}: {
-  value: string;
-  label: string;
-  highlight?: boolean;
-}) {
+function ChatChip({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="rounded-[12px] px-3.5 py-3"
-      style={{
-        background: 'rgba(255,255,255,0.025)',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-      }}
+    <Link
+      to="/chat"
+      className="inline-flex items-center rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-[6px] text-[12px] text-white/75 transition-colors hover:border-white/[0.20] hover:bg-white/[0.07] hover:text-white"
     >
-      <div
-        className="font-display text-[22px] font-extrabold leading-none tracking-[-0.02em]"
-        style={{ color: highlight ? '#9F86FF' : '#fff' }}
-      >
-        {value}
-      </div>
-      <p className="mt-1.5 text-[11px] leading-[1.35] text-white/55">{label}</p>
-    </div>
+      {children}
+    </Link>
   );
 }
 
 /* Quick actions. Light card, mirrors the reference's right column. */
 
 interface ActionRow {
-  icon: typeof Lightning;
+  icon: typeof Sparkle;
   iconBg: string;
   title: string;
   context: string;
