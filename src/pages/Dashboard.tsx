@@ -201,27 +201,10 @@ function GreetingStrip() {
 
 /* ─── 2 · Activity hero (dark) ───────────────────────────────────────── */
 
-/* Brand language — pulled from the live ppc.io marketing site:
- *   - Pure dark base + faint perspective grid (no radial purple bloom)
- *   - Big bold WHITE Figtree headline with white period
- *   - SERIF ITALIC gradient (Playfair Display, purple → peach) for one
- *     accent moment per hero — the live site's signature gesture
- *   - Purple SPARKLE CTA pill with glow halo
- *   - Memoji-style agent avatars in a wreath, echoing the live site's
- *     "Loved by the PPC community" treatment. No abstract orbs.
- */
-
-const SERIF_GRADIENT_STYLE: React.CSSProperties = {
-  fontFamily: '"Playfair Display", Georgia, serif',
-  fontStyle: 'italic',
-  fontWeight: 500,
-  background:
-    'linear-gradient(120deg, #B98FF8 0%, #C690E5 32%, #E8B5A0 70%, #F2C9A8 100%)',
-  WebkitBackgroundClip: 'text',
-  backgroundClip: 'text',
-  color: 'transparent',
-  WebkitTextFillColor: 'transparent',
-};
+/* Brand language: pure dark base, faint perspective grid masked at the
+ * edges, single soft purple bloom up top, bold Figtree headline with a
+ * lavender period, Courier mono eyebrow with a status dot, and a friendly
+ * AgentMascot anchor in the right column. */
 
 function ActivityHero() {
   return (
@@ -732,13 +715,16 @@ function AiVerdict() {
       />
 
       <div className="relative">
-        <span className="text-[13px] tracking-[-0.005em]" style={SERIF_GRADIENT_STYLE}>
+        <span
+          className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-white/55"
+          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+        >
+          <span className="h-[5px] w-[5px] rounded-full bg-[#9F86FF]" />
           AI verdict
         </span>
-        <h3 className="mt-2 font-display text-[28px] font-black leading-[1.05] tracking-[-0.022em] text-white sm:text-[30px]">
+        <h3 className="mt-3 font-display text-[28px] font-black leading-[1.05] tracking-[-0.022em] text-white sm:text-[30px]">
           You're winning in 7 accounts.<br />
-          Fix 1 issue, unlock{' '}
-          <span style={SERIF_GRADIENT_STYLE}>$12.4K</span>.
+          Fix 1 issue, unlock <span style={{ color: '#9F86FF' }}>$12.4K</span><span style={{ color: '#9F86FF' }}>.</span>
         </h3>
         <p className="mt-3 max-w-[440px] text-[13px] leading-[1.55] text-white/60">
           The HOTH's CPA jumped 38% over 30 days. Spend Leak Detector and Negative Keyword
