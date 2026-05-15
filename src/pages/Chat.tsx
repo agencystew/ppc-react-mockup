@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowUp, ArrowRight, CaretDown, CaretLeft,
+  ArrowUp, ArrowRight, CaretDown, CaretLeft, ChatCircle,
   DotsThree, MagnifyingGlass, Robot, Sparkle, TrendUp,
   ChartBar, Coins, Users, Info, Broadcast, Files, Target, Plus,
   CalendarBlank,
 } from '@phosphor-icons/react';
-import { CHAT_HISTORY, SPECIALIST_CHIPS, findChatThread } from '../mock/chats';
+import { SPECIALIST_CHIPS, findChatThread } from '../mock/chats';
 import type {
   ChatActionChip, ChatChart, ChatFactorsCard, ChatMessage,
   ChatRunningCard, ChatThread,
@@ -67,12 +67,6 @@ const NEUTRAL_AVATAR: AvatarToken = {
   fg:   '#534AB7',
 };
 
-function avatarForLabel(label: string): AvatarToken {
-  const project = PROJECTS.find((p) => p.name === label);
-  if (!project) return NEUTRAL_AVATAR;
-  return PROJECT_AVATARS[project.id] ?? NEUTRAL_AVATAR;
-}
-
 function avatarForId(id: string | undefined): AvatarToken {
   if (!id) return NEUTRAL_AVATAR;
   return PROJECT_AVATARS[id] ?? NEUTRAL_AVATAR;
@@ -96,8 +90,6 @@ function PreChat() {
         <PopularGrid />
 
         <SpecialistRow />
-
-        <RecentChatsStrip />
       </div>
     </div>
   );
