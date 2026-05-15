@@ -174,7 +174,7 @@ export function AgentCatalog() {
 function HeroBlock() {
   const runningCount = 4; // mock — eventually wired to actual run-state
   return (
-    <section className="grid items-start gap-6 lg:grid-cols-[1fr_440px]">
+    <section className="grid gap-6 lg:grid-cols-[1fr_440px]">
       <div className="flex flex-col">
         <span className="inline-flex items-center gap-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ppc-purple-700">
           <Sparkle size={10} weight="fill" />
@@ -229,7 +229,10 @@ function WorkspaceStatStrip({
   specialists, projects, running,
 }: { specialists: number; projects: number; running: number }) {
   return (
-    <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t-[0.5px] border-ppc-card-border pt-4 font-mono text-[11px] tracking-[0.04em] text-ppc-text-muted">
+    <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 border-t-[0.5px] border-ppc-card-border pt-5 font-mono text-[11px] tracking-[0.04em] text-ppc-text-muted">
+      {/* mt-auto pins this strip to the bottom of the (stretched) flex
+        * column so it lines up with the ScheduleCard's bottom edge
+        * instead of leaving lavender dead space below the chips. */}
       <Stat label="specialists" value={specialists} />
       <Divider />
       <Stat label="projects" value={projects} />
