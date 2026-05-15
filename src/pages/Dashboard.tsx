@@ -14,7 +14,7 @@ import { AgentMascot } from '../components/AgentMascot';
  * (greeting · big dark hero · portfolio table · 2-up bottom row) and
  * make it PPC.io. Top dark box surfaces RECENT AGENT ACTIVITY with a
  * see-all-reports CTA. Below is the projects table. Below that, a
- * 2-up: AI verdict + Quick actions.
+ * 2-up: Chat CTA + Quick actions.
  *
  * Design language is lifted directly from the competitor-spy report
  * hero card (radial purple bloom + starfield grain + italic purple
@@ -23,7 +23,7 @@ import { AgentMascot } from '../components/AgentMascot';
  *   1 · Greeting strip       Morning, Stewy · THU · 14 MAY date pill
  *   2 · Activity hero        Dark surface, recent runs feed, glowing orb
  *   3 · Portfolio table      Filter chips + projects table with sparklines
- *   4 · Bottom duo           AI verdict (dark) + Quick actions (light)
+ *   4 · Bottom duo           Chat CTA (dark) + Quick actions (light)
  */
 
 const TODAY_PILL = 'THU · 14 MAY';
@@ -658,13 +658,13 @@ function FilterButton() {
 function BottomDuo() {
   return (
     <section className="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
-      <AiVerdict />
+      <ChatPrompt />
       <QuickActions />
     </section>
   );
 }
 
-function AiVerdict() {
+function ChatPrompt() {
   return (
     <article
       className="relative overflow-hidden rounded-[18px] px-7 py-7 text-white"
