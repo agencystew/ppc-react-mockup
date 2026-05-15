@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Check, ArrowRight, ArrowUpRight, CaretDown, CaretUp, Waveform, Clock,
+  Check, ArrowRight, ArrowUpRight, CaretDown, CaretUp, Waveform,
 } from '@phosphor-icons/react';
 import type {
   AgentRun,
@@ -425,14 +425,13 @@ function RunningHero({ headline }: { headline: string }) {
 
 // ─── Mission-feed card ───────────────────────────────────────────────────
 //
-// World-class redesign 2026-05-15 v2: brand-aligned dark sidebar-cousin
-// canvas (#1A1230 → #0F0A1E → #07050D radial) — a sophisticated PPC.io
-// dark surface, not a Spotify radio. Atmosphere comes from a subtle
-// top-left purple bloom and a faint grain. The active block has an
-// orbital sparkle mark (the agent is THINKING), a single Running chip,
-// "Sizing their spend"-style title, slim glowing progress bar with a
-// luminous head, and a dedicated ELAPSED TIME stat tile on the right.
-// Step rows have purple-filled checkmarks for real momentum.
+// World-class redesign 2026-05-15: refined light research-console. Replaces
+// the dark "Spotify radio" panel with an editorial white card in keeping
+// with PPC.io's lavender + white app system. Active operation sits in a
+// soft lavender wash at the top (where the live work happens); the
+// receipts trail flows below on white. ONE Courier-mono Running pulse —
+// no NOW/ACTIVE chips, no waveform mascot, no "in progress" label, no
+// orbital sparkle. Calm and high-signal: a live document, not a player.
 
 function MissionFeedCard({
   active, recentSteps,
@@ -442,40 +441,14 @@ function MissionFeedCard({
 }) {
   return (
     <section
-      className="relative overflow-hidden rounded-[20px] px-7 pb-7 pt-6 text-white sm:px-9 sm:pb-8 sm:pt-7"
+      className="overflow-hidden rounded-[16px] bg-white"
       style={{
-        background:
-          'radial-gradient(140% 90% at 12% -10%, #1A1230 0%, #0F0A1E 38%, #07050D 100%)',
         boxShadow:
-          '0 40px 80px -40px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 0 1px rgba(255,255,255,0.04)',
+          '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.10)',
       }}
     >
-      {/* Soft purple top-left bloom */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -left-32 -top-32 h-[420px] w-[420px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.18) 0%, transparent 65%)' }}
-      />
-      {/* Faint grain so the dark canvas reads alive, not flat */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.05]"
-        style={{
-          backgroundImage:
-            'radial-gradient(rgba(255,255,255,0.55) 1px, transparent 1px)',
-          backgroundSize: '3px 3px',
-          mixBlendMode: 'screen',
-        }}
-      />
-
-      <p className="relative mb-6 text-[13.5px] font-semibold tracking-[-0.005em] text-white/85">
-        Live mission feed
-      </p>
-
-      <div className="relative">
-        <ActivePanel active={active} />
-        <StepsTrail steps={recentSteps} />
-      </div>
+      <ActivePanel active={active} />
+      <StepsTrail steps={recentSteps} />
     </section>
   );
 }
@@ -484,149 +457,78 @@ function ActivePanel({ active }: { active: AgentStageRunning }) {
   const progress = Math.max(0, Math.min(100, active.progressPct ?? 0));
   return (
     <div
-      className="relative overflow-hidden rounded-[16px] px-6 pb-6 pt-6 sm:px-7 sm:pb-7 sm:pt-7"
+      className="relative overflow-hidden px-7 pb-7 pt-6 sm:px-8 sm:pb-8 sm:pt-7"
       style={{
         background:
-          'linear-gradient(180deg, rgba(127,90,240,0.05) 0%, rgba(127,90,240,0.015) 100%)',
-        boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.22)',
+          'linear-gradient(165deg, #F3EFFD 0%, #ECE4FB 55%, #E3D8F9 100%)',
+        borderBottom: '0.5px solid #d9d4ec',
       }}
     >
-      <div className="relative flex items-start gap-6 sm:gap-8">
-        {/* Orbital sparkle — the signature "agent is thinking" mark */}
-        <OrbitalSparkle />
-
-        {/* Center column: chip → title → subtitle → progress */}
-        <div className="min-w-0 flex-1 pt-1">
-          <RunningChip />
-          <h3 className="mt-3 font-display text-[26px] font-bold leading-[1.1] tracking-[-0.018em] text-white sm:text-[28px]">
-            {active.role}
-          </h3>
-          <p className="mt-1.5 text-[14px] leading-[1.5] text-white/55">
-            {active.task}
-          </p>
-          <div
-            className="relative mt-6 h-[6px] overflow-hidden rounded-full"
-            style={{ background: 'rgba(255,255,255,0.06)' }}
-          >
-            <div
-              className="ppcio-live-bar relative h-full rounded-full"
-              style={{ width: `${progress}%` }}
-            >
-              <span
-                aria-hidden
-                className="absolute right-0 top-1/2 h-[10px] w-[10px] -translate-y-1/2 translate-x-[3px] rounded-full"
-                style={{
-                  background: '#C9B5FF',
-                  boxShadow:
-                    '0 0 0 3px rgba(127,90,240,0.30), 0 0 14px rgba(127,90,240,0.85)',
-                }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Right column: ELAPSED TIME tile */}
-        <ElapsedTile elapsed={active.elapsed} />
-      </div>
-    </div>
-  );
-}
-
-function RunningChip() {
-  return (
-    <span
-      className="inline-flex items-center gap-2 rounded-full py-[5px] pl-[10px] pr-[12px] text-[12px] font-semibold leading-none"
-      style={{
-        background: 'rgba(127,90,240,0.18)',
-        color: '#D3C6FF',
-        boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.32)',
-      }}
-    >
-      <span
-        className="ppcio-live-dot inline-block h-[6px] w-[6px] rounded-full"
-        style={{ background: '#C9B5FF', boxShadow: '0 0 8px rgba(201,181,255,0.85)' }}
-      />
-      Running
-    </span>
-  );
-}
-
-function ElapsedTile({ elapsed }: { elapsed: string }) {
-  return (
-    <div
-      className="hidden shrink-0 flex-col items-end self-stretch border-l pl-7 sm:flex"
-      style={{ borderColor: 'rgba(255,255,255,0.08)' }}
-    >
-      <p
-        className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-white/55"
-        style={{ fontFamily: '"Courier New", ui-monospace, Menlo, monospace' }}
-      >
-        Elapsed time
-      </p>
-      <div className="mt-3 flex items-center gap-2.5">
-        <Clock size={20} weight="duotone" style={{ color: '#B08EF4' }} />
-        <span className="font-display text-[32px] font-bold leading-none tracking-[-0.020em] tabular-nums text-white sm:text-[36px]">
-          {elapsed}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// Orbital sparkle — a 4-point sparkle in the center of two tilted
-// elliptical orbits with small "atom" dots. SVG-only; CSS rotates each
-// orbit on an opposing axis so the mark feels alive without being noisy.
-function OrbitalSparkle() {
-  return (
-    <span className="ppcio-orbit relative grid h-[100px] w-[100px] shrink-0 place-items-center">
+      {/* Soft purple bloom — atmosphere, never a ring */}
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-full"
+        className="pointer-events-none absolute -right-24 -top-24 h-[320px] w-[320px] rounded-full"
         style={{
           background:
-            'radial-gradient(circle at 50% 50%, rgba(127,90,240,0.30) 0%, rgba(127,90,240,0.10) 35%, transparent 70%)',
-          filter: 'blur(2px)',
+            'radial-gradient(circle, rgba(127,90,240,0.22) 0%, rgba(127,90,240,0.06) 45%, transparent 70%)',
         }}
       />
-      <svg width="100" height="100" viewBox="0 0 100 100" aria-hidden fill="none" className="relative">
-        <defs>
-          <radialGradient id="orbit-spark" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0%"   stopColor="#FFFFFF" stopOpacity="1" />
-            <stop offset="55%"  stopColor="#D3C6FF" stopOpacity="0.95" />
-            <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0.55" />
-          </radialGradient>
-          <linearGradient id="orbit-stroke" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0%"   stopColor="rgba(127,90,240,0.65)" />
-            <stop offset="100%" stopColor="rgba(127,90,240,0.18)" />
-          </linearGradient>
-          <filter id="orbit-glow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="1.6" result="b" />
-            <feMerge>
-              <feMergeNode in="b" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        <g className="ppcio-orbit-1" style={{ transformOrigin: '50px 50px' }}>
-          <g transform="rotate(-22 50 50)">
-            <ellipse cx="50" cy="50" rx="44" ry="20" stroke="url(#orbit-stroke)" strokeWidth="1" fill="none" />
-            <circle cx="94" cy="50" r="2.4" fill="#D3C6FF" filter="url(#orbit-glow)" />
-          </g>
-        </g>
-        <g className="ppcio-orbit-2" style={{ transformOrigin: '50px 50px' }}>
-          <g transform="rotate(34 50 50)">
-            <ellipse cx="50" cy="50" rx="44" ry="20" stroke="url(#orbit-stroke)" strokeWidth="1" fill="none" />
-            <circle cx="6"  cy="50" r="2"   fill="#B08EF4" filter="url(#orbit-glow)" />
-            <circle cx="50" cy="30" r="1.6" fill="#FFFFFF" opacity="0.85" filter="url(#orbit-glow)" />
-          </g>
-        </g>
-        <g filter="url(#orbit-glow)">
-          <path
-            d="M50 30 L52.2 47.8 L70 50 L52.2 52.2 L50 70 L47.8 52.2 L30 50 L47.8 47.8 Z"
-            fill="url(#orbit-spark)"
-          />
-        </g>
-      </svg>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -left-20 bottom-[-100px] h-[260px] w-[260px] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(127,90,240,0.10) 0%, transparent 65%)',
+        }}
+      />
+
+      <div className="relative flex flex-wrap items-center justify-between gap-3">
+        <RunningPulse />
+        <span className="tabular-nums font-display text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">
+          {active.elapsed}
+        </span>
+      </div>
+
+      <p className="relative mt-4 max-w-[640px] font-display text-[20px] font-semibold leading-[1.32] tracking-[-0.012em] text-ppc-ink sm:text-[22px]">
+        {active.task}
+      </p>
+
+      <div
+        className="relative mt-6 h-[5px] overflow-hidden rounded-full"
+        style={{ background: 'rgba(255,255,255,0.65)' }}
+      >
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${progress}%`,
+            background:
+              'linear-gradient(90deg, #A88CFF 0%, #7F5AF0 60%, #534AB7 100%)',
+            boxShadow: '0 0 10px rgba(127,90,240,0.35)',
+            transition: 'width 600ms ease-out',
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function RunningPulse() {
+  return (
+    <span
+      className="inline-flex items-center gap-2 text-[10.5px] font-bold uppercase leading-none tracking-[0.18em]"
+      style={{
+        color: '#534AB7',
+        fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
+      }}
+    >
+      <span
+        className="ppcio-live-dot relative inline-block h-[7px] w-[7px] rounded-full"
+        style={{
+          background: '#7F5AF0',
+          boxShadow: '0 0 0 3px rgba(127,90,240,0.18)',
+        }}
+      />
+      Running
     </span>
   );
 }
@@ -634,45 +536,48 @@ function OrbitalSparkle() {
 function StepsTrail({ steps }: { steps: MissionFeedStep[] }) {
   if (steps.length === 0) return null;
   return (
-    <ul className="relative mt-5 flex flex-col gap-[2px]">
+    <ul className="flex flex-col px-7 sm:px-8">
       {steps.map((s, i) => (
-        <li key={i}>
-          <StepRow step={s} />
-        </li>
+        <StepRow key={i} step={s} isLast={i === steps.length - 1} />
       ))}
     </ul>
   );
 }
 
-function StepRow({ step }: { step: MissionFeedStep }) {
+function StepRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
   return (
-    <div
-      className="flex items-center gap-5 rounded-[12px] px-5 py-[14px] transition-colors hover:bg-white/[0.025]"
-      style={{ boxShadow: 'inset 0 -1px 0 rgba(255,255,255,0.04)' }}
+    <li
+      className="flex items-start gap-5 py-[18px]"
+      style={{ borderBottom: isLast ? 'none' : '0.5px solid #eee9f5' }}
     >
       <span
-        className="relative grid h-[28px] w-[28px] shrink-0 place-items-center rounded-full"
+        className="mt-[3px] grid h-[20px] w-[20px] shrink-0 place-items-center rounded-full"
         style={{
-          background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 60%, #5A3FE0 100%)',
-          boxShadow:
-            'inset 0 0 0 1px rgba(255,255,255,0.22), 0 6px 14px -6px rgba(127,90,240,0.55)',
+          background: '#E6F7EE',
+          boxShadow: 'inset 0 0 0 0.5px rgba(31,138,90,0.25)',
         }}
       >
-        <Check size={13} weight="bold" className="text-white" />
+        <Check size={11} weight="bold" style={{ color: '#1F8A5A' }} />
       </span>
       <span
-        className="tabular-nums shrink-0 text-[12.5px] font-medium text-white/45"
-        style={{ width: 56, fontFamily: '"Courier New", ui-monospace, Menlo, monospace' }}
+        className="tabular-nums shrink-0 pt-[4px] text-[11.5px] font-semibold uppercase tracking-[0.08em]"
+        style={{
+          color: '#b0a9c2',
+          fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
+          width: 64,
+        }}
       >
         {step.time}
       </span>
-      <div className="min-w-0 flex-1 leading-tight">
-        <p className="text-[14.5px] font-medium tracking-[-0.005em] text-white">
+      <div className="min-w-0 flex-1 leading-snug">
+        <p className="text-[14.5px] font-semibold tracking-[-0.005em] text-ppc-ink">
           {step.title}
         </p>
-        <p className="mt-[3px] text-[12.5px] text-white/50">{step.description}</p>
+        <p className="mt-[3px] text-[13px] leading-[1.5] text-ppc-text-muted">
+          {step.description}
+        </p>
       </div>
-    </div>
+    </li>
   );
 }
 
