@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, NavLink, useParams } from 'react-router-dom';
+import { Link, NavLink, Navigate, useParams } from 'react-router-dom';
 import {
   ArrowUp, ArrowRight, CaretDown, ChatCircle,
   DotsThree, MagnifyingGlass, NotePencil, Robot, Sparkle, TrendUp,
@@ -35,13 +35,21 @@ import { AGENTS } from '../mock/agents';
 export function Chat() {
   const { chatId } = useParams<{ chatId?: string }>();
   const activeThread = findChatThread(chatId);
+
+  // /chat with no thread selected → land on the first thread so users always
+  // see the active-chat surface (with rail), never the legacy PreChat hero.
+  if (!activeThread) {
+    const fallback = CHAT_HISTORY[0];
+    return fallback
+      ? <Navigate to={`/chat/${fallback.id}`} replace />
+      : <PreChat />;
+  }
+
   return (
     <div className="flex min-h-screen w-full">
-      <ChatHistoryRail activeId={activeThread?.id} />
+      <ChatHistoryRail activeId={activeThread.id} />
       <div className="flex min-w-0 flex-1 flex-col">
-        {activeThread
-          ? <ActiveChat thread={activeThread} />
-          : <PreChat />}
+        <ActiveChat thread={activeThread} />
       </div>
     </div>
   );
