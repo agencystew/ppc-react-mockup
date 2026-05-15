@@ -21,11 +21,17 @@ function getScopedProjectId(pathname: string): string | null {
 
 /* AppShell — "Inhabited Dark" sidebar.
  *
- * Replaces the previous chunky purple-fill active state (which felt like a
- * generic SaaS template) with an atmospheric rail: subtle radial top-glow,
- * tonal project chips, and a soft-tint + 2px gradient accent-bar treatment
- * for the active row. The sidebar now reads as the same world as the main
- * content's dark hero card, not a different product.
+ * Three rules the active treatment obeys:
+ *  1. Whisper, don't shout. Active rows get a low-alpha purple wash (≤0.18)
+ *     and a 2.5px gradient accent bar on the left edge. No inset rings,
+ *     no chunky purple fill — those read as generic SaaS template.
+ *  2. Parent stays quiet when you're inside its section. The leaf sub-item
+ *     carries the spotlight (its own mini accent bar + soft wash); the
+ *     parent only gets bold text and a rotated caret. No double-active.
+ *  3. Monochrome project chips. Previously each project hashed to its own
+ *     HSL hue, which read as a different design system from the purple/white
+ *     rail above. Identity comes from the letter + status orb, not from
+ *     a random rainbow of fills.
  *
  * One signature moment: the lowercase "ppc" wordmark gets a single italic
  * serif period — echoing the hero card's italic period in "Google Ads."
@@ -317,8 +323,7 @@ function MainNavItem({
         return active
           ? {
               background:
-                'linear-gradient(90deg, rgba(127,90,240,0.48) 0%, rgba(127,90,240,0.18) 55%, rgba(127,90,240,0) 100%)',
-              boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.32)',
+                'linear-gradient(90deg, rgba(127,90,240,0.16) 0%, rgba(127,90,240,0.04) 60%, rgba(127,90,240,0) 100%)',
             }
           : undefined;
       }}
@@ -333,7 +338,7 @@ function MainNavItem({
               weight={active ? 'fill' : 'duotone'}
               className={
                 active
-                  ? 'text-[#D3C6FF]'
+                  ? 'text-white'
                   : 'text-white transition-colors group-hover:text-white'
               }
             />
@@ -415,8 +420,7 @@ function ItemGroup({
           inSection
             ? {
                 background:
-                  'linear-gradient(90deg, rgba(127,90,240,0.48) 0%, rgba(127,90,240,0.18) 100%)',
-                boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.32)',
+                  'linear-gradient(90deg, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.04) 100%)',
               }
             : undefined
         }
@@ -426,7 +430,7 @@ function ItemGroup({
           weight={inSection ? 'fill' : 'duotone'}
           className={
             inSection
-              ? 'text-[#D3C6FF]'
+              ? 'text-white'
               : 'text-white transition-colors group-hover:text-white'
           }
         />
@@ -441,28 +445,14 @@ function ItemGroup({
         onClick={() => setOpen((v) => !v)}
         className={`group relative flex w-full items-center gap-2.5 rounded-[9px] px-3 py-[8px] text-left text-[13.5px] transition-colors duration-150 ${
           inSection
-            ? 'font-semibold text-white'
+            ? 'font-semibold text-white hover:bg-white/[0.04]'
             : 'font-medium text-white/80 hover:bg-white/[0.05] hover:text-white'
         }`}
-        style={
-          inSection
-            ? {
-                background:
-                  'linear-gradient(90deg, rgba(127,90,240,0.48) 0%, rgba(127,90,240,0.18) 55%, rgba(127,90,240,0) 100%)',
-                boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.32)',
-              }
-            : undefined
-        }
       >
-        {inSection && <ActiveAccent />}
         <Icon
           size={17}
           weight={inSection ? 'fill' : 'duotone'}
-          className={
-            inSection
-              ? 'text-[#D3C6FF]'
-              : 'text-white transition-colors group-hover:text-white'
-          }
+          className="text-white transition-colors group-hover:text-white"
         />
         <span className="flex-1 tracking-[-0.005em]">{label}</span>
         {runningCount !== undefined && <RunningIndicator count={runningCount} />}
@@ -492,7 +482,7 @@ function ItemGroup({
                 to={sp.to}
                 end
                 className={({ isActive }) =>
-                  `block rounded-[7px] px-2.5 py-[6px] text-[12.5px] transition-colors duration-150 ${
+                  `relative block rounded-[7px] px-2.5 py-[6px] text-[12.5px] transition-colors duration-150 ${
                     isActive
                       ? 'font-semibold text-white'
                       : 'font-medium text-white/65 hover:bg-white/[0.05] hover:text-white'
@@ -502,12 +492,27 @@ function ItemGroup({
                   isActive
                     ? {
                         background:
-                          'linear-gradient(90deg, rgba(127,90,240,0.42) 0%, rgba(127,90,240,0.10) 100%)',
+                          'linear-gradient(90deg, rgba(127,90,240,0.14) 0%, rgba(127,90,240,0.02) 80%, rgba(127,90,240,0) 100%)',
                       }
                     : undefined
                 }
               >
-                {sp.label}
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute -left-[12px] top-1/2 h-[14px] w-[2px] -translate-y-1/2 rounded-r-full"
+                        style={{
+                          background:
+                            'linear-gradient(180deg, #C7B0FF 0%, #7F5AF0 100%)',
+                          boxShadow: '0 0 8px 0 rgba(127,90,240,0.55)',
+                        }}
+                      />
+                    )}
+                    {sp.label}
+                  </>
+                )}
               </NavLink>
             </li>
           ))}
@@ -548,7 +553,7 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
                   background: chip.bg,
                   color: chip.fg,
                   boxShadow: isActive
-                    ? `inset 0 0 0 1px ${chip.ring}, 0 0 0 2px rgba(127,90,240,0.45)`
+                    ? `inset 0 0 0 1px rgba(255,255,255,0.18), 0 0 0 1.5px rgba(127,90,240,0.28)`
                     : `inset 0 0 0 1px ${chip.ring}`,
                 }}
               >
@@ -616,8 +621,7 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
                   isActive
                     ? {
                         background:
-                          'linear-gradient(90deg, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.05) 60%, rgba(127,90,240,0) 100%)',
-                        boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.32)',
+                          'linear-gradient(90deg, rgba(127,90,240,0.16) 0%, rgba(127,90,240,0.04) 60%, rgba(127,90,240,0) 100%)',
                       }
                     : undefined
                 }
@@ -701,17 +705,16 @@ function RunningIndicator({ count }: { count: number }) {
   );
 }
 
-/* Project chip — desaturated tonal squares (Linear-style), not crayons.
- * Each project hashes to a hue, but we render at low saturation over a dark
- * base so every chip lives in the same dark family. */
-function projectChip(id: string): { bg: string; fg: string; ring: string } {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  const hue = h % 360;
+/* Project chip — monochrome on dark. Previously hashed each project id to its
+ * own HSL hue, which read as a different design system from the purple/white
+ * sidebar above. Unified to a single low-alpha white treatment; the status orb
+ * carries the only semantic colour (red/yellow/green) so identity comes from
+ * the letter + the health signal, not from a random rainbow of fills. */
+function projectChip(_id: string): { bg: string; fg: string; ring: string } {
   return {
-    bg:   `linear-gradient(155deg, hsl(${hue}, 40%, 22%) 0%, hsl(${hue}, 32%, 14%) 100%)`,
-    fg:   `hsl(${hue}, 60%, 82%)`,
-    ring: `hsla(${hue}, 55%, 55%, 0.25)`,
+    bg:   'linear-gradient(155deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.035) 100%)',
+    fg:   'rgba(255,255,255,0.82)',
+    ring: 'rgba(255,255,255,0.10)',
   };
 }
 
