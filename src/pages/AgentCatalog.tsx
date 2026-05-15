@@ -181,7 +181,7 @@ function HeroBlock() {
           Agents
         </span>
 
-        <h1 className="mt-3 font-display text-[42px] font-black leading-[1.02] tracking-[-0.028em] text-ppc-ink sm:text-[48px]">
+        <h1 className="mt-4 font-display font-black leading-[0.94] tracking-[-0.038em] text-ppc-ink text-[56px] sm:text-[72px] lg:text-[88px]">
           What do you want
           <br />
           to{' '}
