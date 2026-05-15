@@ -7,7 +7,6 @@ import {
 } from '@phosphor-icons/react';
 import { PROJECTS, ACCOUNTS } from '../mock/projects';
 import { SIDEBAR_REPORT_PAGES } from '../mock/reports';
-import { CHAT_HISTORY } from '../mock/chats';
 
 /* Path-prefix scope: anything under /projects/<id>/... (or /projects/<id>) is
  * project-scoped — the cockpit, agents, reports, runs. Plain /projects (the
@@ -53,18 +52,6 @@ const REPORT_PAGES: SubPage[] = [
   ...SIDEBAR_REPORT_PAGES.map((r) => ({
     label: truncate(r.label, 32),
     to: `/reports/${r.runId}`,
-  })),
-];
-
-// Chat dropdown — "All chats" index + recent threads from CHAT_HISTORY.
-// Gives users a one-click jump into the active-chat surface from anywhere
-// in the app. Stewart asked for this on 2026-05-15 after the chat redesign
-// landed without a discoverable entry point.
-const CHAT_PAGES: SubPage[] = [
-  { label: 'All chats', to: '/chat' },
-  ...CHAT_HISTORY.slice(0, 6).map((t) => ({
-    label: truncate(t.title, 32),
-    to: `/chat/${t.id}`,
   })),
 ];
 
@@ -166,13 +153,7 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <nav className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-3 pb-3">
           {!collapsed && <SectionLabel>Workspace</SectionLabel>}
           <MainNavItem to="/" icon={House} label="Dashboard" collapsed={collapsed} end />
-          <ItemGroup
-            icon={ChatCircle}
-            label="Chat"
-            basePath="/chat"
-            pages={CHAT_PAGES}
-            collapsed={collapsed}
-          />
+          <MainNavItem to="/chat" icon={ChatCircle} label="Chat" collapsed={collapsed} badge="2" />
           <ItemGroup
             icon={Robot}
             label="Agents"

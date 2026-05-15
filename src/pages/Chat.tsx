@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useParams } from 'react-router-dom';
 import {
-  ArrowUp, ArrowRight, CaretDown, CaretLeft, ChatCircle,
-  DotsThree, MagnifyingGlass, Robot, Sparkle, TrendUp,
+  ArrowUp, ArrowRight, CaretDown, ChatCircle,
+  DotsThree, MagnifyingGlass, NotePencil, Robot, Sparkle, TrendUp,
   ChartBar, Coins, Users, Info, Broadcast, Files, Target, Plus,
   CalendarBlank,
 } from '@phosphor-icons/react';
@@ -35,9 +35,154 @@ import { AGENTS } from '../mock/agents';
 export function Chat() {
   const { chatId } = useParams<{ chatId?: string }>();
   const activeThread = findChatThread(chatId);
-  return activeThread
-    ? <ActiveChat thread={activeThread} />
-    : <PreChat />;
+  return (
+    <div className="flex min-h-screen w-full">
+      <ChatHistoryRail activeId={activeThread?.id} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        {activeThread
+          ? <ActiveChat thread={activeThread} />
+          : <PreChat />}
+      </div>
+    </div>
+  );
+}
+
+/* ═══ INNER LEFT RAIL · chat history ═══════════════════════════════════════
+ *
+ * Sits flush against the dark AppShell sidebar (which goes full-bleed on
+ * /chat routes). White card column at 296px wide on desktop; hidden on
+ * mobile (where users fall through to the in-page Recent Chats strip).
+ *
+ * Same v5 hand as the rest: 0.5px ppc-card-border, Figtree, Courier mono
+ * timestamps, single italic purple period on the title. Active thread gets
+ * a low-alpha purple wash + bold title. Live threads carry a status orb. */
+
+function ChatHistoryRail({ activeId }: { activeId?: string }) {
+  return (
+    <aside
+      className="sticky top-0 hidden h-screen w-[296px] shrink-0 flex-col border-r-[0.5px] border-ppc-card-border bg-white md:flex"
+    >
+      <div className="px-5 pt-[22px] pb-3">
+        <h2 className="text-[19px] font-bold tracking-[-0.012em] text-ppc-ink">
+          Chat<span className="font-serif italic text-ppc-purple-500">.</span>
+        </h2>
+      </div>
+
+      <div className="px-4 pb-[14px]">
+        <NavLink
+          to="/chat"
+          end
+          className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-[10px] px-3 py-[10px] text-[13.5px] font-semibold text-white transition-transform hover:-translate-y-[0.5px]"
+          style={{
+            background: 'linear-gradient(180deg, #8B68F2 0%, #7F5AF0 55%, #6B47E0 100%)',
+            boxShadow:
+              '0 1px 0 rgba(255,255,255,0.18) inset, 0 0 0 1px rgba(127,90,240,0.55), 0 6px 18px -6px rgba(127,90,240,0.55)',
+          }}
+        >
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-60"
+            style={{
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 55%)',
+            }}
+          />
+          <NotePencil size={14} weight="bold" className="relative" />
+          <span className="relative">New chat</span>
+        </NavLink>
+      </div>
+
+      <div className="flex items-center justify-between px-5 pb-2.5">
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-ink transition-colors hover:text-ppc-purple-700"
+        >
+          Recent
+          <CaretDown size={10} weight="bold" className="text-ppc-text-faint" />
+        </button>
+        <button
+          type="button"
+          title="Search chats"
+          className="grid h-[22px] w-[22px] place-items-center rounded-[6px] text-ppc-text-muted transition-colors hover:bg-ppc-canvas hover:text-ppc-purple-700"
+        >
+          <MagnifyingGlass size={12} weight="bold" />
+        </button>
+      </div>
+
+      <nav className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-3 pb-3">
+        {CHAT_HISTORY.map((t) => (
+          <ChatHistoryRow key={t.id} thread={t} active={t.id === activeId} />
+        ))}
+      </nav>
+
+      <div className="border-t-[0.5px] border-ppc-card-border px-5 py-3">
+        <Link
+          to="/chat"
+          className="inline-flex items-center gap-1 text-[12px] font-medium text-ppc-purple-700 transition-colors hover:text-ppc-purple-500"
+        >
+          View all chats
+          <ArrowRight size={11} weight="bold" />
+        </Link>
+      </div>
+    </aside>
+  );
+}
+
+function ChatHistoryRow({ thread, active }: { thread: ChatThread; active: boolean }) {
+  const avatar = avatarForLabel(thread.projectLabel);
+  return (
+    <Link
+      to={`/chat/${thread.id}`}
+      className={`group flex items-start gap-2.5 rounded-[10px] px-2.5 py-[10px] transition-colors ${
+        active ? 'bg-ppc-purple-500/10' : 'hover:bg-ppc-canvas/70'
+      }`}
+    >
+      <span className="min-w-0 flex-1">
+        <p className={`line-clamp-2 text-[12.5px] leading-[1.35] tracking-[-0.003em] ${
+          active ? 'font-semibold text-ppc-ink' : 'font-medium text-ppc-ink'
+        }`}>
+          {thread.title}
+        </p>
+        <span className="mt-[7px] flex items-center gap-1.5">
+          <span
+            aria-hidden
+            className="grid h-[16px] w-[16px] shrink-0 place-items-center rounded-[4px] text-[9px] font-bold leading-none"
+            style={{
+              background: avatar.bg,
+              color: avatar.fg,
+              boxShadow: `inset 0 0 0 0.5px ${avatar.ring}`,
+            }}
+          >
+            {thread.projectLabel.charAt(0)}
+          </span>
+          <span className="truncate text-[10.5px] font-medium text-ppc-text-muted">
+            {thread.projectLabel}
+          </span>
+        </span>
+      </span>
+      {thread.live ? (
+        <span className="ppcio-live-dot mt-[6px] inline-block h-[6px] w-[6px] shrink-0 rounded-full bg-ppc-status-healthy" />
+      ) : (
+        <span
+          className="shrink-0 pt-[1px] text-[10px] font-medium uppercase tracking-[0.04em] text-ppc-text-faint"
+          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+        >
+          {compactTime(thread.relativeTime)}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function compactTime(rel: string): string {
+  switch (rel) {
+    case 'just now':   return '10:24';
+    case '2h ago':     return '2h';
+    case 'yesterday':  return 'Tue';
+    case '2 days ago': return 'Mon';
+    case '3 days ago': return 'Sun';
+    case 'last week':  return 'Apr 27';
+    default:           return rel;
+  }
 }
 
 /* ═══ PROJECT AVATAR PALETTE ═══════════════════════════════════════════════
@@ -91,8 +236,6 @@ function PreChat() {
       <div className="mx-auto w-full max-w-[860px] flex-1 px-6 pb-20 pt-10 lg:px-10 lg:pt-14">
         <Hero project={project} />
 
-        <RecentChatsStrip />
-
         <TrustStrip />
 
         <PopularGrid />
@@ -100,62 +243,6 @@ function PreChat() {
         <SpecialistRow />
       </div>
     </div>
-  );
-}
-
-/* ─── Recent chats (PreChat) — primary entry to active threads ──────────── */
-
-function RecentChatsStrip() {
-  const recent = CHAT_HISTORY.slice(0, 6);
-  return (
-    <section className="mt-12">
-      <div className="mb-3 flex items-baseline justify-between">
-        <h2 className="text-[13px] font-semibold tracking-[-0.003em] text-ppc-ink">
-          Recent chats<span className="font-serif italic text-ppc-purple-500">.</span>
-        </h2>
-        <span
-          className="text-[10.5px] uppercase tracking-[0.10em] text-ppc-text-faint"
-          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-        >
-          {CHAT_HISTORY.length} threads
-        </span>
-      </div>
-      <div className="grid gap-2 sm:grid-cols-2">
-        {recent.map((t) => {
-          const avatar = avatarForLabel(t.projectLabel);
-          return (
-            <Link
-              key={t.id}
-              to={`/chat/${t.id}`}
-              className="group flex items-start gap-2.5 rounded-[12px] border-[0.5px] border-ppc-card-border bg-white px-3.5 py-[12px] transition-all hover:-translate-y-[1px] hover:border-ppc-purple-300"
-            >
-              <span
-                aria-hidden
-                className="grid h-[26px] w-[26px] shrink-0 place-items-center rounded-[7px] text-[11px] font-bold leading-none"
-                style={{
-                  background: avatar.bg,
-                  color: avatar.fg,
-                  boxShadow: `inset 0 0 0 0.5px ${avatar.ring}`,
-                }}
-              >
-                {t.projectLabel.charAt(0)}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="line-clamp-1 text-[13px] font-semibold leading-tight tracking-[-0.003em] text-ppc-ink">
-                  {t.title}
-                </p>
-                <p className="mt-[3px] truncate text-[11px] text-ppc-text-muted">
-                  {t.projectLabel} · {t.relativeTime}
-                </p>
-              </div>
-              {t.live && (
-                <span className="ppcio-live-dot mt-[7px] inline-block h-[6px] w-[6px] rounded-full bg-ppc-status-healthy" />
-              )}
-            </Link>
-          );
-        })}
-      </div>
-    </section>
   );
 }
 
@@ -599,28 +686,19 @@ function ActiveChat({ thread }: { thread: ChatThread }) {
   );
 }
 
-/* ─── Header · < Back · centered title · ⋯ ──────────────────────────────── */
+/* ─── Header · centered title · ⋯ (rail owns thread navigation) ────────── */
 
 function ActiveChatHeader({ title }: { title: string }) {
-  const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-10 bg-ppc-canvas/85 px-4 pt-4 pb-3 backdrop-blur-md sm:px-7">
-      <div className="mx-auto grid w-full max-w-[680px] grid-cols-[auto_1fr_auto] items-center gap-3">
-        <button
-          type="button"
-          onClick={() => navigate('/chat')}
-          className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[12.5px] font-medium text-ppc-text-muted transition-colors hover:text-ppc-ink"
-        >
-          <CaretLeft size={12} weight="bold" />
-          <span>Back to chats</span>
-        </button>
-        <h1 className="truncate text-center text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink">
+      <div className="mx-auto flex w-full max-w-[680px] items-center justify-between gap-3">
+        <h1 className="min-w-0 flex-1 truncate text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink">
           {title}
         </h1>
         <button
           type="button"
           title="More"
-          className="grid h-7 w-7 place-items-center rounded-full border-[0.5px] border-ppc-card-border bg-white text-ppc-text-muted transition-colors hover:border-ppc-purple-300 hover:text-ppc-purple-500"
+          className="grid h-7 w-7 shrink-0 place-items-center rounded-full border-[0.5px] border-ppc-card-border bg-white text-ppc-text-muted transition-colors hover:border-ppc-purple-300 hover:text-ppc-purple-500"
         >
           <DotsThree size={14} weight="bold" />
         </button>
