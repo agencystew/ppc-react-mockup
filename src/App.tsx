@@ -24,6 +24,11 @@ import { ProjectPage as V2ProjectPage } from './pages/_v2/Project';
 
 import { DevPrimitives } from './pages/_dev/Primitives';
 
+/* v3 (parallel design exploration — Reports evidence redesign 2026-05-15) */
+import { ReportMagazine } from './pages/_v3/ReportMagazine';
+import { ReportBloomberg } from './pages/_v3/ReportBloomberg';
+import { ReportAudit } from './pages/_v3/ReportAudit';
+
 export default function App() {
   return (
     <Routes>
@@ -72,6 +77,13 @@ export default function App() {
 
         <Route path="v2/projects" element={<V2Projects />} />
         <Route path="v2/projects/:id" element={<V2ProjectPage />} />
+
+        {/* ─── v3 (parallel design exploration, Reports evidence redesign) ─
+           Three variants of /reports/:runId built in parallel from the same
+           brief. See docs/plans/2026-05-15-report-evidence-parallel-design.md. */}
+        <Route path="v3/reports/run-competitor-spy-magazine" element={<ReportMagazine />} />
+        <Route path="v3/reports/run-competitor-spy-bloomberg" element={<ReportBloomberg />} />
+        <Route path="v3/reports/run-competitor-spy-audit" element={<ReportAudit />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
