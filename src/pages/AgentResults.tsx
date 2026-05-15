@@ -227,36 +227,54 @@ function HeroCard({ run }: { run: AgentRun }) {
 
   return (
     <section
-      className="relative mb-10 overflow-hidden rounded-[20px] text-white"
+      className="relative mb-5 overflow-hidden rounded-[20px] text-white"
       style={{
         background:
-          'radial-gradient(120% 90% at 88% -10%, #1B0F39 0%, #0A0814 55%, #050310 100%)',
+          'radial-gradient(110% 100% at 92% -5%, #2A1758 0%, #150A30 40%, #07050D 100%)',
         boxShadow:
-          '0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(15,10,30,0.55)',
+          '0 1px 0 rgba(255,255,255,0.05) inset, 0 30px 60px -30px rgba(15,10,30,0.55)',
       }}
     >
-      {/* Top-right purple bloom */}
+      {/* Top sheen line — adds a defined edge */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-32 -top-32 h-[460px] w-[460px] rounded-full"
+        className="pointer-events-none absolute inset-x-10 top-0 h-px"
         style={{
           background:
-            'radial-gradient(circle, rgba(127,90,240,0.30) 0%, rgba(127,90,240,0.10) 35%, transparent 65%)',
+            'linear-gradient(90deg, transparent 0%, rgba(201,181,255,0.55) 30%, rgba(201,181,255,0.55) 70%, transparent 100%)',
         }}
       />
-      {/* Soft bottom-left bloom */}
+      {/* Brighter top-right purple bloom */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -bottom-24 left-[8%] h-[280px] w-[280px] rounded-full"
+        className="pointer-events-none absolute -right-28 -top-28 h-[440px] w-[440px] rounded-full"
         style={{
           background:
-            'radial-gradient(circle, rgba(127,90,240,0.10) 0%, transparent 65%)',
+            'radial-gradient(circle, rgba(159,134,255,0.45) 0%, rgba(127,90,240,0.18) 35%, transparent 65%)',
+        }}
+      />
+      {/* Mid-left secondary bloom for warmth */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -bottom-20 -left-16 h-[340px] w-[340px] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(127,90,240,0.20) 0%, rgba(127,90,240,0.05) 40%, transparent 70%)',
+        }}
+      />
+      {/* Diagonal sheen overlay */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.04) 50%, transparent 65%)',
         }}
       />
       {/* Subtle starfield grain */}
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        className="pointer-events-none absolute inset-0 opacity-[0.07]"
         style={{
           backgroundImage:
             'radial-gradient(rgba(255,255,255,0.55) 1px, transparent 1px)',
@@ -265,58 +283,103 @@ function HeroCard({ run }: { run: AgentRun }) {
         }}
       />
 
-      <div className="relative grid gap-5 px-9 pb-4 pt-6 sm:grid-cols-[1fr_minmax(180px,220px)] sm:gap-8 sm:px-10 sm:pt-7">
+      <div className="relative grid gap-5 px-9 pb-5 pt-7 sm:grid-cols-[1fr_minmax(160px,200px)] sm:gap-8 sm:px-10 sm:pt-8">
         {/* Copy column */}
         <div className="min-w-0">
-          <h2 className="font-display text-[30px] font-extrabold leading-[1.05] tracking-[-0.025em] text-white sm:text-[34px]">
+          <p className="mb-3 inline-flex items-center gap-2 rounded-full px-3 py-[5px] text-[10.5px] font-bold uppercase tracking-[0.12em] text-white/85"
+             style={{
+               background: 'rgba(159,134,255,0.18)',
+               boxShadow: 'inset 0 0 0 1px rgba(159,134,255,0.32)',
+             }}>
+            <span aria-hidden className="h-[5px] w-[5px] rounded-full" style={{ background: '#9F86FF', boxShadow: '0 0 0 3px rgba(159,134,255,0.25)' }} />
+            Top finding
+          </p>
+          <h2 className="font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.025em] text-white sm:text-[38px]">
             {body}
             {hasPeriod && <span style={{ color: '#9F86FF' }}>.</span>}
           </h2>
-          <p className="mt-3 max-w-[520px] text-[13.5px] leading-[1.55] text-white/65">
+          <p className="mt-3 max-w-[520px] text-[14px] leading-[1.55] text-white/65">
             {run.description}
           </p>
         </div>
 
         {/* Mascot column */}
         <div className="relative flex items-end justify-end sm:items-center">
-          <div className="scale-[0.78] origin-bottom-right sm:origin-center">
+          <div className="scale-[0.82] origin-bottom-right sm:origin-center">
             <SpyMascot />
           </div>
         </div>
       </div>
 
       {/* Stat tiles inside the dark card */}
-      <div className="relative grid gap-3 px-9 pb-6 sm:grid-cols-3 sm:gap-3 sm:px-10">
+      <div className="relative grid gap-3 px-9 pb-7 sm:grid-cols-3 sm:gap-4 sm:px-10">
         {run.stats?.map((s, i) => (
-          <DarkStatTile key={i} value={s.value} label={s.label} />
+          <DarkStatTile key={i} value={s.value} label={s.label} tone={STAT_TONES[i] ?? 'lavender'} />
         ))}
       </div>
     </section>
   );
 }
 
-function DarkStatTile({ value, label }: { value: string; label: string }) {
+type StatTone = 'lavender' | 'mint' | 'peach';
+const STAT_TONES: StatTone[] = ['lavender', 'mint', 'peach'];
+
+const TONE_STYLES: Record<StatTone, { accent: string; glow: string }> = {
+  lavender: { accent: '#9F86FF', glow: 'rgba(159,134,255,0.22)' },
+  mint:     { accent: '#7CE0B6', glow: 'rgba(124,224,182,0.20)' },
+  peach:    { accent: '#FFAE85', glow: 'rgba(255,174,133,0.20)' },
+};
+
+function DarkStatTile({
+  value,
+  label,
+  tone,
+}: {
+  value: string;
+  label: string;
+  tone: StatTone;
+}) {
   const m = value.match(/^(.+?)(\/\w+)$/);
   const main = m ? m[1] : value;
   const suffix = m ? m[2] : null;
+  const t = TONE_STYLES[tone];
   return (
     <div
-      className="rounded-[12px] px-5 py-[14px]"
+      className="relative overflow-hidden rounded-[14px] px-6 py-[20px]"
       style={{
-        background: 'rgba(255,255,255,0.025)',
+        background: 'rgba(255,255,255,0.045)',
         boxShadow:
-          'inset 0 0 0 1px rgba(255,255,255,0.06), 0 1px 0 rgba(255,255,255,0.02) inset',
+          'inset 0 0 0 1px rgba(255,255,255,0.10), 0 1px 0 rgba(255,255,255,0.03) inset',
       }}
     >
-      <div className="font-display text-[28px] font-extrabold leading-none tracking-[-0.025em] text-white">
-        {main}
-        {suffix && (
-          <span className="ml-[1px] text-[14px] font-medium text-white/55">
-            {suffix}
-          </span>
-        )}
+      {/* Top color accent bar */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[2px]"
+        style={{
+          background: `linear-gradient(90deg, ${t.accent} 0%, transparent 100%)`,
+        }}
+      />
+      {/* Soft accent glow behind value */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -left-6 top-2 h-[100px] w-[100px] rounded-full"
+        style={{
+          background: `radial-gradient(circle, ${t.glow} 0%, transparent 65%)`,
+        }}
+      />
+
+      <div className="relative">
+        <div className="font-display text-[36px] font-extrabold leading-none tracking-[-0.025em] text-white">
+          {main}
+          {suffix && (
+            <span className="ml-[1px] text-[16px] font-medium text-white/55">
+              {suffix}
+            </span>
+          )}
+        </div>
+        <p className="mt-3 text-[12px] leading-[1.4] text-white/60">{label}</p>
       </div>
-      <p className="mt-2 text-[11.5px] leading-[1.4] text-white/55">{label}</p>
     </div>
   );
 }
