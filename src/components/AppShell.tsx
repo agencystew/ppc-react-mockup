@@ -107,10 +107,20 @@ interface SidebarProps {
 
 function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { pathname } = useLocation();
-  // Inside a project (/projects/<id>/...), workspace nav items render inactive.
-  // Orientation comes from the active project chip + the ScopePill in the
-  // content area, never from a half-active workspace highlight.
-  const inProjectMode = !!getScopedProjectId(pathname);
+  // In project mode, Agents + Reports rebind to their project-scoped equivalents
+  // so clicking them stays in the project rather than ejecting back to global.
+  // Dashboard + Chat stay global — clicking them is an explicit exit (Dashboard
+  // IS the cross-account portfolio; chat is workspace-level v1).
+  // Only the ScopePill's "× exit" chip explicitly drops the project context.
+  const scopedId = getScopedProjectId(pathname);
+  const inProjectMode = !!scopedId;
+  const projectPrefix = scopedId ? `/projects/${scopedId}` : '';
+  const rebindAgentPages = inProjectMode
+    ? AGENT_PAGES.map((p) => ({ ...p, to: p.to.replace(/^\/agents/, `${projectPrefix}/agents`) }))
+    : AGENT_PAGES;
+  const rebindReportPages = inProjectMode
+    ? REPORT_PAGES.map((p) => ({ ...p, to: p.to.replace(/^\/reports/, `${projectPrefix}/reports`) }))
+    : REPORT_PAGES;
 
   return (
     <aside
@@ -144,19 +154,17 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <ItemGroup
             icon={Robot}
             label="Agents"
-            basePath="/agents"
-            pages={AGENT_PAGES}
+            basePath={inProjectMode ? `${projectPrefix}/agents` : '/agents'}
+            pages={rebindAgentPages}
             collapsed={collapsed}
             runningCount={4}
-            forceInactive={inProjectMode}
           />
           <ItemGroup
             icon={ChartLineUp}
             label="Reports"
-            basePath="/reports"
-            pages={REPORT_PAGES}
+            basePath={inProjectMode ? `${projectPrefix}/reports` : '/reports'}
+            pages={rebindReportPages}
             collapsed={collapsed}
-            forceInactive={inProjectMode}
           />
           <ProjectsSection collapsed={collapsed} />
         </nav>
