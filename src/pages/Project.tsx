@@ -303,10 +303,12 @@ export function ProjectPage() {
         })}
       </div>
 
-      {/* ── 5. Run an agent — signature dark cards ───────────────── */}
+      {/* ── 5. Run an agent — signature dark cards ─────────────────
+         Project-scoped links: clicking from inside a project keeps you in scope.
+         AgentDetail reads useParams().id and pre-fills the launch panel. */}
       <SectionHeading
         title="Run an agent"
-        right={<HeaderLink to="/agents">Browse all 24</HeaderLink>}
+        right={<HeaderLink to={`/projects/${project.id}/agents`}>Browse all 24</HeaderLink>}
         marginTop="mt-14"
       />
 
@@ -316,7 +318,7 @@ export function ProjectPage() {
           return (
             <Link
               key={a.slug}
-              to={`/agents/${a.slug}`}
+              to={`/projects/${project.id}/agents/${a.slug}`}
               className="group relative flex flex-col rounded-[14px] border px-6 py-7 transition-all duration-200 hover:-translate-y-px hover:border-[#2a2a36]"
               style={{ background: C.darkBg, borderColor: C.darkBorder, minHeight: 240 }}
             >

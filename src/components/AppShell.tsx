@@ -106,6 +106,12 @@ interface SidebarProps {
 }
 
 function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const { pathname } = useLocation();
+  // Inside a project (/projects/<id>/...), workspace nav items render inactive.
+  // Orientation comes from the active project chip + the ScopePill in the
+  // content area, never from a half-active workspace highlight.
+  const inProjectMode = !!getScopedProjectId(pathname);
+
   return (
     <aside
       className={`relative sticky top-0 flex h-screen shrink-0 flex-col transition-[width] duration-200 ${
@@ -132,8 +138,9 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <SearchRow collapsed={collapsed} />
 
         <nav className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-3 pb-3">
-          <MainNavItem to="/" icon={House} label="Dashboard" collapsed={collapsed} end />
-          <MainNavItem to="/chat" icon={ChatCircle} label="Chat" collapsed={collapsed} badge="2" />
+          {!collapsed && <SectionLabel>Workspace</SectionLabel>}
+          <MainNavItem to="/" icon={House} label="Dashboard" collapsed={collapsed} end forceInactive={inProjectMode} />
+          <MainNavItem to="/chat" icon={ChatCircle} label="Chat" collapsed={collapsed} badge="2" forceInactive={inProjectMode} />
           <ItemGroup
             icon={Robot}
             label="Agents"
@@ -141,6 +148,7 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
             pages={AGENT_PAGES}
             collapsed={collapsed}
             runningCount={4}
+            forceInactive={inProjectMode}
           />
           <ItemGroup
             icon={ChartLineUp}
@@ -148,6 +156,7 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
             basePath="/reports"
             pages={REPORT_PAGES}
             collapsed={collapsed}
+            forceInactive={inProjectMode}
           />
           <ProjectsSection collapsed={collapsed} />
         </nav>
@@ -155,6 +164,24 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <SidebarFooter collapsed={collapsed} />
       </div>
     </aside>
+  );
+}
+
+/* Mono uppercase eyebrow used to label sidebar zones (Workspace / Projects).
+ * Same Courier New + 0.16em tracking as the existing Projects label. */
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mb-1 px-3 pt-1">
+      <span
+        className="text-[10px] font-semibold uppercase leading-none text-white/55"
+        style={{
+          fontFamily: '"Courier New", ui-monospace, monospace',
+          letterSpacing: '0.16em',
+        }}
+      >
+        {children}
+      </span>
+    </div>
   );
 }
 
@@ -251,7 +278,7 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
 /* ─── Main nav item ─────────────────────────────────────────────────────── */
 
 function MainNavItem({
-  to, icon: Icon, label, collapsed, end, badge, dot, activeMatch,
+  to, icon: Icon, label, collapsed, end, badge, dot, activeMatch, forceInactive,
 }: {
   to: string;
   icon: typeof House;
@@ -261,9 +288,10 @@ function MainNavItem({
   badge?: string;
   dot?: 'red' | 'green' | 'yellow';
   activeMatch?: (pathname: string) => boolean;
+  forceInactive?: boolean;
 }) {
   const { pathname } = useLocation();
-  const overrideActive = activeMatch ? activeMatch(pathname) : null;
+  const overrideActive = forceInactive ? false : (activeMatch ? activeMatch(pathname) : null);
 
   return (
     <NavLink
@@ -353,6 +381,7 @@ function ItemGroup({
   pages,
   collapsed,
   runningCount,
+  forceInactive,
 }: {
   icon: typeof House;
   label: string;
@@ -360,10 +389,11 @@ function ItemGroup({
   pages: SubPage[];
   collapsed: boolean;
   runningCount?: number;
+  forceInactive?: boolean;
 }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const inSection = pathname.startsWith(basePath);
+  const inSection = !forceInactive && pathname.startsWith(basePath);
   const [open, setOpen] = useState(inSection);
   useEffect(() => {
     if (inSection) setOpen(true);
@@ -488,12 +518,19 @@ function ItemGroup({
 /* ─── Projects section ──────────────────────────────────────────────────── */
 
 function ProjectsSection({ collapsed }: { collapsed: boolean }) {
+  const { pathname } = useLocation();
+  // Chip stays highlighted across the project sub-app (cockpit, scoped agents,
+  // scoped runs, scoped reports) — not just the cockpit URL. NavLink's `end`
+  // can't express that, so we drive active state from getScopedProjectId.
+  const scopedId = getScopedProjectId(pathname);
+
   if (collapsed) {
     return (
       <div className="mt-3 flex flex-col items-center gap-1.5 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         {PROJECTS.map((p) => {
           const status = projectStatus(p.id);
           const chip = projectChip(p.id);
+          const isActive = scopedId === p.id;
           return (
             <NavLink
               key={p.id}
@@ -501,23 +538,21 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
               title={p.name}
               className="group relative"
             >
-              {({ isActive }) => (
-                <span
-                  className={`grid h-8 w-8 place-items-center rounded-[7px] text-[11px] font-semibold transition-all ${
-                    isActive ? '' : 'opacity-90 group-hover:opacity-100'
-                  }`}
-                  style={{
-                    background: chip.bg,
-                    color: chip.fg,
-                    boxShadow: isActive
-                      ? `inset 0 0 0 1px ${chip.ring}, 0 0 0 2px rgba(127,90,240,0.45)`
-                      : `inset 0 0 0 1px ${chip.ring}`,
-                  }}
-                >
-                  {p.name.charAt(0)}
-                  <StatusOrb tone={status} />
-                </span>
-              )}
+              <span
+                className={`grid h-8 w-8 place-items-center rounded-[7px] text-[11px] font-semibold transition-all ${
+                  isActive ? '' : 'opacity-90 group-hover:opacity-100'
+                }`}
+                style={{
+                  background: chip.bg,
+                  color: chip.fg,
+                  boxShadow: isActive
+                    ? `inset 0 0 0 1px ${chip.ring}, 0 0 0 2px rgba(127,90,240,0.45)`
+                    : `inset 0 0 0 1px ${chip.ring}`,
+                }}
+              >
+                {p.name.charAt(0)}
+                <StatusOrb tone={status} />
+              </span>
             </NavLink>
           );
         })}
@@ -526,7 +561,7 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
   }
 
   return (
-    <div className="mt-5">
+    <div className="mt-5 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
       <div className="flex items-center justify-between px-3 pb-2">
         <div className="flex items-center gap-[7px]">
           <span
@@ -565,19 +600,17 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
         {PROJECTS.map((p) => {
           const status = projectStatus(p.id);
           const chip = projectChip(p.id);
+          const isActive = scopedId === p.id;
           return (
             <li key={p.id}>
               <NavLink
                 to={`/projects/${p.id}`}
-                end
-                className={({ isActive }) =>
-                  `group relative flex items-center gap-2.5 overflow-hidden rounded-[9px] px-3 py-[7px] text-[13px] transition-colors duration-150 ${
-                    isActive
-                      ? 'font-semibold text-white'
-                      : 'font-medium text-white/80 hover:bg-white/[0.05] hover:text-white'
-                  }`
-                }
-                style={({ isActive }) =>
+                className={`group relative flex items-center gap-2.5 overflow-hidden rounded-[9px] px-3 py-[7px] text-[13px] transition-colors duration-150 ${
+                  isActive
+                    ? 'font-semibold text-white'
+                    : 'font-medium text-white/80 hover:bg-white/[0.05] hover:text-white'
+                }`}
+                style={
                   isActive
                     ? {
                         background:
@@ -587,23 +620,19 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
                     : undefined
                 }
               >
-                {({ isActive }) => (
-                  <>
-                    {isActive && <ActiveAccent />}
-                    <span
-                      className="relative grid h-[22px] w-[22px] shrink-0 place-items-center rounded-[6px] text-[10.5px] font-semibold leading-none"
-                      style={{
-                        background: chip.bg,
-                        color: chip.fg,
-                        boxShadow: `inset 0 0 0 1px ${chip.ring}`,
-                      }}
-                    >
-                      {p.name.charAt(0)}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate tracking-[-0.005em]">{p.name}</span>
-                    <StatusDot tone={status} />
-                  </>
-                )}
+                {isActive && <ActiveAccent />}
+                <span
+                  className="relative grid h-[22px] w-[22px] shrink-0 place-items-center rounded-[6px] text-[10.5px] font-semibold leading-none"
+                  style={{
+                    background: chip.bg,
+                    color: chip.fg,
+                    boxShadow: `inset 0 0 0 1px ${chip.ring}`,
+                  }}
+                >
+                  {p.name.charAt(0)}
+                </span>
+                <span className="min-w-0 flex-1 truncate tracking-[-0.005em]">{p.name}</span>
+                <StatusDot tone={status} />
               </NavLink>
             </li>
           );
@@ -736,6 +765,168 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
         </span>
         <DotsThree size={15} weight="bold" className="text-white/45" />
       </button>
+    </div>
+  );
+}
+
+/* ─── ScopePill — the orientation answer ────────────────────────────────────
+ * Persistent indicator at the top of every workspace/project content area.
+ *  - Workspace: mono eyebrow "PORTFOLIO · ALL ACCOUNTS"  (low weight)
+ *  - Project:   pill with project chip + name + Project label, plus a Switch
+ *               popover and an Exit chip back to the workspace sibling.
+ * The pill is the loudest "where am I" cue. Sidebar mirrors mode but eyes
+ * go to the page first.                                                     */
+function ScopePill() {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  const switcherRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!switcherOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
+        setSwitcherOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [switcherOpen]);
+
+  const scopedId = getScopedProjectId(pathname);
+  const project = scopedId ? PROJECTS.find((p) => p.id === scopedId) : null;
+
+  // Workspace mode — small mono eyebrow, intentionally low weight.
+  if (!project) {
+    return (
+      <div className="mb-5 flex items-center gap-2">
+        <span
+          className="h-[6px] w-[6px] rounded-full"
+          style={{ background: '#a1a1aa', boxShadow: '0 0 0 2px rgba(161,161,170,0.18)' }}
+        />
+        <span
+          className="text-[10.5px] font-semibold uppercase leading-none text-ppc-black/55"
+          style={{
+            fontFamily: '"Courier New", ui-monospace, monospace',
+            letterSpacing: '0.16em',
+          }}
+        >
+          Portfolio · All accounts
+        </span>
+      </div>
+    );
+  }
+
+  const chip = projectChip(project.id);
+  // Exit lands you on the workspace sibling of the current page rather than
+  // blanket-redirecting to Dashboard. /projects/hoth/reports → /reports.
+  const tail = pathname.startsWith(`/projects/${project.id}/`)
+    ? '/' + pathname.slice(`/projects/${project.id}/`.length).split('/')[0]
+    : '/';
+
+  return (
+    <div className="mb-5 flex flex-wrap items-center gap-2">
+      <div
+        ref={switcherRef}
+        className="relative flex items-center rounded-full border bg-white"
+        style={{
+          borderColor: 'rgba(127,90,240,0.28)',
+          boxShadow: '0 1px 0 rgba(127,90,240,0.06), 0 4px 14px -8px rgba(127,90,240,0.30)',
+        }}
+      >
+        <NavLink
+          to={`/projects/${project.id}`}
+          title={`${project.name} cockpit`}
+          className="flex items-center gap-2 pl-[3px] pr-2"
+        >
+          <span
+            className="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full text-[10.5px] font-semibold leading-none"
+            style={{ background: chip.bg, color: chip.fg, boxShadow: `inset 0 0 0 1px ${chip.ring}` }}
+          >
+            {project.name.charAt(0)}
+          </span>
+          <span className="text-[12.5px] font-semibold tracking-[-0.005em] text-ppc-black">
+            {project.name}
+          </span>
+        </NavLink>
+        <span
+          className="text-[10.5px] font-semibold uppercase text-ppc-black/45"
+          style={{ fontFamily: '"Courier New", ui-monospace, monospace', letterSpacing: '0.14em' }}
+        >
+          Project
+        </span>
+        <button
+          type="button"
+          onClick={() => setSwitcherOpen((v) => !v)}
+          title="Switch project"
+          className="ml-1 grid h-[22px] w-[22px] place-items-center rounded-full text-ppc-black/55 transition-colors hover:bg-black/[0.04] hover:text-ppc-black"
+        >
+          <ArrowsLeftRight size={11} weight="bold" />
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(tail)}
+          title="Exit to workspace"
+          className="mr-[3px] grid h-[22px] w-[22px] place-items-center rounded-full text-ppc-black/55 transition-colors hover:bg-black/[0.04] hover:text-ppc-black"
+        >
+          <X size={11} weight="bold" />
+        </button>
+
+        {switcherOpen && (
+          <div
+            className="absolute left-0 top-full z-20 mt-1.5 w-[230px] overflow-hidden rounded-[10px] border bg-white"
+            style={{
+              borderColor: 'rgba(0,0,0,0.08)',
+              boxShadow: '0 12px 30px -12px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.06)',
+            }}
+          >
+            <div
+              className="px-3 pt-2.5 pb-1.5 text-[10px] font-semibold uppercase text-ppc-black/45"
+              style={{ fontFamily: '"Courier New", ui-monospace, monospace', letterSpacing: '0.14em' }}
+            >
+              Switch project
+            </div>
+            <ul className="max-h-[240px] overflow-y-auto pb-1">
+              {PROJECTS.map((p) => {
+                const c = projectChip(p.id);
+                const isCurrent = p.id === project.id;
+                const target = pathname.replace(`/projects/${project.id}`, `/projects/${p.id}`);
+                return (
+                  <li key={p.id}>
+                    <button
+                      type="button"
+                      disabled={isCurrent}
+                      onClick={() => {
+                        setSwitcherOpen(false);
+                        if (!isCurrent) navigate(target);
+                      }}
+                      className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-[12.5px] transition-colors ${
+                        isCurrent ? 'cursor-default text-ppc-black/45' : 'text-ppc-black hover:bg-black/[0.03]'
+                      }`}
+                    >
+                      <span
+                        className="grid h-[20px] w-[20px] shrink-0 place-items-center rounded-[5px] text-[10px] font-semibold leading-none"
+                        style={{ background: c.bg, color: c.fg, boxShadow: `inset 0 0 0 1px ${c.ring}` }}
+                      >
+                        {p.name.charAt(0)}
+                      </span>
+                      <span className="flex-1 truncate font-medium tracking-[-0.005em]">{p.name}</span>
+                      {isCurrent && (
+                        <span
+                          className="text-[9.5px] font-semibold uppercase text-ppc-black/40"
+                          style={{ fontFamily: '"Courier New", ui-monospace, monospace', letterSpacing: '0.14em' }}
+                        >
+                          Active
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
