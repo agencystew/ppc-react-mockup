@@ -1,17 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   House, Robot, ChartLineUp, ChatCircle,
   MagnifyingGlass, SidebarSimple, Plus, SquaresFour,
-  CaretRight, DotsThree, X, ArrowsLeftRight,
+  CaretRight, DotsThree,
 } from '@phosphor-icons/react';
 import { PROJECTS, ACCOUNTS } from '../mock/projects';
 import { SIDEBAR_REPORT_PAGES } from '../mock/reports';
 
 /* Path-prefix scope: anything under /projects/<id>/... (or /projects/<id>) is
  * project-scoped — the cockpit, agents, reports, runs. Plain /projects (the
- * index) stays workspace mode. The ScopePill, sidebar active-state mirror, and
- * any future scoped surface all read from this single helper. */
+ * index) stays workspace-level. Used by the sidebar to (a) light the active
+ * project chip and (b) rebind Agents/Reports to their scoped equivalents. */
 function getScopedProjectId(pathname: string): string | null {
   const m = pathname.match(/^\/projects\/([^/]+)(?:\/|$)/);
   if (!m) return null;
@@ -88,8 +88,7 @@ export function AppShell() {
         {fullBleed ? (
           <Outlet />
         ) : (
-          <div className="mx-auto w-full max-w-[1240px] px-8 pt-6 pb-10 lg:px-12 lg:pb-12">
-            <ScopePill />
+          <div className="mx-auto w-full max-w-[1240px] px-8 py-10 lg:px-12 lg:py-12">
             <Outlet />
           </div>
         )}
@@ -107,18 +106,16 @@ interface SidebarProps {
 
 function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { pathname } = useLocation();
-  // In project mode, Agents + Reports rebind to their project-scoped equivalents
-  // so clicking them stays in the project rather than ejecting back to global.
-  // Dashboard + Chat stay global — clicking them is an explicit exit (Dashboard
-  // IS the cross-account portfolio; chat is workspace-level v1).
-  // Only the ScopePill's "× exit" chip explicitly drops the project context.
+  // When the user is inside a project, Agents + Reports rebind to their
+  // project-scoped equivalents so clicking them stays in the project. Dashboard
+  // + Chat stay global because they have no project-scoped meaning — Dashboard
+  // IS the cross-account portfolio, and Chat is workspace-level for v1.
   const scopedId = getScopedProjectId(pathname);
-  const inProjectMode = !!scopedId;
   const projectPrefix = scopedId ? `/projects/${scopedId}` : '';
-  const rebindAgentPages = inProjectMode
+  const rebindAgentPages = scopedId
     ? AGENT_PAGES.map((p) => ({ ...p, to: p.to.replace(/^\/agents/, `${projectPrefix}/agents`) }))
     : AGENT_PAGES;
-  const rebindReportPages = inProjectMode
+  const rebindReportPages = scopedId
     ? REPORT_PAGES.map((p) => ({ ...p, to: p.to.replace(/^\/reports/, `${projectPrefix}/reports`) }))
     : REPORT_PAGES;
 
@@ -149,12 +146,12 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
         <nav className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-3 pb-3">
           {!collapsed && <SectionLabel>Workspace</SectionLabel>}
-          <MainNavItem to="/" icon={House} label="Dashboard" collapsed={collapsed} end forceInactive={inProjectMode} />
-          <MainNavItem to="/chat" icon={ChatCircle} label="Chat" collapsed={collapsed} badge="2" forceInactive={inProjectMode} />
+          <MainNavItem to="/" icon={House} label="Dashboard" collapsed={collapsed} end />
+          <MainNavItem to="/chat" icon={ChatCircle} label="Chat" collapsed={collapsed} badge="2" />
           <ItemGroup
             icon={Robot}
             label="Agents"
-            basePath={inProjectMode ? `${projectPrefix}/agents` : '/agents'}
+            basePath={scopedId ? `${projectPrefix}/agents` : '/agents'}
             pages={rebindAgentPages}
             collapsed={collapsed}
             runningCount={4}
@@ -162,7 +159,7 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <ItemGroup
             icon={ChartLineUp}
             label="Reports"
-            basePath={inProjectMode ? `${projectPrefix}/reports` : '/reports'}
+            basePath={scopedId ? `${projectPrefix}/reports` : '/reports'}
             pages={rebindReportPages}
             collapsed={collapsed}
           />
@@ -286,7 +283,7 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
 /* ─── Main nav item ─────────────────────────────────────────────────────── */
 
 function MainNavItem({
-  to, icon: Icon, label, collapsed, end, badge, dot, activeMatch, forceInactive,
+  to, icon: Icon, label, collapsed, end, badge, dot, activeMatch,
 }: {
   to: string;
   icon: typeof House;
@@ -296,10 +293,9 @@ function MainNavItem({
   badge?: string;
   dot?: 'red' | 'green' | 'yellow';
   activeMatch?: (pathname: string) => boolean;
-  forceInactive?: boolean;
 }) {
   const { pathname } = useLocation();
-  const overrideActive = forceInactive ? false : (activeMatch ? activeMatch(pathname) : null);
+  const overrideActive = activeMatch ? activeMatch(pathname) : null;
 
   return (
     <NavLink
@@ -389,7 +385,6 @@ function ItemGroup({
   pages,
   collapsed,
   runningCount,
-  forceInactive,
 }: {
   icon: typeof House;
   label: string;
@@ -397,11 +392,10 @@ function ItemGroup({
   pages: SubPage[];
   collapsed: boolean;
   runningCount?: number;
-  forceInactive?: boolean;
 }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const inSection = !forceInactive && pathname.startsWith(basePath);
+  const inSection = pathname.startsWith(basePath);
   const [open, setOpen] = useState(inSection);
   useEffect(() => {
     if (inSection) setOpen(true);
@@ -777,164 +771,3 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-/* ─── ScopePill — the orientation answer ────────────────────────────────────
- * Persistent indicator at the top of every workspace/project content area.
- *  - Workspace: mono eyebrow "PORTFOLIO · ALL ACCOUNTS"  (low weight)
- *  - Project:   pill with project chip + name + Project label, plus a Switch
- *               popover and an Exit chip back to the workspace sibling.
- * The pill is the loudest "where am I" cue. Sidebar mirrors mode but eyes
- * go to the page first.                                                     */
-function ScopePill() {
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const [switcherOpen, setSwitcherOpen] = useState(false);
-  const switcherRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!switcherOpen) return;
-    const onClick = (e: MouseEvent) => {
-      if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
-        setSwitcherOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
-  }, [switcherOpen]);
-
-  const scopedId = getScopedProjectId(pathname);
-  const project = scopedId ? PROJECTS.find((p) => p.id === scopedId) : null;
-
-  // Workspace mode — small mono eyebrow, intentionally low weight.
-  if (!project) {
-    return (
-      <div className="mb-5 flex items-center gap-2">
-        <span
-          className="h-[6px] w-[6px] rounded-full"
-          style={{ background: '#a1a1aa', boxShadow: '0 0 0 2px rgba(161,161,170,0.18)' }}
-        />
-        <span
-          className="text-[10.5px] font-semibold uppercase leading-none text-ppc-black/55"
-          style={{
-            fontFamily: '"Courier New", ui-monospace, monospace',
-            letterSpacing: '0.16em',
-          }}
-        >
-          Portfolio · All accounts
-        </span>
-      </div>
-    );
-  }
-
-  const chip = projectChip(project.id);
-  // Exit lands you on the workspace sibling of the current page rather than
-  // blanket-redirecting to Dashboard. /projects/hoth/reports → /reports.
-  const tail = pathname.startsWith(`/projects/${project.id}/`)
-    ? '/' + pathname.slice(`/projects/${project.id}/`.length).split('/')[0]
-    : '/';
-
-  return (
-    <div className="mb-5 flex flex-wrap items-center gap-2">
-      <div
-        ref={switcherRef}
-        className="relative flex items-center rounded-full border bg-white"
-        style={{
-          borderColor: 'rgba(127,90,240,0.28)',
-          boxShadow: '0 1px 0 rgba(127,90,240,0.06), 0 4px 14px -8px rgba(127,90,240,0.30)',
-        }}
-      >
-        <NavLink
-          to={`/projects/${project.id}`}
-          title={`${project.name} cockpit`}
-          className="flex items-center gap-2 pl-[3px] pr-2"
-        >
-          <span
-            className="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full text-[10.5px] font-semibold leading-none"
-            style={{ background: chip.bg, color: chip.fg, boxShadow: `inset 0 0 0 1px ${chip.ring}` }}
-          >
-            {project.name.charAt(0)}
-          </span>
-          <span className="text-[12.5px] font-semibold tracking-[-0.005em] text-ppc-black">
-            {project.name}
-          </span>
-        </NavLink>
-        <span
-          className="text-[10.5px] font-semibold uppercase text-ppc-black/45"
-          style={{ fontFamily: '"Courier New", ui-monospace, monospace', letterSpacing: '0.14em' }}
-        >
-          Project
-        </span>
-        <button
-          type="button"
-          onClick={() => setSwitcherOpen((v) => !v)}
-          title="Switch project"
-          className="ml-1 grid h-[22px] w-[22px] place-items-center rounded-full text-ppc-black/55 transition-colors hover:bg-black/[0.04] hover:text-ppc-black"
-        >
-          <ArrowsLeftRight size={11} weight="bold" />
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate(tail)}
-          title="Exit to workspace"
-          className="mr-[3px] grid h-[22px] w-[22px] place-items-center rounded-full text-ppc-black/55 transition-colors hover:bg-black/[0.04] hover:text-ppc-black"
-        >
-          <X size={11} weight="bold" />
-        </button>
-
-        {switcherOpen && (
-          <div
-            className="absolute left-0 top-full z-20 mt-1.5 w-[230px] overflow-hidden rounded-[10px] border bg-white"
-            style={{
-              borderColor: 'rgba(0,0,0,0.08)',
-              boxShadow: '0 12px 30px -12px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.06)',
-            }}
-          >
-            <div
-              className="px-3 pt-2.5 pb-1.5 text-[10px] font-semibold uppercase text-ppc-black/45"
-              style={{ fontFamily: '"Courier New", ui-monospace, monospace', letterSpacing: '0.14em' }}
-            >
-              Switch project
-            </div>
-            <ul className="max-h-[240px] overflow-y-auto pb-1">
-              {PROJECTS.map((p) => {
-                const c = projectChip(p.id);
-                const isCurrent = p.id === project.id;
-                const target = pathname.replace(`/projects/${project.id}`, `/projects/${p.id}`);
-                return (
-                  <li key={p.id}>
-                    <button
-                      type="button"
-                      disabled={isCurrent}
-                      onClick={() => {
-                        setSwitcherOpen(false);
-                        if (!isCurrent) navigate(target);
-                      }}
-                      className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-[12.5px] transition-colors ${
-                        isCurrent ? 'cursor-default text-ppc-black/45' : 'text-ppc-black hover:bg-black/[0.03]'
-                      }`}
-                    >
-                      <span
-                        className="grid h-[20px] w-[20px] shrink-0 place-items-center rounded-[5px] text-[10px] font-semibold leading-none"
-                        style={{ background: c.bg, color: c.fg, boxShadow: `inset 0 0 0 1px ${c.ring}` }}
-                      >
-                        {p.name.charAt(0)}
-                      </span>
-                      <span className="flex-1 truncate font-medium tracking-[-0.005em]">{p.name}</span>
-                      {isCurrent && (
-                        <span
-                          className="text-[9.5px] font-semibold uppercase text-ppc-black/40"
-                          style={{ fontFamily: '"Courier New", ui-monospace, monospace', letterSpacing: '0.14em' }}
-                        >
-                          Active
-                        </span>
-                      )}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
