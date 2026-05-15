@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, NavLink, Navigate, useParams } from 'react-router-dom';
+import { Link, NavLink, useParams } from 'react-router-dom';
 import {
   ArrowUp, ArrowRight, CaretDown, ChatCircle,
   DotsThree, MagnifyingGlass, NotePencil, Robot, Sparkle, TrendUp,
