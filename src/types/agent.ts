@@ -53,15 +53,28 @@ export interface GoogleAdsAccount {
 
 export interface AgentStageRunning {
   initial: string;          // single-letter avatar
-  role: string;
-  task: string;
+  role: string;             // active card title — e.g. "Competitor Gap Finder"
+  task: string;             // descriptive sentence inside the active card
   elapsed: string;
+  // Mission-feed active card extensions
+  toolCallCount?: number;
+  insightLabel?: string;    // e.g. "11 unclaimed angles with CTR benchmarks"
+  tools?: string[];         // tool pills, e.g. ["compare.matrix", "ctr.benchmark"]
+  progressPct?: number;
 }
 
 export interface AgentStageCompleted {
   title: string;
   agent: string;
   time: string;
+}
+
+// One row inside the dark "Live mission feed" card — sub-step level,
+// distinct from the stage-level Completed section below the card.
+export interface MissionFeedStep {
+  time: string;
+  title: string;
+  description: string;
 }
 
 export interface AgentStageUpcoming {
@@ -121,6 +134,13 @@ export interface AgentRun {
   completedStages?: AgentStageCompleted[];
   upcomingStages?: AgentStageUpcoming[];
   moreUpcomingCount?: number;
+  // Mission-feed rows shown inside the dark card (recent sub-steps within
+  // the currently-active stage, with descriptions). Separate from
+  // completedStages, which is the stage-level overview below the card.
+  recentMissionSteps?: MissionFeedStep[];
+  moreRecentStepsCount?: number;
+  // Footer callout — the lavender "we're analyzing live signals" panel.
+  liveSignalsLabel?: string;
   // Completed-state data
   stats?: StatTile[];
   findings?: Finding[];

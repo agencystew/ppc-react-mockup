@@ -18,25 +18,54 @@ const COMPETITOR_SPY_RUNNING: AgentRun = {
   parentAgent: { icon: '🕵️', name: 'Competitor Spy' },
   stage: { current: 5, total: 11 },
   headline: 'Sizing their spend.',
-  description: "How aggressive each rival is, where their budget concentrates, and who's gaining share.",
+  description:
+    "A live read on every competitor in your auction: their angles, their spend trajectory, " +
+    "their funnels, and the gaps they're exploiting.",
   activeAgent: {
-    initial: 'S',
-    role: 'Spend Tracker',
-    task: 'Modeling spend signals across 8 rival accounts',
+    initial: 'G',
+    role: 'Competitor Gap Finder',
+    task:
+      "Compared rivals' ad copy themes against your account's active ad copy. " +
+      "Surfaced angles rivals are running that you aren't, ranked by average CTR " +
+      'among rivals using them.',
     elapsed: '3m 47s',
+    toolCallCount: 9,
+    insightLabel: '11 unclaimed angles with CTR benchmarks',
+    tools: ['compare.matrix', 'ctr.benchmark'],
+    progressPct: 75,
   },
+  recentMissionSteps: [
+    {
+      time: '3m 46s',
+      title: 'Loaded rival auction set',
+      description: 'Pulled live competitors from your current auction landscape',
+    },
+    {
+      time: '3m 28s',
+      title: 'Clustered ad copy themes',
+      description: 'Grouped recurring messaging patterns across rival ads',
+    },
+    {
+      time: '2m 12s',
+      title: 'Matched against your ads',
+      description: 'Compared rival themes to your active ad copy',
+    },
+  ],
+  moreRecentStepsCount: 2,
   progressPct: 45,
   completedStages: [
-    { title: 'Mapping the field',    agent: 'Competitor Discovery',  time: '2m 12s' },
-    { title: 'Reading the auction',  agent: 'Auction Intelligence',  time: '3m 28s' },
-    { title: 'Decoding their copy',  agent: 'Copy Analyst',          time: '5m 04s' },
-    { title: 'Walking their funnels',agent: 'Page Detective',        time: '4m 51s' },
+    { title: 'Mapping the field',     agent: 'Competitor Discovery',  time: '2m 12s' },
+    { title: 'Reading the auction',   agent: 'Auction Intelligence',  time: '3m 28s' },
+    { title: 'Decoding their copy',   agent: 'Copy Analyst',          time: '5m 04s' },
+    { title: 'Walking their funnels', agent: 'Page Detective',        time: '4m 51s' },
   ],
   upcomingStages: [
-    { title: 'Finding the gaps',    agent: 'Gap Hunter' },
-    { title: 'Spotting the threats',agent: 'Auction Intelligence', dim: true },
+    { title: 'Pressure-test the overlap', agent: 'Overlap Scanner' },
+    { title: 'Spotting the threats',      agent: 'Auction Intelligence' },
+    { title: 'Budget pacer',              agent: 'Budget Forecaster' },
   ],
-  moreUpcomingCount: 4,
+  moreUpcomingCount: 3,
+  liveSignalsLabel: "We're analyzing live signals across 8 rival accounts.",
 };
 
 // ─── COMPETITOR SPY · COMPLETED ───────────────────────────────────────────

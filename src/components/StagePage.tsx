@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import {
-  Check, ArrowRight, ArrowUpRight, CaretDown, CaretUp,
+  Check, ArrowRight, ArrowUpRight, CaretDown, CaretUp, Waveform,
 } from '@phosphor-icons/react';
 import type {
   AgentRun,
+  AgentStageRunning,
   AgentStageCompleted,
   AgentStageUpcoming,
+  MissionFeedStep,
   StatTile,
   Finding,
   DataSource,
@@ -371,165 +373,472 @@ function ActionButtonNew({ label, primary }: ActionBtn) {
 }
 
 // ════════════════════════════════════════════════════════════════════════
-// RUNNING canvas — preserved verbatim (still wired through AgentRunning)
+// RUNNING view — light-surface layout (hero on canvas, dark mission feed
+// card, stage-level Completed + Up next sections, lavender callout).
+// Matches the pixel-perfect design Stewart shipped on 2026-05-15.
 // ════════════════════════════════════════════════════════════════════════
 
 function RunningCanvas({ run }: { run: AgentRun }) {
+  const current = run.stage.current;
   return (
-    <div
-      className="relative overflow-hidden rounded-3xl bg-ppc-black px-12 py-12 text-white shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.04)] sm:px-14 md:px-14"
-      style={{
-        backgroundImage:
-          'radial-gradient(120% 80% at 20% 0%, rgba(128,87,255,0.10) 0%, transparent 55%)',
-      }}
-    >
-      <RunningHeader run={run} />
-      <RunningBody run={run} />
-    </div>
-  );
-}
-
-function RunningHeader({ run }: { run: AgentRun }) {
-  return (
-    <div className="mb-14 flex flex-wrap items-start justify-between gap-4">
-      <div className="inline-flex items-center gap-2.5 text-[17px] font-semibold tracking-tight">
-        <span className="text-[20px] leading-none drop-shadow-[0_2px_8px_rgba(128,87,255,0.25)]">
-          {run.parentAgent.icon}
-        </span>
-        {run.parentAgent.name}
-      </div>
-      <div className="inline-flex items-center gap-2.5 text-[12px] text-white/60">
-        <span className="ppcio-live-dot inline-block h-2 w-2 rounded-full bg-ppc-purple-500" />
-        <span className="font-medium uppercase tracking-wider">Running</span>
-        <span className="opacity-40">·</span>
-        <span>Stage {run.stage.current} of {run.stage.total}</span>
-      </div>
-    </div>
-  );
-}
-
-function RunningBody({ run }: { run: AgentRun }) {
-  const completed = run.completedStages ?? [];
-  const upcoming = run.upcomingStages ?? [];
-  return (
-    <>
+    <div className="space-y-10">
       <RunningHero headline={run.headline} description={run.description} />
 
       {run.activeAgent && (
-        <div
-          className="ppcio-agent-card relative mb-7 flex items-center gap-4 overflow-hidden rounded-2xl border border-ppc-purple-500/25 p-5"
-          style={{
-            backgroundImage:
-              'linear-gradient(135deg, rgba(128,87,255,0.14) 0%, rgba(128,87,255,0.05) 55%, rgba(255,255,255,0.025) 100%)',
-          }}
-        >
-          <span className="pointer-events-none absolute left-6 right-6 top-0 h-px bg-grad-sheen" />
-          <Avatar initial={run.activeAgent.initial} />
-          <div className="flex-1 leading-tight">
-            <div className="text-[15px] font-semibold tracking-tight text-white">
-              {run.activeAgent.role}
-            </div>
-            <div className="mt-0.5 text-[13.5px] text-white/75">{run.activeAgent.task}</div>
-          </div>
-          <div className="tabular text-[13px] font-medium text-ppc-purple-300">
-            {run.activeAgent.elapsed}
-          </div>
-        </div>
-      )}
-
-      <div className="relative mb-14 h-1 overflow-hidden rounded-full bg-white/5">
-        <div
-          className="ppcio-live-bar h-full rounded-full shadow-[0_0_12px_rgba(128,87,255,0.45)]"
-          style={{ width: `${run.progressPct ?? 0}%` }}
+        <MissionFeedCard
+          active={run.activeAgent}
+          recentSteps={run.recentMissionSteps ?? []}
+          moreCount={run.moreRecentStepsCount}
         />
-      </div>
-
-      {completed.length > 0 && (
-        <div className="mb-12">
-          <SectionLabel>Just completed</SectionLabel>
-          <div className="flex flex-col gap-[18px]">
-            {completed.map((c, i) => <CompletedRow key={i} {...c} />)}
-          </div>
-        </div>
       )}
 
-      {upcoming.length > 0 && (
-        <div>
-          <SectionLabel>Coming up next</SectionLabel>
-          <div className="flex flex-col gap-[18px]">
-            {upcoming.map((u, i) => <UpcomingRow key={i} {...u} />)}
-            {run.moreUpcomingCount ? (
-              <div className="pl-[38px] text-[12px] text-white/35">
-                + {run.moreUpcomingCount} more checks
-              </div>
-            ) : null}
-          </div>
-        </div>
+      {run.completedStages && run.completedStages.length > 0 && (
+        <CompletedStagesSection stages={run.completedStages} />
       )}
-    </>
+
+      {run.upcomingStages && run.upcomingStages.length > 0 && (
+        <UpcomingStagesSection
+          stages={run.upcomingStages}
+          startNumber={current + 1}
+          moreCount={run.moreUpcomingCount}
+        />
+      )}
+
+      {run.liveSignalsLabel && <LiveSignalsCallout label={run.liveSignalsLabel} />}
+    </div>
   );
 }
 
+// ─── Hero on canvas ──────────────────────────────────────────────────────
+
 function RunningHero({ headline, description }: { headline: string; description: string }) {
+  // Headline structure: "Sizing their spend." → underline the last word
+  // before any trailing period in a soft lavender pill, then place a small
+  // purple period-dot to the right of the closing period.
   const hasPeriod = headline.endsWith('.');
   const body = hasPeriod ? headline.slice(0, -1) : headline;
+  const words = body.trim().split(/\s+/);
+  const lastWord = words.pop() ?? '';
+  const lead = words.join(' ');
+
   return (
-    <div className="mb-12">
-      <h1 className="font-display text-[64px] font-extrabold leading-[0.96] tracking-[-0.035em] text-white sm:text-[68px]">
-        {body}{hasPeriod && <span className="text-ppc-purple-500">.</span>}
+    <div>
+      <h1 className="font-display text-[60px] font-extrabold leading-[1.02] tracking-[-0.035em] text-ppc-ink sm:text-[68px]">
+        {lead}
+        {lead && ' '}
+        <span
+          className="relative inline-block rounded-[10px] px-[10px] py-[1px] leading-[1.02]"
+          style={{ background: '#E9E3FF' }}
+        >
+          {lastWord}
+        </span>
+        {hasPeriod && <span className="text-ppc-ink">.</span>}
+        <span
+          aria-hidden
+          className="ml-[6px] inline-block h-[9px] w-[9px] translate-y-[-2px] rounded-full align-middle"
+          style={{ background: '#7F5AF0' }}
+        />
       </h1>
-      <p className="mt-6 max-w-[560px] text-[18px] leading-[1.55] tracking-tight text-white/70">
+      <p className="mt-5 max-w-[640px] text-[15px] leading-[1.6] text-ppc-ink/70">
         {description}
       </p>
     </div>
   );
 }
 
-function Avatar({ initial }: { initial: string }) {
+// ─── Dark "Live mission feed" card ────────────────────────────────────────
+
+function MissionFeedCard({
+  active, recentSteps, moreCount,
+}: {
+  active: AgentStageRunning;
+  recentSteps: MissionFeedStep[];
+  moreCount?: number;
+}) {
+  const [expanded, setExpanded] = useState(false);
   return (
-    <span
-      className="inline-grid h-10 w-10 shrink-0 place-items-center rounded-full text-[15px] font-semibold text-white shadow-[0_6px_18px_-4px_rgba(128,87,255,0.45),inset_0_1px_0_rgba(255,255,255,0.25)]"
+    <div
+      className="relative overflow-hidden rounded-[16px] px-7 py-7 text-white"
       style={{
-        backgroundImage:
-          'linear-gradient(135deg, #A88CFF 0%, #8057FF 55%, #5A3FE0 100%)',
+        background: '#0E0B1A',
+        boxShadow:
+          '0 30px 60px -30px rgba(15,10,30,0.55), inset 0 1px 0 rgba(255,255,255,0.03)',
       }}
     >
-      {initial}
+      <p className="mb-5 text-[14px] font-medium text-white/85">Live mission feed</p>
+
+      <MissionActiveCard active={active} />
+
+      <div className="relative mt-5">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-[19px] top-0 h-full w-px"
+          style={{ background: 'rgba(255,255,255,0.06)' }}
+        />
+        <div className="flex flex-col">
+          {recentSteps.map((s, i) => (
+            <MissionCompletedRow key={i} step={s} isLast={i === recentSteps.length - 1} />
+          ))}
+        </div>
+      </div>
+
+      {moreCount ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="mt-4 flex w-full items-center justify-center gap-2 border-t border-white/[0.06] pt-4 text-[12.5px] font-medium text-white/55 transition-colors hover:text-white"
+        >
+          {expanded ? 'Hide completed steps' : `+ ${moreCount} more completed steps`}
+          {expanded
+            ? <CaretUp size={11} weight="bold" />
+            : <CaretDown size={11} weight="bold" />}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function MissionActiveCard({ active }: { active: AgentStageRunning }) {
+  const progress = Math.max(0, Math.min(100, active.progressPct ?? 0));
+  return (
+    <div
+      className="relative overflow-hidden rounded-[14px] p-5"
+      style={{
+        background: 'rgba(127,90,240,0.05)',
+        border: '1px solid rgba(127,90,240,0.45)',
+        boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.05), 0 0 0 1px rgba(127,90,240,0.15)',
+      }}
+    >
+      {/* Subtle radial top-right bloom */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-16 -top-20 h-[200px] w-[200px] rounded-full"
+        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.18) 0%, transparent 65%)' }}
+      />
+
+      <div className="relative flex items-start gap-4">
+        {/* Left column: icon + stacked NOW/ACTIVE tags */}
+        <div className="flex w-[44px] shrink-0 flex-col items-center gap-2">
+          <span
+            className="grid h-[44px] w-[44px] place-items-center rounded-[12px]"
+            style={{
+              background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 55%, #5A3FE0 100%)',
+              boxShadow:
+                '0 0 0 1px rgba(255,255,255,0.18) inset, 0 8px 20px -8px rgba(127,90,240,0.55)',
+            }}
+          >
+            <Waveform size={20} weight="bold" className="text-white" />
+          </span>
+          <FeedChip>Now</FeedChip>
+          <FeedChip>Active</FeedChip>
+        </div>
+
+        {/* Right column: title row + meta + pills + description + bar */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <p className="text-[17px] font-semibold tracking-[-0.012em] text-white">
+                {active.role}
+              </p>
+              <p className="mt-[3px] text-[12.5px] leading-[1.55] text-white/55">
+                {active.toolCallCount != null && (
+                  <>
+                    <span className="tabular-nums">{active.toolCallCount}</span> tool calls
+                  </>
+                )}
+                {active.toolCallCount != null && active.insightLabel && (
+                  <span className="px-1.5 text-white/30">·</span>
+                )}
+                {active.insightLabel}
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-3 pt-[1px]">
+              <div className="text-right leading-tight">
+                <div className="tabular-nums text-[15px] font-semibold text-white">
+                  {active.elapsed}
+                </div>
+                <div className="text-[10.5px] text-white/45">elapsed</div>
+              </div>
+              <ElapsedSparkline />
+            </div>
+          </div>
+
+          {active.tools && active.tools.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {active.tools.map((t, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center rounded-[6px] border px-2.5 py-[4px] text-[11px]"
+                  style={{
+                    background: 'rgba(127,90,240,0.10)',
+                    borderColor: 'rgba(127,90,240,0.32)',
+                    color: '#D3C6FF',
+                    fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
+                  }}
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <p className="mt-3 text-[13px] leading-[1.6] text-white/72">{active.task}</p>
+
+          <div
+            className="relative mt-4 h-[5px] overflow-hidden rounded-full"
+            style={{ background: 'rgba(255,255,255,0.08)' }}
+          >
+            <div
+              className="ppcio-live-bar h-full rounded-full"
+              style={{
+                width: `${progress}%`,
+                boxShadow: '0 0 12px rgba(127,90,240,0.55)',
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FeedChip({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      className="inline-flex w-full items-center justify-center rounded-[5px] px-[6px] py-[3px] text-[9px] font-bold uppercase leading-none tracking-[0.14em]"
+      style={{
+        background: 'rgba(127,90,240,0.20)',
+        color: '#D3C6FF',
+        boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.30)',
+        fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
+      }}
+    >
+      {children}
     </span>
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function MissionCompletedRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
   return (
-    <div className="mb-[22px] text-[13px] font-medium tracking-tight text-white/70">
-      {children}
-    </div>
-  );
-}
-
-function CompletedRow({ title, agent, time }: AgentStageCompleted) {
-  return (
-    <div className="flex items-start gap-4">
-      <span className="mt-0.5 inline-grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full bg-ppc-success text-white shadow-[0_2px_10px_-2px_rgba(23,178,106,0.45),inset_0_1px_0_rgba(255,255,255,0.2)]">
-        <Check size={13} weight="bold" />
+    <div
+      className={`relative flex items-start gap-4 py-3 ${isLast ? '' : 'border-b border-white/[0.04]'}`}
+    >
+      <span
+        className="relative z-[1] grid h-[26px] w-[26px] shrink-0 place-items-center rounded-full"
+        style={{
+          background: 'rgba(255,255,255,0.06)',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.10)',
+        }}
+      >
+        <Check size={12} weight="bold" className="text-white/75" />
       </span>
-      <div className="flex-1 leading-tight">
-        <div className="mb-0.5 text-[15px] font-medium text-white">{title}</div>
-        <div className="text-[13px] text-white/70">{agent}</div>
+      <span
+        className="tabular-nums shrink-0 pt-[2px] text-[12px] font-medium text-white/45"
+        style={{ width: 56 }}
+      >
+        {step.time}
+      </span>
+      <div className="min-w-0 flex-1 pt-[1px]">
+        <p className="text-[13.5px] font-medium tracking-[-0.005em] text-white">{step.title}</p>
+        <p className="mt-[3px] text-[12.5px] leading-[1.55] text-white/55">{step.description}</p>
       </div>
-      <span className="tabular mt-1 text-[13px] font-medium text-white/70">{time}</span>
+      <span
+        className="grid h-[20px] w-[20px] shrink-0 place-items-center rounded-full"
+        style={{
+          background: 'rgba(93,202,165,0.18)',
+          boxShadow: 'inset 0 0 0 1px rgba(93,202,165,0.42)',
+        }}
+      >
+        <Check size={11} weight="bold" style={{ color: '#5DCAA5' }} />
+      </span>
     </div>
   );
 }
 
-function UpcomingRow({ title, agent, dim }: AgentStageUpcoming) {
+function ElapsedSparkline() {
+  // Stylised audio-waveform glyph, ~74×22. Static — feels alive at-rest.
   return (
-    <div className={`flex items-center gap-4 ${dim ? 'opacity-55' : ''}`}>
-      <span className="inline-block h-[22px] w-[22px] shrink-0 rounded-full border-[1.5px] border-white/15" />
-      <div className="leading-tight">
-        <div className="mb-0.5 text-[15px] font-medium text-white">{title}</div>
-        <div className="text-[13px] text-white/70">{agent}</div>
+    <svg width="74" height="22" viewBox="0 0 74 22" aria-hidden fill="none">
+      <g stroke="#B08EF4" strokeWidth="1.5" strokeLinecap="round">
+        <line x1="3"  y1="11" x2="3"  y2="11" />
+        <line x1="7"  y1="9"  x2="7"  y2="13" />
+        <line x1="11" y1="7"  x2="11" y2="15" />
+        <line x1="15" y1="4"  x2="15" y2="18" />
+        <line x1="19" y1="9"  x2="19" y2="13" />
+        <line x1="23" y1="6"  x2="23" y2="16" />
+        <line x1="27" y1="2"  x2="27" y2="20" />
+        <line x1="31" y1="7"  x2="31" y2="15" />
+        <line x1="35" y1="10" x2="35" y2="12" />
+        <line x1="39" y1="6"  x2="39" y2="16" />
+        <line x1="43" y1="3"  x2="43" y2="19" />
+        <line x1="47" y1="8"  x2="47" y2="14" />
+        <line x1="51" y1="10" x2="51" y2="12" />
+        <line x1="55" y1="7"  x2="55" y2="15" />
+        <line x1="59" y1="9"  x2="59" y2="13" />
+        <line x1="63" y1="10" x2="63" y2="12" />
+        <line x1="67" y1="11" x2="67" y2="11" />
+        <line x1="71" y1="11" x2="71" y2="11" />
+      </g>
+    </svg>
+  );
+}
+
+// ─── Stage-level Completed section ──────────────────────────────────────
+
+function CompletedStagesSection({ stages }: { stages: AgentStageCompleted[] }) {
+  return (
+    <div>
+      <p className="mb-5 text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">Completed</p>
+      <div className="relative pl-[14px]">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-[14px] top-[18px] w-[2px]"
+          style={{
+            background: 'linear-gradient(180deg, rgba(93,202,165,0.55) 0%, rgba(93,202,165,0.10) 100%)',
+            height: `calc(100% - 36px)`,
+          }}
+        />
+        <ul className="flex flex-col gap-[14px]">
+          {stages.map((s, i) => (
+            <li key={i} className="relative flex items-center gap-4">
+              <span
+                className="relative z-[1] grid h-[28px] w-[28px] shrink-0 place-items-center rounded-full text-white"
+                style={{
+                  background: 'linear-gradient(155deg, #6DD3AB 0%, #4FB390 100%)',
+                  boxShadow:
+                    '0 0 0 3px #F3F0FF, 0 4px 10px -3px rgba(79,179,144,0.45)',
+                }}
+              >
+                <Check size={13} weight="bold" />
+              </span>
+              <span className="w-[16px] shrink-0 text-[14px] font-semibold tabular-nums text-ppc-ink/55">
+                {i + 1}
+              </span>
+              <div className="min-w-0 flex-1 leading-tight">
+                <p className="text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">
+                  {s.title}
+                </p>
+                <p className="mt-[2px] text-[13px] text-ppc-purple-700/85">{s.agent}</p>
+              </div>
+              <span className="shrink-0 tabular-nums text-[13px] font-medium text-ppc-ink/55">
+                {s.time}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
+  );
+}
+
+// ─── Stage-level Up next section ────────────────────────────────────────
+
+function UpcomingStagesSection({
+  stages, startNumber, moreCount,
+}: {
+  stages: AgentStageUpcoming[];
+  startNumber: number;
+  moreCount?: number;
+}) {
+  return (
+    <div>
+      <p className="mb-5 text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">Up next</p>
+      <div className="pl-[14px]">
+        <ul className="flex flex-col gap-[14px]">
+          {stages.map((s, i) => (
+            <li key={i} className="flex items-center gap-4">
+              <span
+                className="grid h-[28px] w-[28px] shrink-0 place-items-center rounded-full text-[12px] font-semibold tabular-nums text-ppc-ink/65"
+                style={{
+                  background: '#F2EFFB',
+                  boxShadow: 'inset 0 0 0 1px rgba(15,10,30,0.08)',
+                }}
+              >
+                {startNumber + i}
+              </span>
+              <span aria-hidden className="text-[13px] text-ppc-ink/30">·</span>
+              <div className="min-w-0 flex-1 leading-tight">
+                <p className="text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">
+                  {s.title}
+                </p>
+                <p className="mt-[2px] text-[13px] text-ppc-purple-700/85">{s.agent}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        {moreCount ? (
+          <p className="mt-3 pl-[44px] text-[13px] font-medium text-ppc-ink/45">
+            + {moreCount} more stages
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+// ─── Lavender bottom callout ────────────────────────────────────────────
+
+function LiveSignalsCallout({ label }: { label: string }) {
+  return (
+    <div
+      className="relative flex items-center gap-5 overflow-hidden rounded-[16px] px-6 py-5"
+      style={{ background: '#ECE7FB' }}
+    >
+      <span
+        className="grid h-[52px] w-[52px] shrink-0 place-items-center rounded-full"
+        style={{
+          background: '#FFFFFF',
+          boxShadow: '0 0 0 1px rgba(127,90,240,0.18), 0 6px 16px -6px rgba(127,90,240,0.30)',
+        }}
+      >
+        <Waveform size={22} weight="bold" style={{ color: '#7F5AF0' }} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">{label}</p>
+        <p className="mt-[3px] text-[13.5px] text-ppc-ink/55">
+          New insights will appear in your report as they're ready.
+        </p>
+      </div>
+      <CalloutSparkline />
+    </div>
+  );
+}
+
+function CalloutSparkline() {
+  return (
+    <svg
+      width="220"
+      height="60"
+      viewBox="0 0 220 60"
+      aria-hidden
+      fill="none"
+      className="pointer-events-none shrink-0"
+    >
+      <defs>
+        <linearGradient id="cs-stroke" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%" stopColor="#7F5AF0" stopOpacity="0.25" />
+          <stop offset="60%" stopColor="#7F5AF0" stopOpacity="0.85" />
+          <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0.55" />
+        </linearGradient>
+        <linearGradient id="cs-fill" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#7F5AF0" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M2 46 Q 24 32, 38 36 T 72 22 T 108 32 T 142 14 T 176 28 T 218 18"
+        stroke="url(#cs-stroke)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <path
+        d="M2 46 Q 24 32, 38 36 T 72 22 T 108 32 T 142 14 T 176 28 T 218 18 L 218 58 L 2 58 Z"
+        fill="url(#cs-fill)"
+      />
+      <circle cx="72"  cy="22" r="2.5" fill="#7F5AF0" />
+      <circle cx="142" cy="14" r="2.5" fill="#7F5AF0" />
+      <circle cx="218" cy="18" r="2.5" fill="#7F5AF0" />
+    </svg>
   );
 }
