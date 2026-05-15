@@ -5,7 +5,7 @@ import {
   GridFour, ListBullets, MagnifyingGlass, Robot,
   Sparkle, PaperPlaneTilt,
 } from '@phosphor-icons/react';
-import { AGENTS, CATEGORIES } from '../mock/agents';
+import { AGENTS } from '../mock/agents';
 import type { AgentCategory, AgentDefinition } from '../types/agent';
 
 // Agent Catalog · /agents
@@ -25,9 +25,11 @@ import type { AgentCategory, AgentDefinition } from '../types/agent';
 //     wins. The card slot is replaced with a category-only chip.
 
 // ─── Filter row ─────────────────────────────────────────────────────────
-// Show 5 primary pills + "More" overflow (keeps 7-category data intact).
+// Underlying data has 7 categories; the surface shows 5 primary pills +
+// "More" overflow. `buyer` and `client` collapse into a single "Growth"
+// pill, matching how the mockup labels client/buyer agents.
 
-type FilterKey = 'all' | AgentCategory;
+type FilterKey = 'all' | AgentCategory | 'growth';
 
 const PRIMARY_FILTERS: Array<{ key: FilterKey; label: string }> = [
   { key: 'all',         label: 'All' },
@@ -35,13 +37,37 @@ const PRIMARY_FILTERS: Array<{ key: FilterKey; label: string }> = [
   { key: 'diagnostics', label: 'Diagnostics' },
   { key: 'strategic',   label: 'Strategy' },
   { key: 'creative',    label: 'Creative' },
+  { key: 'growth',      label: 'Growth' },
 ];
 
 const MORE_FILTERS: Array<{ key: AgentCategory; label: string }> = [
-  { key: 'buyer',   label: 'Buyer' },
-  { key: 'client',  label: 'Client' },
   { key: 'context', label: 'Context' },
 ];
+
+// Display labels surfaced on cards/rows. Map collapses buyer+client to
+// "Growth" so the bottom chip on each card matches the pill that opens it.
+const CATEGORY_LABEL: Record<AgentCategory, string> = {
+  operations:  'Operations',
+  diagnostics: 'Diagnostics',
+  strategic:   'Strategy',
+  creative:    'Creative',
+  buyer:       'Growth',
+  client:      'Growth',
+  context:     'Context',
+};
+
+// Italic-serif period — workspace signature mark. Keeps the brand's
+// editorial cadence across every section heading.
+function P({ char = '.' }: { char?: '.' | '?' }) {
+  return (
+    <span
+      className="font-serif italic text-ppc-purple-500"
+      style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
+    >
+      {char}
+    </span>
+  );
+}
 
 // ─── Tinted palette per category ────────────────────────────────────────
 // Drives icon-container fill, category chip, and "More" menu item dot.
@@ -97,13 +123,17 @@ export function AgentCatalog() {
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: AGENTS.length };
     AGENTS.forEach((a) => { c[a.category] = (c[a.category] || 0) + 1; });
+    c.growth = (c.buyer || 0) + (c.client || 0);
     return c;
   }, []);
 
-  const visibleAgents = useMemo(
-    () => (active === 'all' ? AGENTS : AGENTS.filter((a) => a.category === active)),
-    [active],
-  );
+  const visibleAgents = useMemo(() => {
+    if (active === 'all') return AGENTS;
+    if (active === 'growth') {
+      return AGENTS.filter((a) => a.category === 'buyer' || a.category === 'client');
+    }
+    return AGENTS.filter((a) => a.category === active);
+  }, [active]);
 
   const recommendedAgents = useMemo(
     () => RECOMMENDED
@@ -152,8 +182,14 @@ function HeroBlock() {
         <h1 className="mt-3 font-display text-[42px] font-black leading-[1.02] tracking-[-0.028em] text-ppc-ink sm:text-[48px]">
           What do you want
           <br />
-          to <span className="text-ppc-purple-500">accomplish</span>
-          <span className="text-ppc-purple-500">?</span>
+          to{' '}
+          <span
+            className="font-serif italic font-bold text-ppc-purple-500"
+            style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
+          >
+            accomplish
+          </span>
+          <P char="?" />
         </h1>
 
         <SearchBar />
@@ -289,7 +325,7 @@ function RecommendedSection({
       <div className="mb-4 flex items-baseline justify-between gap-3">
         <div>
           <h2 className="font-display text-[19px] font-bold tracking-[-0.012em] text-ppc-ink">
-            Recommended for you<span className="text-ppc-purple-500">.</span>
+            Recommended for you<P />
           </h2>
           <p className="mt-0.5 text-[12.5px] text-ppc-text-muted">
             Based on your accounts and recent activity.
@@ -333,7 +369,7 @@ function RecommendedCard({
       </div>
 
       <h3 className="mt-4 font-display text-[17px] font-bold leading-[1.2] tracking-[-0.012em] text-ppc-ink">
-        {a.name}<span className="text-ppc-purple-500">.</span>
+        {a.name}<P />
       </h3>
 
       <span
@@ -380,7 +416,7 @@ function BrowseSection({
   return (
     <section>
       <h2 className="font-display text-[19px] font-bold tracking-[-0.012em] text-ppc-ink">
-        Browse all specialists<span className="text-ppc-purple-500">.</span>
+        Browse all specialists<P />
       </h2>
 
       <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
@@ -547,7 +583,7 @@ function MoreFilter({
 
 function AgentCard({ agent: a }: { agent: AgentDefinition }) {
   const palette = CATEGORY_PALETTE[a.category];
-  const categoryLabel = CATEGORIES[a.category]?.label ?? a.category;
+  const categoryLabel = CATEGORY_LABEL[a.category];
   return (
     <Link
       to={`/agents/${a.slug}`}
@@ -569,7 +605,7 @@ function AgentCard({ agent: a }: { agent: AgentDefinition }) {
       </div>
 
       <h3 className="mt-4 font-display text-[16px] font-bold leading-[1.2] tracking-[-0.012em] text-ppc-ink">
-        {a.name}<span className="text-ppc-purple-500">.</span>
+        {a.name}<P />
       </h3>
 
       <p className="mt-1.5 text-[12.5px] leading-[1.55] tracking-tight text-ppc-text-muted">
@@ -592,7 +628,7 @@ function AgentCard({ agent: a }: { agent: AgentDefinition }) {
 
 function AgentRow({ agent: a }: { agent: AgentDefinition }) {
   const palette = CATEGORY_PALETTE[a.category];
-  const categoryLabel = CATEGORIES[a.category]?.label ?? a.category;
+  const categoryLabel = CATEGORY_LABEL[a.category];
   return (
     <Link
       to={`/agents/${a.slug}`}
