@@ -444,9 +444,14 @@ function RecommendedCard({
           : undefined
       }
     >
+      {/* Absolute-positioned badge that overlaps the top edge of the card.
+        * Critical: keeping it OUT of normal flow so the icon row below
+        * aligns with the icon row in every non-highlight card. Previous
+        * `mb-3` inline version pushed all content on this card down by
+        * ~28px, breaking row-level visual alignment across the carousel. */}
       {highlight && (
         <span
-          className="mb-3 inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-[4px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-white"
+          className="absolute -top-2 left-5 inline-flex items-center gap-1 rounded-full px-2.5 py-[4px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-white"
           style={{
             background: 'linear-gradient(95deg, #F25C9E 0%, #E0418A 100%)',
             boxShadow: '0 6px 16px -8px rgba(232,113,170,0.65)',
@@ -497,7 +502,10 @@ function RecommendedCard({
       <div className="mt-4">
         {highlight ? (
           <span
-            className="flex items-center justify-center gap-1.5 rounded-[12px] px-4 py-[10px] text-[13px] font-semibold tracking-tight text-white transition-all group-hover:-translate-y-[1px]"
+            /* Same border-box width as the non-highlight buttons via a
+             * transparent border, so the gradient pill sits at the exact
+             * same visual width as the white ones across the row. */
+            className="flex items-center justify-center gap-1.5 rounded-[12px] border-[0.5px] border-transparent px-4 py-[10px] text-[13px] font-semibold text-white transition-all group-hover:-translate-y-[1px]"
             style={{
               background:
                 'linear-gradient(95deg, #F25C9E 0%, #E0418A 60%, #C9337A 100%)',
