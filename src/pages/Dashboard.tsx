@@ -655,23 +655,27 @@ function FilterButton() {
 function BottomDuo() {
   return (
     <section className="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
-      <ChatPrompt />
+      <DiscoveriesCTA />
       <QuickActions />
     </section>
   );
 }
 
-function ChatPrompt() {
+/* DiscoveriesCTA — dark card pointing at the recommendations hub.
+ * Reference: portfolio dashboard "AI verdict" composition (mascot on
+ * the right, primary purple pill on the left). Intentionally
+ * stat-free — the discoveries page itself surfaces the numbers. */
+function DiscoveriesCTA() {
   return (
     <article
-      className="relative overflow-hidden rounded-[18px] px-7 py-7 text-white"
+      className="relative overflow-hidden rounded-[18px] px-7 py-8 text-white sm:px-9 sm:py-9"
       style={{
         background: '#08060F',
         boxShadow:
           '0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(15,10,30,0.55)',
       }}
     >
-      {/* Same perspective grid as the activity hero. */}
+      {/* Perspective grid */}
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -687,55 +691,52 @@ function ChatPrompt() {
             'radial-gradient(ellipse 90% 80% at 50% 0%, black 20%, transparent 80%)',
         }}
       />
+      {/* Top-right purple bloom */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-16 -top-16 h-[260px] w-[260px] rounded-full"
+        className="pointer-events-none absolute -right-16 -top-16 h-[280px] w-[280px] rounded-full"
         style={{
           background:
-            'radial-gradient(circle, rgba(127,90,240,0.22) 0%, transparent 65%)',
+            'radial-gradient(circle, rgba(127,90,240,0.26) 0%, transparent 65%)',
         }}
       />
 
-      <div className="relative">
-        <h3 className="font-display text-[32px] font-black leading-[1.04] tracking-[-0.022em] text-white sm:text-[36px]">
-          Ask anything about your accounts<span style={{ color: '#9F86FF' }}>.</span>
-        </h3>
-        <p className="mt-3 max-w-[440px] text-[13.5px] leading-[1.55] text-white/60">
-          Your AI strategist has read every report, every campaign, every conversion. Ask away.
-        </p>
-
-        <Link
-          to="/chat"
-          className="mt-6 flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3.5 transition-colors hover:border-white/[0.20] hover:bg-white/[0.10]"
-        >
-          <Sparkle size={17} weight="fill" className="text-[#9F86FF]" />
-          <span className="flex-1 text-[14px] text-white/55">What do you want to know?</span>
-          <kbd
-            className="rounded-[5px] border border-white/10 bg-white/[0.08] px-2 py-[3px] font-mono text-[11px] text-white/65"
-            style={{ fontFamily: '"Courier New", ui-monospace, Menlo, monospace' }}
+      <div className="relative grid items-center gap-6 sm:grid-cols-[1fr_minmax(140px,180px)] sm:gap-8">
+        {/* LEFT — copy + CTA */}
+        <div className="min-w-0">
+          <span
+            className="text-[10.5px] uppercase tracking-[0.16em] text-white/55"
+            style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
           >
-            ⌘K
-          </kbd>
-        </Link>
+            Discoveries
+          </span>
+          <h3 className="mt-3 font-display text-[28px] font-black leading-[1.04] tracking-[-0.022em] text-white sm:text-[34px]">
+            All discoveries, organized by project<span style={{ color: '#9F86FF' }}>.</span>
+          </h3>
+          <p className="mt-3 max-w-[420px] text-[13.5px] leading-[1.55] text-white/60">
+            Every finding from every agent, sorted and ready to act on.
+          </p>
+          <Link
+            to="/reports"
+            className="mt-6 inline-flex items-center gap-2 rounded-full px-[18px] py-[11px] text-[13.5px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
+            style={{
+              background:
+                'linear-gradient(135deg, #9F86FF 0%, #7F5AF0 50%, #6A45E2 100%)',
+              boxShadow:
+                '0 4px 18px rgba(70,49,134,0.55), 0 0 12px rgba(209,133,236,0.50) inset, 0 0 0 1px rgba(255,255,255,0.10)',
+            }}
+          >
+            See all recommendations
+            <ArrowRight size={13} weight="bold" />
+          </Link>
+        </div>
 
-        <div className="mt-4 flex flex-wrap gap-1.5">
-          <ChatChip>Why is The HOTH's CPA up?</ChatChip>
-          <ChatChip>What's working on Boulder Care?</ChatChip>
-          <ChatChip>Compare last week vs this week</ChatChip>
+        {/* RIGHT — mascot */}
+        <div className="relative flex items-center justify-center sm:justify-end">
+          <AgentMascot size={150} />
         </div>
       </div>
     </article>
-  );
-}
-
-function ChatChip({ children }: { children: React.ReactNode }) {
-  return (
-    <Link
-      to="/chat"
-      className="inline-flex items-center rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-[6px] text-[12px] text-white/75 transition-colors hover:border-white/[0.20] hover:bg-white/[0.07] hover:text-white"
-    >
-      {children}
-    </Link>
   );
 }
 
