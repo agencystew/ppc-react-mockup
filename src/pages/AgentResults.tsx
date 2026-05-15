@@ -265,26 +265,28 @@ function HeroCard({ run }: { run: AgentRun }) {
         }}
       />
 
-      <div className="relative grid gap-6 px-10 pb-7 pt-11 sm:grid-cols-[1fr_minmax(220px,300px)] sm:gap-10 sm:px-12 sm:pt-12">
+      <div className="relative grid gap-5 px-9 pb-4 pt-6 sm:grid-cols-[1fr_minmax(180px,220px)] sm:gap-8 sm:px-10 sm:pt-7">
         {/* Copy column */}
         <div className="min-w-0">
-          <h2 className="font-display text-[44px] font-extrabold leading-[1.04] tracking-[-0.025em] text-white sm:text-[52px]">
+          <h2 className="font-display text-[30px] font-extrabold leading-[1.05] tracking-[-0.025em] text-white sm:text-[34px]">
             {body}
             {hasPeriod && <span style={{ color: '#9F86FF' }}>.</span>}
           </h2>
-          <p className="mt-5 max-w-[520px] text-[15px] leading-[1.6] text-white/65">
+          <p className="mt-3 max-w-[520px] text-[13.5px] leading-[1.55] text-white/65">
             {run.description}
           </p>
         </div>
 
         {/* Mascot column */}
         <div className="relative flex items-end justify-end sm:items-center">
-          <SpyMascot />
+          <div className="scale-[0.78] origin-bottom-right sm:origin-center">
+            <SpyMascot />
+          </div>
         </div>
       </div>
 
       {/* Stat tiles inside the dark card */}
-      <div className="relative grid gap-3 px-10 pb-10 sm:grid-cols-3 sm:gap-4 sm:px-12">
+      <div className="relative grid gap-3 px-9 pb-6 sm:grid-cols-3 sm:gap-3 sm:px-10">
         {run.stats?.map((s, i) => (
           <DarkStatTile key={i} value={s.value} label={s.label} />
         ))}
@@ -299,22 +301,22 @@ function DarkStatTile({ value, label }: { value: string; label: string }) {
   const suffix = m ? m[2] : null;
   return (
     <div
-      className="rounded-[14px] px-6 py-[22px]"
+      className="rounded-[12px] px-5 py-[14px]"
       style={{
         background: 'rgba(255,255,255,0.025)',
         boxShadow:
           'inset 0 0 0 1px rgba(255,255,255,0.06), 0 1px 0 rgba(255,255,255,0.02) inset',
       }}
     >
-      <div className="font-display text-[44px] font-extrabold leading-none tracking-[-0.025em] text-white">
+      <div className="font-display text-[28px] font-extrabold leading-none tracking-[-0.025em] text-white">
         {main}
         {suffix && (
-          <span className="ml-[1px] text-[18px] font-medium text-white/55">
+          <span className="ml-[1px] text-[14px] font-medium text-white/55">
             {suffix}
           </span>
         )}
       </div>
-      <p className="mt-3 text-[12.5px] leading-[1.45] text-white/55">{label}</p>
+      <p className="mt-2 text-[11.5px] leading-[1.4] text-white/55">{label}</p>
     </div>
   );
 }
@@ -336,7 +338,7 @@ function Tabs({
 }) {
   return (
     <div
-      className="mb-6 flex flex-wrap items-center gap-1"
+      className="mb-7 flex flex-wrap items-center gap-2"
       style={{ borderBottom: '1px solid #e6e1ef' }}
     >
       {TABS.map(({ id, label }) => {
@@ -346,7 +348,7 @@ function Tabs({
             key={id}
             type="button"
             onClick={() => onChange(id)}
-            className={`relative px-3 py-3 text-[14px] font-medium tracking-[-0.005em] transition-colors ${
+            className={`relative px-5 py-[14px] text-[16px] font-semibold tracking-[-0.005em] transition-colors ${
               on ? 'text-ppc-ink' : 'text-ppc-text-muted hover:text-ppc-ink'
             }`}
           >
@@ -354,7 +356,7 @@ function Tabs({
             {on && (
               <span
                 aria-hidden
-                className="absolute -bottom-[1px] left-3 right-3 h-[2px] rounded-full"
+                className="absolute -bottom-[1px] left-5 right-5 h-[2.5px] rounded-full"
                 style={{ background: '#7F5AF0' }}
               />
             )}
@@ -1058,114 +1060,156 @@ function EvidenceExpand({ evidence }: { evidence: Evidence }) {
 
       {open && (
         <div
-          className="mt-4 rounded-[12px] px-6 py-6"
+          className="relative mt-4 overflow-hidden rounded-[14px] px-6 py-6 text-white"
           style={{
-            background: '#F7F4FD',
-            boxShadow: 'inset 0 0 0 1px #e6dff4',
+            background:
+              'radial-gradient(120% 90% at 88% -10%, #1B0F39 0%, #0A0814 55%, #050310 100%)',
+            boxShadow:
+              '0 1px 0 rgba(255,255,255,0.04) inset, 0 18px 36px -24px rgba(15,10,30,0.45)',
           }}
         >
-          {/* Specialist */}
-          <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-2">
-            <EvidenceMetaItem icon={<Cpu size={11} weight="bold" />} label="Specialist">
-              {evidence.specialist}
-            </EvidenceMetaItem>
-            <EvidenceMetaItem icon={<Database size={11} weight="bold" />} label="Sample">
-              {evidence.totalSamples}
-            </EvidenceMetaItem>
-          </div>
+          {/* Top-right purple bloom (mirrors hero) */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -right-24 -top-24 h-[280px] w-[280px] rounded-full"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(127,90,240,0.20) 0%, rgba(127,90,240,0.06) 40%, transparent 70%)',
+            }}
+          />
+          {/* Subtle grain */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-[0.05]"
+            style={{
+              backgroundImage:
+                'radial-gradient(rgba(255,255,255,0.55) 1px, transparent 1px)',
+              backgroundSize: '3px 3px',
+              mixBlendMode: 'screen',
+            }}
+          />
 
-          {/* Tools */}
-          <div className="mb-5 flex flex-wrap items-center gap-2">
-            <span className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-ppc-text-muted">
-              Tools used
-            </span>
-            {evidence.tools.map((t) => (
-              <code
-                key={t}
-                className="rounded-[6px] px-[8px] py-[3px] text-[11.5px] text-ppc-purple-600"
+          <div className="relative">
+            {/* Specialist + sample */}
+            <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+              <EvidenceMetaItem icon={<Cpu size={11} weight="bold" />} label="Specialist">
+                {evidence.specialist}
+              </EvidenceMetaItem>
+              <EvidenceMetaItem icon={<Database size={11} weight="bold" />} label="Sample">
+                {evidence.totalSamples}
+              </EvidenceMetaItem>
+            </div>
+
+            {/* Tools */}
+            <div className="mb-5 flex flex-wrap items-center gap-2">
+              <span className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-white/55">
+                Tools used
+              </span>
+              {evidence.tools.map((t) => (
+                <code
+                  key={t}
+                  className="rounded-[6px] px-[8px] py-[3px] text-[11.5px]"
+                  style={{
+                    background: 'rgba(127,90,240,0.18)',
+                    color: '#C9B5FF',
+                    fontFamily: 'Courier New, monospace',
+                    boxShadow: 'inset 0 0 0 1px rgba(159,134,255,0.30)',
+                  }}
+                >
+                  {t}
+                </code>
+              ))}
+            </div>
+
+            {/* Sample data table */}
+            <div className="mb-5">
+              <div className="mb-2 text-[10.5px] font-bold uppercase tracking-[0.08em] text-white/55">
+                Sample data
+              </div>
+              <div
+                className="overflow-hidden rounded-[10px]"
                 style={{
-                  background: '#EFE9FA',
-                  fontFamily: 'Courier New, monospace',
-                  boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.14)',
+                  background: 'rgba(255,255,255,0.03)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
                 }}
               >
-                {t}
-              </code>
-            ))}
-          </div>
-
-          {/* Sample data table */}
-          <div className="mb-5">
-            <div className="mb-2 text-[10.5px] font-bold uppercase tracking-[0.08em] text-ppc-text-muted">
-              Sample data
-            </div>
-            <div
-              className="overflow-hidden rounded-[10px] bg-white"
-              style={{ boxShadow: 'inset 0 0 0 1px #ece6f3' }}
-            >
-              <table className="w-full text-[12.5px]">
-                <thead>
-                  <tr>
-                    {evidence.table.columns.map((c) => (
-                      <th
-                        key={c}
-                        className="border-b border-[#efeaf4] bg-[#FBF9FD] px-4 py-[9px] text-left text-[10.5px] font-bold uppercase tracking-[0.06em] text-ppc-text-muted"
-                      >
-                        {c}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {evidence.table.rows.map((row, i) => (
-                    <tr
-                      key={i}
-                      className={
-                        i < evidence.table.rows.length - 1
-                          ? 'border-b border-[#efeaf4]'
-                          : ''
-                      }
-                    >
-                      {row.map((cell, j) => (
-                        <td
-                          key={j}
-                          className="px-4 py-[9px] text-ppc-ink"
-                          style={{ fontFamily: j === 0 ? undefined : 'Courier New, monospace' }}
+                <table className="w-full text-[12.5px]">
+                  <thead>
+                    <tr>
+                      {evidence.table.columns.map((c) => (
+                        <th
+                          key={c}
+                          className="px-4 py-[10px] text-left text-[10.5px] font-bold uppercase tracking-[0.06em] text-white/55"
+                          style={{
+                            background: 'rgba(255,255,255,0.04)',
+                            borderBottom: '1px solid rgba(255,255,255,0.08)',
+                          }}
                         >
-                          {cell}
-                        </td>
+                          {c}
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              {evidence.table.moreCount && (
-                <div className="border-t border-[#efeaf4] bg-[#FBF9FD] px-4 py-[9px] text-[12px] text-ppc-text-muted">
-                  + {evidence.table.moreCount} more rows
-                </div>
-              )}
+                  </thead>
+                  <tbody>
+                    {evidence.table.rows.map((row, i) => (
+                      <tr
+                        key={i}
+                        style={
+                          i < evidence.table.rows.length - 1
+                            ? { borderBottom: '1px solid rgba(255,255,255,0.05)' }
+                            : undefined
+                        }
+                      >
+                        {row.map((cell, j) => (
+                          <td
+                            key={j}
+                            className="px-4 py-[10px] text-white/85"
+                            style={{ fontFamily: j === 0 ? undefined : 'Courier New, monospace' }}
+                          >
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {evidence.table.moreCount && (
+                  <div
+                    className="px-4 py-[9px] text-[12px] text-white/50"
+                    style={{
+                      background: 'rgba(255,255,255,0.025)',
+                      borderTop: '1px solid rgba(255,255,255,0.08)',
+                    }}
+                  >
+                    + {evidence.table.moreCount} more rows
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* AI judgment */}
-          <div
-            className="rounded-[10px] bg-white px-5 py-4"
-            style={{ boxShadow: 'inset 0 0 0 1px #ece6f3' }}
-          >
-            <div className="flex items-start gap-3">
-              <Quotes
-                size={16}
-                weight="fill"
-                className="mt-[2px] shrink-0"
-                style={{ color: '#7F5AF0' }}
-              />
-              <div className="min-w-0">
-                <div className="mb-1 text-[10.5px] font-bold uppercase tracking-[0.08em] text-ppc-text-muted">
-                  AI judgment
+            {/* AI judgment */}
+            <div
+              className="rounded-[10px] px-5 py-4"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <Quotes
+                  size={16}
+                  weight="fill"
+                  className="mt-[2px] shrink-0"
+                  style={{ color: '#9F86FF' }}
+                />
+                <div className="min-w-0">
+                  <div className="mb-1 text-[10.5px] font-bold uppercase tracking-[0.08em] text-white/55">
+                    AI judgment
+                  </div>
+                  <p className="text-[13px] leading-[1.55] text-white/90">
+                    {evidence.judgment}
+                  </p>
                 </div>
-                <p className="text-[13px] leading-[1.55] text-ppc-ink">
-                  {evidence.judgment}
-                </p>
               </div>
             </div>
           </div>
@@ -1188,14 +1232,18 @@ function EvidenceMetaItem({
     <div className="flex items-center gap-2">
       <span
         className="grid h-[20px] w-[20px] place-items-center rounded-[5px]"
-        style={{ background: '#EFE9FA', color: '#7F5AF0' }}
+        style={{
+          background: 'rgba(127,90,240,0.20)',
+          color: '#C9B5FF',
+          boxShadow: 'inset 0 0 0 1px rgba(159,134,255,0.25)',
+        }}
       >
         {icon}
       </span>
-      <span className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-ppc-text-muted">
+      <span className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-white/55">
         {label}
       </span>
-      <span className="text-[13px] font-semibold text-ppc-ink">{children}</span>
+      <span className="text-[13px] font-semibold text-white">{children}</span>
     </div>
   );
 }

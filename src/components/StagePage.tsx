@@ -538,10 +538,9 @@ function MissionFeedCard({
     <section
       className="relative overflow-hidden rounded-[16px]"
       style={{
-        background:
-          'radial-gradient(140% 100% at 0% 0%, #1A1230 0%, #0F0A1E 45%, #07050D 100%)',
+        background: '#0A0612',
         boxShadow:
-          '0 0 0 1px rgba(255,255,255,0.05), 0 30px 60px -30px rgba(15,10,30,0.55)',
+          '0 0 0 1px rgba(255,255,255,0.04), 0 30px 60px -30px rgba(15,10,30,0.55)',
       }}
     >
       <ActivePanel active={active} />
@@ -553,33 +552,7 @@ function MissionFeedCard({
 function ActivePanel({ active }: { active: AgentStageRunning }) {
   const progress = Math.max(0, Math.min(100, active.progressPct ?? 0));
   return (
-    <div
-      className="relative overflow-hidden px-7 pb-7 pt-6 sm:px-8 sm:pb-8 sm:pt-7"
-      style={{
-        // Subtle purple wash on top of the radial base — keeps the
-        // "active zone" feeling alive without breaking the dark canvas.
-        borderBottom: '0.5px solid rgba(255,255,255,0.06)',
-      }}
-    >
-      {/* Top-right purple bloom — atmosphere, not a ring */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -right-24 -top-24 h-[360px] w-[360px] rounded-full"
-        style={{
-          background:
-            'radial-gradient(circle, rgba(127,90,240,0.22) 0%, rgba(127,90,240,0.06) 45%, transparent 70%)',
-        }}
-      />
-      {/* Bottom-left soft glow for depth */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -left-20 bottom-[-100px] h-[260px] w-[260px] rounded-full"
-        style={{
-          background:
-            'radial-gradient(circle, rgba(127,90,240,0.10) 0%, transparent 65%)',
-        }}
-      />
-
+    <div className="relative overflow-hidden px-8 pb-7 pt-7 sm:px-10 sm:pb-8 sm:pt-8">
       <div className="relative flex flex-wrap items-center justify-between gap-3">
         <RunningPulse />
         <span className="tabular-nums font-display text-[15px] font-semibold tracking-[-0.005em] text-white">
@@ -587,12 +560,12 @@ function ActivePanel({ active }: { active: AgentStageRunning }) {
         </span>
       </div>
 
-      <p className="relative mt-4 max-w-[640px] font-display text-[20px] font-semibold leading-[1.32] tracking-[-0.012em] text-white sm:text-[22px]">
+      <p className="relative mt-6 max-w-[720px] font-display text-[26px] font-bold leading-[1.25] tracking-[-0.018em] text-white sm:text-[30px]">
         {active.task}
       </p>
 
       <div
-        className="relative mt-6 h-[5px] overflow-hidden rounded-full"
+        className="relative mt-7 h-[6px] overflow-hidden rounded-full"
         style={{ background: 'rgba(255,255,255,0.07)' }}
       >
         <div
@@ -613,20 +586,20 @@ function ActivePanel({ active }: { active: AgentStageRunning }) {
 function RunningPulse() {
   return (
     <span
-      className="inline-flex items-center gap-[10px] text-[13px] font-bold uppercase leading-none tracking-[0.14em]"
+      className="inline-flex items-center gap-[8px] rounded-full px-3 py-[6px] text-[12.5px] font-semibold leading-none tracking-[-0.005em]"
       style={{
-        color: '#FF6F5C',
-        fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
+        background: 'rgba(127,90,240,0.22)',
+        color: '#C9B5FF',
       }}
     >
       <span
-        className="ppcio-live-dot relative inline-block h-[8px] w-[8px] rounded-full"
+        className="ppcio-live-dot relative inline-block h-[6px] w-[6px] rounded-full"
         style={{
-          background: '#FF5A4A',
-          boxShadow: '0 0 0 4px rgba(255,90,74,0.22), 0 0 14px rgba(255,107,90,0.65)',
+          background: '#C9B5FF',
+          boxShadow: '0 0 0 3px rgba(127,90,240,0.30)',
         }}
       />
-      Agent Running
+      Running
     </span>
   );
 }
@@ -634,7 +607,10 @@ function RunningPulse() {
 function StepsTrail({ steps }: { steps: MissionFeedStep[] }) {
   if (steps.length === 0) return null;
   return (
-    <ul className="flex flex-col px-7 sm:px-8">
+    <ul
+      className="flex flex-col px-8 sm:px-10"
+      style={{ borderTop: '0.5px solid rgba(255,255,255,0.07)' }}
+    >
       {steps.map((s, i) => (
         <StepRow key={i} step={s} isLast={i === steps.length - 1} />
       ))}
@@ -645,42 +621,39 @@ function StepsTrail({ steps }: { steps: MissionFeedStep[] }) {
 function StepRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
   return (
     <li
-      className="flex items-start gap-5 py-[18px]"
+      className="flex items-center gap-5 py-[18px]"
       style={{ borderBottom: isLast ? 'none' : '0.5px solid rgba(255,255,255,0.05)' }}
     >
       <span
-        className="mt-[3px] grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full"
+        className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full"
         style={{
-          background: 'rgba(127,90,240,0.15)',
-          boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.45)',
+          background:
+            'linear-gradient(155deg, #8E6CF5 0%, #7F5AF0 55%, #5A3FE0 100%)',
+          boxShadow:
+            'inset 0 0 0 1px rgba(255,255,255,0.18), 0 4px 12px -4px rgba(127,90,240,0.55)',
         }}
       >
-        <Check size={12} weight="bold" style={{ color: '#C9B5FF' }} />
+        <Check size={15} weight="bold" className="text-white" />
       </span>
       <span
-        className="tabular-nums shrink-0 pt-[4px] text-[11.5px] font-semibold uppercase tracking-[0.08em]"
+        className="tabular-nums shrink-0 text-[12.5px] font-medium"
         style={{
-          color: 'rgba(255,255,255,0.42)',
+          color: 'rgba(255,255,255,0.58)',
           fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
-          width: 64,
+          width: 72,
         }}
       >
         {step.time}
       </span>
       <div className="min-w-0 flex-1 leading-snug">
-        <p className="text-[14.5px] font-semibold tracking-[-0.005em] text-white">
+        <p className="text-[15px] font-semibold tracking-[-0.005em] text-white">
           {step.title}
         </p>
         <p
-          className="mt-[4px] inline-flex items-center gap-[6px] text-[13px] leading-[1.5]"
+          className="mt-[3px] text-[13px] leading-[1.5]"
           style={{ color: 'rgba(255,255,255,0.55)' }}
         >
-          <ArrowUpRight
-            size={13}
-            weight="bold"
-            style={{ color: '#5DCAA5', flexShrink: 0 }}
-          />
-          <span>{step.description}</span>
+          {step.description}
         </p>
       </div>
     </li>
@@ -691,46 +664,42 @@ function StepRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
 
 function CompletedStagesSection({ stages }: { stages: AgentStageCompleted[] }) {
   return (
-    <div>
-      <p className="mb-5 text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">Completed Agents</p>
-      <div className="relative pl-[14px]">
-        <span
-          aria-hidden
-          className="pointer-events-none absolute left-[14px] top-[18px] w-[2px]"
-          style={{
-            background: 'linear-gradient(180deg, rgba(93,202,165,0.55) 0%, rgba(93,202,165,0.10) 100%)',
-            height: `calc(100% - 36px)`,
-          }}
-        />
-        <ul className="flex flex-col gap-[14px]">
-          {stages.map((s, i) => (
-            <li key={i} className="relative flex items-center gap-4">
-              <span
-                className="relative z-[1] grid h-[28px] w-[28px] shrink-0 place-items-center rounded-full text-white"
-                style={{
-                  background: 'linear-gradient(155deg, #6DD3AB 0%, #4FB390 100%)',
-                  boxShadow:
-                    '0 0 0 3px #F3F0FF, 0 4px 10px -3px rgba(79,179,144,0.45)',
-                }}
-              >
-                <Check size={13} weight="bold" />
-              </span>
-              <span className="w-[16px] shrink-0 text-[14px] font-semibold tabular-nums text-ppc-ink/55">
-                {i + 1}
-              </span>
-              <div className="min-w-0 flex-1 leading-tight">
-                <p className="text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">
-                  {s.title}
-                </p>
-                <p className="mt-[2px] text-[13px] text-ppc-purple-700/85">{s.agent}</p>
-              </div>
-              <span className="shrink-0 tabular-nums text-[13px] font-medium text-ppc-ink/55">
-                {s.time}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <div
+      className="rounded-[16px] bg-white px-8 py-7 sm:px-10 sm:py-8"
+      style={{
+        boxShadow:
+          '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.10)',
+      }}
+    >
+      <p className="mb-6 text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">Completed Agents</p>
+      <ul className="flex flex-col gap-[18px]">
+        {stages.map((s, i) => (
+          <li key={i} className="flex items-center gap-4">
+            <span
+              className="grid h-[28px] w-[28px] shrink-0 place-items-center rounded-full text-white"
+              style={{
+                background: 'linear-gradient(155deg, #6DD3AB 0%, #4FB390 100%)',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(255,255,255,0.25), 0 3px 8px -2px rgba(79,179,144,0.35)',
+              }}
+            >
+              <Check size={13} weight="bold" />
+            </span>
+            <span className="w-[16px] shrink-0 text-[14px] font-semibold tabular-nums text-ppc-ink/55">
+              {i + 1}
+            </span>
+            <div className="min-w-0 flex-1 leading-tight">
+              <p className="text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">
+                {s.title}
+              </p>
+              <p className="mt-[2px] text-[13px] text-ppc-purple-700/85">{s.agent}</p>
+            </div>
+            <span className="shrink-0 tabular-nums text-[13px] font-medium text-ppc-ink/55">
+              {s.time}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -745,37 +714,41 @@ function UpcomingStagesSection({
   moreCount?: number;
 }) {
   return (
-    <div>
-      <p className="mb-5 text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">Up next</p>
-      <div className="pl-[14px]">
-        <ul className="flex flex-col gap-[14px]">
-          {stages.map((s, i) => (
-            <li key={i} className="flex items-center gap-4">
-              <span
-                className="grid h-[28px] w-[28px] shrink-0 place-items-center rounded-full text-[12px] font-semibold tabular-nums text-ppc-ink/65"
-                style={{
-                  background: '#F2EFFB',
-                  boxShadow: 'inset 0 0 0 1px rgba(15,10,30,0.08)',
-                }}
-              >
-                {startNumber + i}
-              </span>
-              <span aria-hidden className="text-[13px] text-ppc-ink/30">·</span>
-              <div className="min-w-0 flex-1 leading-tight">
-                <p className="text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">
-                  {s.title}
-                </p>
-                <p className="mt-[2px] text-[13px] text-ppc-purple-700/85">{s.agent}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-        {moreCount ? (
-          <p className="mt-3 pl-[44px] text-[13px] font-medium text-ppc-ink/45">
-            + {moreCount} more stages
-          </p>
-        ) : null}
-      </div>
+    <div
+      className="rounded-[16px] bg-white px-8 py-7 sm:px-10 sm:py-8"
+      style={{
+        boxShadow:
+          '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.10)',
+      }}
+    >
+      <p className="mb-6 text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">Up next</p>
+      <ul className="flex flex-col gap-[18px]">
+        {stages.map((s, i) => (
+          <li key={i} className="flex items-center gap-4">
+            <span
+              className="grid h-[28px] w-[28px] shrink-0 place-items-center rounded-full text-[12px] font-semibold tabular-nums text-ppc-ink/65"
+              style={{
+                background: '#F2EFFB',
+                boxShadow: 'inset 0 0 0 1px rgba(15,10,30,0.08)',
+              }}
+            >
+              {startNumber + i}
+            </span>
+            <span aria-hidden className="text-[13px] text-ppc-ink/30">·</span>
+            <div className="min-w-0 flex-1 leading-tight">
+              <p className="text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">
+                {s.title}
+              </p>
+              <p className="mt-[2px] text-[13px] text-ppc-purple-700/85">{s.agent}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+      {moreCount ? (
+        <p className="mt-5 pl-[44px] text-[13px] font-medium text-ppc-ink/45">
+          + {moreCount} more stages
+        </p>
+      ) : null}
     </div>
   );
 }
