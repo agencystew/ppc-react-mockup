@@ -456,198 +456,118 @@ function ActivePanel({ active }: { active: AgentStageRunning }) {
   const progress = Math.max(0, Math.min(100, active.progressPct ?? 0));
   return (
     <div
-      className="relative overflow-hidden rounded-[16px] px-6 py-6"
+      className="relative overflow-hidden px-7 pb-6 pt-[22px] sm:px-8"
       style={{
         background:
-          'radial-gradient(120% 90% at 0% 50%, rgba(127,90,240,0.16) 0%, rgba(127,90,240,0.05) 45%, rgba(127,90,240,0.02) 100%)',
-        boxShadow: [
-          'inset 0 0 0 1.5px rgba(127,90,240,0.55)',
-          'inset 0 1px 0 rgba(255,255,255,0.06)',
-          '0 0 0 1px rgba(127,90,240,0.18)',
-          '0 0 28px rgba(127,90,240,0.20)',
-          '0 0 60px rgba(127,90,240,0.10)',
-        ].join(', '),
+          'linear-gradient(160deg, #F2EEFB 0%, #ECE7FB 60%, #E6DEFB 100%)',
       }}
     >
-      <div className="relative flex items-center gap-6">
-        {/* Big glowing waveform circle (the signature element) */}
-        <span
-          className="relative grid h-[78px] w-[78px] shrink-0 place-items-center rounded-full"
-          style={{
-            background: 'radial-gradient(circle at 35% 30%, #B08EF4 0%, #7F5AF0 55%, #5A3FE0 100%)',
-            boxShadow: [
-              'inset 0 0 0 1.5px rgba(255,255,255,0.28)',
-              'inset 0 -12px 20px rgba(15,10,30,0.40)',
-              '0 0 0 4px rgba(127,90,240,0.16)',
-              '0 0 30px rgba(127,90,240,0.65)',
-              '0 0 60px rgba(127,90,240,0.40)',
-            ].join(', '),
-          }}
-        >
-          <Waveform size={34} weight="bold" className="text-white" />
+      {/* Soft purple bloom in the top-right — gives the live region depth
+          without dragging the surface into a dark hero. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-24 -top-24 h-[280px] w-[280px] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(127,90,240,0.18) 0%, transparent 60%)',
+        }}
+      />
+
+      <div className="relative flex flex-wrap items-baseline justify-between gap-3">
+        <RunningChip />
+        <span className="tabular-nums text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">
+          {active.elapsed}
         </span>
+      </div>
 
-        {/* Center column */}
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <FeedChip>Now</FeedChip>
-            <h3 className="font-display text-[24px] font-bold leading-[1.1] tracking-[-0.018em] text-white sm:text-[26px]">
-              {active.role}
-            </h3>
-            <FeedChip>Active</FeedChip>
-          </div>
-          <p className="mt-2 text-[14.5px] leading-[1.5] text-white/65">{active.task}</p>
-          <div
-            className="relative mt-4 h-[7px] overflow-hidden rounded-full"
-            style={{ background: 'rgba(255,255,255,0.08)' }}
-          >
-            <div
-              className="ppcio-live-bar h-full rounded-full"
-              style={{
-                width: `${progress}%`,
-                boxShadow: '0 0 14px rgba(127,90,240,0.65)',
-              }}
-            />
-          </div>
-        </div>
+      <p className="relative mt-[14px] max-w-[640px] text-[16px] leading-[1.55] text-ppc-ink">
+        {active.task}
+      </p>
 
-        {/* Right column: large elapsed + "in progress" + sparkline */}
-        <div className="flex shrink-0 items-center gap-4 self-stretch pl-3">
-          <div className="flex flex-col items-end leading-none">
-            <div
-              className="tabular-nums font-display text-[34px] font-bold leading-none tracking-[-0.020em] text-white"
-            >
-              {active.elapsed}
-            </div>
-            <span
-              aria-hidden
-              className="my-[10px] block h-px w-[44px]"
-              style={{ background: 'rgba(127,90,240,0.40)' }}
-            />
-            <div
-              className="text-[11px] uppercase tracking-[0.18em] text-white/55"
-              style={{ fontFamily: '"Courier New", ui-monospace, Menlo, monospace' }}
-            >
-              in progress
-            </div>
-          </div>
-          <ElapsedSparkline />
-        </div>
+      <div
+        className="relative mt-5 h-[5px] overflow-hidden rounded-full"
+        style={{ background: 'rgba(255,255,255,0.65)' }}
+      >
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${progress}%`,
+            background:
+              'linear-gradient(90deg, #A88CFF 0%, #7F5AF0 60%, #534AB7 100%)',
+            boxShadow: '0 0 10px rgba(127,90,240,0.40)',
+          }}
+        />
       </div>
     </div>
   );
 }
 
-function FeedChip({ children }: { children: React.ReactNode }) {
+function RunningChip() {
   return (
     <span
-      className="inline-flex items-center justify-center rounded-[6px] px-[9px] py-[5px] text-[10px] font-bold uppercase leading-none tracking-[0.18em]"
+      className="inline-flex items-center gap-[8px] text-[11px] font-semibold uppercase leading-none tracking-[0.18em]"
       style={{
-        background: 'rgba(127,90,240,0.20)',
-        color: '#D3C6FF',
-        boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.30)',
+        color: '#534AB7',
         fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
       }}
     >
-      {children}
+      <span
+        className="ppcio-live-dot inline-block h-[7px] w-[7px] rounded-full"
+        style={{
+          background: '#7F5AF0',
+          boxShadow: '0 0 0 3px rgba(127,90,240,0.18)',
+        }}
+      />
+      Running
     </span>
   );
 }
 
-function MissionCompletedRow({ step }: { step: MissionFeedStep }) {
+function StepsTrail({ steps }: { steps: MissionFeedStep[] }) {
+  if (steps.length === 0) return null;
   return (
-    <div className="relative flex items-stretch gap-4">
-      {/* Outside-the-card check circle, sits on the vertical connector */}
-      <span
-        className="relative z-[1] mt-[14px] grid h-[34px] w-[34px] shrink-0 place-items-center self-start rounded-full"
-        style={{
-          background: '#13101D',
-          boxShadow:
-            'inset 0 0 0 1px rgba(255,255,255,0.10), 0 0 0 4px #050308, 0 0 0 5px rgba(255,255,255,0.04)',
-        }}
-      >
-        <Check size={13} weight="bold" className="text-white/75" />
-      </span>
-
-      {/* The card */}
-      <div
-        className="flex min-w-0 flex-1 items-center gap-5 rounded-[12px] px-5 py-[14px]"
-        style={{
-          background: 'rgba(255,255,255,0.025)',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
-        }}
-      >
-        <span
-          className="tabular-nums shrink-0 text-[13px] font-medium text-white/45"
-          style={{ width: 56 }}
-        >
-          {step.time}
-        </span>
-        <div className="min-w-0 flex-1 leading-tight">
-          <p className="text-[14.5px] font-medium tracking-[-0.005em] text-white">
-            {step.title}
-          </p>
-          <p className="mt-[3px] text-[12.5px] text-white/50">{step.description}</p>
-        </div>
-        <span
-          className="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full"
-          style={{
-            background: 'transparent',
-            boxShadow: 'inset 0 0 0 1px rgba(93,202,165,0.45)',
-          }}
-        >
-          <Check size={12} weight="bold" style={{ color: '#5DCAA5' }} />
-        </span>
-      </div>
-    </div>
+    <ul className="px-7 py-2 sm:px-8">
+      {steps.map((s, i) => (
+        <StepRow key={i} step={s} isLast={i === steps.length - 1} />
+      ))}
+    </ul>
   );
 }
 
-function ElapsedSparkline() {
-  // Larger audio-waveform glyph (~112×42) with a soft purple glow so the
-  // pulse reads as a signature inside the dark card.
+function StepRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
   return (
-    <svg width="112" height="42" viewBox="0 0 112 42" aria-hidden fill="none">
-      <defs>
-        <filter id="spark-glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="1.4" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-        <linearGradient id="spark-grad" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0%"   stopColor="#7F5AF0" stopOpacity="0.40" />
-          <stop offset="50%"  stopColor="#B08EF4" stopOpacity="1" />
-          <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0.55" />
-        </linearGradient>
-      </defs>
-      <g
-        stroke="url(#spark-grad)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        filter="url(#spark-glow)"
+    <li
+      className="flex items-start gap-4 py-[14px]"
+      style={{ borderBottom: isLast ? 'none' : '0.5px solid #eee9f5' }}
+    >
+      <span
+        className="mt-[3px] grid h-[20px] w-[20px] shrink-0 place-items-center rounded-full"
+        style={{
+          background: '#E6F7EE',
+          boxShadow: 'inset 0 0 0 1px rgba(63,170,120,0.25)',
+        }}
       >
-        <line x1="4"   y1="21" x2="4"   y2="21" />
-        <line x1="10"  y1="17" x2="10"  y2="25" />
-        <line x1="16"  y1="13" x2="16"  y2="29" />
-        <line x1="22"  y1="6"  x2="22"  y2="36" />
-        <line x1="28"  y1="15" x2="28"  y2="27" />
-        <line x1="34"  y1="9"  x2="34"  y2="33" />
-        <line x1="40"  y1="2"  x2="40"  y2="40" />
-        <line x1="46"  y1="10" x2="46"  y2="32" />
-        <line x1="52"  y1="18" x2="52"  y2="24" />
-        <line x1="58"  y1="11" x2="58"  y2="31" />
-        <line x1="64"  y1="5"  x2="64"  y2="37" />
-        <line x1="70"  y1="14" x2="70"  y2="28" />
-        <line x1="76"  y1="18" x2="76"  y2="24" />
-        <line x1="82"  y1="13" x2="82"  y2="29" />
-        <line x1="88"  y1="16" x2="88"  y2="26" />
-        <line x1="94"  y1="19" x2="94"  y2="23" />
-        <line x1="100" y1="20" x2="100" y2="22" />
-        <line x1="106" y1="21" x2="106" y2="21" />
-      </g>
-    </svg>
+        <Check size={11} weight="bold" style={{ color: '#1F8A5A' }} />
+      </span>
+      <span
+        className="tabular-nums shrink-0 pt-[3px] text-[12px] font-medium"
+        style={{
+          color: '#9890ad',
+          fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
+          width: 58,
+        }}
+      >
+        {step.time}
+      </span>
+      <div className="min-w-0 flex-1 leading-tight">
+        <p className="text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink">
+          {step.title}
+        </p>
+        <p className="mt-[3px] text-[13px] leading-[1.5] text-ppc-text-muted">
+          {step.description}
+        </p>
+      </div>
+    </li>
   );
 }
 
