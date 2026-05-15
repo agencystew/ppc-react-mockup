@@ -14,15 +14,15 @@ import type { AgentRun } from '../types/agent';
 
 // /reports/:runId — the agent results surface.
 //
-// For the canonical competitor-spy completed run we render the full
-// pixel-perfect "report" layout: breadcrumb + title + dark hero card with
-// the spy mascot + three tabs (Summary / Full Report / Methodology).
-// Evidence is inline — every finding in Full Report has a [Show evidence]
-// toggle that reveals the specialist, tools, raw data, and AI judgment
-// that produced the claim. Other completed runs fall back to the dark
-// StagePage canvas that ships with the rest of the app — this layout is
-// purpose-built for the competitor-spy story and isn't expected to be the
-// universal report shell yet.
+// Renders a pixel-perfect "report" layout: breadcrumb + title + dark hero
+// card with an agent-specific mascot + three tabs (Summary / Full Report /
+// Methodology). Evidence is inline — every finding in Full Report has a
+// [Show evidence] toggle that reveals the specialist, tools, raw data,
+// and AI judgment that produced the claim.
+//
+// Content per agent lives in a `ReportConfig` (see REPORT_CONFIGS at the
+// bottom of this file). Runs without a config fall back to the StagePage
+// canvas that ships with the rest of the app.
 
 export function AgentResults() {
   const { runId } = useParams();
@@ -30,9 +30,10 @@ export function AgentResults() {
   if (!run) return <Navigate to="/" replace />;
 
   const completedRun = { ...run, status: 'completed' as const };
+  const config = REPORT_CONFIGS[completedRun.runId];
 
-  if (completedRun.runId === 'run-competitor-spy-completed') {
-    return <CompetitorSpyReport run={completedRun} />;
+  if (config) {
+    return <AgentReportView run={completedRun} config={config} />;
   }
 
   return (
@@ -43,12 +44,29 @@ export function AgentResults() {
 }
 
 // ════════════════════════════════════════════════════════════════════════
-// Competitor Spy · pixel-perfect report
+// Agent report · shared shell
 // ════════════════════════════════════════════════════════════════════════
 
 type ReportTab = 'summary' | 'full' | 'methodology';
 
-function CompetitorSpyReport({ run }: { run: AgentRun }) {
+interface ReportConfig {
+  generated: { date: string; time: string };
+  mascot: () => React.ReactNode;
+  summary: {
+    findingTiles: FindingTile[];
+    recs: RecRow[];
+  };
+  fullReport: Section[];
+  methodology: {
+    intro: string;
+    runtime: { value: string; label: string }[];
+    specialistsIntro: string;
+    specialists: { icon: Section['icon']; name: string; role: string; tools: string[] }[];
+    freshness: string;
+  };
+}
+
+function AgentReportView({ run, config }: { run: AgentRun; config: ReportConfig }) {
   const project = PROJECTS.find((p) => p.id === run.projectId);
   const projectName = project?.name ?? '';
   const [tab, setTab] = useState<ReportTab>('summary');
@@ -57,12 +75,18 @@ function CompetitorSpyReport({ run }: { run: AgentRun }) {
     <div className="font-sans text-ppc-ink">
       <Breadcrumbs trail={['Reports', run.parentAgent.name, projectName]} />
       <TitleRow agentName={run.parentAgent.name} onJumpToAudit={() => setTab('full')} />
-      <MetaLine date="May 13, 2025" time="2:14 PM" />
-      <HeroCard run={run} />
+      <MetaLine date={config.generated.date} time={config.generated.time} />
+      <HeroCard run={run} mascot={config.mascot()} />
       <Tabs active={tab} onChange={setTab} />
-      {tab === 'summary' && <SummaryView run={run} onSeeFullReport={() => setTab('full')} />}
-      {tab === 'full' && <FullReportView />}
-      {tab === 'methodology' && <MethodologyView />}
+      {tab === 'summary' && (
+        <SummaryView
+          findingTiles={config.summary.findingTiles}
+          recs={config.summary.recs}
+          onSeeFullReport={() => setTab('full')}
+        />
+      )}
+      {tab === 'full' && <FullReportView sections={config.fullReport} />}
+      {tab === 'methodology' && <MethodologyView methodology={config.methodology} />}
     </div>
   );
 }
@@ -211,7 +235,7 @@ function MetaLine({ date, time }: { date: string; time: string }) {
 
 // ─── Dark hero card ──────────────────────────────────────────────────────
 
-function HeroCard({ run }: { run: AgentRun }) {
+function HeroCard({ run, mascot }: { run: AgentRun; mascot: React.ReactNode }) {
   const headline = run.headline;
   const hasPeriod = headline.endsWith('.');
   const body = hasPeriod ? headline.slice(0, -1) : headline;
@@ -307,11 +331,10 @@ function HeroCard({ run }: { run: AgentRun }) {
           </p>
         </div>
 
-        {/* Mascot column — vertically centered with copy, no empty stage */}
+        {/* Mascot column — vertically centered with copy, no empty stage.
+            Agent-specific render via the `mascot` prop on the config. */}
         <div className="relative flex items-center justify-end">
-          <div className="scale-[0.88] origin-right">
-            <SpyMascot />
-          </div>
+          {mascot}
         </div>
       </div>
 
@@ -435,10 +458,12 @@ function Tabs({
 // ─── Summary view ────────────────────────────────────────────────────────
 
 function SummaryView({
-  run,
+  findingTiles,
+  recs,
   onSeeFullReport,
 }: {
-  run: AgentRun;
+  findingTiles: FindingTile[];
+  recs: RecRow[];
   onSeeFullReport: () => void;
 }) {
   return (
@@ -450,11 +475,8 @@ function SummaryView({
       }}
     >
       <WhatWeFoundHeader onSeeFullReport={onSeeFullReport} />
-      <FindingTiles />
-      <RecommendationsSection
-        recs={run.findings?.slice(0, 3).map((f) => f.action ?? f.finding) ?? []}
-        onSeeFullReport={onSeeFullReport}
-      />
+      <FindingTiles tiles={findingTiles} />
+      <RecommendationsSection recs={recs} onSeeFullReport={onSeeFullReport} />
     </section>
   );
 }
@@ -477,42 +499,6 @@ function WhatWeFoundHeader({ onSeeFullReport }: { onSeeFullReport: () => void })
   );
 }
 
-// Static finding tiles — purpose-built for the competitor-spy overview.
-// (The longer `run.findings` content lives further down the report in the
-// full analysis view, which this tab summary points to.)
-const FINDING_TILES: FindingTile[] = [
-  {
-    title: 'Bidding gaps on core terms',
-    description:
-      'Rivals are consistently outranking you on high-intent terms with higher bids and better ad rank.',
-    impact: 'high',
-    metrics: [
-      { value: '$3.1K/mo', label: 'Potential upside' },
-      { value: '8',        label: 'Affected' },
-    ],
-  },
-  {
-    title: 'Winning copy patterns',
-    description:
-      'Top rivals convert 64% of impression share with outcome-driven headlines and strong CTAs.',
-    impact: 'high',
-    metrics: [
-      { value: '+64%', label: 'Impression share' },
-      { value: '12',   label: 'Examples identified' },
-    ],
-  },
-  {
-    title: 'Auction overlap risk',
-    description:
-      'Rivals overlap with you on 41% of spend, driving up CPCs on key terms.',
-    impact: 'medium',
-    metrics: [
-      { value: '41%', label: 'Overlap rate' },
-      { value: '5',   label: 'Rivals competing' },
-    ],
-  },
-];
-
 interface FindingTile {
   title: string;
   description: string;
@@ -520,10 +506,10 @@ interface FindingTile {
   metrics: { value: string; label: string }[];
 }
 
-function FindingTiles() {
+function FindingTiles({ tiles }: { tiles: FindingTile[] }) {
   return (
     <div className="mb-9 grid gap-4 sm:grid-cols-3">
-      {FINDING_TILES.map((t, i) => (
+      {tiles.map((t, i) => (
         <FindingTileCard key={i} {...t} />
       ))}
     </div>
@@ -608,37 +594,13 @@ interface RecRow {
   icon: 'rise' | 'refresh' | 'shield';
 }
 
-const RECS: RecRow[] = [
-  {
-    title: 'Raise bids on 8 high-intent keywords',
-    chips: [
-      { label: 'Quick win',   tone: 'win' },
-      { label: 'High impact', tone: 'impact' },
-    ],
-    icon: 'rise',
-  },
-  {
-    title: 'Refresh headlines to match winning patterns',
-    chips: [{ label: 'High impact', tone: 'impact' }],
-    icon: 'refresh',
-  },
-  {
-    title: 'Add negative keywords to stop wasted spend',
-    chips: [{ label: 'Quick win', tone: 'win' }],
-    icon: 'shield',
-  },
-];
-
 function RecommendationsSection({
   recs,
   onSeeFullReport,
 }: {
-  recs?: string[];
+  recs: RecRow[];
   onSeeFullReport: () => void;
 }) {
-  // recs param reserved for future per-run wiring; for now we render the
-  // canonical three rows that match the design.
-  void recs;
   return (
     <div>
       <div className="mb-1 flex items-baseline justify-between">
@@ -653,8 +615,8 @@ function RecommendationsSection({
         className="mb-4 overflow-hidden rounded-[12px]"
         style={{ boxShadow: 'inset 0 0 0 1px #ece6f3' }}
       >
-        {RECS.map((r, i) => (
-          <RecRowItem key={i} {...r} isLast={i === RECS.length - 1} />
+        {recs.map((r, i) => (
+          <RecRowItem key={i} {...r} isLast={i === recs.length - 1} />
         ))}
       </div>
       <button
@@ -796,7 +758,7 @@ interface Section {
   findings: SectionFinding[];
 }
 
-const FULL_REPORT: Section[] = [
+const COMPETITOR_SPY_FULL_REPORT: Section[] = [
   {
     icon: 'target',
     name: 'Competitor Discovery',
@@ -1015,10 +977,10 @@ const FULL_REPORT: Section[] = [
   },
 ];
 
-function FullReportView() {
+function FullReportView({ sections }: { sections: Section[] }) {
   return (
     <div className="mb-7 space-y-6">
-      {FULL_REPORT.map((section, i) => (
+      {sections.map((section, i) => (
         <FullReportSection key={i} section={section} />
       ))}
     </div>
@@ -1317,34 +1279,11 @@ function EvidenceMetaItem({
 // Methodology view
 // ════════════════════════════════════════════════════════════════════════
 
-const METHOD_SPECIALISTS = [
-  {
-    icon: 'target' as const,
-    name: 'Competitor Discovery',
-    role: 'Identifies who you\'re competing against and quantifies their scale.',
-    tools: ['serp_api.search', 'web.scrape', 'domain.lookup', 'google_ads.auction_insights'],
-  },
-  {
-    icon: 'binoculars' as const,
-    name: 'Auction Intelligence',
-    role: 'Measures head-to-head performance across every shared auction.',
-    tools: ['google_ads.auction_insights', 'google_ads.report', 'google_ads.bid_simulator'],
-  },
-  {
-    icon: 'chart' as const,
-    name: 'Copy Pattern Analysis',
-    role: 'Extracts winning patterns from rival ad copy and your own history.',
-    tools: ['web.scrape', 'content.classifier', 'content.template_extractor', 'google_ads.search_term_report'],
-  },
-  {
-    icon: 'flag' as const,
-    name: 'Strategy Synthesis',
-    role: 'Ranks recommendations by impact × confidence, validates with simulators.',
-    tools: ['google_ads.bid_simulator', 'google_ads.search_term_report'],
-  },
-];
-
-function MethodologyView() {
+function MethodologyView({
+  methodology,
+}: {
+  methodology: ReportConfig['methodology'];
+}) {
   return (
     <div className="mb-7 space-y-6">
       <section
@@ -1361,17 +1300,15 @@ function MethodologyView() {
               How this agent works
             </h3>
             <p className="mt-1 max-w-[640px] text-[14px] leading-[1.55] text-ppc-text-muted">
-              Competitor Spy is an orchestration of four specialists, each focused on a
-              distinct question. Their findings are cross-checked before being ranked
-              and presented in the Summary and Full Report.
+              {methodology.intro}
             </p>
           </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-3">
-          <RuntimeStat value="4" label="Specialists" />
-          <RuntimeStat value="161" label="Tool invocations" />
-          <RuntimeStat value="7-day" label="Lookback window" />
+          {methodology.runtime.map((r, i) => (
+            <RuntimeStat key={i} value={r.value} label={r.label} />
+          ))}
         </div>
       </section>
 
@@ -1386,10 +1323,10 @@ function MethodologyView() {
           Specialists
         </h3>
         <p className="mb-5 text-[13px] text-ppc-text-muted">
-          Each runs independently with its own tool set, then hands findings to Strategy Synthesis.
+          {methodology.specialistsIntro}
         </p>
         <div className="space-y-4">
-          {METHOD_SPECIALISTS.map((s, i) => (
+          {methodology.specialists.map((s, i) => (
             <SpecialistRow key={i} {...s} />
           ))}
         </div>
@@ -1409,9 +1346,7 @@ function MethodologyView() {
               Data freshness
             </h4>
             <p className="mt-1 text-[13px] leading-[1.55] text-ppc-text-muted">
-              Auction insights and search-term reports are pulled live from the Google Ads API.
-              Rival ad-copy samples are scraped within the run and cached for 24 hours.
-              Re-run the agent to refresh.
+              {methodology.freshness}
             </p>
           </div>
         </div>
@@ -1500,3 +1435,135 @@ function SpecialistRow({
     </div>
   );
 }
+
+// ════════════════════════════════════════════════════════════════════════
+// Mascots
+// ════════════════════════════════════════════════════════════════════════
+//
+// Each agent gets a hero illustration on the dark card. CompetitorSpy uses
+// the bespoke SpyMascot (fedora + binoculars). Add more here as new
+// agent-specific reports come online.
+
+function CompetitorSpyHero() {
+  return (
+    <div className="scale-[0.88] origin-right">
+      <SpyMascot />
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// Competitor Spy · report config
+// ════════════════════════════════════════════════════════════════════════
+
+const COMPETITOR_SPY_FINDING_TILES: FindingTile[] = [
+  {
+    title: 'Bidding gaps on core terms',
+    description:
+      'Rivals are consistently outranking you on high-intent terms with higher bids and better ad rank.',
+    impact: 'high',
+    metrics: [
+      { value: '$3.1K/mo', label: 'Potential upside' },
+      { value: '8',        label: 'Affected' },
+    ],
+  },
+  {
+    title: 'Winning copy patterns',
+    description:
+      'Top rivals convert 64% of impression share with outcome-driven headlines and strong CTAs.',
+    impact: 'high',
+    metrics: [
+      { value: '+64%', label: 'Impression share' },
+      { value: '12',   label: 'Examples identified' },
+    ],
+  },
+  {
+    title: 'Auction overlap risk',
+    description:
+      'Rivals overlap with you on 41% of spend, driving up CPCs on key terms.',
+    impact: 'medium',
+    metrics: [
+      { value: '41%', label: 'Overlap rate' },
+      { value: '5',   label: 'Rivals competing' },
+    ],
+  },
+];
+
+const COMPETITOR_SPY_RECS: RecRow[] = [
+  {
+    title: 'Raise bids on 8 high-intent keywords',
+    chips: [
+      { label: 'Quick win',   tone: 'win' },
+      { label: 'High impact', tone: 'impact' },
+    ],
+    icon: 'rise',
+  },
+  {
+    title: 'Refresh headlines to match winning patterns',
+    chips: [{ label: 'High impact', tone: 'impact' }],
+    icon: 'refresh',
+  },
+  {
+    title: 'Add negative keywords to stop wasted spend',
+    chips: [{ label: 'Quick win', tone: 'win' }],
+    icon: 'shield',
+  },
+];
+
+const COMPETITOR_SPY_METHODOLOGY: ReportConfig['methodology'] = {
+  intro:
+    'Competitor Spy is an orchestration of four specialists, each focused on a distinct question. Their findings are cross-checked before being ranked and presented in the Summary and Full Report.',
+  runtime: [
+    { value: '4',     label: 'Specialists'       },
+    { value: '161',   label: 'Tool invocations'  },
+    { value: '7-day', label: 'Lookback window'   },
+  ],
+  specialistsIntro:
+    'Each runs independently with its own tool set, then hands findings to Strategy Synthesis.',
+  specialists: [
+    {
+      icon: 'target',
+      name: 'Competitor Discovery',
+      role: 'Identifies who you\'re competing against and quantifies their scale.',
+      tools: ['serp_api.search', 'web.scrape', 'domain.lookup', 'google_ads.auction_insights'],
+    },
+    {
+      icon: 'binoculars',
+      name: 'Auction Intelligence',
+      role: 'Measures head-to-head performance across every shared auction.',
+      tools: ['google_ads.auction_insights', 'google_ads.report', 'google_ads.bid_simulator'],
+    },
+    {
+      icon: 'chart',
+      name: 'Copy Pattern Analysis',
+      role: 'Extracts winning patterns from rival ad copy and your own history.',
+      tools: ['web.scrape', 'content.classifier', 'content.template_extractor', 'google_ads.search_term_report'],
+    },
+    {
+      icon: 'flag',
+      name: 'Strategy Synthesis',
+      role: 'Ranks recommendations by impact × confidence, validates with simulators.',
+      tools: ['google_ads.bid_simulator', 'google_ads.search_term_report'],
+    },
+  ],
+  freshness:
+    'Auction insights and search-term reports are pulled live from the Google Ads API. Rival ad-copy samples are scraped within the run and cached for 24 hours. Re-run the agent to refresh.',
+};
+
+const COMPETITOR_SPY_REPORT: ReportConfig = {
+  generated: { date: 'May 13, 2025', time: '2:14 PM' },
+  mascot: () => <CompetitorSpyHero />,
+  summary: {
+    findingTiles: COMPETITOR_SPY_FINDING_TILES,
+    recs: COMPETITOR_SPY_RECS,
+  },
+  fullReport: COMPETITOR_SPY_FULL_REPORT,
+  methodology: COMPETITOR_SPY_METHODOLOGY,
+};
+
+// Map of run-id → report config. Runs without an entry fall back to the
+// generic StagePage canvas in AgentResults().
+const REPORT_CONFIGS: Record<string, ReportConfig> = {
+  'run-competitor-spy-completed': COMPETITOR_SPY_REPORT,
+};
+

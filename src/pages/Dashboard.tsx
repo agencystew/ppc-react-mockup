@@ -137,16 +137,6 @@ const ACTIVITY: ActivityRow[] = [
     finishedAt: '2h ago',
   },
   {
-    runId: 'run-negative-keyword-completed',
-    agentEmoji: '🛡️',
-    agentName: 'Negative Keyword',
-    projectName: 'Boulder Care',
-    projectAvatarBg: PROJECT_META['boulder-care'].avatarBg,
-    headline: 'Found $12K/month in waste',
-    upside: '+$12K/mo',
-    finishedAt: 'Yesterday',
-  },
-  {
     runId: 'run-spend-leak-rocket',
     agentEmoji: '🔍',
     agentName: 'Spend Leak Detector',

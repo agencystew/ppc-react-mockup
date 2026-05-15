@@ -9,9 +9,9 @@
 // All copy is post-run, so concrete $ figures are allowed here
 // (see feedback_no_pre_run_dollar_figures.md).
 //
-// Mock-data note: every row's runId points to one of the two fully-fleshed
-// fixtures in mock/runs.ts (competitor-spy / negative-keyword completed),
-// so a click from any row in the list lands on a real report screen.
+// Mock-data note: every row's runId currently routes into the one
+// canonical completed-run fixture in mock/runs.ts (competitor-spy), so a
+// click from any row in the list lands on a real report screen.
 
 export type ReportStatus =
   | 'draft-ready'
@@ -60,9 +60,10 @@ export interface FyiReport {
   finishedLabel: string;
 }
 
-// The two canonical run fixtures every list row currently routes into.
+// Every list row currently routes into the one canonical completed run.
+// (The negative-keyword fixture was retired 2026-05-15; rows that used to
+// point at it now land on the competitor-spy report.)
 const RUN_COMPETITOR = 'run-competitor-spy-completed';
-const RUN_NEGATIVES = 'run-negative-keyword-completed';
 
 export const NEEDS_TODAY: NeedsReport[] = [
   {
@@ -83,7 +84,7 @@ export const NEEDS_TODAY: NeedsReport[] = [
   },
   {
     id: 'r-needs-2',
-    runId: RUN_NEGATIVES,
+    runId: RUN_COMPETITOR,
     agentName: 'Negative Keyword',
     agentEmoji: '🧹',
     projectId: 'flock',
@@ -126,7 +127,7 @@ export const READY_FOR_CLIENT: ReadyReport[] = [
   },
   {
     id: 'r-ready-3',
-    runId: RUN_NEGATIVES,
+    runId: RUN_COMPETITOR,
     agentName: 'Change Impact',
     agentEmoji: '🚨',
     projectId: 'the-hoth',
@@ -153,7 +154,7 @@ export const READY_FOR_CLIENT: ReadyReport[] = [
 export const FYI_REPORTS: FyiReport[] = [
   {
     id: 'r-fyi-1',
-    runId: RUN_NEGATIVES,
+    runId: RUN_COMPETITOR,
     agentName: 'Google Ads Context',
     agentEmoji: '🩺',
     projectId: 'durable',
@@ -175,7 +176,7 @@ export const FYI_REPORTS: FyiReport[] = [
   },
   {
     id: 'r-fyi-3',
-    runId: RUN_NEGATIVES,
+    runId: RUN_COMPETITOR,
     agentName: 'Change Impact',
     agentEmoji: '🔬',
     projectId: 'flock',
@@ -206,7 +207,6 @@ export interface SidebarReportEntry {
 
 export const SIDEBAR_REPORT_PAGES: SidebarReportEntry[] = [
   { runId: RUN_COMPETITOR, label: 'Competitor Spy · Boulder Care' },
-  { runId: RUN_NEGATIVES,  label: 'Negative Keyword · Flock' },
 ];
 
 export const REPORT_TOTAL = 47;

@@ -222,8 +222,6 @@ export function AgentDetail() {
     const prefix = scopedProject ? `/projects/${scopedProject.id}` : '';
     if (agent.slug === 'competitor-spy') {
       navigate(`${prefix}/agents/competitor-spy/run/run-competitor-spy-running`);
-    } else if (agent.slug === 'negative-keyword') {
-      navigate('/reports/run-negative-keyword-completed');
     } else {
       navigate(`${prefix}/agents/${agent.slug}/run/run-${agent.slug}`);
     }

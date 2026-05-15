@@ -311,128 +311,9 @@ const COMPETITOR_SPY_COMPLETED: AgentRun = {
   ],
 };
 
-// ─── NEGATIVE KEYWORD · COMPLETED ─────────────────────────────────────────
-const NEGATIVE_KEYWORD_COMPLETED: AgentRun = {
-  runId: 'run-negative-keyword-completed',
-  agentSlug: 'negative-keyword',
-  projectId: 'boulder-care',
-  status: 'completed',
-  parentAgent: { icon: '🛡️', name: 'Negative Keyword' },
-  stage: { current: 8, total: 8 },
-  totalDuration: '18 min',
-  headline: 'Found $12K/month in waste.',
-  description:
-    'Across 14,233 search terms from the last 90 days. 187 negatives drafted, brand-safe, and ready to deploy.',
-  stats: [
-    { value: '$12K/mo', label: 'Wasted spend you can recover this week' },
-    { value: '187',     label: 'Brand-safe negatives ready to deploy' },
-    { value: '24%',     label: 'Of total ad spend was leaking' },
-  ],
-  findings: [
-    {
-      agent: 'Term Classifier',
-      priority: 'high',
-      finding:
-        "2,847 of your 14,233 search terms over the last 90 days spent money with zero conversions. That's 24% of your total spend with nothing to show for it.",
-      impact: '$12K/mo recoverable',
-      action: 'Deploy negatives',
-    },
-    {
-      agent: 'Theme Clustering',
-      priority: 'high',
-      finding:
-        'Three themes account for 67% of the waste: "free [service]", "DIY [topic]", and "[competitor] alternative". Each blockable with 3-5 broad-match negatives.',
-      impact: 'Cut 67% of waste with 11 negatives',
-      action: 'Deploy 11 negatives',
-    },
-    {
-      agent: 'Intent Classification',
-      priority: 'medium',
-      finding:
-        '31% of waste is informational intent ("how to", "what is"). 12% is job-seeker traffic ("law firm careers"). Both are bottomless wells until negated.',
-      impact: 'Stop $5.7K/mo bleed',
-      action: 'Add intent filters',
-    },
-    {
-      agent: 'Brand Safety Check',
-      priority: 'low',
-      finding:
-        '4 proposed negatives were flagged and removed because they would have killed converting traffic. "free consultation" alone would have blocked 12 conversions worth $4,200 in the last 90 days.',
-      impact: '$4,200 in conversions protected',
-      action: 'Review removed list',
-    },
-  ],
-  dataSources: [
-    {
-      agent: 'Term Classifier',
-      tools: ['google_ads.search_terms_report'],
-      toolCallCount: 6,
-      dataPointsLabel: '14,233 search terms · last 90 days · 8 campaigns',
-      summary:
-        'Pulled the search terms report from your Google Ads account covering the last 90 days across all active search campaigns. Filtered to terms with $5+ in spend and zero conversions, leaving 2,847 candidates for negation.',
-      dataPreview: {
-        headers: ['Search term', 'Spend', 'Clicks', 'Conv.'],
-        rows: [
-          ['how to file insurance claim','$342', '47', '0'],
-          ['diy will template free',    '$287', '38', '0'],
-          ['law school requirements',   '$231', '29', '0'],
-          ['free legal advice forum',   '$198', '24', '0'],
-        ],
-        moreCount: 2843,
-        moreLabel: 'zero-conversion terms',
-      },
-    },
-    {
-      agent: 'Theme Tagger',
-      tools: ['embeddings.create', 'cluster.hdbscan'],
-      toolCallCount: 4,
-      dataPointsLabel: '2,847 wasteful terms · 14 themes · semantic clustering',
-      summary:
-        'Generated embeddings for each zero-conversion term and clustered them by semantic similarity. Filtered out clusters below 12 terms (too sparse to negate confidently). Each cluster gets a theme label.',
-      dataPreview: {
-        headers: ['Theme', 'Example terms', '% of waste'],
-        rows: [
-          ['"free [service]"',          '187 terms', '32%'],
-          ['"DIY [topic]"',             '141 terms', '22%'],
-          ['"[competitor] alternative"','94 terms',  '13%'],
-          ['"[location] courthouse"',   '67 terms',  '8%'],
-        ],
-        moreCount: 10,
-        moreLabel: 'themes',
-      },
-    },
-    {
-      agent: 'Brand Protector',
-      tools: ['google_ads.search_terms_report (12mo)', 'negative.simulate'],
-      toolCallCount: 7,
-      dataPointsLabel: '187 negatives checked against 12 months of converting terms',
-      summary:
-        'For each proposed negative, simulated which converting search terms from the last 12 months would have been blocked. Flagged any negative that would have killed 2 or more converting queries and removed them from the deploy list.',
-      dataPreview: {
-        headers: ['Removed negative', 'Would have blocked', 'Conversions at risk'],
-        rows: [
-          ['free consultation', '4 converting queries',  '12 conv. ($4,200)'],
-          ['advice',            '6 converting queries',  '8 conv. ($2,900)'],
-          ['help',              '11 converting queries', '6 conv. ($2,100)'],
-          ['talk to lawyer',    '3 converting queries',  '4 conv. ($1,400)'],
-        ],
-        moreCount: 0,
-        moreLabel: 'rows',
-      },
-    },
-  ],
-  actions: [
-    { label: 'Apply 187 negatives', primary: true },
-    { label: 'Export as CSV' },
-    { label: 'Generate client report' },
-    { label: 'Schedule weekly run' },
-  ],
-};
-
 export const RUNS: Record<string, AgentRun> = {
   [COMPETITOR_SPY_RUNNING.runId]:   COMPETITOR_SPY_RUNNING,
   [COMPETITOR_SPY_COMPLETED.runId]: COMPETITOR_SPY_COMPLETED,
-  [NEGATIVE_KEYWORD_COMPLETED.runId]: NEGATIVE_KEYWORD_COMPLETED,
   [SPEND_LEAK_RUNNING.runId]:       SPEND_LEAK_RUNNING,
 };
 
@@ -446,15 +327,6 @@ export const RECENT_RUNS_SUMMARY = [
     finishedAt: '2 hours ago',
     duration: '47 min',
     upside: '$8.2K/mo',
-  },
-  {
-    runId: NEGATIVE_KEYWORD_COMPLETED.runId,
-    agentName: 'Negative Keyword',
-    projectName: 'Smith Law Group',
-    headline: 'Found $12K/month in waste',
-    finishedAt: 'Yesterday',
-    duration: '18 min',
-    upside: '$12K/mo',
   },
   {
     runId: 'run-spend-leak-rocket',
