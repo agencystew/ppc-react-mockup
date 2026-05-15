@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, ArrowUpRight, Sparkle, Stack, Star,
+  ArrowRight, ArrowUpRight, CaretDown, Funnel,
+  GridFour, ListBullets, MagnifyingGlass, Robot,
+  Sparkle, PaperPlaneTilt,
 } from '@phosphor-icons/react';
 import { AGENTS, CATEGORIES } from '../mock/agents';
 import type { AgentCategory, AgentDefinition } from '../types/agent';
@@ -9,62 +11,88 @@ import type { AgentCategory, AgentDefinition } from '../types/agent';
 // Agent Catalog · /agents
 //
 // Layout (top-to-bottom):
-//   1. Dark hero — "Agents that actually understand Google Ads."
-//      with describe-bar + Schedule a stack / How agents think.
-//   2. Colored filter pill row — category-tinted chips + count badges.
-//   3. Most-run-this-week — two premium featured cards (purple top accent).
-//   4. Category sections — mono-numbered headers + 3-col agent grids.
+//   1. Light hero — "What do you want to accomplish?" + describe-bar
+//      + chip suggestions, with AI Advisor dark card on the right.
+//   2. Recommended for you — 3 cards tuned to recent activity.
+//   3. Browse all specialists — 5 primary pills + More overflow,
+//      Filters + grid/list toggle, unified 3-col agent grid.
+//   4. "Not sure where to start?" — dark banner with sine-wave + CTA.
 //
-// Pre-run surface: no specific $ figures (feedback_no_pre_run_dollar_figures).
+// Pre-run rules honoured here:
+//   - No $ figures pre-run (feedback_no_pre_run_dollar_figures)
+//   - No duration chips pre-run (feedback_no_pre_run_duration_claims) —
+//     even though the source mockup showed them, Stewart's locked rule
+//     wins. The card slot is replaced with a category-only chip.
+
+// ─── Filter row ─────────────────────────────────────────────────────────
+// Show 5 primary pills + "More" overflow (keeps 7-category data intact).
 
 type FilterKey = 'all' | AgentCategory;
 
-const FILTERS: Array<{ key: FilterKey; label: string; emoji?: string }> = [
-  { key: 'all',         label: 'All agents' },
-  { key: 'operations',  label: 'Operations',  emoji: '🛠️' },
-  { key: 'creative',    label: 'Creative',    emoji: '✍️' },
-  { key: 'strategic',   label: 'Strategic',   emoji: '🎯' },
-  { key: 'buyer',       label: 'Buyer',       emoji: '💰' },
-  { key: 'diagnostics', label: 'Diagnostics', emoji: '🔍' },
-  { key: 'client',      label: 'Client',      emoji: '📝' },
-  { key: 'context',     label: 'Context',     emoji: '🧭' },
+const PRIMARY_FILTERS: Array<{ key: FilterKey; label: string }> = [
+  { key: 'all',         label: 'All' },
+  { key: 'operations',  label: 'Operations' },
+  { key: 'diagnostics', label: 'Diagnostics' },
+  { key: 'strategic',   label: 'Strategy' },
+  { key: 'creative',    label: 'Creative' },
 ];
 
-// Tinted palette per category — sampled from the reference design.
-// Used by both the filter pills and the section headers.
+const MORE_FILTERS: Array<{ key: AgentCategory; label: string }> = [
+  { key: 'buyer',   label: 'Buyer' },
+  { key: 'client',  label: 'Client' },
+  { key: 'context', label: 'Context' },
+];
+
+// ─── Tinted palette per category ────────────────────────────────────────
+// Drives icon-container fill, category chip, and "More" menu item dot.
+
 const CATEGORY_PALETTE: Record<AgentCategory, {
-  chipBg: string; chipFg: string; chipCountBg: string;
-  eyebrow: string; emoji: string; verb: string;
+  iconBg: string;     // soft tint behind emoji
+  chipBg: string;     // category chip background
+  chipFg: string;     // category chip text
+  dot:    string;     // solid accent (More menu, hover)
 }> = {
-  operations:  { chipBg: '#EEEDFE', chipFg: '#3C3489', chipCountBg: 'rgba(60, 52, 137, 0.15)',  eyebrow: '#534AB7', emoji: '🛠️', verb: 'Run the account' },
-  creative:    { chipBg: '#FBEAF0', chipFg: '#72243E', chipCountBg: 'rgba(114, 36, 62, 0.12)',  eyebrow: '#72243E', emoji: '✍️',  verb: 'Make it convert' },
-  strategic:   { chipBg: '#E6F1FB', chipFg: '#0C447C', chipCountBg: 'rgba(12, 68, 124, 0.12)',  eyebrow: '#0C447C', emoji: '🎯',  verb: 'See the bigger picture' },
-  buyer:       { chipBg: '#EAF3DE', chipFg: '#27500A', chipCountBg: 'rgba(39, 80, 10, 0.12)',   eyebrow: '#27500A', emoji: '💰',  verb: "Know who you're selling to" },
-  diagnostics: { chipBg: '#FAEEDA', chipFg: '#633806', chipCountBg: 'rgba(99, 56, 6, 0.12)',    eyebrow: '#633806', emoji: '🔍',  verb: 'Find the broken bits' },
-  client:      { chipBg: '#E1F5EE', chipFg: '#085041', chipCountBg: 'rgba(8, 80, 65, 0.12)',    eyebrow: '#085041', emoji: '📝',  verb: 'Win + keep clients' },
-  context:     { chipBg: '#F1EFE8', chipFg: '#2C2C2A', chipCountBg: 'rgba(44, 44, 42, 0.12)',   eyebrow: '#2C2C2A', emoji: '🧭',  verb: 'What the agents know about you' },
+  operations:  { iconBg: '#EEEDFE', chipBg: '#EEEDFE', chipFg: '#3C3489', dot: '#7F5AF0' },
+  diagnostics: { iconBg: '#FAEEDA', chipBg: '#FAEEDA', chipFg: '#633806', dot: '#C28A2C' },
+  strategic:   { iconBg: '#E6F1FB', chipBg: '#E6F1FB', chipFg: '#0C447C', dot: '#2671B8' },
+  creative:    { iconBg: '#FBEAF0', chipBg: '#FBEAF0', chipFg: '#72243E', dot: '#B83361' },
+  buyer:       { iconBg: '#EAF3DE', chipBg: '#EAF3DE', chipFg: '#27500A', dot: '#5C9B2E' },
+  client:      { iconBg: '#E1F5EE', chipBg: '#E1F5EE', chipFg: '#085041', dot: '#0F8C71' },
+  context:     { iconBg: '#F1EFE8', chipBg: '#F1EFE8', chipFg: '#2C2C2A', dot: '#6B6964' },
 };
 
-const CATEGORY_ORDER: AgentCategory[] = [
-  'operations', 'diagnostics', 'strategic', 'creative', 'buyer', 'client', 'context',
+// ─── Suggestion chips below the search bar ──────────────────────────────
+
+const SUGGESTIONS = [
+  'Find wasted spend',
+  'Audit my account',
+  'Analyze my competitors',
+  'Improve ROAS',
 ];
 
-// "Most run this week" — featured agents with their week-rank + stage counts.
-const FEATURED: Array<{ slug: string; rank: number; stages: number }> = [
-  { slug: 'competitor-spy', rank: 1, stages: 11 },
-  { slug: 'weekly-audit',   rank: 2, stages: 8  },
+// ─── Recommended for you ────────────────────────────────────────────────
+// Three hand-picked agents with priority tags. Order matters: the first
+// card is the strongest impact pick.
+
+const RECOMMENDED: Array<{ slug: string; tag: 'high' | 'routine' }> = [
+  { slug: 'spend-leak',       tag: 'high'    },
+  { slug: 'negative-keyword', tag: 'high'    },
+  { slug: 'weekly-audit',     tag: 'routine' },
 ];
 
-// Agents that get a NEW chip — the recently shipped / staged-rollout ones.
-const NEW_AGENTS = new Set<string>([
-  'budget-pacer',
-  'test-recommender',
-  'change-impact',
-  'context-enrichment',
-]);
+const TAG_LABEL: Record<'high' | 'routine', string> = {
+  high:    'High potential impact',
+  routine: 'Routine check',
+};
+
+// ════════════════════════════════════════════════════════════════════════
+// MAIN COMPONENT
+// ════════════════════════════════════════════════════════════════════════
 
 export function AgentCatalog() {
   const [active, setActive] = useState<FilterKey>('all');
+  const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: AGENTS.length };
@@ -72,337 +100,609 @@ export function AgentCatalog() {
     return c;
   }, []);
 
-  const featuredAgents = useMemo(
-    () => FEATURED
-      .map((f) => {
-        const agent = AGENTS.find((a) => a.slug === f.slug);
-        return agent ? { agent, rank: f.rank, stages: f.stages } : null;
+  const visibleAgents = useMemo(
+    () => (active === 'all' ? AGENTS : AGENTS.filter((a) => a.category === active)),
+    [active],
+  );
+
+  const recommendedAgents = useMemo(
+    () => RECOMMENDED
+      .map((r) => {
+        const a = AGENTS.find((x) => x.slug === r.slug);
+        return a ? { agent: a, tag: r.tag } : null;
       })
-      .filter((x): x is { agent: AgentDefinition; rank: number; stages: number } => x !== null),
+      .filter((x): x is { agent: AgentDefinition; tag: 'high' | 'routine' } => x !== null),
     [],
   );
 
-  const visibleCategories = active === 'all' ? CATEGORY_ORDER : [active];
-
   return (
-    <div className="space-y-8">
-      {/* ═══ 1 · DARK HERO ══════════════════════════════════════════════ */}
-      <Hero count={AGENTS.length} />
+    <div className="space-y-12">
+      <HeroBlock />
+      <RecommendedSection items={recommendedAgents} />
 
-      {/* ═══ 2 · FILTER PILLS ═══════════════════════════════════════════ */}
-      <div className="flex flex-wrap items-center gap-1.5">
-        {FILTERS.map((f) => (
-          <FilterPill
-            key={f.key}
-            filter={f}
-            active={active === f.key}
-            count={counts[f.key] ?? 0}
-            onSelect={() => setActive(f.key)}
-          />
-        ))}
+      <BrowseSection
+        active={active}
+        counts={counts}
+        view={view}
+        moreOpen={moreOpen}
+        onSelectFilter={(k) => { setActive(k); setMoreOpen(false); }}
+        onToggleView={() => setView(view === 'grid' ? 'list' : 'grid')}
+        onToggleMore={() => setMoreOpen((v) => !v)}
+        agents={visibleAgents}
+      />
+
+      <PlanCtaBanner />
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// 1 · HERO
+// ════════════════════════════════════════════════════════════════════════
+
+function HeroBlock() {
+  return (
+    <section className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="flex flex-col">
+        <span className="inline-flex items-center gap-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ppc-purple-700">
+          <Sparkle size={10} weight="fill" />
+          Agents
+        </span>
+
+        <h1 className="mt-3 font-display text-[42px] font-black leading-[1.02] tracking-[-0.028em] text-ppc-ink sm:text-[48px]">
+          What do you want
+          <br />
+          to <span className="text-ppc-purple-500">accomplish</span>
+          <span className="text-ppc-purple-500">?</span>
+        </h1>
+
+        <SearchBar />
+
+        <div className="mt-4 flex flex-wrap items-center gap-1.5">
+          <span className="mr-1 text-[12px] text-ppc-text-muted">Try asking:</span>
+          {SUGGESTIONS.map((s) => (
+            <button
+              key={s}
+              className="rounded-full border-[0.5px] border-ppc-card-border bg-white px-3 py-[6px] text-[12px] font-medium text-ppc-text-muted transition-all hover:-translate-y-[0.5px] hover:border-ppc-purple-300 hover:text-ppc-ink"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* ═══ 3 · FEATURED · Most run this week ══════════════════════════ */}
-      {active === 'all' && (
-        <section>
-          <div className="mb-3.5 flex items-baseline justify-between gap-3">
-            <div className="flex items-baseline gap-3">
-              <span className="inline-flex items-center gap-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ppc-purple-500">
-                <Star size={10} weight="fill" />
-                Featured
-              </span>
-              <h3 className="text-[19px] font-semibold tracking-[-0.012em] text-ppc-ink">
-                Most run this week<span className="text-ppc-purple-500">.</span>
-              </h3>
-            </div>
-            <p className="text-[12px] text-ppc-text-muted">Across 60+ accounts</p>
-          </div>
-          <div className="grid gap-3 lg:grid-cols-2">
-            {featuredAgents.map((f) => (
-              <FeaturedAgentCard
-                key={f.agent.slug}
-                agent={f.agent}
-                rank={f.rank}
-                stages={f.stages}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      <AiAdvisorCard />
+    </section>
+  );
+}
 
-      {/* ═══ 4 · CATEGORY SECTIONS ══════════════════════════════════════ */}
-      <div className="space-y-9">
-        {visibleCategories.map((cat, i) => {
-          const inCat = AGENTS.filter((a) => a.category === cat);
-          if (inCat.length === 0) return null;
-          return (
-            <section key={cat}>
-              <SectionHead
-                index={i + 1}
-                category={cat}
-                count={inCat.length}
-              />
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {inCat.map((a) => <AgentCard key={a.slug} agent={a} />)}
-              </div>
-            </section>
-          );
-        })}
+function SearchBar() {
+  return (
+    <form
+      onSubmit={(e) => e.preventDefault()}
+      className="mt-7 flex items-center gap-2 rounded-[14px] border-[0.5px] border-ppc-card-border bg-white py-2.5 pl-4 pr-2.5 shadow-[0_2px_10px_-6px_rgba(15,10,30,0.08)] focus-within:border-ppc-purple-300 focus-within:shadow-[0_0_0_4px_rgba(127,90,240,0.10),0_4px_14px_-6px_rgba(127,90,240,0.25)]"
+    >
+      <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-ppc-text-muted" />
+      <input
+        type="text"
+        placeholder="Search agents or describe what you need…"
+        className="min-w-0 flex-1 bg-transparent text-[14px] tracking-[-0.005em] text-ppc-ink placeholder:text-ppc-text-muted/85 focus:outline-none"
+      />
+      <button
+        type="submit"
+        aria-label="Submit"
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-ppc-purple-500 text-white shadow-[0_4px_14px_-4px_rgba(127,90,240,0.55)] transition-all hover:-translate-y-[1px] hover:bg-ppc-purple-600"
+      >
+        <PaperPlaneTilt size={14} weight="fill" />
+      </button>
+    </form>
+  );
+}
+
+function AiAdvisorCard() {
+  return (
+    <Link
+      to="/chat"
+      className="group relative flex flex-col justify-between overflow-hidden rounded-[16px] p-5 text-white transition-transform hover:-translate-y-[1px]"
+      style={{
+        background:
+          'linear-gradient(155deg, #1A1030 0%, #0F0A1E 60%, #07050D 100%)',
+        boxShadow:
+          'inset 0 0 0 1px rgba(127,90,240,0.22), 0 8px 24px -14px rgba(127,90,240,0.45)',
+      }}
+    >
+      {/* Top-right purple bloom */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-10 -top-12 h-[200px] w-[200px] rounded-full"
+        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.34) 0%, transparent 60%)' }}
+      />
+      {/* Faint bottom-left whisper */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-16 -left-10 h-[180px] w-[180px] rounded-full"
+        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.14) 0%, transparent 65%)' }}
+      />
+
+      <div className="relative">
+        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-white/55">
+          AI Advisor
+        </span>
+        <h3 className="mt-2 font-display text-[18px] font-bold leading-[1.18] tracking-[-0.015em]">
+          Your strategic
+          <br />
+          copilot<span className="text-ppc-purple-300">.</span>
+        </h3>
+        <p className="mt-1.5 max-w-[180px] text-[12px] leading-[1.5] text-white/65">
+          Ask anything about your account or goals.
+        </p>
+      </div>
+
+      <div className="relative mt-4 flex items-end justify-between gap-3">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1.5 text-[12px] font-semibold text-white ring-1 ring-inset ring-white/12 transition-colors group-hover:bg-white/[0.10]">
+          Ask AI
+          <ArrowRight size={11} weight="bold" />
+        </span>
+        <AdvisorOrb />
+      </div>
+    </Link>
+  );
+}
+
+// Small mascot — a glowing orb with a faint robot silhouette. Phosphor
+// Robot inside a soft purple bloom, no emoji.
+function AdvisorOrb() {
+  return (
+    <div className="relative h-[58px] w-[58px] shrink-0">
+      <div
+        aria-hidden
+        className="absolute inset-0 rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle at 30% 30%, rgba(168,140,255,0.42) 0%, rgba(127,90,240,0.18) 45%, transparent 70%)',
+        }}
+      />
+      <div
+        className="absolute inset-[6px] grid place-items-center rounded-full"
+        style={{
+          background:
+            'linear-gradient(155deg, #2A1B58 0%, #170E30 100%)',
+          boxShadow:
+            'inset 0 0 0 1px rgba(199,176,255,0.22), 0 0 14px -2px rgba(127,90,240,0.45)',
+        }}
+      >
+        <Robot size={22} weight="duotone" className="text-[#C7B0FF]" />
       </div>
     </div>
   );
 }
 
-// ─── 1 · Dark hero ──────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════
+// 2 · RECOMMENDED FOR YOU
+// ════════════════════════════════════════════════════════════════════════
 
-function Hero({ count }: { count: number }) {
+function RecommendedSection({
+  items,
+}: { items: Array<{ agent: AgentDefinition; tag: 'high' | 'routine' }> }) {
   return (
-    <section className="relative overflow-hidden rounded-[20px] bg-black px-9 pb-9 pt-14 sm:px-12 sm:pt-16">
-      {/* Three radial glows — top-right strong, mid soft, bottom-left whisper */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-24 -top-32 h-[480px] w-[480px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.28) 0%, transparent 60%)' }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-[35%] top-[20%] h-[200px] w-[200px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.06) 0%, transparent 70%)' }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-16 left-[10%] h-[280px] w-[280px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.10) 0%, transparent 65%)' }}
-      />
-
-      <div className="relative">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">
-          The agent library · {count} specialists
-        </p>
-
-        <h1 className="mt-3.5 max-w-[820px] font-display text-[44px] font-black leading-[0.96] tracking-[-0.035em] text-white sm:text-[58px]">
-          <span className="text-ppc-purple-500">Agents</span> that actually
-          <br className="hidden sm:block" />{' '}
-          understand Google Ads<span className="text-ppc-purple-500">.</span>
-        </h1>
-
-        <p className="mt-5 max-w-[560px] text-[14.5px] leading-[1.55] text-white/60">
-          Twenty-nine specialists, one team. Each reads your account the way a senior strategist would. Send one in, or stack a week of work to run while you sleep.
-        </p>
-
-        <HeroInput />
-
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <button className="inline-flex items-center gap-2 rounded-[10px] bg-ppc-purple-500 px-4 py-2.5 text-[13.5px] font-semibold tracking-tight text-white shadow-[0_4px_14px_-4px_rgba(127,90,240,0.65)] transition-transform hover:-translate-y-[1px]">
-            <Stack size={14} weight="duotone" />
-            Schedule a stack
-          </button>
-          <button className="inline-flex items-center gap-2 rounded-[10px] border border-white/15 bg-white/[0.04] px-4 py-2.5 text-[13.5px] font-semibold tracking-tight text-white/90 transition-colors hover:bg-white/[0.08]">
-            How agents think
-            <ArrowRight size={12} weight="bold" />
-          </button>
+    <section>
+      <div className="mb-4 flex items-baseline justify-between gap-3">
+        <div>
+          <h2 className="font-display text-[19px] font-bold tracking-[-0.012em] text-ppc-ink">
+            Recommended for you<span className="text-ppc-purple-500">.</span>
+          </h2>
+          <p className="mt-0.5 text-[12.5px] text-ppc-text-muted">
+            Based on your accounts and recent activity.
+          </p>
         </div>
+        <Link
+          to="/chat"
+          className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500 hover:text-ppc-purple-600"
+        >
+          Why these?
+          <ArrowRight size={11} weight="bold" />
+        </Link>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        {items.map((it) => (
+          <RecommendedCard key={it.agent.slug} agent={it.agent} tag={it.tag} />
+        ))}
       </div>
     </section>
   );
 }
 
-function HeroInput() {
+function RecommendedCard({
+  agent: a, tag,
+}: { agent: AgentDefinition; tag: 'high' | 'routine' }) {
+  const palette = CATEGORY_PALETTE[a.category];
   return (
-    <div className="mt-7 overflow-hidden rounded-[14px] border border-white/10 bg-white/[0.05] backdrop-blur-sm">
-      <div className="flex items-center gap-2.5 px-4 py-[14px]">
-        <Sparkle size={16} weight="fill" className="text-white/55" />
-        <span className="flex-1 text-[14px] text-white/55">
-          Describe the work you need done, or browse below
+    <Link
+      to={`/agents/${a.slug}`}
+      className="group flex h-full flex-col rounded-[14px] border-[0.5px] border-ppc-card-border bg-white p-5 transition-all hover:-translate-y-[1px] hover:border-ppc-purple-300 hover:shadow-[0_10px_28px_-18px_rgba(127,90,240,0.40)]"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <span
+          aria-hidden
+          className="grid h-11 w-11 place-items-center rounded-[11px] text-[22px] leading-none"
+          style={{ background: palette.iconBg }}
+        >
+          {a.emoji}
         </span>
-        <kbd className="rounded-[5px] border border-white/10 bg-white/[0.08] px-2 py-[3px] font-mono text-[10.5px] text-ppc-text-on-dark">
-          ⌘K
-        </kbd>
       </div>
-    </div>
+
+      <h3 className="mt-4 font-display text-[17px] font-bold leading-[1.2] tracking-[-0.012em] text-ppc-ink">
+        {a.name}<span className="text-ppc-purple-500">.</span>
+      </h3>
+
+      <span
+        className={`mt-1.5 inline-flex w-fit items-center gap-1 rounded-full px-2 py-[2px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.10em] ${
+          tag === 'high'
+            ? 'bg-[#EEEDFE] text-[#3C3489]'
+            : 'bg-[#F1EFE8] text-[#2C2C2A]'
+        }`}
+      >
+        {TAG_LABEL[tag]}
+      </span>
+
+      <p className="mt-2.5 text-[12.5px] leading-[1.55] tracking-tight text-ppc-text-muted">
+        {a.outcomeDescription}
+      </p>
+
+      <span className="mt-4 inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500 transition-[gap] group-hover:gap-2">
+        Run now <ArrowRight size={11} weight="bold" />
+      </span>
+    </Link>
   );
 }
 
-// ─── 2 · Filter pills ───────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════
+// 3 · BROWSE ALL SPECIALISTS
+// ════════════════════════════════════════════════════════════════════════
 
-function FilterPill({
-  filter, active, count, onSelect,
-}: {
-  filter: { key: FilterKey; label: string; emoji?: string };
-  active: boolean;
-  count: number;
-  onSelect: () => void;
-}) {
-  if (filter.key === 'all') {
-    return (
-      <button
-        onClick={onSelect}
-        className={`inline-flex items-center gap-2 rounded-full px-4 py-[8px] text-[12.5px] font-medium tracking-tight transition-colors ${
-          active
-            ? 'bg-ppc-purple-500 text-white shadow-[0_4px_14px_-6px_rgba(127,90,240,0.55)]'
-            : 'bg-white text-ppc-ink hover:bg-ppc-purple-50'
+interface BrowseSectionProps {
+  active: FilterKey;
+  counts: Record<string, number>;
+  view: 'grid' | 'list';
+  moreOpen: boolean;
+  onSelectFilter: (k: FilterKey) => void;
+  onToggleView: () => void;
+  onToggleMore: () => void;
+  agents: AgentDefinition[];
+}
+
+function BrowseSection({
+  active, counts, view, moreOpen,
+  onSelectFilter, onToggleView, onToggleMore,
+  agents,
+}: BrowseSectionProps) {
+  return (
+    <section>
+      <h2 className="font-display text-[19px] font-bold tracking-[-0.012em] text-ppc-ink">
+        Browse all specialists<span className="text-ppc-purple-500">.</span>
+      </h2>
+
+      <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
+        {PRIMARY_FILTERS.map((f) => (
+          <FilterPill
+            key={f.key}
+            label={f.label}
+            count={counts[f.key] ?? 0}
+            active={active === f.key}
+            onSelect={() => onSelectFilter(f.key)}
+          />
+        ))}
+
+        <MoreFilter
+          open={moreOpen}
+          activeKey={active}
+          counts={counts}
+          onToggle={onToggleMore}
+          onSelect={(k) => onSelectFilter(k)}
+        />
+
+        <span className="mx-1 h-5 w-px bg-ppc-card-border" />
+
+        <button className="inline-flex items-center gap-1.5 rounded-full border-[0.5px] border-ppc-card-border bg-white px-3 py-[7px] text-[12px] font-medium text-ppc-ink transition-colors hover:border-ppc-purple-300">
+          <Funnel size={12} weight="bold" />
+          Filters
+        </button>
+
+        <div className="inline-flex overflow-hidden rounded-full border-[0.5px] border-ppc-card-border bg-white">
+          <button
+            aria-label="Grid view"
+            onClick={view === 'list' ? onToggleView : undefined}
+            className={`grid h-[28px] w-[30px] place-items-center transition-colors ${
+              view === 'grid'
+                ? 'bg-ppc-panel-soft text-ppc-purple-700'
+                : 'text-ppc-text-muted hover:text-ppc-ink'
+            }`}
+          >
+            <GridFour size={12} weight="bold" />
+          </button>
+          <button
+            aria-label="List view"
+            onClick={view === 'grid' ? onToggleView : undefined}
+            className={`grid h-[28px] w-[30px] place-items-center transition-colors ${
+              view === 'list'
+                ? 'bg-ppc-panel-soft text-ppc-purple-700'
+                : 'text-ppc-text-muted hover:text-ppc-ink'
+            }`}
+          >
+            <ListBullets size={12} weight="bold" />
+          </button>
+        </div>
+      </div>
+
+      <div
+        className={`mt-6 ${
+          view === 'grid'
+            ? 'grid gap-3 sm:grid-cols-2 lg:grid-cols-3'
+            : 'flex flex-col gap-2'
         }`}
       >
-        {filter.label}
-        <span
-          className={`tabular-nums rounded-[8px] px-1.5 py-[1px] font-mono text-[10px] font-medium ${
-            active ? 'bg-white/20 text-white' : 'bg-ppc-panel-soft text-ppc-purple-700'
-          }`}
-        >
-          {String(count).padStart(2, '0')}
-        </span>
-      </button>
-    );
-  }
+        {agents.map((a) =>
+          view === 'grid'
+            ? <AgentCard key={a.slug} agent={a} />
+            : <AgentRow key={a.slug} agent={a} />,
+        )}
+      </div>
+    </section>
+  );
+}
 
-  const palette = CATEGORY_PALETTE[filter.key as AgentCategory];
+function FilterPill({
+  label, count, active, onSelect,
+}: { label: string; count: number; active: boolean; onSelect: () => void }) {
   return (
     <button
       onClick={onSelect}
-      style={
+      className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-[7px] text-[12.5px] font-medium tracking-tight transition-all ${
         active
-          ? { background: palette.chipFg, color: '#fff' }
-          : { background: palette.chipBg, color: palette.chipFg }
-      }
-      className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-[8px] text-[12.5px] font-medium tracking-tight transition-all hover:-translate-y-[0.5px]"
+          ? 'bg-ppc-purple-500 text-white shadow-[0_4px_14px_-6px_rgba(127,90,240,0.55)]'
+          : 'border-[0.5px] border-ppc-card-border bg-white text-ppc-ink hover:-translate-y-[0.5px] hover:border-ppc-purple-300'
+      }`}
     >
-      <span aria-hidden className="text-[13px] leading-none">{filter.emoji}</span>
-      {filter.label}
+      {label}
       <span
-        className="tabular-nums rounded-[8px] px-1.5 py-[1px] font-mono text-[10px] font-medium"
-        style={
-          active
-            ? { background: 'rgba(255,255,255,0.22)', color: '#fff' }
-            : { background: palette.chipCountBg, color: palette.chipFg }
-        }
+        className={`tabular-nums font-mono text-[10px] font-semibold ${
+          active ? 'text-white/85' : 'text-ppc-text-muted'
+        }`}
       >
-        {String(count).padStart(2, '0')}
+        {count}
       </span>
     </button>
   );
 }
 
-// ─── 3 · Featured card ──────────────────────────────────────────────────
-
-function FeaturedAgentCard({
-  agent: a, rank, stages,
-}: { agent: AgentDefinition; rank: number; stages: number }) {
+function MoreFilter({
+  open, activeKey, counts, onToggle, onSelect,
+}: {
+  open: boolean;
+  activeKey: FilterKey;
+  counts: Record<string, number>;
+  onToggle: () => void;
+  onSelect: (k: AgentCategory) => void;
+}) {
+  const moreActiveLabel = MORE_FILTERS.find((m) => m.key === activeKey)?.label;
   return (
-    <Link
-      to={`/agents/${a.slug}`}
-      className="group relative flex flex-col rounded-[16px] border-[0.5px] border-ppc-card-border bg-white px-6 pt-5 pb-5 shadow-[0_0_0_4px_rgba(127,90,240,0.05)] transition-all hover:-translate-y-[1px] hover:shadow-[0_0_0_4px_rgba(127,90,240,0.10),0_8px_22px_-12px_rgba(127,90,240,0.35)]"
-    >
-      {/* Purple top edge */}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-[2px] rounded-t-[16px] bg-ppc-purple-500"
-      />
+    <div className="relative">
+      <button
+        onClick={onToggle}
+        className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-[7px] text-[12.5px] font-medium tracking-tight transition-all ${
+          moreActiveLabel
+            ? 'bg-ppc-purple-500 text-white shadow-[0_4px_14px_-6px_rgba(127,90,240,0.55)]'
+            : 'border-[0.5px] border-ppc-card-border bg-white text-ppc-ink hover:-translate-y-[0.5px] hover:border-ppc-purple-300'
+        }`}
+      >
+        {moreActiveLabel ?? 'More'}
+        <CaretDown
+          size={10}
+          weight="bold"
+          className={`transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
 
-      <div className="flex items-center justify-between gap-3">
-        <span
-          aria-hidden
-          className="grid h-12 w-12 place-items-center rounded-[12px] bg-ppc-panel-soft text-[28px] leading-none"
-        >
-          {a.emoji}
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-[5px] bg-ppc-panel-soft px-2 py-[3px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.1em] text-ppc-purple-700">
-          <Star size={9} weight="fill" />
-          #{rank} This week
-        </span>
-      </div>
-
-      <h4 className="mt-5 font-display text-[22px] font-bold leading-[1.1] tracking-[-0.018em] text-ppc-ink">
-        {a.name}<span className="text-ppc-purple-500">.</span>
-      </h4>
-
-      <p className="mt-2 text-[13.5px] leading-[1.55] tracking-tight text-ppc-text-muted">
-        {a.outcomeDescription}
-      </p>
-
-      <div className="mt-5 flex items-center justify-between border-t-[0.5px] border-ppc-card-border pt-3">
-        <span className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-ppc-text-muted">
-          {stages} stages · {a.expectedDuration}
-        </span>
-        <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500 transition-[gap] group-hover:gap-2">
-          Send in <ArrowRight size={11} weight="bold" />
-        </span>
-      </div>
-    </Link>
-  );
-}
-
-// ─── 4 · Section head ───────────────────────────────────────────────────
-
-function SectionHead({
-  index, category, count,
-}: { index: number; category: AgentCategory; count: number }) {
-  const palette = CATEGORY_PALETTE[category];
-  const label = CATEGORIES[category]?.label ?? category;
-  return (
-    <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3 border-b-[0.5px] border-ppc-card-border pb-2.5">
-      <div className="flex items-baseline gap-2.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em]">
-        <span className="tabular-nums" style={{ color: palette.eyebrow }}>
-          {String(index).padStart(2, '0')}
-        </span>
-        <span className="text-ppc-text-faint">·</span>
-        <span className="inline-flex items-center gap-1.5" style={{ color: palette.eyebrow }}>
-          <span aria-hidden className="text-[12px] leading-none">{palette.emoji}</span>
-          {label}
-        </span>
-        <span
-          className="ml-2 text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink normal-case"
-          style={{ letterSpacing: '-0.005em' }}
-        >
-          {palette.verb}
-        </span>
-      </div>
-      <span className="tabular-nums font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-ppc-text-faint">
-        {String(count).padStart(2, '0')} agents
-      </span>
+      {open && (
+        <>
+          <button
+            aria-hidden
+            tabIndex={-1}
+            onClick={onToggle}
+            className="fixed inset-0 z-10 cursor-default"
+          />
+          <div className="absolute left-0 top-full z-20 mt-1.5 min-w-[180px] overflow-hidden rounded-[12px] border-[0.5px] border-ppc-card-border bg-white shadow-[0_12px_30px_-12px_rgba(15,10,30,0.20)]">
+            {MORE_FILTERS.map((m) => {
+              const palette = CATEGORY_PALETTE[m.key];
+              const isActive = activeKey === m.key;
+              return (
+                <button
+                  key={m.key}
+                  onClick={() => onSelect(m.key)}
+                  className={`flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] transition-colors ${
+                    isActive ? 'bg-ppc-panel-soft' : 'hover:bg-ppc-panel-soft/60'
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className="h-[7px] w-[7px] shrink-0 rounded-full"
+                    style={{ background: palette.dot }}
+                  />
+                  <span className="flex-1 text-ppc-ink">{m.label}</span>
+                  <span className="font-mono text-[10.5px] tabular-nums text-ppc-text-muted">
+                    {counts[m.key] ?? 0}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-// ─── 5 · Regular agent card ─────────────────────────────────────────────
+// ─── Card (grid view) ────────────────────────────────────────────────────
 
 function AgentCard({ agent: a }: { agent: AgentDefinition }) {
-  const isNew = NEW_AGENTS.has(a.slug);
+  const palette = CATEGORY_PALETTE[a.category];
+  const categoryLabel = CATEGORIES[a.category]?.label ?? a.category;
   return (
     <Link
       to={`/agents/${a.slug}`}
-      className="group flex h-full flex-col rounded-[12px] border-[0.5px] border-ppc-card-border bg-white p-[18px] transition-all hover:-translate-y-[1px] hover:border-ppc-purple-300 hover:shadow-[0_8px_22px_-16px_rgba(127,90,240,0.45)]"
+      className="group flex h-full flex-col rounded-[14px] border-[0.5px] border-ppc-card-border bg-white p-5 transition-all hover:-translate-y-[1px] hover:border-ppc-purple-300 hover:shadow-[0_10px_28px_-18px_rgba(127,90,240,0.40)]"
     >
-      <div className="flex items-center justify-between gap-2">
-        <span aria-hidden className="text-[26px] leading-none">{a.emoji}</span>
-        <span className="inline-flex items-center gap-1.5">
-          {isNew && (
-            <span className="rounded-[4px] bg-[#E1F5EE] px-[7px] py-[2.5px] font-mono text-[9px] font-semibold uppercase tracking-[0.08em] text-[#0F6E56]">
-              New
-            </span>
-          )}
-          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-ppc-text-muted">
-            {a.expectedDuration}
-          </span>
+      <div className="flex items-start justify-between gap-2">
+        <span
+          aria-hidden
+          className="grid h-11 w-11 place-items-center rounded-[11px] text-[22px] leading-none"
+          style={{ background: palette.iconBg }}
+        >
+          {a.emoji}
         </span>
+        <ArrowUpRight
+          size={13}
+          weight="bold"
+          className="mt-1 text-ppc-text-faint transition-colors group-hover:text-ppc-purple-500"
+        />
       </div>
 
-      <h5 className="mt-2.5 text-[15px] font-semibold leading-[1.2] tracking-[-0.01em] text-ppc-ink">
+      <h3 className="mt-4 font-display text-[16px] font-bold leading-[1.2] tracking-[-0.012em] text-ppc-ink">
         {a.name}<span className="text-ppc-purple-500">.</span>
-      </h5>
+      </h3>
 
       <p className="mt-1.5 text-[12.5px] leading-[1.55] tracking-tight text-ppc-text-muted">
         {a.outcomeDescription}
       </p>
 
-      <div className="mt-auto flex items-center justify-between pt-3 text-[11.5px]">
-        <span className="font-mono uppercase tracking-[0.08em] text-ppc-text-faint">
-          {CATEGORIES[a.category]?.label}
-        </span>
-        <span className="inline-flex items-center gap-1 font-medium text-ppc-text-muted transition-colors group-hover:text-ppc-purple-500">
-          Open <ArrowUpRight size={11} weight="bold" />
+      <div className="mt-auto pt-4">
+        <span
+          className="inline-flex items-center rounded-[5px] px-2 py-[3px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.10em]"
+          style={{ background: palette.chipBg, color: palette.chipFg }}
+        >
+          {categoryLabel}
         </span>
       </div>
     </Link>
   );
 }
 
+// ─── Row (list view) ────────────────────────────────────────────────────
+
+function AgentRow({ agent: a }: { agent: AgentDefinition }) {
+  const palette = CATEGORY_PALETTE[a.category];
+  const categoryLabel = CATEGORIES[a.category]?.label ?? a.category;
+  return (
+    <Link
+      to={`/agents/${a.slug}`}
+      className="group flex items-center gap-4 rounded-[12px] border-[0.5px] border-ppc-card-border bg-white px-4 py-3 transition-all hover:-translate-y-[0.5px] hover:border-ppc-purple-300"
+    >
+      <span
+        aria-hidden
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px] text-[19px] leading-none"
+        style={{ background: palette.iconBg }}
+      >
+        {a.emoji}
+      </span>
+      <div className="min-w-0 flex-1">
+        <h4 className="truncate text-[14px] font-semibold leading-tight tracking-[-0.01em] text-ppc-ink">
+          {a.name}
+        </h4>
+        <p className="truncate text-[12px] leading-[1.4] tracking-tight text-ppc-text-muted">
+          {a.outcomeDescription}
+        </p>
+      </div>
+      <span
+        className="hidden shrink-0 rounded-[5px] px-2 py-[3px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.10em] sm:inline-flex"
+        style={{ background: palette.chipBg, color: palette.chipFg }}
+      >
+        {categoryLabel}
+      </span>
+      <ArrowUpRight
+        size={13}
+        weight="bold"
+        className="shrink-0 text-ppc-text-faint transition-colors group-hover:text-ppc-purple-500"
+      />
+    </Link>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// 4 · "NOT SURE WHERE TO START?" BANNER
+// ════════════════════════════════════════════════════════════════════════
+
+function PlanCtaBanner() {
+  return (
+    <Link
+      to="/chat"
+      className="group relative flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-[18px] px-7 py-6 text-white transition-transform hover:-translate-y-[1px]"
+      style={{
+        background:
+          'linear-gradient(95deg, #0F0A1E 0%, #1A1030 60%, #0F0A1E 100%)',
+        boxShadow:
+          'inset 0 0 0 1px rgba(127,90,240,0.22), 0 10px 30px -18px rgba(127,90,240,0.55)',
+      }}
+    >
+      <SineWave />
+
+      <div className="relative max-w-[460px]">
+        <h3 className="font-display text-[20px] font-bold leading-[1.18] tracking-[-0.015em]">
+          Not sure where to start<span className="text-ppc-purple-300">?</span>
+        </h3>
+        <p className="mt-1 text-[13px] text-white/65">
+          Get a personalised plan in 60 seconds.
+        </p>
+      </div>
+
+      <span
+        className="relative inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-[0_8px_22px_-10px_rgba(127,90,240,0.65)] transition-all group-hover:-translate-y-[1px]"
+        style={{
+          background: 'linear-gradient(180deg, #7F5AF0 0%, #534AB7 100%)',
+          boxShadow:
+            'inset 0 1px 0 rgba(255,255,255,0.18), 0 8px 22px -10px rgba(127,90,240,0.65)',
+        }}
+      >
+        Generate my plan
+        <Sparkle size={13} weight="fill" />
+      </span>
+    </Link>
+  );
+}
+
+// Decorative purple sine wave in the banner background.
+function SineWave() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 600 120"
+      className="pointer-events-none absolute inset-y-0 right-[140px] h-full w-[420px] opacity-90"
+      preserveAspectRatio="none"
+    >
+      <defs>
+        <linearGradient id="wave-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"  stopColor="#7F5AF0" stopOpacity="0" />
+          <stop offset="35%" stopColor="#A88CFF" stopOpacity="0.9" />
+          <stop offset="65%" stopColor="#7F5AF0" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0" />
+        </linearGradient>
+        <filter id="wave-glow" x="-20%" y="-50%" width="140%" height="200%">
+          <feGaussianBlur stdDeviation="2.5" />
+        </filter>
+      </defs>
+      <path
+        d="M0,60 C 80,20 140,100 220,60 C 300,20 360,100 440,60 C 520,20 580,80 600,60"
+        fill="none"
+        stroke="url(#wave-grad)"
+        strokeWidth="2.5"
+        filter="url(#wave-glow)"
+      />
+      <path
+        d="M0,60 C 80,20 140,100 220,60 C 300,20 360,100 440,60 C 520,20 580,80 600,60"
+        fill="none"
+        stroke="url(#wave-grad)"
+        strokeWidth="1.4"
+      />
+    </svg>
+  );
+}
