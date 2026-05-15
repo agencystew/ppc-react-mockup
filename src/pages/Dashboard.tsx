@@ -6,6 +6,7 @@ import {
 import { PROJECTS, ACCOUNTS } from '../mock/projects';
 import { RECENT_RUNS_SUMMARY } from '../mock/runs';
 import { AGENTS } from '../mock/agents';
+import { AgentMascot } from '../components/AgentMascot';
 
 /* Dashboard · /
  *
@@ -157,7 +158,6 @@ const ACTIVITY: ActivityRow[] = [
   },
 ];
 
-const TOTAL_SURFACED = '$23.6K';
 const TOTAL_RUNS = ACTIVITY.length + 2;        // includes 2 pre-feed runs
 const TOTAL_PROJECTS_TOUCHED = 3;
 
@@ -180,20 +180,11 @@ function GreetingStrip() {
   return (
     <div className="flex items-end justify-between gap-4">
       <div>
-        <h1 className="font-display text-[30px] font-black leading-none tracking-[-0.022em] text-ppc-ink">
-          Morning,{' '}
-          <span
-            style={{
-              fontFamily: '"Playfair Display", Georgia, serif',
-              fontStyle: 'italic',
-              fontWeight: 600,
-            }}
-          >
-            Stewy
-          </span>
-          .
-        </h1>
-        <p className="mt-1.5 text-[13px] text-ppc-text-muted">
+        <p className="flex items-center gap-2 text-[16px] font-medium tracking-[-0.005em] text-ppc-ink">
+          Morning, Stewy
+          <span aria-hidden className="inline-block text-[18px] leading-none">👋</span>
+        </p>
+        <p className="mt-1 text-[13px] text-ppc-text-muted">
           Portfolio signals, projects, and what your agents found overnight.
         </p>
       </div>
@@ -274,13 +265,16 @@ function ActivityHero() {
       <div className="relative grid gap-10 px-10 pb-10 pt-12 sm:grid-cols-[1fr_minmax(260px,320px)] sm:gap-12 sm:px-14 sm:pt-14">
         {/* ─── Copy column ─────────────────────────────────────────── */}
         <div className="min-w-0">
-          <span className="text-[14px] tracking-[-0.005em]" style={SERIF_GRADIENT_STYLE}>
+          <span
+            className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-white/55"
+            style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+          >
+            <span className="h-[5px] w-[5px] rounded-full bg-[#5DCAA5]" />
             While you were away
           </span>
 
-          <h2 className="mt-2 font-display text-[44px] font-black leading-[1.02] tracking-[-0.028em] text-white sm:text-[56px]">
-            Your agents found{' '}
-            <span style={SERIF_GRADIENT_STYLE}>{TOTAL_SURFACED}</span>.
+          <h2 className="mt-3 font-display text-[44px] font-black leading-[1.02] tracking-[-0.028em] text-white sm:text-[52px]">
+            Your agents have been busy<span style={{ color: '#9F86FF' }}>.</span>
           </h2>
           <p className="mt-4 max-w-[480px] text-[15px] leading-[1.55] text-white/60">
             {TOTAL_RUNS} reports wrapped across {TOTAL_PROJECTS_TOUCHED} projects in the last 24 hours.
@@ -317,109 +311,12 @@ function ActivityHero() {
           </div>
         </div>
 
-        {/* ─── Right column · agent wreath ─────────────────────────── */}
-        <div className="relative flex min-w-0 flex-col items-center justify-start sm:items-end sm:pt-2">
-          <AgentWreath rows={ACTIVITY} />
-
-          <div className="mt-5 text-center sm:text-right">
-            <p
-              className="text-[12.5px] text-white/85"
-              style={{
-                fontFamily: '"Playfair Display", Georgia, serif',
-                fontStyle: 'italic',
-                fontWeight: 500,
-              }}
-            >
-              Today's specialists
-            </p>
-            <p className="mt-1.5 text-[11.5px] leading-[1.45] text-white/45 sm:max-w-[200px]">
-              {ACTIVITY.map((r) => r.agentName).join(', ')}
-            </p>
-          </div>
+        {/* ─── Right column · friendly mascot ─────────────────────── */}
+        <div className="relative flex min-w-0 items-center justify-center sm:justify-end">
+          <AgentMascot size={240} />
         </div>
       </div>
     </section>
-  );
-}
-
-/* Agent wreath — three emoji avatars echoing the marketing site's
- * "Loved by the PPC community" laurel-wreath cluster. Center avatar
- * sits forward with a stronger purple halo; flanking avatars step back. */
-function AgentWreath({ rows }: { rows: ActivityRow[] }) {
-  // Always render three slots even if rows < 3. Pad with subtle ghosts.
-  const triple = [
-    rows[0],
-    rows[1] ?? rows[0],
-    rows[2] ?? rows[0],
-  ];
-  return (
-    <div className="relative flex items-end gap-2.5">
-      {/* Left laurel */}
-      <Laurel side="left" />
-
-      {triple.map((row, i) => {
-        const isCenter = i === 1;
-        return (
-          <Link
-            key={`${row.runId}-${i}`}
-            to={`/reports/${row.runId}`}
-            title={`${row.agentName} on ${row.projectName}`}
-            className="relative grid place-items-center rounded-full transition-transform hover:-translate-y-[2px]"
-            style={{
-              height: isCenter ? 64 : 52,
-              width: isCenter ? 64 : 52,
-              background:
-                'radial-gradient(circle at 35% 28%, #2A1D52 0%, #14092A 70%, #0A0418 100%)',
-              boxShadow: isCenter
-                ? '0 0 0 2px rgba(159,134,255,0.55), 0 6px 22px rgba(127,90,240,0.45), inset 0 1px 0 rgba(255,255,255,0.18)'
-                : '0 0 0 1.5px rgba(127,90,240,0.30), 0 4px 14px rgba(127,90,240,0.25), inset 0 1px 0 rgba(255,255,255,0.10)',
-              transform: isCenter ? 'translateY(-6px)' : undefined,
-            }}
-          >
-            <span
-              aria-hidden
-              className="leading-none"
-              style={{ fontSize: isCenter ? 30 : 24 }}
-            >
-              {row.agentEmoji}
-            </span>
-          </Link>
-        );
-      })}
-
-      {/* Right laurel */}
-      <Laurel side="right" />
-    </div>
-  );
-}
-
-function Laurel({ side }: { side: 'left' | 'right' }) {
-  // Eight tiny leaf strokes fanning around the cluster — cheap SVG copy
-  // of the marketing site's wreath without committing to a heavy asset.
-  const flip = side === 'right';
-  return (
-    <svg
-      width={28}
-      height={68}
-      viewBox="0 0 28 68"
-      aria-hidden
-      className={`shrink-0 ${flip ? 'scale-x-[-1]' : ''}`}
-      style={{ color: 'rgba(255,255,255,0.40)' }}
-    >
-      {[8, 18, 30, 42, 54].map((y, i) => {
-        const len = 14 - Math.abs(i - 2) * 2;
-        return (
-          <path
-            key={y}
-            d={`M 22 ${y} q -${len} -3 -${len + 2} -7`}
-            stroke="currentColor"
-            strokeWidth={1.4}
-            strokeLinecap="round"
-            fill="none"
-          />
-        );
-      })}
-    </svg>
   );
 }
 
@@ -454,15 +351,7 @@ function ActivityCard({ row }: { row: ActivityRow }) {
           {row.headline}
         </p>
       </div>
-      <div className="hidden flex-col items-end gap-1 sm:flex">
-        <span
-          className="rounded-full px-[9px] py-[2px] text-[10.5px] font-semibold leading-none"
-          style={SERIF_GRADIENT_STYLE}
-        >
-          {row.upside}
-        </span>
-        <span className="text-[10.5px] text-white/40">{row.finishedAt}</span>
-      </div>
+      <span className="hidden text-[11px] text-white/45 sm:inline">{row.finishedAt}</span>
       <CaretRight
         size={13}
         weight="bold"
