@@ -507,11 +507,16 @@ function SpecialistRow() {
  * one moment of colour tension (red spike bar). Reference 2026-05-15. */
 
 function ActiveChat({ thread }: { thread: ChatThread }) {
+  /* h-screen on the outer column gives `flex-1 overflow-y-auto` on the
+   *  middle a definite height so it scrolls — and pins the ReplyDock at the
+   *  bottom of the flex stack. `sticky bottom-0` fell through under
+   *  `min-h-screen` because the scroll context lived on the page <body>
+   *  instead of inside this column. */
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-screen flex-col">
       <ActiveChatHeader title={thread.title} />
-      <div className="flex-1 overflow-y-auto px-5 pb-44 pt-8 sm:px-7">
-        <div className="mx-auto w-full max-w-[680px] space-y-7">
+      <div className="flex-1 overflow-y-auto px-5 pt-8 sm:px-7">
+        <div className="mx-auto w-full max-w-[680px] space-y-7 pb-8">
           {thread.messages.length === 0
             ? <EmptyThreadHint thread={thread} />
             : thread.messages.map((m) => (
@@ -863,7 +868,7 @@ function InlineRunningCard({ run }: { run: ChatRunningCard }) {
 
 function ReplyDock() {
   return (
-    <div className="sticky bottom-0 bg-ppc-canvas/85 px-5 pb-5 pt-3 backdrop-blur-md sm:px-7">
+    <div className="shrink-0 border-t-[0.5px] border-ppc-card-border bg-ppc-canvas/85 px-5 pb-5 pt-3 backdrop-blur-md sm:px-7">
       <div className="mx-auto w-full max-w-[680px]">
         <div className="rounded-[18px] border-[0.5px] border-ppc-card-border bg-white px-5 pt-4 pb-3 shadow-[0_4px_24px_-12px_rgba(15,10,30,0.10)]">
           <input
