@@ -21,20 +21,18 @@ function getScopedProjectId(pathname: string): string | null {
 
 /* AppShell — "Inhabited Dark" sidebar.
  *
- * Three rules the active treatment obeys:
- *  1. Whisper, don't shout. Active rows get a low-alpha purple wash (≤0.18)
- *     and a 2.5px gradient accent bar on the left edge. No inset rings,
- *     no chunky purple fill — those read as generic SaaS template.
+ * Active treatment rules:
+ *  1. Active rows get a quiet elevated pill — a flat white/[0.05] tint —
+ *     and nothing else. No purple wash, no accent bar, no inset ring. The
+ *     pill alone marks "you are here" without competing with content.
  *  2. Parent stays quiet when you're inside its section. The leaf sub-item
- *     carries the spotlight (its own mini accent bar + soft wash); the
- *     parent only gets bold text and a rotated caret. No double-active.
- *  3. Monochrome project chips. Previously each project hashed to its own
- *     HSL hue, which read as a different design system from the purple/white
- *     rail above. Identity comes from the letter + status orb, not from
- *     a random rainbow of fills.
+ *     carries the spotlight (its own quiet pill); the parent only gets
+ *     bold text and a rotated caret. No double-active.
+ *  3. Monochrome project chips. Identity comes from the letter + status orb,
+ *     not from a random rainbow of fills.
  *
- * One signature moment: the lowercase "ppc" wordmark gets a single italic
- * serif period — echoing the hero card's italic period in "Google Ads."
+ * Sidebar bg is black-led with a soft purple bloom only at the very top,
+ * blending into deep #07050D. Wordmark is uppercase PPC.IO, bold and tight.
  */
 
 interface SubPage { label: string; to: string; }
@@ -150,7 +148,7 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <BrandRow collapsed={collapsed} onToggle={onToggle} />
         <SearchRow collapsed={collapsed} />
 
-        <nav className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-3 pb-3">
+        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 pb-3">
           {!collapsed && <SectionLabel>Workspace</SectionLabel>}
           <MainNavItem to="/" icon={House} label="Dashboard" collapsed={collapsed} end />
           <MainNavItem to="/chat" icon={ChatCircle} label="Chat" collapsed={collapsed} badge="2" />
@@ -200,36 +198,32 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function BrandRow({ collapsed, onToggle }: SidebarProps) {
   return (
-    <div className={`relative flex items-center pt-5 pb-4 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
+    <div className={`relative flex items-center pt-5 pb-5 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
       {!collapsed && (
         <NavLink to="/" className="group flex items-center gap-2.5">
           <span
-            className="relative grid h-[28px] w-[28px] place-items-center overflow-hidden rounded-[8px] text-[13px] font-extrabold leading-none text-white"
+            className="relative grid h-[34px] w-[34px] place-items-center overflow-hidden rounded-[10px] text-[15px] font-extrabold leading-none text-white"
             style={{
-              background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 55%, #534AB7 100%)',
+              background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 55%, #5742C7 100%)',
               boxShadow:
-                '0 1px 0 rgba(255,255,255,0.18) inset, 0 0 0 1px rgba(127,90,240,0.55), 0 6px 14px -6px rgba(127,90,240,0.55)',
+                '0 1px 0 rgba(255,255,255,0.22) inset, 0 0 0 1px rgba(127,90,240,0.55), 0 8px 22px -8px rgba(127,90,240,0.65)',
             }}
           >
             <span
               aria-hidden
-              className="absolute inset-0 opacity-50"
+              className="absolute inset-0 opacity-55"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 55%)',
+                  'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 55%)',
               }}
             />
-            <span className="relative">ɪ</span>
+            <span className="relative">P</span>
           </span>
-          <span className="flex items-baseline text-[15px] font-bold tracking-[-0.02em] text-white">
-            ppc
-            <span
-              className="ml-[1px] font-serif italic font-bold leading-none text-[#B08EF4]"
-              style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-            >
-              .
-            </span>
-            io
+          <span
+            className="text-[17px] font-extrabold leading-none tracking-[-0.01em] text-white"
+            style={{ fontFamily: 'Figtree, ui-sans-serif, system-ui, sans-serif' }}
+          >
+            PPC.IO
           </span>
         </NavLink>
       )}
@@ -267,16 +261,16 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
     <div className="px-3 pb-4">
       <div className="group relative">
         <MagnifyingGlass
-          size={13.5}
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/45 transition-colors group-hover:text-white/80"
+          size={14}
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/50 transition-colors group-hover:text-white/85"
         />
         <input
           readOnly
-          placeholder="Search or jump to"
-          className="w-full cursor-pointer rounded-[10px] border border-white/[0.07] bg-white/[0.03] py-[8.5px] pl-[34px] pr-14 text-[13px] text-white outline-none placeholder:text-white/50 transition-colors hover:border-white/[0.12] hover:bg-white/[0.05]"
+          placeholder="Search..."
+          className="w-full cursor-pointer rounded-[10px] border border-white/[0.07] bg-white/[0.035] py-[10px] pl-[34px] pr-14 text-[13.5px] text-white outline-none placeholder:text-white/55 transition-colors hover:border-white/[0.12] hover:bg-white/[0.05]"
         />
         <kbd
-          className="pointer-events-none absolute right-2.5 top-1/2 flex h-[18px] -translate-y-1/2 items-center rounded-[5px] border border-white/[0.10] bg-white/[0.04] px-[6px] font-mono text-[10px] leading-none text-white/65"
+          className="pointer-events-none absolute right-2.5 top-1/2 flex h-[19px] -translate-y-1/2 items-center rounded-[5px] border border-white/[0.10] bg-white/[0.04] px-[6px] font-mono text-[10.5px] leading-none text-white/70"
           style={{ fontFamily: '"Courier New", ui-monospace, Menlo, monospace' }}
         >
           ⌘K
@@ -310,44 +304,30 @@ function MainNavItem({
       title={collapsed ? label : undefined}
       className={({ isActive }) => {
         const active = overrideActive ?? isActive;
-        return `group relative flex items-center rounded-[9px] text-[13.5px] transition-colors duration-150 ${
-          collapsed ? 'justify-center px-2 py-[9px]' : 'gap-2.5 px-3 py-[8px]'
+        return `group relative flex items-center rounded-[10px] text-[14px] transition-colors duration-150 ${
+          collapsed ? 'justify-center px-2 py-[10px]' : 'gap-3 px-3 py-[11px]'
         } ${
           active
-            ? 'font-semibold text-white'
-            : 'font-medium text-white/80 hover:bg-white/[0.05] hover:text-white'
+            ? 'bg-white/[0.05] font-semibold text-white'
+            : 'font-medium text-white/85 hover:bg-white/[0.04] hover:text-white'
         }`;
-      }}
-      style={({ isActive }) => {
-        const active = overrideActive ?? isActive;
-        return active
-          ? {
-              background:
-                'linear-gradient(90deg, rgba(127,90,240,0.16) 0%, rgba(127,90,240,0.04) 60%, rgba(127,90,240,0) 100%)',
-            }
-          : undefined;
       }}
     >
       {({ isActive }) => {
         const active = overrideActive ?? isActive;
         return (
           <>
-            {active && !collapsed && <ActiveAccent />}
             <Icon
-              size={17}
+              size={18}
               weight={active ? 'fill' : 'duotone'}
-              className={
-                active
-                  ? 'text-white'
-                  : 'text-white transition-colors group-hover:text-white'
-              }
+              className="text-white"
             />
             {!collapsed && (
               <>
                 <span className="flex-1 tracking-[-0.005em]">{label}</span>
                 {badge && (
                   <span
-                    className={`ml-auto inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-[5px] px-[5px] text-[10.5px] font-semibold leading-none tabular-nums ${
+                    className={`ml-auto inline-flex h-[19px] min-w-[21px] items-center justify-center rounded-[5px] px-[6px] text-[10.5px] font-semibold leading-none tabular-nums ${
                       active
                         ? 'bg-white/15 text-white'
                         : 'bg-white/[0.07] text-white/70'
@@ -363,21 +343,6 @@ function MainNavItem({
         );
       }}
     </NavLink>
-  );
-}
-
-/* Left edge accent: 2px vertical pill with a soft purple gradient + glow.
- * Replaces the chunky background fill the previous active state used. */
-function ActiveAccent() {
-  return (
-    <span
-      aria-hidden
-      className="pointer-events-none absolute left-0 top-1/2 h-[18px] w-[2.5px] -translate-y-1/2 rounded-r-full"
-      style={{
-        background: 'linear-gradient(180deg, #C7B0FF 0%, #7F5AF0 100%)',
-        boxShadow: '0 0 10px 0 rgba(127,90,240,0.55)',
-      }}
-    />
   );
 }
 
@@ -411,28 +376,16 @@ function ItemGroup({
       <button
         onClick={() => navigate(pages[0].to)}
         title={label}
-        className={`group relative flex w-full items-center justify-center rounded-[9px] px-2 py-[9px] transition-colors ${
+        className={`group relative flex w-full items-center justify-center rounded-[10px] px-2 py-[10px] transition-colors ${
           inSection
-            ? 'font-semibold text-white'
-            : 'text-white/80 hover:bg-white/[0.05] hover:text-white'
+            ? 'bg-white/[0.05] font-semibold text-white'
+            : 'text-white/85 hover:bg-white/[0.04] hover:text-white'
         }`}
-        style={
-          inSection
-            ? {
-                background:
-                  'linear-gradient(90deg, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.04) 100%)',
-              }
-            : undefined
-        }
       >
         <Icon
-          size={17}
+          size={18}
           weight={inSection ? 'fill' : 'duotone'}
-          className={
-            inSection
-              ? 'text-white'
-              : 'text-white transition-colors group-hover:text-white'
-          }
+          className="text-white"
         />
       </button>
     );
@@ -443,16 +396,16 @@ function ItemGroup({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`group relative flex w-full items-center gap-2.5 rounded-[9px] px-3 py-[8px] text-left text-[13.5px] transition-colors duration-150 ${
+        className={`group relative flex w-full items-center gap-3 rounded-[10px] px-3 py-[11px] text-left text-[14px] transition-colors duration-150 ${
           inSection
-            ? 'font-semibold text-white hover:bg-white/[0.04]'
-            : 'font-medium text-white/80 hover:bg-white/[0.05] hover:text-white'
+            ? 'bg-white/[0.05] font-semibold text-white hover:bg-white/[0.06]'
+            : 'font-medium text-white/85 hover:bg-white/[0.04] hover:text-white'
         }`}
       >
         <Icon
-          size={17}
+          size={18}
           weight={inSection ? 'fill' : 'duotone'}
-          className="text-white transition-colors group-hover:text-white"
+          className="text-white"
         />
         <span className="flex-1 tracking-[-0.005em]">{label}</span>
         {runningCount !== undefined && <RunningIndicator count={runningCount} />}
@@ -460,17 +413,17 @@ function ItemGroup({
           size={10}
           weight="bold"
           className={`shrink-0 ${
-            inSection ? 'text-white/55' : 'text-white/45'
+            inSection ? 'text-white/60' : 'text-white/45'
           } transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
         />
       </button>
 
       {open && (
         <ul
-          className="relative mb-1 ml-[24px] mt-1 flex flex-col gap-[1px] pl-3"
+          className="relative mb-1 ml-[26px] mt-1 flex flex-col gap-[2px] pl-3"
           style={{
             background:
-              'linear-gradient(180deg, rgba(127,90,240,0.30) 0%, rgba(127,90,240,0.06) 100%)',
+              'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.02) 100%)',
             backgroundSize: '1px 100%',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'left top',
@@ -482,37 +435,14 @@ function ItemGroup({
                 to={sp.to}
                 end
                 className={({ isActive }) =>
-                  `relative block rounded-[7px] px-2.5 py-[6px] text-[12.5px] transition-colors duration-150 ${
+                  `relative block rounded-[8px] px-3 py-[7px] text-[12.5px] transition-colors duration-150 ${
                     isActive
-                      ? 'font-semibold text-white'
-                      : 'font-medium text-white/65 hover:bg-white/[0.05] hover:text-white'
+                      ? 'bg-white/[0.05] font-semibold text-white'
+                      : 'font-medium text-white/65 hover:bg-white/[0.04] hover:text-white'
                   }`
                 }
-                style={({ isActive }) =>
-                  isActive
-                    ? {
-                        background:
-                          'linear-gradient(90deg, rgba(127,90,240,0.14) 0%, rgba(127,90,240,0.02) 80%, rgba(127,90,240,0) 100%)',
-                      }
-                    : undefined
-                }
               >
-                {({ isActive }) => (
-                  <>
-                    {isActive && (
-                      <span
-                        aria-hidden
-                        className="pointer-events-none absolute -left-[12px] top-1/2 h-[14px] w-[2px] -translate-y-1/2 rounded-r-full"
-                        style={{
-                          background:
-                            'linear-gradient(180deg, #C7B0FF 0%, #7F5AF0 100%)',
-                          boxShadow: '0 0 8px 0 rgba(127,90,240,0.55)',
-                        }}
-                      />
-                    )}
-                    {sp.label}
-                  </>
-                )}
+                {sp.label}
               </NavLink>
             </li>
           ))}
@@ -603,7 +533,7 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
         end
       />
 
-      <ul className="mt-px flex flex-col gap-[1px]">
+      <ul className="mt-px flex flex-col gap-1">
         {PROJECTS.map((p) => {
           const status = projectStatus(p.id);
           const chip = projectChip(p.id);
@@ -612,23 +542,14 @@ function ProjectsSection({ collapsed }: { collapsed: boolean }) {
             <li key={p.id}>
               <NavLink
                 to={`/projects/${p.id}`}
-                className={`group relative flex items-center gap-2.5 overflow-hidden rounded-[9px] px-3 py-[7px] text-[13px] transition-colors duration-150 ${
+                className={`group relative flex items-center gap-3 overflow-hidden rounded-[10px] px-3 py-[9px] text-[13.5px] transition-colors duration-150 ${
                   isActive
-                    ? 'font-semibold text-white'
-                    : 'font-medium text-white/80 hover:bg-white/[0.05] hover:text-white'
+                    ? 'bg-white/[0.05] font-semibold text-white'
+                    : 'font-medium text-white/85 hover:bg-white/[0.04] hover:text-white'
                 }`}
-                style={
-                  isActive
-                    ? {
-                        background:
-                          'linear-gradient(90deg, rgba(127,90,240,0.16) 0%, rgba(127,90,240,0.04) 60%, rgba(127,90,240,0) 100%)',
-                      }
-                    : undefined
-                }
               >
-                {isActive && <ActiveAccent />}
                 <span
-                  className="relative grid h-[22px] w-[22px] shrink-0 place-items-center rounded-[6px] text-[10.5px] font-semibold leading-none"
+                  className="relative grid h-[24px] w-[24px] shrink-0 place-items-center rounded-[6px] text-[11px] font-semibold leading-none"
                   style={{
                     background: chip.bg,
                     color: chip.fg,
