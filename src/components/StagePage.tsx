@@ -411,16 +411,26 @@ function RunningCanvas({ run }: { run: AgentRun }) {
 // ─── Hero on canvas ──────────────────────────────────────────────────────
 
 function RunningHero({ headline }: { headline: string }) {
+  const hasPeriod = headline.endsWith('.');
+  const body = hasPeriod ? headline.slice(0, -1) : headline;
   return (
     <div>
       <h1 className="font-display text-[64px] font-extrabold leading-[1.04] tracking-[-0.035em] text-ppc-ink sm:text-[72px]">
-        {headline}
+        {body}
+        {hasPeriod && <span style={{ color: '#7F5AF0' }}>.</span>}
       </h1>
     </div>
   );
 }
 
-// ─── Dark "Live mission feed" card ────────────────────────────────────────
+// ─── Mission-feed card ───────────────────────────────────────────────────
+//
+// World-class redesign 2026-05-15: replaces the dark "Spotify radio" panel
+// with an editorial white card in keeping with the rest of PPC.io's app
+// system. Active operation sits in a soft lavender wash at the top (where
+// the live work is happening); the receipts trail flows below on white.
+// One subtle Running pulse — no NOW/ACTIVE chips, no waveform mascot, no
+// "in progress" label. Calm and high-signal.
 
 function MissionFeedCard({
   active, recentSteps,
@@ -429,64 +439,20 @@ function MissionFeedCard({
   recentSteps: MissionFeedStep[];
 }) {
   return (
-    <div
-      className="relative overflow-hidden rounded-[18px] px-7 pb-7 pt-6 text-white sm:px-8 sm:pb-8 sm:pt-7"
+    <section
+      className="overflow-hidden rounded-[16px] bg-white"
       style={{
-        background: '#050308',
         boxShadow:
-          '0 40px 70px -40px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.025), inset 0 0 0 1px rgba(255,255,255,0.04)',
+          '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.10)',
       }}
     >
-      {/* Faint top-left purple bloom — atmosphere, not a glow on its own */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -left-24 -top-32 h-[340px] w-[340px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.10) 0%, transparent 65%)' }}
-      />
-
-      <p className="relative mb-6 text-[16px] font-semibold tracking-[-0.005em] text-white">
-        Live mission feed
-      </p>
-
-      <div className="relative">
-        <MissionActiveCard active={active} />
-
-        {/* Vertical connector — runs from below the active card down through
-            every check circle. Sits OUTSIDE the completed cards on the left. */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute left-[17px] w-px"
-          style={{
-            top: 'calc(50% + 0px)', // tweaked below: actually anchor inside relative wrapper
-            background:
-              'linear-gradient(180deg, rgba(127,90,240,0.55) 0%, rgba(255,255,255,0.10) 22%, rgba(255,255,255,0.08) 100%)',
-            height: 0,
-          }}
-        />
-
-        <ul className="relative mt-4 flex flex-col gap-3">
-          {/* The actual connector — anchored inside this UL so it lines up
-              cleanly with each row's check circle (left:17px → center of 34px). */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute left-[17px] top-0 bottom-[14px] w-px"
-            style={{
-              background:
-                'linear-gradient(180deg, rgba(127,90,240,0.40) 0%, rgba(255,255,255,0.08) 8%, rgba(255,255,255,0.06) 100%)',
-            }}
-          />
-          {recentSteps.map((s, i) => (
-            <li key={i}>
-              <MissionCompletedRow step={s} />
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+      <ActivePanel active={active} />
+      <StepsTrail steps={recentSteps} />
+    </section>
   );
 }
 
-function MissionActiveCard({ active }: { active: AgentStageRunning }) {
+function ActivePanel({ active }: { active: AgentStageRunning }) {
   const progress = Math.max(0, Math.min(100, active.progressPct ?? 0));
   return (
     <div

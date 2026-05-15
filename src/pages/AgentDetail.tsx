@@ -1,19 +1,21 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowLeft, ArrowRight, Clock, Sparkle,
-  Brain, Lightning, ChartLineUp, EnvelopeSimple, ShieldCheck,
+  CaretRight, CaretDown, ArrowRight, Clock, Sparkle,
+  MapTrifold, Path, Flag, Check, ShieldCheck, EnvelopeSimple,
+  PaperPlaneTilt,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
 import { PROJECTS, ACCOUNTS, CURRENT_PROJECT_ID } from '../mock/projects';
-import type { LaunchLevel } from '../types/agent';
+import { SpyMascot } from '../components/SpyMascot';
+import type { LaunchLevel, AgentDefinition } from '../types/agent';
 
 // Agent Detail · /agents/:slug
 //
-// LIGHT magazine-feature page with ONE dark focal moment (the
-// "How this agent thinks" block — the editorial smoky-black canvas
-// that mirrors the StagePage). Left = editorial story. Right = sticky
-// Configure & Launch card.
+// The agent's "front of house" — same world as the completed report
+// (/reports/:runId): breadcrumb, big bold title, dark hero card with a
+// signature mascot (the SAME spy that runs the report — continuity is
+// the point), and clean white cards underneath.
 //
 // Hard rules: TIME + APPROVAL cues only. NEVER pre-run $ figures.
 
@@ -25,11 +27,11 @@ const LAUNCH_LEVELS: Array<{ value: LaunchLevel; label: string; sub: string }> =
 ];
 
 type RunMode = 'once' | 'recurring' | 'schedule-only' | 'custom';
-const RUN_MODES: Array<[RunMode, string, string]> = [
-  ['once',          'Run once now',       'Single launch, this run only'],
-  ['recurring',     'Run now + schedule', 'Run today, then on a cadence'],
-  ['schedule-only', 'Schedule only',      'Queue for a future run'],
-  ['custom',        'Custom cron',        'Power-user cadence'],
+const RUN_MODES: Array<{ value: RunMode; label: string; sub: string }> = [
+  { value: 'once',          label: 'Run once now',       sub: 'Single launch, this run only' },
+  { value: 'recurring',     label: 'Run now + schedule', sub: 'Run today, then on a cadence' },
+  { value: 'schedule-only', label: 'Schedule only',      sub: 'Queue for a future run' },
+  { value: 'custom',        label: 'Custom cron',        sub: 'Power-user cadence' },
 ];
 
 export function AgentDetail() {
@@ -50,21 +52,8 @@ export function AgentDetail() {
   );
 
   if (!agent) {
-    return (
-      <div className="rounded-2xl border border-ppc-neutral-100 bg-white p-12 text-center">
-        <div className="font-display text-[24px] font-bold tracking-tight">Agent not found.</div>
-        <Link to="/agents" className="mt-3 inline-flex items-center gap-1 text-ppc-purple-500 hover:underline">
-          <ArrowLeft size={14} /> Back to library
-        </Link>
-      </div>
-    );
+    return <NotFound />;
   }
-
-  const headlineBody = agent.headline.endsWith('.')
-    ? agent.headline.slice(0, -1)
-    : agent.headline;
-
-  const categoryLabel = agent.category.charAt(0).toUpperCase() + agent.category.slice(1);
 
   const toggleAccount = (id: string) => {
     setSelectedAccounts((prev) =>
@@ -83,307 +72,752 @@ export function AgentDetail() {
   };
 
   return (
-    <div className="space-y-10">
-      <Link
-        to="/agents"
-        className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-ppc-neutral-500 transition-colors hover:text-ppc-purple-500"
-      >
-        <ArrowLeft size={12} weight="bold" /> All agents
-      </Link>
-
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_420px]">
-        {/* ═══ LEFT — editorial column ═══════════════════════════════════ */}
-        <div className="min-w-0 space-y-12">
-          {/* HERO */}
-          <section>
-            <div className="flex items-center gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
-              <span className="tabular text-ppc-text-faint">
-                {String(AGENTS.findIndex((a) => a.slug === agent.slug) + 1).padStart(2, '0')}
-              </span>
-              <span className="h-px w-7 bg-ppc-neutral-200" />
-              <span>{categoryLabel} agent</span>
-            </div>
-
-            <div className="mt-6 flex items-center gap-3">
-              <span
-                className="grid h-11 w-11 place-items-center rounded-2xl border border-ppc-neutral-100 bg-white text-[20px] shadow-ppc-sm"
-                aria-hidden
-              >
-                {agent.emoji}
-              </span>
-              <div className="font-display text-[17px] font-semibold tracking-tight text-ppc-black">
-                {agent.name}
-              </div>
-            </div>
-
-            <h1 className="mt-6 max-w-[720px] font-display text-[52px] font-extrabold leading-[0.98] tracking-[-0.03em] text-ppc-black sm:text-[60px]">
-              {headlineBody}
-              <span className="text-ppc-purple-500">.</span>
-            </h1>
-
-            <p className="mt-6 max-w-[620px] text-[17px] leading-[1.55] tracking-tight text-ppc-neutral-700">
-              {agent.outcomeDescription}
-            </p>
-
-            {/* Quiet meta row — TIME + APPROVAL cues */}
-            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ppc-neutral-500">
-              <span className="inline-flex items-center gap-1.5">
-                <Clock size={12} weight="duotone" className="text-ppc-neutral-400" />
-                <span className="tabular">{agent.expectedDuration}</span>
-                <span className="text-ppc-neutral-400">· background</span>
-              </span>
-              <span className="h-3 w-px bg-ppc-neutral-200" />
-              <span className="inline-flex items-center gap-1.5">
-                <EnvelopeSimple size={12} weight="duotone" className="text-ppc-neutral-400" />
-                Email when ready
-              </span>
-              <span className="h-3 w-px bg-ppc-neutral-200" />
-              <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck size={12} weight="duotone" className="text-ppc-neutral-400" />
-                Client-ready output
-              </span>
-            </div>
-          </section>
-
-          {/* BUILT BY — light editorial byline */}
-          <section className="border-y border-ppc-neutral-100 py-7">
-            <div className="flex items-start gap-4">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-300 to-ppc-purple-500 text-[22px]">
-                👨
-              </div>
-              <div className="text-[14.5px] leading-relaxed tracking-tight">
-                <div className="text-[12.5px] font-semibold text-ppc-black">
-                  Stew built this <span className="font-normal text-ppc-neutral-500">/ founder, PPC.io</span>
-                </div>
-                <p className="mt-2 max-w-[600px] text-ppc-neutral-700">
-                  After scaling an agency to 100+ client accounts with a team of 50, I saw the same thing every agency owner sees: the gap between <span className="font-semibold text-ppc-black">we know what to do</span> and <span className="font-semibold text-ppc-black">we have time to do it for every single account</span> gets wider every month. This agent closes that gap.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* HOW THIS AGENT THINKS — DARK focal moment */}
-          <section className="ppc-dark ppc-dark--hero relative overflow-hidden rounded-3xl px-8 py-9 sm:px-10 sm:py-10">
-            <div className="relative">
-              <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-white/55">
-                How this agent thinks
-              </div>
-              <h2 className="mt-3 max-w-[560px] font-display text-[30px] font-bold leading-[1.05] tracking-[-0.022em] text-white">
-                Like a senior strategist, not a script<span className="text-ppc-purple-500">.</span>
-              </h2>
-              <ol className="mt-7 space-y-3">
-                {[
-                  { icon: Brain,         step: '01', kicker: 'Context',        label: agent.thinkingSteps[0] },
-                  { icon: Lightning,     step: '02', kicker: 'Alignment',      label: agent.thinkingSteps[1] },
-                  { icon: ChartLineUp,   step: '03', kicker: 'Recommendation', label: agent.thinkingSteps[2] },
-                ].map((s, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center gap-5 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-4"
-                  >
-                    <div className="tabular font-mono text-[12px] font-semibold text-ppc-purple-300">
-                      {s.step}
-                    </div>
-                    <div className="grid h-9 w-9 place-items-center rounded-xl bg-ppc-purple-500/15 text-ppc-purple-300">
-                      <s.icon size={17} weight="duotone" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.12em] text-white/55">
-                        {s.kicker}
-                      </div>
-                      <div className="mt-1 text-[14.5px] font-medium leading-snug tracking-tight text-white">
-                        {s.label}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </section>
-
-          {/* WHAT YOU'LL GET BACK — v5 "You walk away with" soft-purple panel */}
-          <section>
-            <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ppc-neutral-500">
-              What you'll get back
-            </div>
-            <h2 className="mt-3 font-display text-[26px] font-bold leading-[1.05] tracking-[-0.02em] text-ppc-black">
-              Client-ready, audit-ready<span className="text-ppc-purple-500">.</span>
-            </h2>
-
-            <div className="mt-6 rounded-card bg-ppc-panel-soft px-7 py-6">
-              <div className="text-[15px] font-semibold text-ppc-ink">You walk away with</div>
-              <ul className="mt-4 space-y-3.5">
-                {[
-                  { title: `${agent.expectedDuration} in the background`, sub: "You'll get an email when it's done." },
-                  { title: 'Prioritized findings with impact',            sub: 'Reasoning and estimated impact per finding.' },
-                  { title: 'Generate client report',                      sub: 'Hand it to your client as-is. No editing.' },
-                  { title: 'Full audit trail',                            sub: 'Every tool call, every source, every AI judgment.' },
-                ].map((row, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <span className="mt-2 h-[5px] w-[5px] shrink-0 rounded-full bg-ppc-purple-700" />
-                    <div>
-                      <div className="text-[13.5px] font-semibold text-ppc-ink">{row.title}</div>
-                      <div className="mt-0.5 text-[12.5px] leading-[1.55] text-ppc-purple-700">{row.sub}</div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-        </div>
-
-        {/* ═══ RIGHT — Configure & launch (sticky light card) ═══════════════ */}
-        <aside className="lg:sticky lg:top-10 lg:h-fit">
-          <div className="rounded-2xl border border-ppc-neutral-100 bg-white p-7 shadow-ppc-sm">
-            <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-ppc-neutral-500">
-              Configure & launch
-            </div>
-            <div className="mt-2 font-display text-[22px] font-bold tracking-[-0.02em] text-ppc-black">
-              Pick where this runs<span className="text-ppc-purple-500">.</span>
-            </div>
-
-            <div className="mt-6 space-y-5">
-              <Field label="Project (client)">
-                <select
-                  value={selectedProject}
-                  onChange={(e) => { setSelectedProject(e.target.value); setSelectedAccounts([]); }}
-                  className="ppc-select"
-                >
-                  {PROJECTS.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}{p.industry ? ` — ${p.industry}` : ''}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-
-              <Field label={`Accounts (${selectedAccounts.length || 'all'} selected)`}>
-                <div className="max-h-44 overflow-y-auto rounded-xl border border-ppc-neutral-100 p-1">
-                  {projectAccounts.map((acc) => {
-                    const checked = selectedAccounts.includes(acc.id);
-                    return (
-                      <label
-                        key={acc.id}
-                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-[13.5px] transition-colors ${
-                          checked ? 'bg-ppc-purple-50' : 'hover:bg-ppc-neutral-25'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => toggleAccount(acc.id)}
-                          className="h-4 w-4 accent-ppc-purple-500"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate font-medium text-ppc-black">{acc.name}</div>
-                          <div className="font-mono text-[11px] text-ppc-neutral-400">{acc.customerId}</div>
-                        </div>
-                      </label>
-                    );
-                  })}
-                </div>
-              </Field>
-
-              <Field label="Launch level">
-                <div className="grid grid-cols-2 gap-2">
-                  {LAUNCH_LEVELS.map((l) => (
-                    <button
-                      key={l.value}
-                      onClick={() => setLaunchLevel(l.value)}
-                      className={`rounded-xl border px-3 py-2.5 text-left text-[12.5px] transition-colors ${
-                        launchLevel === l.value
-                          ? 'border-ppc-purple-500 bg-ppc-purple-50'
-                          : 'border-ppc-neutral-100 hover:border-ppc-purple-300'
-                      }`}
-                    >
-                      <div className="font-semibold text-ppc-black">{l.label}</div>
-                      <div className="mt-0.5 text-[11.5px] text-ppc-neutral-500">{l.sub}</div>
-                    </button>
-                  ))}
-                </div>
-              </Field>
-
-              <Field label="Date range">
-                <select
-                  value={dateRange}
-                  onChange={(e) => setDateRange(e.target.value)}
-                  className="ppc-select"
-                >
-                  <option value="last_7d">Last 7 days</option>
-                  <option value="last_30d">Last 30 days</option>
-                  <option value="last_90d">Last 90 days</option>
-                  <option value="this_month">This month so far</option>
-                  <option value="last_month">Last month</option>
-                </select>
-              </Field>
-
-              <Field label="Steer the agent (optional)">
-                <textarea
-                  value={steer}
-                  onChange={(e) => setSteer(e.target.value)}
-                  rows={2}
-                  placeholder='e.g. "focus on settlement positioning, ignore brand"'
-                  className="ppc-textarea"
-                />
-              </Field>
-
-              <Field label="Run mode">
-                <div className="space-y-1.5">
-                  {RUN_MODES.map(([v, l, sub]) => {
-                    const active = runMode === v;
-                    return (
-                      <button
-                        key={v}
-                        onClick={() => setRunMode(v)}
-                        className={`flex w-full items-start gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-colors ${
-                          active
-                            ? 'border-ppc-purple-500 bg-ppc-purple-50'
-                            : 'border-ppc-neutral-100 hover:border-ppc-purple-300'
-                        }`}
-                      >
-                        <span className={`mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full border-2 ${
-                          active ? 'border-ppc-purple-500' : 'border-ppc-neutral-300'
-                        }`}>
-                          {active && <span className="h-1.5 w-1.5 rounded-full bg-ppc-purple-500" />}
-                        </span>
-                        <span>
-                          <span className="block text-[12.5px] font-semibold text-ppc-black">{l}</span>
-                          <span className="block text-[11.5px] text-ppc-neutral-500">{sub}</span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </Field>
-
-              <button
-                onClick={handleLaunch}
-                className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-md bg-ppc-purple-500 px-6 py-3.5 text-[14.5px] font-bold tracking-tight text-white shadow-[0_4px_14px_-4px_rgba(128,87,255,0.55)] transition-transform hover:-translate-y-[1px]"
-              >
-                <Sparkle size={15} weight="fill" />
-                Launch agent
-                <ArrowRight size={14} weight="bold" />
-              </button>
-
-              <div className="flex items-center justify-center gap-1.5 text-[11.5px] text-ppc-neutral-500">
-                <Clock size={11} weight="duotone" />
-                {agent.expectedDuration} · runs in background · email when ready
-              </div>
-            </div>
-          </div>
-        </aside>
-      </div>
+    <div className="font-sans text-ppc-ink">
+      <Breadcrumbs trail={['Agents', agent.name]} />
+      <TitleRow agent={agent} />
+      <HeroCard agent={agent} onLaunch={handleLaunch} />
+      <BuiltBy />
+      <HowItThinks steps={agent.thinkingSteps} />
+      <WhatYouGet expectedDuration={agent.expectedDuration} />
+      <ConfigurePanel
+        agent={agent}
+        selectedProject={selectedProject}
+        setSelectedProject={(id) => { setSelectedProject(id); setSelectedAccounts([]); }}
+        projectAccounts={projectAccounts}
+        selectedAccounts={selectedAccounts}
+        toggleAccount={toggleAccount}
+        launchLevel={launchLevel}
+        setLaunchLevel={setLaunchLevel}
+        runMode={runMode}
+        setRunMode={setRunMode}
+        steer={steer}
+        setSteer={setSteer}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        onLaunch={handleLaunch}
+      />
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function NotFound() {
   return (
-    <div>
-      <div className="mb-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ppc-neutral-500">
+    <div className="rounded-2xl border border-ppc-neutral-100 bg-white p-12 text-center">
+      <div className="font-display text-[24px] font-bold tracking-tight">Agent not found.</div>
+      <Link to="/agents" className="mt-3 inline-flex items-center gap-1 text-ppc-purple-500 hover:underline">
+        Back to library
+      </Link>
+    </div>
+  );
+}
+
+// ─── Breadcrumb ──────────────────────────────────────────────────────────
+
+function Breadcrumbs({ trail }: { trail: string[] }) {
+  return (
+    <nav className="mb-4 flex flex-wrap items-center gap-[6px] text-[13px] text-ppc-text-muted">
+      <Link to="/agents" className="transition-colors hover:text-ppc-ink">
+        {trail[0]}
+      </Link>
+      <CaretRight size={10} weight="bold" className="text-ppc-text-faint" />
+      <span className="font-medium text-ppc-ink">{trail[1]}</span>
+    </nav>
+  );
+}
+
+// ─── Title row ───────────────────────────────────────────────────────────
+
+const CATEGORY_LABEL: Record<string, string> = {
+  operations:  'Operations',
+  creative:    'Creative',
+  strategic:   'Strategic',
+  buyer:       'Buyer',
+  diagnostics: 'Diagnostics',
+  client:      'Client',
+  context:     'Context',
+};
+
+function TitleRow({ agent }: { agent: AgentDefinition }) {
+  return (
+    <div className="mb-7 flex flex-wrap items-center gap-3">
+      <h1 className="font-display text-[40px] font-extrabold leading-none tracking-[-0.025em] text-ppc-ink">
+        {agent.name}
+      </h1>
+      <CategoryChip label={CATEGORY_LABEL[agent.category] ?? agent.category} />
+    </div>
+  );
+}
+
+function CategoryChip({ label }: { label: string }) {
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-[11px] py-[5px] text-[12px] font-semibold"
+      style={{
+        background: '#EFEAFB',
+        color: '#534AB7',
+        boxShadow: 'inset 0 0 0 1px rgba(83,74,183,0.18)',
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+// ─── Dark hero card with mascot + launch button ──────────────────────────
+
+function HeroCard({
+  agent,
+  onLaunch,
+}: {
+  agent: AgentDefinition;
+  onLaunch: () => void;
+}) {
+  const hasPeriod = agent.headline.endsWith('.');
+  const body = hasPeriod ? agent.headline.slice(0, -1) : agent.headline;
+
+  return (
+    <section
+      className="relative mb-12 overflow-hidden rounded-[20px] text-white"
+      style={{
+        background:
+          'radial-gradient(120% 90% at 88% -10%, #1B0F39 0%, #0A0814 55%, #050310 100%)',
+        boxShadow:
+          '0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(15,10,30,0.55)',
+      }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-32 -top-32 h-[460px] w-[460px] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(127,90,240,0.30) 0%, rgba(127,90,240,0.10) 35%, transparent 65%)',
+        }}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -bottom-24 left-[8%] h-[280px] w-[280px] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(127,90,240,0.10) 0%, transparent 65%)',
+        }}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            'radial-gradient(rgba(255,255,255,0.55) 1px, transparent 1px)',
+          backgroundSize: '3px 3px',
+          mixBlendMode: 'screen',
+        }}
+      />
+
+      <div className="relative grid gap-8 px-10 py-11 sm:grid-cols-[1fr_minmax(220px,300px)] sm:gap-12 sm:px-12 sm:py-14">
+        {/* Copy column */}
+        <div className="min-w-0">
+          <h2 className="font-display text-[44px] font-extrabold leading-[1.04] tracking-[-0.025em] text-white sm:text-[52px]">
+            {body}
+            {hasPeriod && <span style={{ color: '#9F86FF' }}>.</span>}
+          </h2>
+          <p className="mt-5 max-w-[560px] text-[15.5px] leading-[1.6] text-white/65">
+            {agent.outcomeDescription}
+          </p>
+
+          <HeroMeta expectedDuration={agent.expectedDuration} />
+
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={onLaunch}
+              className="group inline-flex items-center gap-2 rounded-[10px] px-[20px] py-[14px] text-[14.5px] font-semibold text-white transition-transform hover:-translate-y-[0.5px]"
+              style={{
+                background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
+                boxShadow:
+                  '0 1px 0 rgba(255,255,255,0.18) inset, 0 8px 20px -6px rgba(127,90,240,0.65)',
+              }}
+            >
+              <Sparkle size={15} weight="fill" />
+              Launch agent
+              <ArrowRight
+                size={14}
+                weight="bold"
+                className="transition-transform group-hover:translate-x-[2px]"
+              />
+            </button>
+
+            <a
+              href="#configure"
+              className="inline-flex items-center gap-2 rounded-[10px] border border-white/[0.12] bg-white/[0.04] px-[18px] py-[12px] text-[13.5px] font-medium text-white/85 transition-colors hover:bg-white/[0.08] hover:text-white"
+            >
+              Configure options
+              <CaretDown size={11} weight="bold" />
+            </a>
+          </div>
+        </div>
+
+        {/* Mascot column */}
+        <div className="relative flex items-end justify-end sm:items-center">
+          <SpyMascot />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HeroMeta({ expectedDuration }: { expectedDuration: string }) {
+  return (
+    <div className="mt-6 flex flex-wrap items-center gap-2.5">
+      <MetaPill icon={<Clock size={13} weight="bold" />}>
+        <span className="tabular-nums">{expectedDuration}</span> background run
+      </MetaPill>
+      <MetaPill icon={<EnvelopeSimple size={13} weight="bold" />}>
+        Email when ready
+      </MetaPill>
+      <MetaPill icon={<ShieldCheck size={13} weight="bold" />}>
+        Client-ready output
+      </MetaPill>
+    </div>
+  );
+}
+
+function MetaPill({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      className="inline-flex items-center gap-[7px] rounded-full px-[11px] py-[6px] text-[12.5px] font-medium text-white/80"
+      style={{
+        background: 'rgba(255,255,255,0.04)',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+      }}
+    >
+      <span className="text-white/75">{icon}</span>
+      {children}
+    </span>
+  );
+}
+
+// ─── Built by Stew ───────────────────────────────────────────────────────
+
+function BuiltBy() {
+  return (
+    <section className="mb-12 flex flex-wrap items-start gap-5">
+      <span
+        className="grid h-[54px] w-[54px] shrink-0 place-items-center overflow-hidden rounded-full text-[18px] font-bold text-white"
+        style={{
+          background: 'linear-gradient(135deg, #C7B0FF 0%, #7F5AF0 60%, #5A3FE0 100%)',
+          boxShadow:
+            '0 0 0 4px #ECEAFA, 0 0 0 5px rgba(127,90,240,0.30), 0 8px 18px -8px rgba(127,90,240,0.45)',
+        }}
+        aria-hidden
+      >
+        SD
+      </span>
+      <div className="min-w-0 max-w-[640px]">
+        <p className="text-[13px] font-mono uppercase tracking-[0.12em] text-ppc-text-muted">
+          Built by Stew
+          <span className="ml-2 normal-case tracking-normal text-ppc-text-faint">
+            Founder, PPC.io
+          </span>
+        </p>
+        <p className="mt-2 text-[15px] leading-[1.65] text-ppc-ink/80">
+          After scaling an agency to 100+ accounts with a team of 50, I saw the same
+          gap every operator sees: <span className="font-semibold text-ppc-ink">we know what to do</span> and
+          {' '}<span className="font-semibold text-ppc-ink">we have time to do it for every account</span> grow
+          further apart every month. This agent closes that gap.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ─── How this agent thinks ───────────────────────────────────────────────
+
+const THINKING_KICKERS = ['Context', 'Alignment', 'Recommendation'];
+const THINKING_ICONS = [MapTrifold, Path, Flag];
+
+function HowItThinks({ steps }: { steps: [string, string, string] }) {
+  return (
+    <section className="mb-12">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h3 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ppc-ink">
+            How this agent thinks<span style={{ color: '#7F5AF0' }}>.</span>
+          </h3>
+          <p className="mt-2 text-[14px] text-ppc-text-muted">
+            Three moves, in order. A senior strategist on tap.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        {steps.map((label, i) => (
+          <ThinkingCard
+            key={i}
+            index={i + 1}
+            kicker={THINKING_KICKERS[i]}
+            label={label}
+            Icon={THINKING_ICONS[i]}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ThinkingCard({
+  index,
+  kicker,
+  label,
+  Icon,
+}: {
+  index: number;
+  kicker: string;
+  label: string;
+  Icon: typeof MapTrifold;
+}) {
+  return (
+    <div
+      className="group relative flex flex-col gap-5 overflow-hidden rounded-[16px] bg-white px-6 pb-6 pt-7 transition-transform hover:-translate-y-[2px]"
+      style={{
+        boxShadow:
+          '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.12)',
+      }}
+    >
+      {/* Step number top-right, large, faint */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute right-5 top-3 font-display text-[60px] font-extrabold leading-none tracking-[-0.04em]"
+        style={{ color: 'rgba(127,90,240,0.08)' }}
+      >
+        0{index}
+      </span>
+
+      <div className="flex items-center gap-3">
+        <span
+          className="grid h-[42px] w-[42px] place-items-center rounded-[10px]"
+          style={{
+            background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 60%, #5A3FE0 100%)',
+            boxShadow:
+              '0 1px 0 rgba(255,255,255,0.35) inset, 0 6px 14px -6px rgba(127,90,240,0.45)',
+          }}
+        >
+          <Icon size={20} weight="bold" className="text-white" />
+        </span>
+        <p
+          className="font-mono text-[11px] font-bold uppercase tracking-[0.14em]"
+          style={{ color: '#7C45CB' }}
+        >
+          {kicker}
+        </p>
+      </div>
+
+      <p className="text-[15.5px] font-semibold leading-[1.4] tracking-[-0.005em] text-ppc-ink">
         {label}
+      </p>
+    </div>
+  );
+}
+
+// ─── What you walk away with ─────────────────────────────────────────────
+
+interface Deliverable {
+  title: string;
+  sub: string;
+}
+
+function WhatYouGet({ expectedDuration }: { expectedDuration: string }) {
+  const items: Deliverable[] = [
+    {
+      title: `${expectedDuration} background run`,
+      sub: "You get an email when it's ready. No watching a loader.",
+    },
+    {
+      title: 'Prioritized findings with impact',
+      sub: 'Every finding is ranked, reasoned, and sized.',
+    },
+    {
+      title: 'Client-ready report',
+      sub: 'Hand it over as-is. No re-editing required.',
+    },
+    {
+      title: 'Full audit trail',
+      sub: 'Every tool call, every source, every judgment.',
+    },
+  ];
+
+  return (
+    <section
+      className="relative mb-12 overflow-hidden rounded-[16px] px-7 py-7"
+      style={{
+        background: '#F2EEFB',
+        boxShadow: 'inset 0 0 0 1px #e1d8f0',
+      }}
+    >
+      <div className="mb-5 flex items-center gap-3">
+        <span
+          className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[12px]"
+          style={{
+            background: 'linear-gradient(155deg, #C9B5FF 0%, #8B6CF5 60%, #5A3FE0 100%)',
+            boxShadow:
+              '0 1px 0 rgba(255,255,255,0.35) inset, 0 6px 14px -6px rgba(127,90,240,0.45)',
+          }}
+        >
+          <PaperPlaneTilt size={20} weight="fill" className="text-white" />
+        </span>
+        <div>
+          <h3 className="text-[18px] font-semibold tracking-[-0.01em] text-ppc-ink">
+            What you walk away with
+          </h3>
+          <p className="mt-[2px] text-[13px] text-ppc-text-muted">
+            What lands in your inbox. Every time.
+          </p>
+        </div>
+      </div>
+
+      <ul className="grid gap-3 sm:grid-cols-2">
+        {items.map((it, i) => (
+          <li
+            key={i}
+            className="flex items-start gap-3 rounded-[12px] bg-white px-5 py-4"
+            style={{ boxShadow: 'inset 0 0 0 1px #ece6f3' }}
+          >
+            <span
+              className="mt-[2px] grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full"
+              style={{
+                background: 'linear-gradient(155deg, #6FE0AC 0%, #3FB985 100%)',
+                boxShadow:
+                  '0 1px 0 rgba(255,255,255,0.45) inset, 0 3px 8px -4px rgba(63,185,133,0.45)',
+              }}
+            >
+              <Check size={12} weight="bold" className="text-white" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink">
+                {it.title}
+              </p>
+              <p className="mt-1 text-[12.5px] leading-[1.55] text-ppc-text-muted">
+                {it.sub}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+// ─── Configure & launch (inline section, no longer sticky right rail) ────
+
+interface ConfigureProps {
+  agent: AgentDefinition;
+  selectedProject: string;
+  setSelectedProject: (id: string) => void;
+  projectAccounts: typeof ACCOUNTS;
+  selectedAccounts: string[];
+  toggleAccount: (id: string) => void;
+  launchLevel: LaunchLevel;
+  setLaunchLevel: (l: LaunchLevel) => void;
+  runMode: RunMode;
+  setRunMode: (m: RunMode) => void;
+  steer: string;
+  setSteer: (s: string) => void;
+  dateRange: string;
+  setDateRange: (s: string) => void;
+  onLaunch: () => void;
+}
+
+function ConfigurePanel(props: ConfigureProps) {
+  const {
+    agent, selectedProject, setSelectedProject, projectAccounts,
+    selectedAccounts, toggleAccount, launchLevel, setLaunchLevel,
+    runMode, setRunMode, steer, setSteer, dateRange, setDateRange,
+    onLaunch,
+  } = props;
+
+  const project = PROJECTS.find((p) => p.id === selectedProject);
+  const accountSummary =
+    selectedAccounts.length === 0
+      ? `All ${projectAccounts.length} accounts`
+      : `${selectedAccounts.length} of ${projectAccounts.length} accounts`;
+
+  return (
+    <section
+      id="configure"
+      className="mb-8 rounded-[20px] bg-white px-8 pb-8 pt-8 sm:px-10 sm:pb-10"
+      style={{
+        boxShadow:
+          '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.12)',
+      }}
+    >
+      <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h3 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ppc-ink">
+            Configure &amp; launch<span style={{ color: '#7F5AF0' }}>.</span>
+          </h3>
+          <p className="mt-2 text-[14px] text-ppc-text-muted">
+            Defaults are tuned. Override only what you want different.
+          </p>
+        </div>
+        <div className="hidden items-center gap-2 text-[12.5px] text-ppc-text-muted sm:flex">
+          <Clock size={13} weight="bold" className="text-ppc-text-faint" />
+          <span className="tabular-nums">{agent.expectedDuration}</span>
+          <span className="text-ppc-text-faint">·</span>
+          background run
+        </div>
+      </div>
+
+      {/* Row 1 — Project + Date range */}
+      <div className="grid gap-5 sm:grid-cols-2">
+        <FieldBlock label="Project (client)" hint={project?.industry}>
+          <SelectControl
+            value={selectedProject}
+            onChange={setSelectedProject}
+            options={PROJECTS.map((p) => ({ value: p.id, label: p.name }))}
+          />
+        </FieldBlock>
+        <FieldBlock label="Date range">
+          <SelectControl
+            value={dateRange}
+            onChange={setDateRange}
+            options={[
+              { value: 'last_7d',     label: 'Last 7 days' },
+              { value: 'last_30d',    label: 'Last 30 days' },
+              { value: 'last_90d',    label: 'Last 90 days' },
+              { value: 'this_month',  label: 'This month so far' },
+              { value: 'last_month',  label: 'Last month' },
+            ]}
+          />
+        </FieldBlock>
+      </div>
+
+      {/* Row 2 — Accounts */}
+      <FieldBlock
+        className="mt-5"
+        label="Accounts"
+        hint={accountSummary}
+      >
+        <div className="flex flex-wrap gap-2">
+          {projectAccounts.map((acc) => {
+            const checked = selectedAccounts.includes(acc.id);
+            return (
+              <button
+                key={acc.id}
+                type="button"
+                onClick={() => toggleAccount(acc.id)}
+                className={`group inline-flex items-center gap-2.5 rounded-[10px] px-3.5 py-[10px] text-left text-[13px] transition-all ${
+                  checked
+                    ? 'bg-[#F0EBFA] text-ppc-ink'
+                    : 'bg-white text-ppc-ink hover:bg-[#FBF9FD]'
+                }`}
+                style={{
+                  boxShadow: checked
+                    ? 'inset 0 0 0 1.5px #7F5AF0'
+                    : 'inset 0 0 0 1px #e7e2ef',
+                }}
+              >
+                <span
+                  className="grid h-[16px] w-[16px] shrink-0 place-items-center rounded-[4px]"
+                  style={{
+                    background: checked ? '#7F5AF0' : 'transparent',
+                    boxShadow: checked
+                      ? 'none'
+                      : 'inset 0 0 0 1.5px #c9c1da',
+                  }}
+                >
+                  {checked && <Check size={10} weight="bold" className="text-white" />}
+                </span>
+                <span className="flex flex-col leading-tight">
+                  <span className="font-semibold tracking-[-0.005em]">{acc.name}</span>
+                  <span className="mt-[2px] font-mono text-[10.5px] text-ppc-text-faint">
+                    {acc.customerId}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </FieldBlock>
+
+      {/* Row 3 — Launch level */}
+      <FieldBlock className="mt-5" label="Launch level">
+        <div className="grid gap-2 sm:grid-cols-4">
+          {LAUNCH_LEVELS.map((l) => {
+            const active = l.value === launchLevel;
+            return (
+              <button
+                key={l.value}
+                type="button"
+                onClick={() => setLaunchLevel(l.value)}
+                className={`rounded-[12px] px-4 py-[10px] text-left transition-colors ${
+                  active ? 'bg-[#F0EBFA]' : 'bg-white hover:bg-[#FBF9FD]'
+                }`}
+                style={{
+                  boxShadow: active
+                    ? 'inset 0 0 0 1.5px #7F5AF0'
+                    : 'inset 0 0 0 1px #e7e2ef',
+                }}
+              >
+                <span className="block text-[13px] font-semibold text-ppc-ink">
+                  {l.label}
+                </span>
+                <span className="mt-[3px] block text-[11.5px] text-ppc-text-muted">
+                  {l.sub}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </FieldBlock>
+
+      {/* Row 4 — Steer */}
+      <FieldBlock className="mt-5" label="Steer the agent" hint="Optional">
+        <textarea
+          value={steer}
+          onChange={(e) => setSteer(e.target.value)}
+          rows={2}
+          placeholder='e.g. "focus on settlement positioning, ignore brand terms"'
+          className="w-full resize-y rounded-[12px] border-none bg-white px-4 py-3 text-[13.5px] text-ppc-ink outline-none placeholder:text-ppc-text-faint focus:bg-[#FBF9FD]"
+          style={{ boxShadow: 'inset 0 0 0 1px #e7e2ef' }}
+        />
+      </FieldBlock>
+
+      {/* Row 5 — Run mode */}
+      <FieldBlock className="mt-5" label="Run mode">
+        <div className="grid gap-2 sm:grid-cols-2">
+          {RUN_MODES.map((m) => {
+            const active = m.value === runMode;
+            return (
+              <button
+                key={m.value}
+                type="button"
+                onClick={() => setRunMode(m.value)}
+                className={`flex items-center gap-3 rounded-[12px] px-4 py-[11px] text-left transition-colors ${
+                  active ? 'bg-[#F0EBFA]' : 'bg-white hover:bg-[#FBF9FD]'
+                }`}
+                style={{
+                  boxShadow: active
+                    ? 'inset 0 0 0 1.5px #7F5AF0'
+                    : 'inset 0 0 0 1px #e7e2ef',
+                }}
+              >
+                <span
+                  className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full"
+                  style={{
+                    boxShadow: active
+                      ? 'inset 0 0 0 1.5px #7F5AF0'
+                      : 'inset 0 0 0 1.5px #c9c1da',
+                  }}
+                >
+                  {active && (
+                    <span
+                      className="h-[8px] w-[8px] rounded-full"
+                      style={{ background: '#7F5AF0' }}
+                    />
+                  )}
+                </span>
+                <span className="flex flex-col leading-tight">
+                  <span className="text-[13px] font-semibold text-ppc-ink">
+                    {m.label}
+                  </span>
+                  <span className="mt-[2px] text-[11.5px] text-ppc-text-muted">
+                    {m.sub}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </FieldBlock>
+
+      {/* Launch CTA */}
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-[#efeaf4] pt-7">
+        <div className="text-[12.5px] text-ppc-text-muted">
+          <Clock size={12} weight="bold" className="mr-1 inline-block text-ppc-text-faint" />
+          <span className="tabular-nums">{agent.expectedDuration}</span> background run.
+          We email you when it's ready.
+        </div>
+        <button
+          type="button"
+          onClick={onLaunch}
+          className="group inline-flex items-center gap-2 rounded-[12px] px-[24px] py-[14px] text-[15px] font-semibold text-white transition-transform hover:-translate-y-[0.5px]"
+          style={{
+            background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
+            boxShadow:
+              '0 1px 0 rgba(255,255,255,0.18) inset, 0 10px 22px -8px rgba(127,90,240,0.55)',
+          }}
+        >
+          <Sparkle size={15} weight="fill" />
+          Launch agent
+          <ArrowRight
+            size={14}
+            weight="bold"
+            className="transition-transform group-hover:translate-x-[2px]"
+          />
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function FieldBlock({
+  label,
+  hint,
+  children,
+  className,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <p className="text-[12.5px] font-semibold tracking-[-0.005em] text-ppc-ink">
+          {label}
+        </p>
+        {hint && (
+          <p className="text-[11.5px] text-ppc-text-muted">{hint}</p>
+        )}
       </div>
       {children}
+    </div>
+  );
+}
+
+function SelectControl<T extends string>({
+  value,
+  onChange,
+  options,
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: { value: T; label: string }[];
+}) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as T)}
+        className="w-full appearance-none rounded-[12px] bg-white px-4 py-[11px] pr-10 text-[13.5px] font-medium text-ppc-ink outline-none focus:bg-[#FBF9FD]"
+        style={{ boxShadow: 'inset 0 0 0 1px #e7e2ef' }}
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <CaretDown
+        size={12}
+        weight="bold"
+        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ppc-text-muted"
+      />
     </div>
   );
 }
