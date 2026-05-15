@@ -4,6 +4,7 @@ import {
   CaretRight, CaretDown, CaretUp, Share, Plus, ArrowRight, ArrowUp,
   ArrowsClockwise, Flag, ShieldCheck, Target, ChartBar,
   Binoculars, MagnifyingGlass, Database, Cpu, Clock, Quotes,
+  Lightning, TrendUp,
 } from '@phosphor-icons/react';
 import { StagePage } from '../components/StagePage';
 import { SpyMascot } from '../components/SpyMascot';
@@ -230,155 +231,165 @@ function HeroCard({ run }: { run: AgentRun }) {
       className="relative mb-5 overflow-hidden rounded-[20px] text-white"
       style={{
         background:
-          'radial-gradient(110% 100% at 92% -5%, #2A1758 0%, #150A30 40%, #07050D 100%)',
+          'radial-gradient(120% 100% at 88% 10%, #1A0D38 0%, #0A0518 45%, #050308 100%)',
         boxShadow:
           '0 1px 0 rgba(255,255,255,0.05) inset, 0 30px 60px -30px rgba(15,10,30,0.55)',
       }}
     >
-      {/* Top sheen line — adds a defined edge */}
+      {/* Top sheen line */}
       <span
         aria-hidden
         className="pointer-events-none absolute inset-x-10 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(201,181,255,0.55) 30%, rgba(201,181,255,0.55) 70%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(201,181,255,0.50) 30%, rgba(201,181,255,0.50) 70%, transparent 100%)',
         }}
       />
-      {/* Brighter top-right purple bloom */}
+      {/* Top-right purple bloom (concentrated behind mascot) */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-28 -top-28 h-[440px] w-[440px] rounded-full"
+        className="pointer-events-none absolute -right-20 top-[12%] h-[420px] w-[420px] rounded-full"
         style={{
           background:
-            'radial-gradient(circle, rgba(159,134,255,0.45) 0%, rgba(127,90,240,0.18) 35%, transparent 65%)',
+            'radial-gradient(circle, rgba(159,134,255,0.42) 0%, rgba(127,90,240,0.14) 38%, transparent 68%)',
         }}
       />
-      {/* Mid-left secondary bloom for warmth */}
+      {/* Distant lower-right glow (under the grid horizon) */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -bottom-20 -left-16 h-[340px] w-[340px] rounded-full"
+        className="pointer-events-none absolute -bottom-20 right-[18%] h-[260px] w-[420px] rounded-full"
         style={{
           background:
-            'radial-gradient(circle, rgba(127,90,240,0.20) 0%, rgba(127,90,240,0.05) 40%, transparent 70%)',
+            'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(159,134,255,0.22) 0%, transparent 70%)',
         }}
       />
-      {/* Diagonal sheen overlay */}
+      {/* Subtle starfield grain — heavier in the upper portion */}
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.04) 50%, transparent 65%)',
-        }}
-      />
-      {/* Subtle starfield grain */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.07]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[60%] opacity-[0.10]"
         style={{
           backgroundImage:
-            'radial-gradient(rgba(255,255,255,0.55) 1px, transparent 1px)',
-          backgroundSize: '3px 3px',
+            'radial-gradient(rgba(255,255,255,0.7) 1px, transparent 1px)',
+          backgroundSize: '4px 4px',
           mixBlendMode: 'screen',
+          maskImage:
+            'linear-gradient(180deg, black 0%, black 50%, transparent 100%)',
+          WebkitMaskImage:
+            'linear-gradient(180deg, black 0%, black 50%, transparent 100%)',
         }}
       />
 
-      <div className="relative grid gap-5 px-9 pb-5 pt-7 sm:grid-cols-[1fr_minmax(160px,200px)] sm:gap-8 sm:px-10 sm:pt-8">
+      {/* Perspective grid floor — the "stage" the mascot stands on */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] overflow-hidden"
+        style={{
+          maskImage:
+            'radial-gradient(ellipse 75% 100% at 50% 100%, black 0%, rgba(0,0,0,0.6) 50%, transparent 80%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 75% 100% at 50% 100%, black 0%, rgba(0,0,0,0.6) 50%, transparent 80%)',
+        }}
+      >
+        <span
+          className="absolute inset-x-[-20%] bottom-0 h-[200%]"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(159,134,255,0.22) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(159,134,255,0.22) 1px, transparent 1px)
+            `,
+            backgroundSize: '54px 54px',
+            transform: 'perspective(580px) rotateX(62deg)',
+            transformOrigin: 'center bottom',
+          }}
+        />
+      </span>
+
+      <div className="relative grid gap-5 px-9 pb-6 pt-9 sm:grid-cols-[1fr_minmax(280px,360px)] sm:gap-8 sm:px-10 sm:pt-10">
         {/* Copy column */}
         <div className="min-w-0">
-          <p className="mb-3 inline-flex items-center gap-2 rounded-full px-3 py-[5px] text-[10.5px] font-bold uppercase tracking-[0.12em] text-white/85"
-             style={{
-               background: 'rgba(159,134,255,0.18)',
-               boxShadow: 'inset 0 0 0 1px rgba(159,134,255,0.32)',
-             }}>
-            <span aria-hidden className="h-[5px] w-[5px] rounded-full" style={{ background: '#9F86FF', boxShadow: '0 0 0 3px rgba(159,134,255,0.25)' }} />
-            Top finding
-          </p>
-          <h2 className="font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.025em] text-white sm:text-[38px]">
+          <h2
+            className="font-serif italic font-medium text-[38px] leading-[1.04] tracking-[-0.015em] text-white sm:text-[46px]"
+          >
             {body}
             {hasPeriod && <span style={{ color: '#9F86FF' }}>.</span>}
           </h2>
-          <p className="mt-3 max-w-[520px] text-[14px] leading-[1.55] text-white/65">
+          <p className="mt-4 max-w-[460px] text-[14px] leading-[1.55] text-white/65">
             {run.description}
           </p>
         </div>
 
         {/* Mascot column */}
         <div className="relative flex items-end justify-end sm:items-center">
-          <div className="scale-[0.82] origin-bottom-right sm:origin-center">
-            <SpyMascot />
-          </div>
+          <SpyMascot />
         </div>
       </div>
 
       {/* Stat tiles inside the dark card */}
       <div className="relative grid gap-3 px-9 pb-7 sm:grid-cols-3 sm:gap-4 sm:px-10">
         {run.stats?.map((s, i) => (
-          <DarkStatTile key={i} value={s.value} label={s.label} tone={STAT_TONES[i] ?? 'lavender'} />
+          <DarkStatTile key={i} value={s.value} label={s.label} icon={STAT_ICONS[i] ?? 'lightning'} />
         ))}
       </div>
     </section>
   );
 }
 
-type StatTone = 'lavender' | 'mint' | 'peach';
-const STAT_TONES: StatTone[] = ['lavender', 'mint', 'peach'];
+// Icon assignment follows the data order: quick wins (lightning), upside
+// (trend up), rival growth (arrow up). Stays unified in lavender — the
+// "stage" feel comes from the perspective grid, not from tonal accents.
+type StatIcon = 'lightning' | 'trendup' | 'arrowup';
+const STAT_ICONS: StatIcon[] = ['lightning', 'trendup', 'arrowup'];
 
-const TONE_STYLES: Record<StatTone, { accent: string; glow: string }> = {
-  lavender: { accent: '#9F86FF', glow: 'rgba(159,134,255,0.22)' },
-  mint:     { accent: '#7CE0B6', glow: 'rgba(124,224,182,0.20)' },
-  peach:    { accent: '#FFAE85', glow: 'rgba(255,174,133,0.20)' },
-};
+function StatIconBadge({ kind }: { kind: StatIcon }) {
+  const Icon =
+    kind === 'lightning' ? Lightning :
+    kind === 'trendup'   ? TrendUp :
+                           ArrowUp;
+  return (
+    <span
+      className="grid h-[44px] w-[44px] shrink-0 place-items-center rounded-full"
+      style={{
+        background: 'rgba(127,90,240,0.18)',
+        boxShadow: 'inset 0 0 0 1px rgba(159,134,255,0.32)',
+      }}
+    >
+      <Icon size={20} weight="bold" style={{ color: '#C9B5FF' }} />
+    </span>
+  );
+}
 
 function DarkStatTile({
   value,
   label,
-  tone,
+  icon,
 }: {
   value: string;
   label: string;
-  tone: StatTone;
+  icon: StatIcon;
 }) {
   const m = value.match(/^(.+?)(\/\w+)$/);
   const main = m ? m[1] : value;
   const suffix = m ? m[2] : null;
-  const t = TONE_STYLES[tone];
   return (
     <div
-      className="relative overflow-hidden rounded-[14px] px-6 py-[20px]"
+      className="relative flex items-center gap-4 overflow-hidden rounded-[14px] px-5 py-[18px]"
       style={{
-        background: 'rgba(255,255,255,0.045)',
+        background: 'rgba(255,255,255,0.04)',
         boxShadow:
-          'inset 0 0 0 1px rgba(255,255,255,0.10), 0 1px 0 rgba(255,255,255,0.03) inset',
+          'inset 0 0 0 1px rgba(159,134,255,0.18), 0 1px 0 rgba(255,255,255,0.03) inset',
       }}
     >
-      {/* Top color accent bar */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[2px]"
-        style={{
-          background: `linear-gradient(90deg, ${t.accent} 0%, transparent 100%)`,
-        }}
-      />
-      {/* Soft accent glow behind value */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -left-6 top-2 h-[100px] w-[100px] rounded-full"
-        style={{
-          background: `radial-gradient(circle, ${t.glow} 0%, transparent 65%)`,
-        }}
-      />
-
-      <div className="relative">
-        <div className="font-display text-[36px] font-extrabold leading-none tracking-[-0.025em] text-white">
+      <StatIconBadge kind={icon} />
+      <div className="min-w-0 flex-1">
+        <div className="font-display text-[30px] font-extrabold leading-none tracking-[-0.025em] text-white">
           {main}
           {suffix && (
-            <span className="ml-[1px] text-[16px] font-medium text-white/55">
+            <span className="ml-[1px] text-[14px] font-medium text-white/55">
               {suffix}
             </span>
           )}
         </div>
-        <p className="mt-3 text-[12px] leading-[1.4] text-white/60">{label}</p>
+        <p className="mt-2 text-[12.5px] leading-[1.35] text-white/65">{label}</p>
       </div>
     </div>
   );
