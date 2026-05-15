@@ -404,6 +404,97 @@ function RunningCanvas({ run }: { run: AgentRun }) {
       )}
 
       {run.liveSignalsLabel && <LiveSignalsCallout label={run.liveSignalsLabel} />}
+
+      <HoldTightBand />
+    </div>
+  );
+}
+
+// ─── "Hold tight" anticipation band ─────────────────────────────────────
+//
+// Sits at the foot of the running view to build pay-off anticipation
+// without screaming. Pale lavender → ivory wash, serif-italic accent
+// word, hairline ornament, gentle decorative sparkle on each side. Calm,
+// confident, "the report is coming."
+function HoldTightBand() {
+  return (
+    <div
+      className="relative overflow-hidden rounded-[16px] px-8 py-12 text-center sm:px-12 sm:py-14"
+      style={{
+        background:
+          'radial-gradient(120% 100% at 50% 0%, #F4EFFD 0%, #ECE7FB 55%, #F8F5FF 100%)',
+      }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -left-24 top-[-30%] h-[260px] w-[260px] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(127,90,240,0.12) 0%, transparent 65%)',
+        }}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-20 bottom-[-40%] h-[240px] w-[240px] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(127,90,240,0.10) 0%, transparent 65%)',
+        }}
+      />
+
+      <Ornament />
+
+      <p
+        className="relative mx-auto font-display text-[44px] font-extrabold leading-[1.05] tracking-[-0.025em] text-ppc-ink sm:text-[52px]"
+      >
+        Hold{' '}
+        <span
+          className="italic"
+          style={{
+            fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif',
+            fontWeight: 700,
+            color: '#7F5AF0',
+          }}
+        >
+          tight
+        </span>
+        <span style={{ color: '#7F5AF0' }}>.</span>
+      </p>
+      <p className="relative mx-auto mt-4 max-w-[480px] text-[15px] leading-[1.55] text-ppc-ink/65">
+        The full report drops the moment your agent finishes. Findings,
+        priorities and recommendations — all in one place.
+      </p>
+    </div>
+  );
+}
+
+function Ornament() {
+  return (
+    <div
+      className="relative mx-auto mb-6 flex items-center justify-center gap-3 text-ppc-ink/35"
+      aria-hidden
+    >
+      <span
+        className="block h-px w-[48px]"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(127,90,240,0.32) 100%)',
+        }}
+      />
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path
+          d="M7 0.5L8.2 5.8L13.5 7L8.2 8.2L7 13.5L5.8 8.2L0.5 7L5.8 5.8L7 0.5Z"
+          fill="#7F5AF0"
+          opacity="0.85"
+        />
+      </svg>
+      <span
+        className="block h-px w-[48px]"
+        style={{
+          background:
+            'linear-gradient(90deg, rgba(127,90,240,0.32) 0%, transparent 100%)',
+        }}
+      />
     </div>
   );
 }
@@ -524,15 +615,15 @@ function RunningPulse() {
     <span
       className="inline-flex items-center gap-[10px] text-[13px] font-bold uppercase leading-none tracking-[0.14em]"
       style={{
-        color: '#D3C6FF',
+        color: '#FF6F5C',
         fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
       }}
     >
       <span
         className="ppcio-live-dot relative inline-block h-[8px] w-[8px] rounded-full"
         style={{
-          background: '#C9B5FF',
-          boxShadow: '0 0 0 4px rgba(127,90,240,0.28), 0 0 12px rgba(201,181,255,0.65)',
+          background: '#FF5A4A',
+          boxShadow: '0 0 0 4px rgba(255,90,74,0.22), 0 0 14px rgba(255,107,90,0.65)',
         }}
       />
       Agent Running
