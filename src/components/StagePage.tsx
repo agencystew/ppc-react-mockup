@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Check, ArrowRight, ArrowUpRight, CaretDown, CaretUp, Waveform,
+  Check, ArrowRight, ArrowUpRight, CaretDown, CaretUp, Waveform, Clock,
 } from '@phosphor-icons/react';
 import type {
   AgentRun,

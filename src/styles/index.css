@@ -134,6 +134,28 @@ a.ppc-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 }
 .ppcio-agent-card { animation: ppcio-card-glow 4s ease-in-out infinite; }
 
+/* Orbital sparkle — the "agent is thinking" mark on the running-state
+ * mission-feed active block. Two elliptical orbits rotate on opposing
+ * axes; the central sparkle pulses softly. Slow + subtle on purpose. */
+@keyframes ppcio-orbit-spin-cw {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes ppcio-orbit-spin-ccw {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+@keyframes ppcio-orbit-pulse {
+  0%, 100% { opacity: 0.92; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.04); }
+}
+.ppcio-orbit-1 { animation: ppcio-orbit-spin-cw 14s linear infinite; }
+.ppcio-orbit-2 { animation: ppcio-orbit-spin-ccw 18s linear infinite; }
+.ppcio-orbit svg > g:last-of-type {
+  transform-origin: 50px 50px;
+  animation: ppcio-orbit-pulse 2.8s ease-in-out infinite;
+}
+
 /* Hero accent word treatment — serif italic + multi-color gradient.
  * Matches the live ppc.io "AI Agents" / "AI Consulting" hero word.
  * Use sparingly: one accent word per hero, never more. */
