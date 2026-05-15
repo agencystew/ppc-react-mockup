@@ -3,7 +3,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, ArrowUpRight, Bell, Brain, Broadcast, Browser, Buildings,
-  CalendarBlank, CaretLeft, CaretRight, ChartBar, Clock, Compass, Drop, Eye,
+  CalendarBlank, CaretLeft, CaretRight, ChartBar, Clock, Drop, Eye,
   Fire, Flask, Funnel, Gauge, GridFour, Lightning, ListBullets, ListChecks,
   MagnifyingGlass, MapTrifold, PaintBrush, PaperPlaneTilt, PencilSimple,
   Rocket, Shield, ShieldCheck, ShoppingCart, Sparkle, SlidersHorizontal,
@@ -366,14 +366,13 @@ function RecommendedCarousel({ agents }: { agents: AgentDefinition[] }) {
 
   return (
     <section className="relative">
-      <div className="mb-4 flex items-baseline justify-between gap-3">
-        <span className="inline-flex items-center gap-2 font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ppc-purple-700">
-          <Sparkle size={11} weight="fill" />
-          Recommended for you
-        </span>
+      <div className="mb-5 flex items-baseline justify-between gap-3">
+        <h2 className="font-display text-[20px] font-bold tracking-[-0.012em] text-ppc-ink sm:text-[22px]">
+          Recommended for you<P />
+        </h2>
         <Link
           to="/chat?intent=why-these"
-          className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500 hover:text-ppc-purple-600"
+          className="inline-flex items-center gap-1 text-[13px] font-semibold text-ppc-purple-500 hover:text-ppc-purple-600"
         >
           Why these?
           <ArrowRight size={11} weight="bold" />
@@ -447,7 +446,7 @@ function RecommendedCard({
     >
       {highlight && (
         <span
-          className="absolute -top-2 left-5 inline-flex items-center gap-1 rounded-full px-2.5 py-[4px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-white"
+          className="mb-3 inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-[4px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-white"
           style={{
             background: 'linear-gradient(95deg, #F25C9E 0%, #E0418A 100%)',
             boxShadow: '0 6px 16px -8px rgba(232,113,170,0.65)',
@@ -542,51 +541,52 @@ function PlanBanner() {
         style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.32) 0%, transparent 60%)' }}
       />
 
-      <div className="relative grid items-center gap-x-10 gap-y-8 lg:grid-cols-[minmax(280px,_360px)_minmax(0,_1fr)_auto]">
-        {/* Headline column — pinned to a 280-360px range so the H2 can
-          * break cleanly on two lines instead of getting crushed into a
-          * single-word stack when the steps row grows. */}
-        <div>
-          <h2 className="font-display text-[28px] font-black leading-[1.05] tracking-[-0.020em] sm:text-[32px]">
-            Build your{' '}
-            <span
-              className="font-serif italic font-bold text-[#C7B0FF]"
-              style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-            >
-              weekly
-            </span>
-            <br />
-            agent plan<span
-              className="font-serif italic text-[#C7B0FF]"
-              style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-            >.</span>
-          </h2>
-          <p className="mt-3 max-w-[340px] text-[13.5px] leading-[1.55] text-white/65">
-            Schedule the right agents to run automatically. Wake up to insights, not dashboards.
-          </p>
+      {/* Two-row layout: top row = title+sub on the left, CTA on the right;
+        * bottom row = three numbered steps spread across full banner width.
+        * Avoids the prior bug where the steps column was crushed into ~200px
+        * by competing with the H2 and the CTA on a single row. */}
+      <div className="relative flex flex-col gap-7">
+        <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
+          <div className="max-w-[480px]">
+            <h2 className="font-display text-[30px] font-black leading-[1.04] tracking-[-0.020em] sm:text-[34px]">
+              Build your{' '}
+              <span
+                className="font-serif italic font-bold text-[#C7B0FF]"
+                style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
+              >
+                weekly
+              </span>{' '}
+              agent plan<span
+                className="font-serif italic text-[#C7B0FF]"
+                style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
+              >.</span>
+            </h2>
+            <p className="mt-3 max-w-[440px] text-[13.5px] leading-[1.55] text-white/65">
+              Schedule the right agents to run automatically. Wake up to insights, not dashboards.
+            </p>
+          </div>
+
+          <Link
+            to="/chat?intent=schedule"
+            className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-[14px] px-6 py-[14px] text-[14px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
+            style={{
+              background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 55%, #534AB7 100%)',
+              boxShadow:
+                'inset 0 1px 0 rgba(255,255,255,0.22), 0 10px 26px -10px rgba(127,90,240,0.75)',
+            }}
+          >
+            <Sparkle size={14} weight="fill" />
+            Create my plan
+            <ArrowRight size={13} weight="bold" className="transition-transform group-hover:translate-x-[1px]" />
+          </Link>
         </div>
 
-        {/* Steps column — flex row that wraps gracefully but never
-          * steals room from the headline column. */}
-        <div className="grid gap-x-7 gap-y-4 sm:grid-cols-3">
-          <PlanStep n={1} icon={<CalendarBlank size={18} weight="duotone" />} title="Choose frequency"        desc="Daily, weekly, or custom." />
-          <PlanStep n={2} icon={<SlidersHorizontal size={18} weight="duotone" />} title="Pick your specialists" desc="Build the perfect agent lineup." />
-          <PlanStep n={3} icon={<Bell size={18} weight="duotone" />} title="Get insights on autopilot"           desc="Delivered to your inbox and dashboard." />
+        {/* Three numbered steps — full-width grid below the title/CTA row. */}
+        <div className="grid gap-x-8 gap-y-5 border-t border-white/[0.06] pt-6 sm:grid-cols-3">
+          <PlanStep n={1} icon={<CalendarBlank size={18} weight="duotone" />}      title="Choose frequency"         desc="Daily, weekly, or custom." />
+          <PlanStep n={2} icon={<SlidersHorizontal size={18} weight="duotone" />}  title="Pick your specialists"    desc="Build the perfect agent lineup." />
+          <PlanStep n={3} icon={<Bell size={18} weight="duotone" />}               title="Get insights on autopilot" desc="Delivered to your inbox and dashboard." />
         </div>
-
-        <Link
-          to="/chat?intent=schedule"
-          className="group inline-flex items-center justify-center gap-2 self-center rounded-[14px] px-6 py-[14px] text-[14px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
-          style={{
-            background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 55%, #534AB7 100%)',
-            boxShadow:
-              'inset 0 1px 0 rgba(255,255,255,0.22), 0 10px 26px -10px rgba(127,90,240,0.75)',
-          }}
-        >
-          <Sparkle size={14} weight="fill" />
-          Create my plan
-          <ArrowRight size={13} weight="bold" className="transition-transform group-hover:translate-x-[1px]" />
-        </Link>
       </div>
     </section>
   );
@@ -642,10 +642,9 @@ function AllSpecialists({
 
   return (
     <section>
-      <span className="inline-flex items-center gap-2 font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ppc-purple-700">
-        <Compass size={11} weight="fill" />
-        All specialists
-      </span>
+      <h2 className="font-display text-[20px] font-bold tracking-[-0.012em] text-ppc-ink sm:text-[22px]">
+        All specialists<P />
+      </h2>
 
       <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
         {PRIMARY.map((f) => (
