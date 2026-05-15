@@ -412,9 +412,9 @@ function RunningCanvas({ run }: { run: AgentRun }) {
 // ─── Hero on canvas ──────────────────────────────────────────────────────
 
 function RunningHero({ headline, description }: { headline: string; description: string }) {
-  // Headline structure: "Sizing their spend." → underline the last word
-  // before any trailing period in a soft lavender pill, then place a small
-  // purple period-dot to the right of the closing period.
+  // Headline structure: "Sizing their spend." — wrap the last word in a soft
+  // lavender highlight with the word rendered in primary purple. The trailing
+  // period sits just outside the box, also in purple. No separate dot.
   const hasPeriod = headline.endsWith('.');
   const body = hasPeriod ? headline.slice(0, -1) : headline;
   const words = body.trim().split(/\s+/);
@@ -423,21 +423,16 @@ function RunningHero({ headline, description }: { headline: string; description:
 
   return (
     <div>
-      <h1 className="font-display text-[60px] font-extrabold leading-[1.02] tracking-[-0.035em] text-ppc-ink sm:text-[68px]">
+      <h1 className="font-display text-[64px] font-extrabold leading-[1.04] tracking-[-0.035em] text-ppc-ink sm:text-[72px]">
         {lead}
         {lead && ' '}
         <span
-          className="relative inline-block rounded-[10px] px-[10px] py-[1px] leading-[1.02]"
-          style={{ background: '#E9E3FF' }}
+          className="relative inline-block rounded-[10px] px-[12px] pb-[2px] pt-[2px] leading-[1.04]"
+          style={{ background: '#E9E3FF', color: '#7F5AF0' }}
         >
           {lastWord}
         </span>
-        {hasPeriod && <span className="text-ppc-ink">.</span>}
-        <span
-          aria-hidden
-          className="ml-[6px] inline-block h-[9px] w-[9px] translate-y-[-2px] rounded-full align-middle"
-          style={{ background: '#7F5AF0' }}
-        />
+        {hasPeriod && <span style={{ color: '#7F5AF0' }}>.</span>}
       </h1>
       <p className="mt-5 max-w-[640px] text-[15px] leading-[1.6] text-ppc-ink/70">
         {description}
@@ -458,40 +453,33 @@ function MissionFeedCard({
   const [expanded, setExpanded] = useState(false);
   return (
     <div
-      className="relative overflow-hidden rounded-[16px] px-7 py-7 text-white"
+      className="relative overflow-hidden rounded-[16px] px-5 py-5 text-white sm:px-6 sm:py-6"
       style={{
         background: '#0E0B1A',
         boxShadow:
           '0 30px 60px -30px rgba(15,10,30,0.55), inset 0 1px 0 rgba(255,255,255,0.03)',
       }}
     >
-      <p className="mb-5 text-[14px] font-medium text-white/85">Live mission feed</p>
+      <p className="mb-4 text-[13px] font-medium text-white/80">Live mission feed</p>
 
       <MissionActiveCard active={active} />
 
-      <div className="relative mt-5">
-        <span
-          aria-hidden
-          className="pointer-events-none absolute left-[19px] top-0 h-full w-px"
-          style={{ background: 'rgba(255,255,255,0.06)' }}
-        />
-        <div className="flex flex-col">
-          {recentSteps.map((s, i) => (
-            <MissionCompletedRow key={i} step={s} isLast={i === recentSteps.length - 1} />
-          ))}
-        </div>
+      <div className="mt-3 flex flex-col gap-[2px]">
+        {recentSteps.map((s, i) => (
+          <MissionCompletedRow key={i} step={s} isLast={i === recentSteps.length - 1} />
+        ))}
       </div>
 
       {moreCount ? (
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="mt-4 flex w-full items-center justify-center gap-2 border-t border-white/[0.06] pt-4 text-[12.5px] font-medium text-white/55 transition-colors hover:text-white"
+          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-[10px] py-2 text-[12px] font-medium text-white/55 transition-colors hover:bg-white/[0.03] hover:text-white/85"
         >
           {expanded ? 'Hide completed steps' : `+ ${moreCount} more completed steps`}
           {expanded
-            ? <CaretUp size={11} weight="bold" />
-            : <CaretDown size={11} weight="bold" />}
+            ? <CaretUp size={10} weight="bold" />
+            : <CaretDown size={10} weight="bold" />}
         </button>
       ) : null}
     </div>

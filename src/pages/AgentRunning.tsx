@@ -21,7 +21,7 @@ export function AgentRunning() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[940px] px-8 pt-9 pb-16 lg:px-10">
+    <div className="w-full max-w-[960px] pl-6 pr-8 pt-7 pb-16 lg:pl-8 lg:pr-10">
       <TopBar
         icon={run.parentAgent.icon}
         name={run.parentAgent.name}

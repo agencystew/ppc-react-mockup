@@ -81,9 +81,9 @@ const COMPETITOR_SPY_COMPLETED: AgentRun = {
   description:
     "Eight rivals analyzed across copy, funnels, spend, and auction overlap. Here's where they're winning and what you can take back.",
   stats: [
-    { value: '3',         label: 'Quick wins ready to deploy this week' },
-    { value: '$8.2K/mo',  label: 'Estimated upside if all 3 are applied' },
-    { value: '+18%',      label: "Top rival's spend growth in last 30 days" },
+    { value: '3',         label: 'Quick wins ready to deploy' },
+    { value: '$8.2K/mo',  label: 'Estimated upside if all 11 are applied' },
+    { value: '+18%',      label: "Top rival's spend growth (30 days)" },
   ],
   findings: [
     {
