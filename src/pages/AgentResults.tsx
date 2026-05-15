@@ -49,7 +49,7 @@ export function AgentResults() {
 
 type ReportTab = 'summary' | 'full' | 'methodology';
 
-interface ReportConfig {
+export interface ReportConfig {
   generated: { date: string; time: string };
   mascot: () => React.ReactNode;
   summary: {
@@ -94,7 +94,7 @@ function AgentReportView({ run, config }: { run: AgentRun; config: ReportConfig 
 
 // ─── Breadcrumb ──────────────────────────────────────────────────────────
 
-function Breadcrumbs({ trail }: { trail: string[] }) {
+export function Breadcrumbs({ trail }: { trail: string[] }) {
   return (
     <nav className="mb-4 flex flex-wrap items-center gap-[6px] text-[13px] text-ppc-text-muted">
       {trail.map((label, i) => {
@@ -126,7 +126,7 @@ function Breadcrumbs({ trail }: { trail: string[] }) {
 
 // ─── Title row ───────────────────────────────────────────────────────────
 
-function TitleRow({
+export function TitleRow({
   agentName,
   onJumpToAudit,
 }: {
@@ -223,7 +223,7 @@ function PrimaryButton({
 
 // ─── Meta line ───────────────────────────────────────────────────────────
 
-function MetaLine({ date, time }: { date: string; time: string }) {
+export function MetaLine({ date, time }: { date: string; time: string }) {
   return (
     <p className="mb-7 text-[13.5px] text-ppc-text-muted">
       Generated {date}
@@ -235,7 +235,7 @@ function MetaLine({ date, time }: { date: string; time: string }) {
 
 // ─── Dark hero card ──────────────────────────────────────────────────────
 
-function HeroCard({ run, mascot }: { run: AgentRun; mascot: React.ReactNode }) {
+export function HeroCard({ run, mascot }: { run: AgentRun; mascot: React.ReactNode }) {
   const headline = run.headline;
   const hasPeriod = headline.endsWith('.');
   const body = hasPeriod ? headline.slice(0, -1) : headline;
@@ -417,7 +417,8 @@ const TABS: { id: ReportTab; label: string }[] = [
   { id: 'methodology', label: 'Methodology' },
 ];
 
-function Tabs({
+export type { ReportTab };
+export function Tabs({
   active,
   onChange,
 }: {
@@ -551,7 +552,7 @@ function FindingTileCard({ title, description, impact, metrics }: FindingTile) {
   );
 }
 
-function ImpactChip({ impact }: { impact: 'high' | 'medium' | 'low' }) {
+export function ImpactChip({ impact }: { impact: 'high' | 'medium' | 'low' }) {
   const styles = {
     high: {
       bg: '#FFE3DE',
@@ -977,7 +978,7 @@ const COMPETITOR_SPY_FULL_REPORT: Section[] = [
   },
 ];
 
-function FullReportView({ sections }: { sections: Section[] }) {
+export function FullReportView({ sections }: { sections: Section[] }) {
   return (
     <div className="mb-7 space-y-6">
       {sections.map((section, i) => (
@@ -1279,7 +1280,7 @@ function EvidenceMetaItem({
 // Methodology view
 // ════════════════════════════════════════════════════════════════════════
 
-function MethodologyView({
+export function MethodologyView({
   methodology,
 }: {
   methodology: ReportConfig['methodology'];
@@ -1563,7 +1564,7 @@ const COMPETITOR_SPY_REPORT: ReportConfig = {
 
 // Map of run-id → report config. Runs without an entry fall back to the
 // generic StagePage canvas in AgentResults().
-const REPORT_CONFIGS: Record<string, ReportConfig> = {
+export const REPORT_CONFIGS: Record<string, ReportConfig> = {
   'run-competitor-spy-completed': COMPETITOR_SPY_REPORT,
 };
 

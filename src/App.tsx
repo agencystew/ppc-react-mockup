@@ -24,10 +24,18 @@ import { ProjectPage as V2ProjectPage } from './pages/_v2/Project';
 
 import { DevPrimitives } from './pages/_dev/Primitives';
 
-/* v3 (parallel design exploration — Reports evidence redesign 2026-05-15) */
-import { ReportMagazine } from './pages/_v3/ReportMagazine';
-import { ReportBloomberg } from './pages/_v3/ReportBloomberg';
-import { ReportAudit } from './pages/_v3/ReportAudit';
+/* v3 reports evidence redesign (2026-05-15)
+   Parallel-agent variants archived under _v3/_archive/ after failing the
+   app-fidelity test. Single rebuild ReportV3 extends the canonical
+   AgentResults page patterns with Jose's evidence model. */
+import { ReportV3 } from './pages/_v3/ReportV3';
+
+/* v4 report summary redesign (2026-05-15)
+   Replaces v1's split FindingTiles + RecommendationsSection with a single
+   stacked feed of paired Discovery cards. Atomic unit for the upcoming Key
+   Discoveries cross-report aggregator. See
+   docs/plans/2026-05-15-summary-section-v4-design.md. */
+import { AgentResultsV4 } from './pages/_v4/AgentResultsV4';
 
 export default function App() {
   return (
@@ -78,12 +86,15 @@ export default function App() {
         <Route path="v2/projects" element={<V2Projects />} />
         <Route path="v2/projects/:id" element={<V2ProjectPage />} />
 
-        {/* ─── v3 (parallel design exploration, Reports evidence redesign) ─
-           Three variants of /reports/:runId built in parallel from the same
-           brief. See docs/plans/2026-05-15-report-evidence-parallel-design.md. */}
-        <Route path="v3/reports/run-competitor-spy-magazine" element={<ReportMagazine />} />
-        <Route path="v3/reports/run-competitor-spy-bloomberg" element={<ReportBloomberg />} />
-        <Route path="v3/reports/run-competitor-spy-audit" element={<ReportAudit />} />
+        {/* ─── v3 reports evidence redesign ─────────────────────────────
+           Single rebuild after parallel-agent variants were archived. */}
+        <Route path="v3/reports/run-competitor-spy" element={<ReportV3 />} />
+
+        {/* ─── v4 summary tab redesign ──────────────────────────────────
+           Discovery cards (finding+rec paired). Same page chrome as v1;
+           only the Summary tab body differs. Compare v1↔v4 by swapping
+           `/v4` in/out of the URL:  /reports/<id>  ↔  /v4/reports/<id>. */}
+        <Route path="v4/reports/:runId" element={<AgentResultsV4 />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
