@@ -675,42 +675,77 @@ function MoreTasksToggle({
 function StepRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
   return (
     <li
-      className="flex items-center gap-4 py-[14px]"
+      className="group relative flex items-start gap-4 py-[16px] transition-colors"
       style={{ borderBottom: isLast ? 'none' : '0.5px solid rgba(255,255,255,0.05)' }}
     >
       <span
-        className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full"
+        className="mt-[3px] grid h-[32px] w-[32px] shrink-0 place-items-center rounded-full transition-transform group-hover:scale-[1.04]"
         style={{
           background:
             'linear-gradient(155deg, #8E6CF5 0%, #7F5AF0 55%, #5A3FE0 100%)',
           boxShadow:
-            'inset 0 0 0 1px rgba(255,255,255,0.16), 0 3px 10px -3px rgba(127,90,240,0.50)',
+            'inset 0 0 0 1px rgba(255,255,255,0.18), 0 4px 14px -4px rgba(127,90,240,0.55)',
         }}
       >
-        <Check size={13} weight="bold" className="text-white" />
+        <Check size={14} weight="bold" className="text-white" />
       </span>
-      <span
-        className="tabular-nums shrink-0 text-[12px] font-medium"
-        style={{
-          color: 'rgba(255,255,255,0.55)',
-          fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
-          width: 56,
-        }}
-      >
-        {step.time}
-      </span>
+
       <div className="min-w-0 flex-1 leading-snug">
-        <p className="text-[14px] font-semibold tracking-[-0.005em] text-white">
-          {step.title}
-        </p>
+        <div className="flex items-baseline gap-3">
+          <p className="min-w-0 flex-1 text-[16px] font-semibold tracking-[-0.005em] text-white">
+            <WinTitle text={step.title} />
+          </p>
+          <span
+            className="tabular-nums shrink-0 text-[11.5px] font-semibold uppercase tracking-[0.06em]"
+            style={{
+              color: 'rgba(255,255,255,0.42)',
+              fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
+            }}
+          >
+            {step.time}
+          </span>
+        </div>
         <p
-          className="mt-[2px] text-[12.5px] leading-[1.45]"
-          style={{ color: 'rgba(255,255,255,0.52)' }}
+          className="mt-[4px] inline-flex items-center gap-[6px] text-[13px] leading-[1.5]"
+          style={{ color: 'rgba(255,255,255,0.55)' }}
         >
+          <span
+            aria-hidden
+            className="inline-block h-[5px] w-[5px] rounded-full"
+            style={{ background: '#5DCAA5', boxShadow: '0 0 0 2px rgba(93,202,165,0.18)' }}
+          />
           {step.description}
         </p>
       </div>
     </li>
+  );
+}
+
+// Pulls the first standalone integer out of the title text and renders it
+// in a slightly larger, display-weight, light-purple style so each row
+// reads as a "win" landing — not a log line. Falls back to plain text
+// when the row has no number to celebrate.
+function WinTitle({ text }: { text: string }) {
+  const m = text.match(/^(.*?)(\d{1,3}(?:,\d{3})*(?:\.\d+)?\+?)(.*)$/);
+  if (!m) return <>{text}</>;
+  const [, before, num, after] = m;
+  return (
+    <>
+      {before}
+      <span
+        className="font-display tabular-nums"
+        style={{
+          fontSize: '1.10em',
+          fontWeight: 800,
+          color: '#D7C6FF',
+          letterSpacing: '-0.012em',
+          marginRight: '1px',
+        }}
+      >
+        {num}
+      </span>
+      {after}
+    </>
   );
 }
 

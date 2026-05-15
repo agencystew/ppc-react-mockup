@@ -31,39 +31,39 @@ const COMPETITOR_SPY_RUNNING: AgentRun = {
   recentMissionSteps: [
     {
       time: '3m 46s',
-      title: 'Collected 912 new ad variations',
-      description: 'Signal capture complete',
+      title: '912 new ad variations collected',
+      description: 'Across 8 rival accounts in the last 7 days',
     },
     {
       time: '3m 28s',
-      title: 'Parsed auction data across Google Ads',
-      description: 'Auction data parsed successfully',
+      title: '15 auction snapshots parsed',
+      description: '120 data points · 100% match against your top keywords',
     },
     {
       time: '2m 12s',
-      title: 'Identified 48 active competitors',
-      description: 'Competitor set confirmed',
+      title: '48 active competitors identified',
+      description: 'All ranked top-4 on at least one of your core terms',
     },
     {
       time: '1m 48s',
-      title: 'Captured 387 landing page snapshots',
-      description: 'Funnel surfaces archived for diff against your account',
+      title: '387 landing pages captured',
+      description: 'Mobile + desktop snapshots ready to diff against yours',
     },
     // ── below the fold (revealed via "+ N more tasks complete") ──────────
     {
       time: '1m 12s',
-      title: 'Cross-referenced ad library',
-      description: 'Confirmed rivals are running ads we surfaced live',
+      title: '2,400 ads cross-referenced in ad library',
+      description: 'Confirmed rivals are running everything we surfaced live',
     },
     {
       time: '0m 54s',
-      title: 'Estimated 30-day spend per rival',
-      description: 'SimilarWeb + auction insights triangulated',
+      title: '8 rival domains spend-modelled',
+      description: 'SimilarWeb + auction insights triangulated · ±20% band',
     },
     {
       time: '0m 28s',
-      title: 'Loaded historic CPCs',
-      description: 'Last 90 days of CPC data ingested',
+      title: '90 days of CPC history ingested',
+      description: 'Anchored every estimate to your real CPC ceiling',
     },
     {
       time: '0m 00s',
@@ -114,18 +114,18 @@ const SPEND_LEAK_RUNNING: AgentRun = {
   recentMissionSteps: [
     {
       time: '2m 10s',
-      title: 'Pulled search terms report',
+      title: '14,233 search terms pulled',
       description: 'Last 90 days · 8 active search campaigns',
     },
     {
       time: '1m 24s',
-      title: 'Loaded conversion history',
-      description: 'Cross-referenced against 12 months of converting queries',
+      title: '12 months of conversion history loaded',
+      description: 'Every converting query in the last year cross-referenced',
     },
     {
       time: '0m 38s',
-      title: 'Filtered by spend floor',
-      description: '2,847 candidate terms with $5+ spend isolated',
+      title: '2,847 candidate terms isolated',
+      description: 'Zero-conversion + $5+ spend floor applied',
     },
     {
       time: '0m 00s',
