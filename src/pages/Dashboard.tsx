@@ -27,7 +27,7 @@ import { AGENTS } from '../mock/agents';
 
 const TODAY_PILL = 'THU · 14 MAY';
 
-/* ─── Per-project surface meta — lives in the dashboard so the
+/* ─── Per-project surface meta. Lives in the dashboard so the
  *     canonical PROJECTS mock stays minimal. */
 type Trend = 'up' | 'down' | 'flat';
 type Signal = { label: string; tone: 'good' | 'warn' | 'bad' | 'neutral' };
@@ -295,7 +295,7 @@ function ActivityHero() {
             in projected upside, ready to deploy
           </p>
 
-          {/* Decorative orb — abstract "agent activity" mark */}
+          {/* Decorative orb. Abstract "agent activity" mark. */}
           <div className="relative mt-6 h-[140px] w-[140px] sm:h-[160px] sm:w-[160px]">
             <span
               aria-hidden
@@ -367,7 +367,7 @@ function ActivityCard({ row }: { row: ActivityRow }) {
           'inset 0 0 0 1px rgba(255,255,255,0.06)',
       }}
     >
-      {/* Project avatar — colored chip */}
+      {/* Project avatar. Tonal chip per project. */}
       <span
         className="grid h-9 w-9 shrink-0 place-items-center rounded-[9px] text-[13px] font-bold text-white"
         style={{
@@ -771,7 +771,7 @@ function AiVerdict() {
       <div className="relative">
         <Eyebrow>AI verdict</Eyebrow>
         <h3 className="mt-3 font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.02em] text-white sm:text-[30px]">
-          You're winning in 4 accounts.<br />
+          You're winning in 7 accounts.<br />
           Fix 1 issue, unlock <span style={{ color: '#9F86FF' }}>$12.4K</span>.
         </h3>
         <p className="mt-3 max-w-[440px] text-[13px] leading-[1.55] text-white/65">
@@ -794,7 +794,7 @@ function AiVerdict() {
 
         {/* Stat strip */}
         <div className="mt-7 grid grid-cols-3 gap-3">
-          <DarkStat value="4" label="Winning accounts" />
+          <DarkStat value="7" label="Winning accounts" />
           <DarkStat value="1" label="Critical issue" />
           <DarkStat value="$12.4K" label="Est. unlock" highlight />
         </div>
@@ -831,7 +831,7 @@ function DarkStat({
   );
 }
 
-/* Quick actions — light card, mirrors reference's right column. */
+/* Quick actions. Light card, mirrors the reference's right column. */
 
 interface ActionRow {
   icon: typeof Lightning;
