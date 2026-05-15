@@ -22,37 +22,35 @@ const COMPETITOR_SPY_RUNNING: AgentRun = {
     "A live read on every competitor in your auction: their angles, their spend trajectory, " +
     "their funnels, and the gaps they're exploiting.",
   activeAgent: {
-    initial: 'G',
-    role: 'Competitor Gap Finder',
-    task:
-      "Compared rivals' ad copy themes against your account's active ad copy. " +
-      "Surfaced angles rivals are running that you aren't, ranked by average CTR " +
-      'among rivals using them.',
+    initial: 'S',
+    role: 'Sizing their spend',
+    task: 'Analyzing spend signals across 8 rival accounts',
     elapsed: '3m 47s',
-    toolCallCount: 9,
-    insightLabel: '11 unclaimed angles with CTR benchmarks',
-    tools: ['compare.matrix', 'ctr.benchmark'],
-    progressPct: 75,
+    progressPct: 60,
   },
   recentMissionSteps: [
     {
       time: '3m 46s',
-      title: 'Loaded rival auction set',
-      description: 'Pulled live competitors from your current auction landscape',
+      title: 'Collected 912 new ad variations',
+      description: 'Signal capture complete',
     },
     {
       time: '3m 28s',
-      title: 'Clustered ad copy themes',
-      description: 'Grouped recurring messaging patterns across rival ads',
+      title: 'Parsed auction data across Google Ads',
+      description: 'Auction data parsed successfully',
     },
     {
       time: '2m 12s',
-      title: 'Matched against your ads',
-      description: 'Compared rival themes to your active ad copy',
+      title: 'Identified 48 active competitors',
+      description: 'Competitor set confirmed',
+    },
+    {
+      time: '0m 00s',
+      title: 'Mission started',
+      description: 'Initializing Competitor Spy',
     },
   ],
-  moreRecentStepsCount: 2,
-  progressPct: 45,
+  progressPct: 60,
   completedStages: [
     { title: 'Mapping the field',     agent: 'Competitor Discovery',  time: '2m 12s' },
     { title: 'Reading the auction',   agent: 'Auction Intelligence',  time: '3m 28s' },

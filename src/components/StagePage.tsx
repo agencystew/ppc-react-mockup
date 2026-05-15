@@ -382,7 +382,7 @@ function RunningCanvas({ run }: { run: AgentRun }) {
   const current = run.stage.current;
   return (
     <div className="space-y-10">
-      <RunningHero headline={run.headline} description={run.description} />
+      <RunningHero headline={run.headline} />
 
       {run.activeAgent && (
         <MissionFeedCard
@@ -411,32 +411,12 @@ function RunningCanvas({ run }: { run: AgentRun }) {
 
 // ─── Hero on canvas ──────────────────────────────────────────────────────
 
-function RunningHero({ headline, description }: { headline: string; description: string }) {
-  // Headline structure: "Sizing their spend." — wrap the last word in a soft
-  // lavender highlight with the word rendered in primary purple. The trailing
-  // period sits just outside the box, also in purple. No separate dot.
-  const hasPeriod = headline.endsWith('.');
-  const body = hasPeriod ? headline.slice(0, -1) : headline;
-  const words = body.trim().split(/\s+/);
-  const lastWord = words.pop() ?? '';
-  const lead = words.join(' ');
-
+function RunningHero({ headline }: { headline: string }) {
   return (
     <div>
       <h1 className="font-display text-[64px] font-extrabold leading-[1.04] tracking-[-0.035em] text-ppc-ink sm:text-[72px]">
-        {lead}
-        {lead && ' '}
-        <span
-          className="relative inline-block rounded-[10px] px-[12px] pb-[2px] pt-[2px] leading-[1.04]"
-          style={{ background: '#E9E3FF', color: '#7F5AF0' }}
-        >
-          {lastWord}
-        </span>
-        {hasPeriod && <span style={{ color: '#7F5AF0' }}>.</span>}
+        {headline}
       </h1>
-      <p className="mt-5 max-w-[640px] text-[15px] leading-[1.6] text-ppc-ink/70">
-        {description}
-      </p>
     </div>
   );
 }
@@ -444,44 +424,65 @@ function RunningHero({ headline, description }: { headline: string; description:
 // ─── Dark "Live mission feed" card ────────────────────────────────────────
 
 function MissionFeedCard({
-  active, recentSteps, moreCount,
+  active, recentSteps,
 }: {
   active: AgentStageRunning;
   recentSteps: MissionFeedStep[];
-  moreCount?: number;
 }) {
-  const [expanded, setExpanded] = useState(false);
   return (
     <div
-      className="relative overflow-hidden rounded-[16px] px-5 py-5 text-white sm:px-6 sm:py-6"
+      className="relative overflow-hidden rounded-[18px] px-7 pb-7 pt-6 text-white sm:px-8 sm:pb-8 sm:pt-7"
       style={{
-        background: '#0E0B1A',
+        background: '#050308',
         boxShadow:
-          '0 30px 60px -30px rgba(15,10,30,0.55), inset 0 1px 0 rgba(255,255,255,0.03)',
+          '0 40px 70px -40px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.025), inset 0 0 0 1px rgba(255,255,255,0.04)',
       }}
     >
-      <p className="mb-4 text-[13px] font-medium text-white/80">Live mission feed</p>
+      {/* Faint top-left purple bloom — atmosphere, not a glow on its own */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -left-24 -top-32 h-[340px] w-[340px] rounded-full"
+        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.10) 0%, transparent 65%)' }}
+      />
 
-      <MissionActiveCard active={active} />
+      <p className="relative mb-6 text-[16px] font-semibold tracking-[-0.005em] text-white">
+        Live mission feed
+      </p>
 
-      <div className="mt-3 flex flex-col gap-[2px]">
-        {recentSteps.map((s, i) => (
-          <MissionCompletedRow key={i} step={s} isLast={i === recentSteps.length - 1} />
-        ))}
+      <div className="relative">
+        <MissionActiveCard active={active} />
+
+        {/* Vertical connector — runs from below the active card down through
+            every check circle. Sits OUTSIDE the completed cards on the left. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-[17px] w-px"
+          style={{
+            top: 'calc(50% + 0px)', // tweaked below: actually anchor inside relative wrapper
+            background:
+              'linear-gradient(180deg, rgba(127,90,240,0.55) 0%, rgba(255,255,255,0.10) 22%, rgba(255,255,255,0.08) 100%)',
+            height: 0,
+          }}
+        />
+
+        <ul className="relative mt-4 flex flex-col gap-3">
+          {/* The actual connector — anchored inside this UL so it lines up
+              cleanly with each row's check circle (left:17px → center of 34px). */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute left-[17px] top-0 bottom-[14px] w-px"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(127,90,240,0.40) 0%, rgba(255,255,255,0.08) 8%, rgba(255,255,255,0.06) 100%)',
+            }}
+          />
+          {recentSteps.map((s, i) => (
+            <li key={i}>
+              <MissionCompletedRow step={s} />
+            </li>
+          ))}
+        </ul>
       </div>
-
-      {moreCount ? (
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-[10px] py-2 text-[12px] font-medium text-white/55 transition-colors hover:bg-white/[0.03] hover:text-white/85"
-        >
-          {expanded ? 'Hide completed steps' : `+ ${moreCount} more completed steps`}
-          {expanded
-            ? <CaretUp size={10} weight="bold" />
-            : <CaretDown size={10} weight="bold" />}
-        </button>
-      ) : null}
     </div>
   );
 }
@@ -490,100 +491,82 @@ function MissionActiveCard({ active }: { active: AgentStageRunning }) {
   const progress = Math.max(0, Math.min(100, active.progressPct ?? 0));
   return (
     <div
-      className="relative overflow-hidden rounded-[14px] p-5"
+      className="relative overflow-hidden rounded-[16px] px-6 py-6"
       style={{
-        background: 'rgba(127,90,240,0.05)',
-        border: '1px solid rgba(127,90,240,0.45)',
-        boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.05), 0 0 0 1px rgba(127,90,240,0.15)',
+        background:
+          'radial-gradient(120% 90% at 0% 50%, rgba(127,90,240,0.16) 0%, rgba(127,90,240,0.05) 45%, rgba(127,90,240,0.02) 100%)',
+        boxShadow: [
+          'inset 0 0 0 1.5px rgba(127,90,240,0.55)',
+          'inset 0 1px 0 rgba(255,255,255,0.06)',
+          '0 0 0 1px rgba(127,90,240,0.18)',
+          '0 0 28px rgba(127,90,240,0.20)',
+          '0 0 60px rgba(127,90,240,0.10)',
+        ].join(', '),
       }}
     >
-      {/* Subtle radial top-right bloom */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -right-16 -top-20 h-[200px] w-[200px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.18) 0%, transparent 65%)' }}
-      />
+      <div className="relative flex items-center gap-6">
+        {/* Big glowing waveform circle (the signature element) */}
+        <span
+          className="relative grid h-[78px] w-[78px] shrink-0 place-items-center rounded-full"
+          style={{
+            background: 'radial-gradient(circle at 35% 30%, #B08EF4 0%, #7F5AF0 55%, #5A3FE0 100%)',
+            boxShadow: [
+              'inset 0 0 0 1.5px rgba(255,255,255,0.28)',
+              'inset 0 -12px 20px rgba(15,10,30,0.40)',
+              '0 0 0 4px rgba(127,90,240,0.16)',
+              '0 0 30px rgba(127,90,240,0.65)',
+              '0 0 60px rgba(127,90,240,0.40)',
+            ].join(', '),
+          }}
+        >
+          <Waveform size={34} weight="bold" className="text-white" />
+        </span>
 
-      <div className="relative flex items-start gap-4">
-        {/* Left column: icon + stacked NOW/ACTIVE tags */}
-        <div className="flex w-[44px] shrink-0 flex-col items-center gap-2">
-          <span
-            className="grid h-[44px] w-[44px] place-items-center rounded-[12px]"
-            style={{
-              background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 55%, #5A3FE0 100%)',
-              boxShadow:
-                '0 0 0 1px rgba(255,255,255,0.18) inset, 0 8px 20px -8px rgba(127,90,240,0.55)',
-            }}
-          >
-            <Waveform size={20} weight="bold" className="text-white" />
-          </span>
-          <FeedChip>Now</FeedChip>
-          <FeedChip>Active</FeedChip>
-        </div>
-
-        {/* Right column: title row + meta + pills + description + bar */}
+        {/* Center column */}
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0 flex-1">
-              <p className="text-[17px] font-semibold tracking-[-0.012em] text-white">
-                {active.role}
-              </p>
-              <p className="mt-[3px] text-[12.5px] leading-[1.55] text-white/55">
-                {active.toolCallCount != null && (
-                  <>
-                    <span className="tabular-nums">{active.toolCallCount}</span> tool calls
-                  </>
-                )}
-                {active.toolCallCount != null && active.insightLabel && (
-                  <span className="px-1.5 text-white/30">·</span>
-                )}
-                {active.insightLabel}
-              </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-3 pt-[1px]">
-              <div className="text-right leading-tight">
-                <div className="tabular-nums text-[15px] font-semibold text-white">
-                  {active.elapsed}
-                </div>
-                <div className="text-[10.5px] text-white/45">elapsed</div>
-              </div>
-              <ElapsedSparkline />
-            </div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <FeedChip>Now</FeedChip>
+            <h3 className="font-display text-[24px] font-bold leading-[1.1] tracking-[-0.018em] text-white sm:text-[26px]">
+              {active.role}
+            </h3>
+            <FeedChip>Active</FeedChip>
           </div>
-
-          {active.tools && active.tools.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {active.tools.map((t, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center rounded-[6px] border px-2.5 py-[4px] text-[11px]"
-                  style={{
-                    background: 'rgba(127,90,240,0.10)',
-                    borderColor: 'rgba(127,90,240,0.32)',
-                    color: '#D3C6FF',
-                    fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
-                  }}
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <p className="mt-3 text-[13px] leading-[1.6] text-white/72">{active.task}</p>
-
+          <p className="mt-2 text-[14.5px] leading-[1.5] text-white/65">{active.task}</p>
           <div
-            className="relative mt-4 h-[5px] overflow-hidden rounded-full"
+            className="relative mt-4 h-[7px] overflow-hidden rounded-full"
             style={{ background: 'rgba(255,255,255,0.08)' }}
           >
             <div
               className="ppcio-live-bar h-full rounded-full"
               style={{
                 width: `${progress}%`,
-                boxShadow: '0 0 12px rgba(127,90,240,0.55)',
+                boxShadow: '0 0 14px rgba(127,90,240,0.65)',
               }}
             />
           </div>
+        </div>
+
+        {/* Right column: large elapsed + "in progress" + sparkline */}
+        <div className="flex shrink-0 items-center gap-4 self-stretch pl-3">
+          <div className="flex flex-col items-end leading-none">
+            <div
+              className="tabular-nums font-display text-[34px] font-bold leading-none tracking-[-0.020em] text-white"
+            >
+              {active.elapsed}
+            </div>
+            <span
+              aria-hidden
+              className="my-[10px] block h-px w-[44px]"
+              style={{ background: 'rgba(127,90,240,0.40)' }}
+            />
+            <div
+              className="text-[11px] uppercase tracking-[0.18em] text-white/55"
+              style={{ fontFamily: '"Courier New", ui-monospace, Menlo, monospace' }}
+            >
+              in progress
+            </div>
+          </div>
+          <ElapsedSparkline />
         </div>
       </div>
     </div>
@@ -593,7 +576,7 @@ function MissionActiveCard({ active }: { active: AgentStageRunning }) {
 function FeedChip({ children }: { children: React.ReactNode }) {
   return (
     <span
-      className="inline-flex w-full items-center justify-center rounded-[5px] px-[6px] py-[3px] text-[9px] font-bold uppercase leading-none tracking-[0.14em]"
+      className="inline-flex items-center justify-center rounded-[6px] px-[9px] py-[5px] text-[10px] font-bold uppercase leading-none tracking-[0.18em]"
       style={{
         background: 'rgba(127,90,240,0.20)',
         color: '#D3C6FF',
@@ -606,66 +589,98 @@ function FeedChip({ children }: { children: React.ReactNode }) {
   );
 }
 
-function MissionCompletedRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
+function MissionCompletedRow({ step }: { step: MissionFeedStep }) {
   return (
-    <div
-      className={`relative flex items-start gap-4 py-3 ${isLast ? '' : 'border-b border-white/[0.04]'}`}
-    >
+    <div className="relative flex items-stretch gap-4">
+      {/* Outside-the-card check circle, sits on the vertical connector */}
       <span
-        className="relative z-[1] grid h-[26px] w-[26px] shrink-0 place-items-center rounded-full"
+        className="relative z-[1] mt-[14px] grid h-[34px] w-[34px] shrink-0 place-items-center self-start rounded-full"
         style={{
-          background: 'rgba(255,255,255,0.06)',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.10)',
+          background: '#13101D',
+          boxShadow:
+            'inset 0 0 0 1px rgba(255,255,255,0.10), 0 0 0 4px #050308, 0 0 0 5px rgba(255,255,255,0.04)',
         }}
       >
-        <Check size={12} weight="bold" className="text-white/75" />
+        <Check size={13} weight="bold" className="text-white/75" />
       </span>
-      <span
-        className="tabular-nums shrink-0 pt-[2px] text-[12px] font-medium text-white/45"
-        style={{ width: 56 }}
+
+      {/* The card */}
+      <div
+        className="flex min-w-0 flex-1 items-center gap-5 rounded-[12px] px-5 py-[14px]"
+        style={{
+          background: 'rgba(255,255,255,0.025)',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
+        }}
       >
-        {step.time}
-      </span>
-      <div className="min-w-0 flex-1 pt-[1px]">
-        <p className="text-[13.5px] font-medium tracking-[-0.005em] text-white">{step.title}</p>
-        <p className="mt-[3px] text-[12.5px] leading-[1.55] text-white/55">{step.description}</p>
+        <span
+          className="tabular-nums shrink-0 text-[13px] font-medium text-white/45"
+          style={{ width: 56 }}
+        >
+          {step.time}
+        </span>
+        <div className="min-w-0 flex-1 leading-tight">
+          <p className="text-[14.5px] font-medium tracking-[-0.005em] text-white">
+            {step.title}
+          </p>
+          <p className="mt-[3px] text-[12.5px] text-white/50">{step.description}</p>
+        </div>
+        <span
+          className="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full"
+          style={{
+            background: 'transparent',
+            boxShadow: 'inset 0 0 0 1px rgba(93,202,165,0.45)',
+          }}
+        >
+          <Check size={12} weight="bold" style={{ color: '#5DCAA5' }} />
+        </span>
       </div>
-      <span
-        className="grid h-[20px] w-[20px] shrink-0 place-items-center rounded-full"
-        style={{
-          background: 'rgba(93,202,165,0.18)',
-          boxShadow: 'inset 0 0 0 1px rgba(93,202,165,0.42)',
-        }}
-      >
-        <Check size={11} weight="bold" style={{ color: '#5DCAA5' }} />
-      </span>
     </div>
   );
 }
 
 function ElapsedSparkline() {
-  // Stylised audio-waveform glyph, ~74×22. Static — feels alive at-rest.
+  // Larger audio-waveform glyph (~112×42) with a soft purple glow so the
+  // pulse reads as a signature inside the dark card.
   return (
-    <svg width="74" height="22" viewBox="0 0 74 22" aria-hidden fill="none">
-      <g stroke="#B08EF4" strokeWidth="1.5" strokeLinecap="round">
-        <line x1="3"  y1="11" x2="3"  y2="11" />
-        <line x1="7"  y1="9"  x2="7"  y2="13" />
-        <line x1="11" y1="7"  x2="11" y2="15" />
-        <line x1="15" y1="4"  x2="15" y2="18" />
-        <line x1="19" y1="9"  x2="19" y2="13" />
-        <line x1="23" y1="6"  x2="23" y2="16" />
-        <line x1="27" y1="2"  x2="27" y2="20" />
-        <line x1="31" y1="7"  x2="31" y2="15" />
-        <line x1="35" y1="10" x2="35" y2="12" />
-        <line x1="39" y1="6"  x2="39" y2="16" />
-        <line x1="43" y1="3"  x2="43" y2="19" />
-        <line x1="47" y1="8"  x2="47" y2="14" />
-        <line x1="51" y1="10" x2="51" y2="12" />
-        <line x1="55" y1="7"  x2="55" y2="15" />
-        <line x1="59" y1="9"  x2="59" y2="13" />
-        <line x1="63" y1="10" x2="63" y2="12" />
-        <line x1="67" y1="11" x2="67" y2="11" />
-        <line x1="71" y1="11" x2="71" y2="11" />
+    <svg width="112" height="42" viewBox="0 0 112 42" aria-hidden fill="none">
+      <defs>
+        <filter id="spark-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1.4" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        <linearGradient id="spark-grad" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%"   stopColor="#7F5AF0" stopOpacity="0.40" />
+          <stop offset="50%"  stopColor="#B08EF4" stopOpacity="1" />
+          <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0.55" />
+        </linearGradient>
+      </defs>
+      <g
+        stroke="url(#spark-grad)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        filter="url(#spark-glow)"
+      >
+        <line x1="4"   y1="21" x2="4"   y2="21" />
+        <line x1="10"  y1="17" x2="10"  y2="25" />
+        <line x1="16"  y1="13" x2="16"  y2="29" />
+        <line x1="22"  y1="6"  x2="22"  y2="36" />
+        <line x1="28"  y1="15" x2="28"  y2="27" />
+        <line x1="34"  y1="9"  x2="34"  y2="33" />
+        <line x1="40"  y1="2"  x2="40"  y2="40" />
+        <line x1="46"  y1="10" x2="46"  y2="32" />
+        <line x1="52"  y1="18" x2="52"  y2="24" />
+        <line x1="58"  y1="11" x2="58"  y2="31" />
+        <line x1="64"  y1="5"  x2="64"  y2="37" />
+        <line x1="70"  y1="14" x2="70"  y2="28" />
+        <line x1="76"  y1="18" x2="76"  y2="24" />
+        <line x1="82"  y1="13" x2="82"  y2="29" />
+        <line x1="88"  y1="16" x2="88"  y2="26" />
+        <line x1="94"  y1="19" x2="94"  y2="23" />
+        <line x1="100" y1="20" x2="100" y2="22" />
+        <line x1="106" y1="21" x2="106" y2="21" />
       </g>
     </svg>
   );
