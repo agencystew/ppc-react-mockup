@@ -2,10 +2,12 @@ import type { ReactElement } from 'react';
 import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, ArrowUpRight, Bell, CaretLeft, CaretRight, ChartBar,
-  Compass, Eye, Fire, Funnel, GridFour, ListBullets,
-  MagnifyingGlass, PaperPlaneTilt, Shield, Sparkle, Target, TrendUp,
-  CalendarBlank, SlidersHorizontal,
+  ArrowRight, ArrowUpRight, Bell, Brain, Broadcast, Browser, Buildings,
+  CalendarBlank, CaretLeft, CaretRight, ChartBar, Clock, Compass, Drop, Eye,
+  Fire, Flask, Funnel, Gauge, GridFour, Lightning, ListBullets, ListChecks,
+  MagnifyingGlass, MapTrifold, PaintBrush, PaperPlaneTilt, PencilSimple,
+  Rocket, Shield, ShieldCheck, ShoppingCart, Sparkle, SlidersHorizontal,
+  SquaresFour, Target, TrendUp, UsersFour, WaveSawtooth,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
 import type { AgentCategory, AgentDefinition } from '../types/agent';
@@ -104,6 +106,43 @@ const CATEGORY_TINT: Record<AgentCategory, { bg: string; fg: string }> = {
   buyer:       { bg: '#EAF3DE', fg: '#27500A' },
   client:      { bg: '#E1F5EE', fg: '#0F8C71' },
   context:     { bg: '#F1EFE8', fg: '#2C2C2A' },
+};
+
+// ─── Per-slug Phosphor icon ─────────────────────────────────────────────
+// The concept renders agent cards with clean line icons inside tinted
+// circular badges, not platform emoji. We keep emoji in the agent data
+// (used elsewhere as a fast eyeball-glyph) but override the visual on
+// /agents so the grid reads like a single icon set.
+const SLUG_ICON: Record<string, ReactElement> = {
+  'weekly-audit':         <ChartBar          size={20} weight="duotone" />,
+  'deep-account-audit':   <MagnifyingGlass   size={20} weight="duotone" />,
+  'negative-keyword':     <Shield            size={20} weight="duotone" />,
+  'budget-pacer':         <Clock             size={20} weight="duotone" />,
+  'spend-leak':           <Drop              size={20} weight="duotone" />,
+  'profit-tracker':       <TrendUp           size={20} weight="duotone" />,
+  'ad-copy':              <PencilSimple      size={20} weight="duotone" />,
+  'landing-page':         <Browser           size={20} weight="duotone" />,
+  'landing-page-designer':<PaintBrush        size={20} weight="duotone" />,
+  'shopping-feed':        <ShoppingCart      size={20} weight="duotone" />,
+  'competitor-spy':       <Eye               size={20} weight="duotone" />,
+  'pmax':                 <Lightning         size={20} weight="duotone" />,
+  'keyword':              <Target            size={20} weight="duotone" />,
+  'keyword-auditor':      <ListChecks        size={20} weight="duotone" />,
+  'campaign-architect':   <SquaresFour       size={20} weight="duotone" />,
+  'buyer-journey':        <MapTrifold        size={20} weight="duotone" />,
+  'readiness':            <Gauge             size={20} weight="duotone" />,
+  'demand-ceiling':       <ChartBar          size={20} weight="duotone" />,
+  'test-recommender':     <Flask             size={20} weight="duotone" />,
+  'change-impact':        <WaveSawtooth      size={20} weight="duotone" />,
+  'brand-safety':         <ShieldCheck       size={20} weight="duotone" />,
+  'business-context':     <Buildings         size={20} weight="duotone" />,
+  'competitor-context':   <UsersFour         size={20} weight="duotone" />,
+  'google-ads-context':   <Broadcast         size={20} weight="duotone" />,
+  'persona':              <Brain             size={20} weight="duotone" />,
+  'context-enrichment':   <Sparkle           size={20} weight="duotone" />,
+  'client-reporting':     <ListBullets       size={20} weight="duotone" />,
+  'sales-intelligence':   <Target            size={20} weight="duotone" />,
+  'new-client-autopilot': <Rocket            size={20} weight="duotone" />,
 };
 
 // ─── Suggestion chips below the search bar ──────────────────────────────
@@ -284,24 +323,24 @@ function SearchBar() {
 
 // Mascot bench image — the hero's emotional anchor. Sits in the top
 // right of the hero on lg+, hides on mobile to keep the H1 the moment.
+// Source asset is a transparent RGBA PNG (3088×1200) so no blend hack.
 function MascotBench() {
   return (
-    <div className="relative hidden h-[300px] w-full lg:block">
-      {/* Soft lavender bloom behind the image so it sits inside a
-       * stage-light glow instead of floating on flat canvas. */}
+    <div className="relative hidden h-[320px] w-full lg:block">
+      {/* Soft lavender bloom behind the image — stage-light glow under
+        * the center "AI Specialist" mascot, not a flat backdrop. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(60% 70% at 55% 55%, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.06) 45%, transparent 75%)',
+            'radial-gradient(55% 60% at 50% 55%, rgba(127,90,240,0.22) 0%, rgba(127,90,240,0.08) 45%, transparent 75%)',
         }}
       />
       <img
-        src="/eyebrow-final.jpg"
-        alt="Four AI specialists in a row, the center mascot framed as today's pick"
+        src="/agents-mascots.png"
+        alt="Four AI specialists on stadium seats, the center mascot framed as today's pick"
         className="relative h-full w-full object-contain"
-        style={{ mixBlendMode: 'multiply' }}
         draggable={false}
       />
     </div>
@@ -503,30 +542,36 @@ function PlanBanner() {
         style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.32) 0%, transparent 60%)' }}
       />
 
-      <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_auto_auto]">
-        <div className="max-w-[460px]">
-          <h2 className="font-display text-[26px] font-black leading-[1.05] tracking-[-0.020em] sm:text-[30px]">
+      <div className="relative grid items-center gap-x-10 gap-y-8 lg:grid-cols-[minmax(280px,_360px)_minmax(0,_1fr)_auto]">
+        {/* Headline column — pinned to a 280-360px range so the H2 can
+          * break cleanly on two lines instead of getting crushed into a
+          * single-word stack when the steps row grows. */}
+        <div>
+          <h2 className="font-display text-[28px] font-black leading-[1.05] tracking-[-0.020em] sm:text-[32px]">
             Build your{' '}
             <span
               className="font-serif italic font-bold text-[#C7B0FF]"
               style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
             >
               weekly
-            </span>{' '}
+            </span>
+            <br />
             agent plan<span
               className="font-serif italic text-[#C7B0FF]"
               style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
             >.</span>
           </h2>
-          <p className="mt-2 max-w-[420px] text-[13.5px] leading-[1.55] text-white/65">
+          <p className="mt-3 max-w-[340px] text-[13.5px] leading-[1.55] text-white/65">
             Schedule the right agents to run automatically. Wake up to insights, not dashboards.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-start gap-x-7 gap-y-4 lg:flex-nowrap">
-          <PlanStep n={1} icon={<CalendarBlank size={18} weight="duotone" />} title="Choose frequency"   desc="Daily, weekly, or custom." />
+        {/* Steps column — flex row that wraps gracefully but never
+          * steals room from the headline column. */}
+        <div className="grid gap-x-7 gap-y-4 sm:grid-cols-3">
+          <PlanStep n={1} icon={<CalendarBlank size={18} weight="duotone" />} title="Choose frequency"        desc="Daily, weekly, or custom." />
           <PlanStep n={2} icon={<SlidersHorizontal size={18} weight="duotone" />} title="Pick your specialists" desc="Build the perfect agent lineup." />
-          <PlanStep n={3} icon={<Bell size={18} weight="duotone" />} title="Get insights on autopilot" desc="Delivered to your inbox and dashboard." />
+          <PlanStep n={3} icon={<Bell size={18} weight="duotone" />} title="Get insights on autopilot"           desc="Delivered to your inbox and dashboard." />
         </div>
 
         <Link
@@ -693,6 +738,7 @@ function AgentCard({ agent: a }: { agent: AgentDefinition }) {
   const tint = CATEGORY_TINT[a.category];
   const b = SLUG_BUCKET[a.slug];
   const bucketPalette = b ? BUCKET_PALETTE[b] : null;
+  const icon = SLUG_ICON[a.slug];
   return (
     <Link
       to={`/agents/${a.slug}`}
@@ -704,7 +750,7 @@ function AgentCard({ agent: a }: { agent: AgentDefinition }) {
           className="grid h-11 w-11 place-items-center rounded-full"
           style={{ background: tint.bg, color: tint.fg }}
         >
-          <span className="text-[20px] leading-none">{a.emoji}</span>
+          {icon ?? <span className="text-[20px] leading-none">{a.emoji}</span>}
         </span>
         <ArrowUpRight
           size={13}
@@ -739,6 +785,7 @@ function AgentRow({ agent: a }: { agent: AgentDefinition }) {
   const tint = CATEGORY_TINT[a.category];
   const b = SLUG_BUCKET[a.slug];
   const bucketPalette = b ? BUCKET_PALETTE[b] : null;
+  const icon = SLUG_ICON[a.slug];
   return (
     <Link
       to={`/agents/${a.slug}`}
@@ -749,7 +796,7 @@ function AgentRow({ agent: a }: { agent: AgentDefinition }) {
         className="grid h-10 w-10 shrink-0 place-items-center rounded-full"
         style={{ background: tint.bg, color: tint.fg }}
       >
-        <span className="text-[19px] leading-none">{a.emoji}</span>
+        {icon ?? <span className="text-[19px] leading-none">{a.emoji}</span>}
       </span>
       <div className="min-w-0 flex-1">
         <h4 className="truncate text-[14px] font-semibold leading-tight tracking-[-0.01em] text-ppc-ink">
