@@ -255,8 +255,10 @@ function OperatorView({
         />
       </section>
 
-      {/* SEARCH + FILTER CHIPS — mirrors /projects exactly */}
-      <section className="reveal space-y-3" style={{ animationDelay: '180ms' }}>
+      {/* SEARCH + FILTER CHIPS — mirrors /projects exactly.
+          relative + z-40 keeps the ProjectPicker dropdown above the
+          inbox card (which would otherwise win on stacking-context). */}
+      <section className="reveal relative z-40 space-y-3" style={{ animationDelay: '180ms' }}>
         <div className="relative">
           <MagnifyingGlass
             size={15}
