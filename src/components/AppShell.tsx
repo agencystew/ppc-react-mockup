@@ -1,12 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   House, Robot, ChartLineUp, ChatCircle,
   MagnifyingGlass, SidebarSimple, Plus, SquaresFour,
-  CaretRight, DotsThree,
+  CaretRight, DotsThree, X, ArrowsLeftRight,
 } from '@phosphor-icons/react';
 import { PROJECTS, ACCOUNTS } from '../mock/projects';
 import { SIDEBAR_REPORT_PAGES } from '../mock/reports';
+
+/* Path-prefix scope: anything under /projects/<id>/... (or /projects/<id>) is
+ * project-scoped — the cockpit, agents, reports, runs. Plain /projects (the
+ * index) stays workspace mode. The ScopePill, sidebar active-state mirror, and
+ * any future scoped surface all read from this single helper. */
+function getScopedProjectId(pathname: string): string | null {
+  const m = pathname.match(/^\/projects\/([^/]+)(?:\/|$)/);
+  if (!m) return null;
+  const id = m[1];
+  return PROJECTS.some((p) => p.id === id) ? id : null;
+}
 
 /* AppShell — "Inhabited Dark" sidebar.
  *
@@ -77,7 +88,8 @@ export function AppShell() {
         {fullBleed ? (
           <Outlet />
         ) : (
-          <div className="mx-auto w-full max-w-[1240px] px-8 py-10 lg:px-12 lg:py-12">
+          <div className="mx-auto w-full max-w-[1240px] px-8 pt-6 pb-10 lg:px-12 lg:pb-12">
+            <ScopePill />
             <Outlet />
           </div>
         )}

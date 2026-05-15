@@ -48,6 +48,15 @@ export default function App() {
         <Route path="projects" element={<Projects />} />
         <Route path="projects/:id" element={<ProjectPage />} />
 
+        {/* Project-scoped surfaces (URL = scope). Same components, two URL shapes:
+           the ScopePill + AgentDetail launch panel pre-fill key off useParams.id. */}
+        <Route path="projects/:id/agents" element={<AgentCatalog />} />
+        <Route path="projects/:id/agents/:slug" element={<AgentDetail />} />
+        <Route path="projects/:id/agents/:slug/loading/:runId" element={<AgentRunning />} />
+        <Route path="projects/:id/agents/:slug/run/:runId" element={<AgentRunning />} />
+        <Route path="projects/:id/runs/:runId" element={<AgentResults />} />
+        <Route path="projects/:id/reports" element={<Reports />} />
+
         {/* ─── v2 (parked for A/B comparison) ─────────────────────────
            Same routes as v1, prefixed with /v2.  Swap "/v2" in/out of any
            URL to compare:  /agents  ↔  /v2/agents.  AppShell wraps both. */}

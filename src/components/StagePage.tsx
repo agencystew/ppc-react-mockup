@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Check, ArrowRight, ArrowUpRight, CaretDown, CaretUp, Waveform,
+  Check, ArrowRight, ArrowUpRight, CaretDown, CaretUp,
 } from '@phosphor-icons/react';
 import type {
   AgentRun,
@@ -403,8 +403,6 @@ function RunningCanvas({ run }: { run: AgentRun }) {
           moreCount={run.moreUpcomingCount}
         />
       )}
-
-      {run.liveSignalsLabel && <LiveSignalsCallout label={run.liveSignalsLabel} />}
 
       <HoldTightBand />
     </div>
@@ -880,69 +878,3 @@ function UpcomingStagesSection({
   );
 }
 
-// ─── Lavender bottom callout ────────────────────────────────────────────
-
-function LiveSignalsCallout({ label }: { label: string }) {
-  return (
-    <div
-      className="relative flex items-center gap-5 overflow-hidden rounded-[16px] px-6 py-5"
-      style={{ background: '#ECE7FB' }}
-    >
-      <span
-        className="grid h-[52px] w-[52px] shrink-0 place-items-center rounded-full"
-        style={{
-          background: '#FFFFFF',
-          boxShadow: '0 0 0 1px rgba(127,90,240,0.18), 0 6px 16px -6px rgba(127,90,240,0.30)',
-        }}
-      >
-        <Waveform size={22} weight="bold" style={{ color: '#7F5AF0' }} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">{label}</p>
-        <p className="mt-[3px] text-[13.5px] text-ppc-ink/55">
-          New insights will appear in your report as they're ready.
-        </p>
-      </div>
-      <CalloutSparkline />
-    </div>
-  );
-}
-
-function CalloutSparkline() {
-  return (
-    <svg
-      width="220"
-      height="60"
-      viewBox="0 0 220 60"
-      aria-hidden
-      fill="none"
-      className="pointer-events-none shrink-0"
-    >
-      <defs>
-        <linearGradient id="cs-stroke" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0%" stopColor="#7F5AF0" stopOpacity="0.25" />
-          <stop offset="60%" stopColor="#7F5AF0" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0.55" />
-        </linearGradient>
-        <linearGradient id="cs-fill" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="#7F5AF0" stopOpacity="0.18" />
-          <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M2 46 Q 24 32, 38 36 T 72 22 T 108 32 T 142 14 T 176 28 T 218 18"
-        stroke="url(#cs-stroke)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        fill="none"
-      />
-      <path
-        d="M2 46 Q 24 32, 38 36 T 72 22 T 108 32 T 142 14 T 176 28 T 218 18 L 218 58 L 2 58 Z"
-        fill="url(#cs-fill)"
-      />
-      <circle cx="72"  cy="22" r="2.5" fill="#7F5AF0" />
-      <circle cx="142" cy="14" r="2.5" fill="#7F5AF0" />
-      <circle cx="218" cy="18" r="2.5" fill="#7F5AF0" />
-    </svg>
-  );
-}
