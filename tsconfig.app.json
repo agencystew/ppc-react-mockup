@@ -22,8 +22,10 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
-  /* v2 reset: archived v1 pages stay in-repo as reference only — page-rebuild
+  /* Archived pages stay in-repo as reference only — page-rebuild
      agents read them, they're not part of the active build. Their imports
-     reference paths that no longer resolve relative to _archive/v1/. */
-  "exclude": ["src/pages/_archive", "src/_archive"]
+     reference paths that no longer resolve from their new archive locations.
+     Glob covers _archive at any nesting depth (e.g. src/pages/_v3/_archive/,
+     src/mock/_archive/). */
+  "exclude": ["**/_archive/**", "src/pages/_archive", "src/_archive"]
 }
