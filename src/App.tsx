@@ -21,7 +21,6 @@ import { AgentResults as V2AgentResults } from './pages/_v2/AgentResults';
 import { Reports as V2Reports } from './pages/_v2/Reports';
 import { Projects as V2Projects } from './pages/_v2/Projects';
 import { ProjectPage as V2ProjectPage } from './pages/_v2/Project';
-import { Chat as V2Chat } from './pages/_v2/Chat';
 
 import { DevPrimitives } from './pages/_dev/Primitives';
 
@@ -62,8 +61,7 @@ export default function App() {
            URL to compare:  /agents  ↔  /v2/agents.  AppShell wraps both. */}
         <Route path="v2" element={<V2Dashboard />} />
 
-        <Route path="v2/chat" element={<V2Chat />} />
-        <Route path="v2/chat/:chatId" element={<V2Chat />} />
+        {/* v2/chat retired 2026-05-15: replaced by the canonical /chat redesign. */}
 
         <Route path="v2/agents" element={<V2AgentCatalog />} />
         <Route path="v2/agents/:slug" element={<V2AgentDetail />} />
