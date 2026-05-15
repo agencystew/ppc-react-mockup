@@ -3,7 +3,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, ArrowUpRight, Bell, CaretLeft, CaretRight, ChartBar,
-  Coffee, Compass, Eye, Fire, Funnel, GridFour, ListBullets,
+  Compass, Eye, Fire, Funnel, GridFour, ListBullets,
   MagnifyingGlass, PaperPlaneTilt, Shield, Sparkle, Target, TrendUp,
   CalendarBlank, SlidersHorizontal,
 } from '@phosphor-icons/react';
@@ -730,10 +730,6 @@ function AgentCard({ agent: a }: { agent: AgentDefinition }) {
             {b && BUCKET_LABEL[b]}
           </span>
         )}
-        <span className="inline-flex items-center gap-1 font-mono text-[9.5px] font-semibold uppercase tracking-[0.10em] text-ppc-text-faint">
-          <Coffee size={10} weight="fill" />
-          Make a coffee
-        </span>
       </div>
     </Link>
   );
