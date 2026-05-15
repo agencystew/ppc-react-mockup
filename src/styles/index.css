@@ -34,7 +34,9 @@
  * ════════════════════════════════════════════════════════════════════════ */
 html, body, #root {
   min-height: 100%;
-  background: #F3F0FF;
+  /* v5 canvas — lavender, slightly warmer than the older #F3F0FF tint.
+   * Locked in stewart-profile + design system v5. */
+  background: var(--canvas, #ECEAFA);
   color: var(--ppc-black);
 }
 
