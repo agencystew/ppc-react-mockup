@@ -3,7 +3,7 @@ import {
   MagnifyingGlass, CaretDown, ArrowRight, ArrowUp, ArrowDown, Sparkle,
   Coffee, Check, PaperPlaneTilt, PushPin, Rows, SquaresFour, Lightning,
 } from '@phosphor-icons/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   NEEDS_TODAY, READY_FOR_CLIENT, FYI_REPORTS,
   ACTIONED_THIS_MONTH, SPECIALISTS_RUNNING,
@@ -240,11 +240,11 @@ function OperatorView({
           accent="#D49021"
         />
         <KpiCard
-          label="Recoverable / mo"
-          value="$12.4K"
-          delta={{ tone: 'up', pct: 22.0 }}
-          spark={[8, 10, 9, 11, 10, 13, 12, 15, 14, 17, 16, 19]}
-          accent="#7F5AF0"
+          label="Auto-shipped this week"
+          value="9"
+          delta={{ tone: 'up', pct: 28.5 }}
+          spark={[2, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 9]}
+          accent="#A88CFF"
         />
         <KpiCard
           label="Actioned this month"
@@ -603,19 +603,43 @@ function KpiCard({
   spark: number[];
   accent: string;
 }) {
-  const semantic = delta.good
-    ? (delta.tone === 'down' ? 'up' : 'down')
-    : delta.tone;
+  const semantic = delta.good ? (delta.tone === 'down' ? 'up' : 'down') : delta.tone;
   const palette = semantic === 'up'
-    ? { fg: '#1F8458', bg: '#E2F4EC', Icon: ArrowUp }
-    : { fg: '#C5301B', bg: '#FBE6E5', Icon: ArrowDown };
+    ? { fg: '#86EFAC', bg: 'rgba(134,239,172,0.12)', Icon: ArrowUp }
+    : { fg: '#FCA5A5', bg: 'rgba(248,113,113,0.12)', Icon: ArrowDown };
   return (
     <div
-      className="kpi-card group relative overflow-hidden rounded-[14px] bg-white px-5 pb-4 pt-4"
-      style={{ border: '0.5px solid #d9d4ec', boxShadow: '0 1px 0 rgba(255,255,255,0.7) inset' }}
+      className="kpi-card group relative overflow-hidden rounded-[14px] px-5 pb-4 pt-4"
+      style={{
+        background: 'radial-gradient(130% 100% at 90% 0%, #1B1138 0%, #0F0A1E 55%, #0A0617 100%)',
+        boxShadow: '0 1px 0 rgba(255,255,255,0.06) inset, 0 14px 30px -20px rgba(127,90,240,0.40)',
+      }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="mono-eyebrow text-ppc-text-faint">{label}</div>
+      {/* Top-right purple bloom — soft, brighter on hover */}
+      <div
+        aria-hidden
+        className="kpi-bloom pointer-events-none absolute -right-16 -top-20 h-[180px] w-[180px] rounded-full"
+        style={{ background: `radial-gradient(circle, ${accent}40 0%, ${accent}10 40%, transparent 70%)` }}
+      />
+      {/* Sheen line at the very top */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-6 top-0 h-px"
+        style={{ background: `linear-gradient(90deg, transparent 0%, ${accent}66 50%, transparent 100%)` }}
+      />
+      {/* Grain */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-40"
+        style={{
+          backgroundImage: 'radial-gradient(rgba(255,255,255,0.022) 1px, transparent 1px)',
+          backgroundSize: '3px 3px',
+          mixBlendMode: 'overlay',
+        }}
+      />
+
+      <div className="relative flex items-start justify-between gap-3">
+        <div className="mono-eyebrow text-white/55">{label}</div>
         <span
           className="tabular-nums inline-flex items-center gap-[3px] rounded-[6px] px-[7px] py-[2px] text-[11px] font-semibold"
           style={{ color: palette.fg, background: palette.bg }}
@@ -624,17 +648,12 @@ function KpiCard({
           {delta.pct.toFixed(1)}%
         </span>
       </div>
-      <div className="mt-2.5 font-display text-[30px] font-extrabold leading-[1.0] tracking-[-0.024em] tabular-nums text-ppc-ink">
+      <div className="relative mt-2.5 font-display text-[30px] font-extrabold leading-[1.0] tracking-[-0.024em] tabular-nums text-white">
         {value}
       </div>
-      <div className="mt-3 -mb-1">
+      <div className="relative mt-3 -mb-1">
         <KpiSparkline points={spark} accent={accent} />
       </div>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-6 bottom-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{ background: `linear-gradient(90deg, transparent 0%, ${accent}80 50%, transparent 100%)` }}
-      />
     </div>
   );
 }
@@ -649,12 +668,27 @@ function KpiSparkline({ points, accent }: { points: number[]; accent: string }) 
     <svg width={w} height={h} viewBox={`0 0 ${w} ${max}`} className="block" preserveAspectRatio="none">
       <defs>
         <linearGradient id={`kpi-${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={accent} stopOpacity="0.32" />
+          <stop offset="0%" stopColor={accent} stopOpacity="0.55" />
           <stop offset="100%" stopColor={accent} stopOpacity="0" />
         </linearGradient>
+        <filter id={`kpi-g-${id}`} x="-20%" y="-50%" width="140%" height="200%">
+          <feGaussianBlur stdDeviation="0.6" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
       <path d={fillPath} fill={`url(#kpi-${id})`} stroke="none" />
-      <path d={linePath} fill="none" stroke={accent} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d={linePath}
+        fill="none"
+        stroke={accent}
+        strokeWidth={1.7}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        filter={`url(#kpi-g-${id})`}
+      />
     </svg>
   );
 }
@@ -705,45 +739,146 @@ function FilterChip({ label }: { label: string }) {
   );
 }
 
+/* Project filter — properly working popover. Click-outside closes it,
+ * Escape closes it. Avatar chips up front mirror the sidebar so a glance
+ * tells you which client you've narrowed to. Active chip turns purple. */
 function ProjectPicker({ value, onChange }: { value: string; onChange: (id: string) => void }) {
   const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const current = PROJECTS.find((p) => p.id === value);
+  const active = value !== 'all';
+
+  useEffect(() => {
+    if (!open) return;
+    const onMouseDown = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={rootRef}>
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-1.5 rounded-[10px] border border-[#d9d4ec] bg-white px-3 py-[8px] text-[12.5px] font-medium tracking-tight text-ppc-ink transition-all duration-150 hover:-translate-y-px hover:border-ppc-purple-300/55 hover:bg-[#FBFAFF]"
+        className={[
+          'inline-flex items-center gap-2 rounded-[10px] px-3 py-[8px] text-[12.5px] font-medium tracking-tight transition-all duration-150 hover:-translate-y-px',
+          active
+            ? 'border border-ppc-purple-300/55 bg-[#F3F0FF] text-ppc-purple-700 hover:bg-[#EDE7FF]'
+            : 'border border-[#d9d4ec] bg-white text-ppc-ink hover:border-ppc-purple-300/55 hover:bg-[#FBFAFF]',
+        ].join(' ')}
       >
+        {active && current && (
+          <AvatarPip id={current.id} name={current.name} size={18} />
+        )}
         <span className="mono-eyebrow text-ppc-text-faint">Project</span>
-        <span>{current ? current.name : 'All'}</span>
-        <CaretDown size={10} weight="bold" className={`text-ppc-text-faint transition-transform ${open ? 'rotate-180' : ''}`} />
+        <span className="font-semibold">{current ? current.name : 'All'}</span>
+        <CaretDown
+          size={10}
+          weight="bold"
+          className={`text-ppc-text-faint transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+        />
       </button>
+
       {open && (
         <div
-          className="absolute left-0 top-full z-20 mt-2 w-[240px] overflow-hidden rounded-[10px] border border-[#d9d4ec] bg-white py-1"
-          style={{ boxShadow: '0 12px 30px -12px rgba(15,10,30,0.18), 0 2px 6px rgba(15,10,30,0.06)' }}
+          className="absolute left-0 top-full mt-2 w-[260px] overflow-hidden rounded-[12px] bg-white"
+          style={{
+            zIndex: 50,
+            border: '0.5px solid #d9d4ec',
+            boxShadow: '0 18px 36px -18px rgba(15,10,30,0.22), 0 2px 6px rgba(15,10,30,0.06)',
+          }}
         >
+          <div className="px-3 pb-1.5 pt-2.5">
+            <span className="mono-eyebrow text-ppc-text-faint">Filter by project</span>
+          </div>
+
           <button
+            type="button"
             onClick={() => { onChange('all'); setOpen(false); }}
-            className={`flex w-full items-center justify-between px-3 py-[7px] text-left text-[12.5px] font-medium hover:bg-[#F3F0FF] ${value === 'all' ? 'text-ppc-purple-700' : 'text-ppc-ink'}`}
+            className={[
+              'flex w-full items-center gap-2.5 px-3 py-[8px] text-left text-[13px] font-semibold tracking-[-0.005em] transition-colors',
+              value === 'all'
+                ? 'bg-[#F3F0FF] text-ppc-purple-700'
+                : 'text-ppc-ink hover:bg-[#F8F5FF]',
+            ].join(' ')}
           >
-            All projects
+            <span
+              className="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-[6px] text-[11px] font-bold text-ppc-purple-700"
+              style={{ background: '#E9E3FF', boxShadow: 'inset 0 0 0 0.5px rgba(127,90,240,0.20)' }}
+            >
+              ★
+            </span>
+            <span className="flex-1">All projects</span>
+            <span className="mono-eyebrow text-ppc-text-faint">{PROJECTS.length}</span>
             {value === 'all' && <Check size={12} weight="bold" className="text-ppc-purple-500" />}
           </button>
+
           <div className="my-1 h-px bg-[#ECEAFA]" />
-          {PROJECTS.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => { onChange(p.id); setOpen(false); }}
-              className={`flex w-full items-center justify-between px-3 py-[7px] text-left text-[12.5px] font-medium hover:bg-[#F3F0FF] ${value === p.id ? 'text-ppc-purple-700' : 'text-ppc-ink'}`}
-            >
-              {p.name}
-              {value === p.id && <Check size={12} weight="bold" className="text-ppc-purple-500" />}
-            </button>
-          ))}
+
+          <ul className="max-h-[300px] overflow-y-auto pb-1.5">
+            {PROJECTS.map((p) => {
+              const isActive = value === p.id;
+              return (
+                <li key={p.id}>
+                  <button
+                    type="button"
+                    onClick={() => { onChange(p.id); setOpen(false); }}
+                    className={[
+                      'flex w-full items-center gap-2.5 px-3 py-[8px] text-left text-[13px] font-medium tracking-[-0.005em] transition-colors',
+                      isActive
+                        ? 'bg-[#F3F0FF] text-ppc-purple-700'
+                        : 'text-ppc-ink hover:bg-[#F8F5FF]',
+                    ].join(' ')}
+                  >
+                    <AvatarPip id={p.id} name={p.name} size={22} />
+                    <span className="flex-1 truncate">{p.name}</span>
+                    {p.industry && (
+                      <span className="hidden truncate text-[10.5px] text-ppc-text-faint sm:inline-block">
+                        {p.industry}
+                      </span>
+                    )}
+                    {isActive && <Check size={12} weight="bold" className="text-ppc-purple-500" />}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       )}
     </div>
+  );
+}
+
+/* Small project chip — colored avatar with the first letter. Same hash-
+ * based hue palette used in the /projects ledger + AppShell sidebar so
+ * Boulder Care looks identical wherever it shows up. */
+function AvatarPip({ id, name, size = 22 }: { id: string; name: string; size?: number }) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  const hue = h % 360;
+  return (
+    <span
+      className="grid shrink-0 place-items-center rounded-[6px] font-bold leading-none"
+      style={{
+        width: size,
+        height: size,
+        fontSize: Math.round(size * 0.5),
+        background: `linear-gradient(155deg, hsl(${hue}, 65%, 92%) 0%, hsl(${hue}, 55%, 84%) 100%)`,
+        color: `hsl(${hue}, 60%, 25%)`,
+        boxShadow: `inset 0 0 0 0.5px hsla(${hue}, 50%, 55%, 0.30)`,
+      }}
+    >
+      {name.charAt(0)}
+    </span>
   );
 }
 
@@ -1040,11 +1175,17 @@ const PAGE_STYLES = `
     background: linear-gradient(90deg, rgba(127,90,240,0.055) 0%, rgba(127,90,240,0.018) 38%, transparent 100%);
   }
 
+  /* Dark KPI cards — gentle lift + brighter bloom on hover */
   .kpi-card {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   .kpi-card:hover {
     transform: translateY(-1px);
-    box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset, 0 12px 28px -16px rgba(127,90,240,0.20);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.08) inset,
+      0 0 0 1px rgba(127,90,240,0.35),
+      0 18px 36px -18px rgba(127,90,240,0.55);
   }
+  .kpi-bloom { transition: opacity 0.35s ease, transform 0.35s ease; opacity: 0.85; }
+  .kpi-card:hover .kpi-bloom { opacity: 1; transform: scale(1.08); }
 `;
