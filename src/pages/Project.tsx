@@ -759,12 +759,21 @@ function KpiCardBlock({ kpi }: { kpi: KpiCard }) {
 function Sparkline({ points, color, className = '' }: { points: number[]; color: string; className?: string }) {
   const W = 120, H = 26, max = 22;
   const stepX = W / (points.length - 1);
-  const path = points
+  const id = `spark-${Math.random().toString(36).slice(2, 8)}`;
+  const line = points
     .map((y, i) => `${i === 0 ? 'M' : 'L'}${(i * stepX).toFixed(2)},${y.toFixed(2)}`)
     .join(' ');
+  const area = `${line} L ${W.toFixed(2)},${max.toFixed(2)} L 0,${max.toFixed(2)} Z`;
   return (
     <svg width="100%" height={H} viewBox={`0 0 ${W} ${max}`} className={`block ${className}`} preserveAspectRatio="none">
-      <path d={path} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.22} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={area} fill={`url(#${id})`} />
+      <path d={line} fill="none" stroke={color} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
