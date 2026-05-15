@@ -89,7 +89,6 @@ export function AgentDetail() {
         {/* ═══ RIGHT — sticky launch rail ═══════════════════════════════════ */}
         <aside className="lg:sticky lg:top-8 lg:h-fit">
           <LaunchPanel
-            agent={agent}
             selectedProject={selectedProject}
             setSelectedProject={(id) => { setSelectedProject(id); setSelectedAccounts([]); }}
             projectAccounts={projectAccounts}
@@ -227,7 +226,7 @@ function HeroCard({ agent }: { agent: AgentDefinition }) {
             {agent.outcomeDescription}
           </p>
 
-          <HeroMeta expectedDuration={agent.expectedDuration} />
+          <HeroMeta />
         </div>
 
         <div className="relative flex items-end justify-end sm:items-center">
@@ -238,11 +237,11 @@ function HeroCard({ agent }: { agent: AgentDefinition }) {
   );
 }
 
-function HeroMeta({ expectedDuration }: { expectedDuration: string }) {
+function HeroMeta() {
   return (
     <div className="mt-7 flex flex-wrap items-center gap-2.5">
-      <MetaPill icon={<Clock size={13} weight="bold" />}>
-        <span className="tabular-nums">{expectedDuration}</span> background run
+      <MetaPill icon={<Coffee size={13} weight="bold" />}>
+        Make a coffee, come back to the report
       </MetaPill>
       <MetaPill icon={<EnvelopeSimple size={13} weight="bold" />}>
         Email when ready
@@ -367,11 +366,11 @@ interface Deliverable {
   sub: string;
 }
 
-function WhatYouGet({ expectedDuration }: { expectedDuration: string }) {
+function WhatYouGet() {
   const items: Deliverable[] = [
     {
-      title: `${expectedDuration} background run`,
-      sub: "You get an email when it's ready. No watching a loader.",
+      title: 'Coffee-break delivery',
+      sub: "Runs in the background. We email when the report's ready.",
     },
     {
       title: 'Prioritized findings with impact',
@@ -451,7 +450,6 @@ function WhatYouGet({ expectedDuration }: { expectedDuration: string }) {
 // ─── Sticky launch panel (right rail) ────────────────────────────────────
 
 interface LaunchPanelProps {
-  agent: AgentDefinition;
   selectedProject: string;
   setSelectedProject: (id: string) => void;
   projectAccounts: typeof ACCOUNTS;
@@ -470,7 +468,7 @@ interface LaunchPanelProps {
 
 function LaunchPanel(props: LaunchPanelProps) {
   const {
-    agent, selectedProject, setSelectedProject, projectAccounts,
+    selectedProject, setSelectedProject, projectAccounts,
     selectedAccounts, toggleAccount, launchLevel, setLaunchLevel,
     runMode, setRunMode, steer, setSteer, dateRange, setDateRange,
     onLaunch,
@@ -676,8 +674,8 @@ function LaunchPanel(props: LaunchPanelProps) {
           />
         </button>
         <p className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-ppc-text-muted">
-          <Clock size={12} weight="bold" className="text-ppc-text-faint" />
-          <span className="tabular-nums">{agent.expectedDuration}</span> background run, email when ready
+          <Coffee size={12} weight="bold" className="text-ppc-text-faint" />
+          Make a coffee. We'll email when the report's ready.
         </p>
       </div>
     </div>
