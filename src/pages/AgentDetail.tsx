@@ -12,10 +12,12 @@ import type { LaunchLevel, AgentDefinition } from '../types/agent';
 
 // Agent Detail · /agents/:slug
 //
-// The agent's "front of house" — same world as the completed report
-// (/reports/:runId): breadcrumb, big bold title, dark hero card with a
-// signature mascot (the SAME spy that runs the report — continuity is
-// the point), and clean white cards underneath.
+// Same world as the completed report: breadcrumb, big bold title,
+// dark hero card with a signature mascot (the SAME spy that runs the
+// report — continuity is the point), and clean white cards underneath.
+//
+// 2-column layout: editorial LEFT, sticky LAUNCH PANEL RIGHT — the right
+// rail is the muscle memory once you've used the app a few times.
 //
 // Hard rules: TIME + APPROVAL cues only. NEVER pre-run $ figures.
 
@@ -75,27 +77,37 @@ export function AgentDetail() {
     <div className="font-sans text-ppc-ink">
       <Breadcrumbs trail={['Agents', agent.name]} />
       <TitleRow agent={agent} />
-      <HeroCard agent={agent} onLaunch={handleLaunch} />
-      <BuiltBy />
-      <HowItThinks steps={agent.thinkingSteps} />
-      <WhatYouGet expectedDuration={agent.expectedDuration} />
-      <ConfigurePanel
-        agent={agent}
-        selectedProject={selectedProject}
-        setSelectedProject={(id) => { setSelectedProject(id); setSelectedAccounts([]); }}
-        projectAccounts={projectAccounts}
-        selectedAccounts={selectedAccounts}
-        toggleAccount={toggleAccount}
-        launchLevel={launchLevel}
-        setLaunchLevel={setLaunchLevel}
-        runMode={runMode}
-        setRunMode={setRunMode}
-        steer={steer}
-        setSteer={setSteer}
-        dateRange={dateRange}
-        setDateRange={setDateRange}
-        onLaunch={handleLaunch}
-      />
+
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start">
+        {/* ═══ LEFT — editorial story ═══════════════════════════════════════ */}
+        <div className="min-w-0 space-y-12">
+          <HeroCard agent={agent} />
+          <BuiltBy />
+          <HowItThinks steps={agent.thinkingSteps} />
+          <WhatYouGet expectedDuration={agent.expectedDuration} />
+        </div>
+
+        {/* ═══ RIGHT — sticky launch rail ═══════════════════════════════════ */}
+        <aside className="lg:sticky lg:top-8 lg:h-fit">
+          <LaunchPanel
+            agent={agent}
+            selectedProject={selectedProject}
+            setSelectedProject={(id) => { setSelectedProject(id); setSelectedAccounts([]); }}
+            projectAccounts={projectAccounts}
+            selectedAccounts={selectedAccounts}
+            toggleAccount={toggleAccount}
+            launchLevel={launchLevel}
+            setLaunchLevel={setLaunchLevel}
+            runMode={runMode}
+            setRunMode={setRunMode}
+            steer={steer}
+            setSteer={setSteer}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            onLaunch={handleLaunch}
+          />
+        </aside>
+      </div>
     </div>
   );
 }
@@ -163,21 +175,15 @@ function CategoryChip({ label }: { label: string }) {
   );
 }
 
-// ─── Dark hero card with mascot + launch button ──────────────────────────
+// ─── Dark hero card with mascot ──────────────────────────────────────────
 
-function HeroCard({
-  agent,
-  onLaunch,
-}: {
-  agent: AgentDefinition;
-  onLaunch: () => void;
-}) {
+function HeroCard({ agent }: { agent: AgentDefinition }) {
   const hasPeriod = agent.headline.endsWith('.');
   const body = hasPeriod ? agent.headline.slice(0, -1) : agent.headline;
 
   return (
     <section
-      className="relative mb-12 overflow-hidden rounded-[20px] text-white"
+      className="relative overflow-hidden rounded-[20px] text-white"
       style={{
         background:
           'radial-gradient(120% 90% at 88% -10%, #1B0F39 0%, #0A0814 55%, #050310 100%)',
@@ -212,52 +218,21 @@ function HeroCard({
         }}
       />
 
-      <div className="relative grid gap-8 px-10 py-11 sm:grid-cols-[1fr_minmax(220px,300px)] sm:gap-12 sm:px-12 sm:py-14">
-        {/* Copy column */}
+      <div className="relative grid gap-8 px-9 py-11 sm:grid-cols-[1fr_minmax(180px,240px)] sm:gap-8 sm:px-10 sm:py-12">
         <div className="min-w-0">
-          <h2 className="font-display text-[44px] font-extrabold leading-[1.04] tracking-[-0.025em] text-white sm:text-[52px]">
+          <h2 className="font-display text-[40px] font-extrabold leading-[1.04] tracking-[-0.025em] text-white sm:text-[46px]">
             {body}
             {hasPeriod && <span style={{ color: '#9F86FF' }}>.</span>}
           </h2>
-          <p className="mt-5 max-w-[560px] text-[15.5px] leading-[1.6] text-white/65">
+          <p className="mt-5 max-w-[500px] text-[15px] leading-[1.6] text-white/65">
             {agent.outcomeDescription}
           </p>
 
           <HeroMeta expectedDuration={agent.expectedDuration} />
-
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={onLaunch}
-              className="group inline-flex items-center gap-2 rounded-[10px] px-[20px] py-[14px] text-[14.5px] font-semibold text-white transition-transform hover:-translate-y-[0.5px]"
-              style={{
-                background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
-                boxShadow:
-                  '0 1px 0 rgba(255,255,255,0.18) inset, 0 8px 20px -6px rgba(127,90,240,0.65)',
-              }}
-            >
-              <Sparkle size={15} weight="fill" />
-              Launch agent
-              <ArrowRight
-                size={14}
-                weight="bold"
-                className="transition-transform group-hover:translate-x-[2px]"
-              />
-            </button>
-
-            <a
-              href="#configure"
-              className="inline-flex items-center gap-2 rounded-[10px] border border-white/[0.12] bg-white/[0.04] px-[18px] py-[12px] text-[13.5px] font-medium text-white/85 transition-colors hover:bg-white/[0.08] hover:text-white"
-            >
-              Configure options
-              <CaretDown size={11} weight="bold" />
-            </a>
-          </div>
         </div>
 
-        {/* Mascot column */}
         <div className="relative flex items-end justify-end sm:items-center">
-          <SpyMascot />
+          <SpyMascot size={220} />
         </div>
       </div>
     </section>
@@ -266,7 +241,7 @@ function HeroCard({
 
 function HeroMeta({ expectedDuration }: { expectedDuration: string }) {
   return (
-    <div className="mt-6 flex flex-wrap items-center gap-2.5">
+    <div className="mt-7 flex flex-wrap items-center gap-2.5">
       <MetaPill icon={<Clock size={13} weight="bold" />}>
         <span className="tabular-nums">{expectedDuration}</span> background run
       </MetaPill>
@@ -305,7 +280,7 @@ function MetaPill({
 
 function BuiltBy() {
   return (
-    <section className="mb-12 flex flex-wrap items-start gap-5">
+    <section className="flex flex-wrap items-start gap-5">
       <span
         className="grid h-[54px] w-[54px] shrink-0 place-items-center overflow-hidden rounded-full text-[18px] font-bold text-white"
         style={{
@@ -317,7 +292,7 @@ function BuiltBy() {
       >
         SD
       </span>
-      <div className="min-w-0 max-w-[640px]">
+      <div className="min-w-0 max-w-[560px]">
         <p className="text-[13px] font-mono uppercase tracking-[0.12em] text-ppc-text-muted">
           Built by Stew
           <span className="ml-2 normal-case tracking-normal text-ppc-text-faint">
@@ -342,16 +317,14 @@ const THINKING_ICONS = [MapTrifold, Path, Flag];
 
 function HowItThinks({ steps }: { steps: [string, string, string] }) {
   return (
-    <section className="mb-12">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h3 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ppc-ink">
-            How this agent thinks<span style={{ color: '#7F5AF0' }}>.</span>
-          </h3>
-          <p className="mt-2 text-[14px] text-ppc-text-muted">
-            Three moves, in order. A senior strategist on tap.
-          </p>
-        </div>
+    <section>
+      <div className="mb-6">
+        <h3 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ppc-ink">
+          How this agent thinks<span style={{ color: '#7F5AF0' }}>.</span>
+        </h3>
+        <p className="mt-2 text-[14px] text-ppc-text-muted">
+          Three moves, in order. A senior strategist on tap.
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -388,7 +361,6 @@ function ThinkingCard({
           '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.12)',
       }}
     >
-      {/* Step number top-right, large, faint */}
       <span
         aria-hidden
         className="pointer-events-none absolute right-5 top-3 font-display text-[60px] font-extrabold leading-none tracking-[-0.04em]"
@@ -452,7 +424,7 @@ function WhatYouGet({ expectedDuration }: { expectedDuration: string }) {
 
   return (
     <section
-      className="relative mb-12 overflow-hidden rounded-[16px] px-7 py-7"
+      className="relative overflow-hidden rounded-[16px] px-7 py-7"
       style={{
         background: '#F2EEFB',
         boxShadow: 'inset 0 0 0 1px #e1d8f0',
@@ -511,9 +483,9 @@ function WhatYouGet({ expectedDuration }: { expectedDuration: string }) {
   );
 }
 
-// ─── Configure & launch (inline section, no longer sticky right rail) ────
+// ─── Sticky launch panel (right rail) ────────────────────────────────────
 
-interface ConfigureProps {
+interface LaunchPanelProps {
   agent: AgentDefinition;
   selectedProject: string;
   setSelectedProject: (id: string) => void;
@@ -531,7 +503,7 @@ interface ConfigureProps {
   onLaunch: () => void;
 }
 
-function ConfigurePanel(props: ConfigureProps) {
+function LaunchPanel(props: LaunchPanelProps) {
   const {
     agent, selectedProject, setSelectedProject, projectAccounts,
     selectedAccounts, toggleAccount, launchLevel, setLaunchLevel,
@@ -539,47 +511,109 @@ function ConfigurePanel(props: ConfigureProps) {
     onLaunch,
   } = props;
 
-  const project = PROJECTS.find((p) => p.id === selectedProject);
   const accountSummary =
     selectedAccounts.length === 0
-      ? `All ${projectAccounts.length} accounts`
-      : `${selectedAccounts.length} of ${projectAccounts.length} accounts`;
+      ? `All ${projectAccounts.length}`
+      : `${selectedAccounts.length} of ${projectAccounts.length}`;
 
   return (
-    <section
-      id="configure"
-      className="mb-8 rounded-[20px] bg-white px-8 pb-8 pt-8 sm:px-10 sm:pb-10"
+    <div
+      className="overflow-hidden rounded-[20px] bg-white"
       style={{
         boxShadow:
-          '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.12)',
+          '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 24px 48px -28px rgba(15,10,30,0.16)',
       }}
     >
-      <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h3 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ppc-ink">
-            Configure &amp; launch<span style={{ color: '#7F5AF0' }}>.</span>
-          </h3>
-          <p className="mt-2 text-[14px] text-ppc-text-muted">
-            Defaults are tuned. Override only what you want different.
-          </p>
-        </div>
-        <div className="hidden items-center gap-2 text-[12.5px] text-ppc-text-muted sm:flex">
-          <Clock size={13} weight="bold" className="text-ppc-text-faint" />
-          <span className="tabular-nums">{agent.expectedDuration}</span>
-          <span className="text-ppc-text-faint">·</span>
-          background run
-        </div>
+      {/* Sticky header with title + duration chip */}
+      <div className="border-b border-[#efeaf4] px-7 pb-5 pt-7">
+        <h3 className="font-display text-[22px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ppc-ink">
+          Configure &amp; launch<span style={{ color: '#7F5AF0' }}>.</span>
+        </h3>
+        <p className="mt-1.5 text-[13px] text-ppc-text-muted">
+          Defaults are tuned. Override only what you want different.
+        </p>
       </div>
 
-      {/* Row 1 — Project + Date range */}
-      <div className="grid gap-5 sm:grid-cols-2">
-        <FieldBlock label="Project (client)" hint={project?.industry}>
+      <div className="space-y-6 px-7 py-7">
+        <FieldBlock label="Project (client)">
           <SelectControl
             value={selectedProject}
             onChange={setSelectedProject}
             options={PROJECTS.map((p) => ({ value: p.id, label: p.name }))}
           />
         </FieldBlock>
+
+        <FieldBlock label="Accounts" hint={`${accountSummary} selected`}>
+          <div
+            className="max-h-[180px] overflow-y-auto rounded-[12px] bg-white p-1"
+            style={{ boxShadow: 'inset 0 0 0 1px #e7e2ef' }}
+          >
+            {projectAccounts.map((acc) => {
+              const checked = selectedAccounts.includes(acc.id);
+              return (
+                <button
+                  key={acc.id}
+                  type="button"
+                  onClick={() => toggleAccount(acc.id)}
+                  className={`flex w-full items-center gap-3 rounded-[8px] px-3 py-[10px] text-left transition-colors ${
+                    checked ? 'bg-[#F0EBFA]' : 'hover:bg-[#FBF9FD]'
+                  }`}
+                >
+                  <span
+                    className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px]"
+                    style={{
+                      background: checked ? '#7F5AF0' : 'transparent',
+                      boxShadow: checked
+                        ? 'none'
+                        : 'inset 0 0 0 1.5px #c9c1da',
+                    }}
+                  >
+                    {checked && <Check size={11} weight="bold" className="text-white" />}
+                  </span>
+                  <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                    <span className="truncate text-[13.5px] font-semibold text-ppc-ink">
+                      {acc.name}
+                    </span>
+                    <span className="mt-[2px] font-mono text-[11px] text-ppc-text-faint">
+                      {acc.customerId}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </FieldBlock>
+
+        <FieldBlock label="Launch level">
+          <div className="grid grid-cols-2 gap-2">
+            {LAUNCH_LEVELS.map((l) => {
+              const active = l.value === launchLevel;
+              return (
+                <button
+                  key={l.value}
+                  type="button"
+                  onClick={() => setLaunchLevel(l.value)}
+                  className={`rounded-[10px] px-3.5 py-[10px] text-left transition-colors ${
+                    active ? 'bg-[#F0EBFA]' : 'bg-white hover:bg-[#FBF9FD]'
+                  }`}
+                  style={{
+                    boxShadow: active
+                      ? 'inset 0 0 0 1.5px #7F5AF0'
+                      : 'inset 0 0 0 1px #e7e2ef',
+                  }}
+                >
+                  <span className="block text-[13px] font-semibold text-ppc-ink">
+                    {l.label}
+                  </span>
+                  <span className="mt-[3px] block text-[11.5px] leading-[1.35] text-ppc-text-muted">
+                    {l.sub}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </FieldBlock>
+
         <FieldBlock label="Date range">
           <SelectControl
             value={dateRange}
@@ -593,158 +627,75 @@ function ConfigurePanel(props: ConfigureProps) {
             ]}
           />
         </FieldBlock>
-      </div>
 
-      {/* Row 2 — Accounts */}
-      <FieldBlock
-        className="mt-5"
-        label="Accounts"
-        hint={accountSummary}
-      >
-        <div className="flex flex-wrap gap-2">
-          {projectAccounts.map((acc) => {
-            const checked = selectedAccounts.includes(acc.id);
-            return (
-              <button
-                key={acc.id}
-                type="button"
-                onClick={() => toggleAccount(acc.id)}
-                className={`group inline-flex items-center gap-2.5 rounded-[10px] px-3.5 py-[10px] text-left text-[13px] transition-all ${
-                  checked
-                    ? 'bg-[#F0EBFA] text-ppc-ink'
-                    : 'bg-white text-ppc-ink hover:bg-[#FBF9FD]'
-                }`}
-                style={{
-                  boxShadow: checked
-                    ? 'inset 0 0 0 1.5px #7F5AF0'
-                    : 'inset 0 0 0 1px #e7e2ef',
-                }}
-              >
-                <span
-                  className="grid h-[16px] w-[16px] shrink-0 place-items-center rounded-[4px]"
-                  style={{
-                    background: checked ? '#7F5AF0' : 'transparent',
-                    boxShadow: checked
-                      ? 'none'
-                      : 'inset 0 0 0 1.5px #c9c1da',
-                  }}
-                >
-                  {checked && <Check size={10} weight="bold" className="text-white" />}
-                </span>
-                <span className="flex flex-col leading-tight">
-                  <span className="font-semibold tracking-[-0.005em]">{acc.name}</span>
-                  <span className="mt-[2px] font-mono text-[10.5px] text-ppc-text-faint">
-                    {acc.customerId}
-                  </span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </FieldBlock>
+        <FieldBlock label="Steer the agent" hint="Optional">
+          <textarea
+            value={steer}
+            onChange={(e) => setSteer(e.target.value)}
+            rows={3}
+            placeholder='e.g. "focus on settlement positioning, ignore brand terms"'
+            className="w-full resize-y rounded-[12px] border-none bg-white px-3.5 py-3 text-[13.5px] text-ppc-ink outline-none placeholder:text-ppc-text-faint focus:bg-[#FBF9FD]"
+            style={{ boxShadow: 'inset 0 0 0 1px #e7e2ef' }}
+          />
+        </FieldBlock>
 
-      {/* Row 3 — Launch level */}
-      <FieldBlock className="mt-5" label="Launch level">
-        <div className="grid gap-2 sm:grid-cols-4">
-          {LAUNCH_LEVELS.map((l) => {
-            const active = l.value === launchLevel;
-            return (
-              <button
-                key={l.value}
-                type="button"
-                onClick={() => setLaunchLevel(l.value)}
-                className={`rounded-[12px] px-4 py-[10px] text-left transition-colors ${
-                  active ? 'bg-[#F0EBFA]' : 'bg-white hover:bg-[#FBF9FD]'
-                }`}
-                style={{
-                  boxShadow: active
-                    ? 'inset 0 0 0 1.5px #7F5AF0'
-                    : 'inset 0 0 0 1px #e7e2ef',
-                }}
-              >
-                <span className="block text-[13px] font-semibold text-ppc-ink">
-                  {l.label}
-                </span>
-                <span className="mt-[3px] block text-[11.5px] text-ppc-text-muted">
-                  {l.sub}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </FieldBlock>
-
-      {/* Row 4 — Steer */}
-      <FieldBlock className="mt-5" label="Steer the agent" hint="Optional">
-        <textarea
-          value={steer}
-          onChange={(e) => setSteer(e.target.value)}
-          rows={2}
-          placeholder='e.g. "focus on settlement positioning, ignore brand terms"'
-          className="w-full resize-y rounded-[12px] border-none bg-white px-4 py-3 text-[13.5px] text-ppc-ink outline-none placeholder:text-ppc-text-faint focus:bg-[#FBF9FD]"
-          style={{ boxShadow: 'inset 0 0 0 1px #e7e2ef' }}
-        />
-      </FieldBlock>
-
-      {/* Row 5 — Run mode */}
-      <FieldBlock className="mt-5" label="Run mode">
-        <div className="grid gap-2 sm:grid-cols-2">
-          {RUN_MODES.map((m) => {
-            const active = m.value === runMode;
-            return (
-              <button
-                key={m.value}
-                type="button"
-                onClick={() => setRunMode(m.value)}
-                className={`flex items-center gap-3 rounded-[12px] px-4 py-[11px] text-left transition-colors ${
-                  active ? 'bg-[#F0EBFA]' : 'bg-white hover:bg-[#FBF9FD]'
-                }`}
-                style={{
-                  boxShadow: active
-                    ? 'inset 0 0 0 1.5px #7F5AF0'
-                    : 'inset 0 0 0 1px #e7e2ef',
-                }}
-              >
-                <span
-                  className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full"
+        <FieldBlock label="Run mode">
+          <div className="space-y-2">
+            {RUN_MODES.map((m) => {
+              const active = m.value === runMode;
+              return (
+                <button
+                  key={m.value}
+                  type="button"
+                  onClick={() => setRunMode(m.value)}
+                  className={`flex w-full items-center gap-3 rounded-[10px] px-3.5 py-[10px] text-left transition-colors ${
+                    active ? 'bg-[#F0EBFA]' : 'bg-white hover:bg-[#FBF9FD]'
+                  }`}
                   style={{
                     boxShadow: active
                       ? 'inset 0 0 0 1.5px #7F5AF0'
-                      : 'inset 0 0 0 1.5px #c9c1da',
+                      : 'inset 0 0 0 1px #e7e2ef',
                   }}
                 >
-                  {active && (
-                    <span
-                      className="h-[8px] w-[8px] rounded-full"
-                      style={{ background: '#7F5AF0' }}
-                    />
-                  )}
-                </span>
-                <span className="flex flex-col leading-tight">
-                  <span className="text-[13px] font-semibold text-ppc-ink">
-                    {m.label}
+                  <span
+                    className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full"
+                    style={{
+                      boxShadow: active
+                        ? 'inset 0 0 0 1.5px #7F5AF0'
+                        : 'inset 0 0 0 1.5px #c9c1da',
+                    }}
+                  >
+                    {active && (
+                      <span
+                        className="h-[8px] w-[8px] rounded-full"
+                        style={{ background: '#7F5AF0' }}
+                      />
+                    )}
                   </span>
-                  <span className="mt-[2px] text-[11.5px] text-ppc-text-muted">
-                    {m.sub}
+                  <span className="flex flex-col leading-tight">
+                    <span className="text-[13px] font-semibold text-ppc-ink">
+                      {m.label}
+                    </span>
+                    <span className="mt-[2px] text-[11.5px] text-ppc-text-muted">
+                      {m.sub}
+                    </span>
                   </span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </FieldBlock>
+                </button>
+              );
+            })}
+          </div>
+        </FieldBlock>
+      </div>
 
-      {/* Launch CTA */}
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-[#efeaf4] pt-7">
-        <div className="text-[12.5px] text-ppc-text-muted">
-          <Clock size={12} weight="bold" className="mr-1 inline-block text-ppc-text-faint" />
-          <span className="tabular-nums">{agent.expectedDuration}</span> background run.
-          We email you when it's ready.
-        </div>
+      {/* Footer — pinned launch button */}
+      <div
+        className="border-t border-[#efeaf4] px-7 py-5"
+        style={{ background: '#FBF9FD' }}
+      >
         <button
           type="button"
           onClick={onLaunch}
-          className="group inline-flex items-center gap-2 rounded-[12px] px-[24px] py-[14px] text-[15px] font-semibold text-white transition-transform hover:-translate-y-[0.5px]"
+          className="group inline-flex w-full items-center justify-center gap-2 rounded-[12px] px-5 py-[14px] text-[15px] font-semibold text-white transition-transform hover:-translate-y-[0.5px]"
           style={{
             background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
             boxShadow:
@@ -759,8 +710,12 @@ function ConfigurePanel(props: ConfigureProps) {
             className="transition-transform group-hover:translate-x-[2px]"
           />
         </button>
+        <p className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-ppc-text-muted">
+          <Clock size={12} weight="bold" className="text-ppc-text-faint" />
+          <span className="tabular-nums">{agent.expectedDuration}</span> background run, email when ready
+        </p>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -768,15 +723,13 @@ function FieldBlock({
   label,
   hint,
   children,
-  className,
 }: {
   label: string;
   hint?: string;
   children: React.ReactNode;
-  className?: string;
 }) {
   return (
-    <div className={className}>
+    <div>
       <div className="mb-2 flex items-baseline justify-between gap-3">
         <p className="text-[12.5px] font-semibold tracking-[-0.005em] text-ppc-ink">
           {label}
