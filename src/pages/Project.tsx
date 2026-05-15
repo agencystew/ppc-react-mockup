@@ -44,14 +44,16 @@ const C = {
 // ─── Data ──────────────────────────────────────────────────────────────
 
 type FindingTone = 'critical' | 'warning';
+type FindingValueTone = 'good' | 'warn' | 'neutral';
 interface Finding {
   tone: FindingTone;
   title: string;
   source: string;
   meta: string;
-  rightTop: React.ReactNode;
-  rightTopColor: string;
-  rightBottom: string;
+  valueMain: string;       // "$4,200" or "CTR uplift"
+  valueSuffix?: string;    // "/mo" — rendered smaller + dimmer
+  valueTone: FindingValueTone;
+  valueLabel: string;      // "recoverable" | "at risk" | "est. 0.4–0.8pp"
 }
 const FINDINGS: Finding[] = [
   {
@@ -59,27 +61,29 @@ const FINDINGS: Finding[] = [
     title: 'Wasted spend in non-converting search terms',
     source: 'Search Term Audit',
     meta: '2h ago · 47 negative candidates surfaced',
-    rightTop: <><span className="tabular">$4,200</span><span className="text-[12px] font-normal text-[#a1a1aa]">/mo</span></>,
-    rightTopColor: 'text-[#16a34a]',
-    rightBottom: 'recoverable',
+    valueMain: '$4,200',
+    valueSuffix: '/mo',
+    valueTone: 'good',
+    valueLabel: 'recoverable',
   },
   {
     tone: 'warning',
     title: 'CPA up 43% in or_sud_search',
     source: 'CPA Monitor',
     meta: '1d ago · $76 → $109 week over week',
-    rightTop: <><span className="tabular">$1,200</span><span className="text-[12px] font-normal text-[#a1a1aa]">/mo</span></>,
-    rightTopColor: 'text-[#d97706]',
-    rightBottom: 'at risk',
+    valueMain: '$1,200',
+    valueSuffix: '/mo',
+    valueTone: 'warn',
+    valueLabel: 'at risk',
   },
   {
     tone: 'warning',
     title: '3 PMAX assets rated "Poor"',
     source: 'PMAX Asset Review',
     meta: '5h ago · headline & description swaps recommended',
-    rightTop: 'CTR uplift',
-    rightTopColor: 'text-[#3f3f46]',
-    rightBottom: 'est. 0.4–0.8pp',
+    valueMain: 'CTR uplift',
+    valueTone: 'neutral',
+    valueLabel: 'est. 0.4–0.8pp',
   },
 ];
 
@@ -121,6 +125,44 @@ const ACTIVITY: ActivityRow[] = [
   { title: 'Search Term Audit', meta: 'Surfaced 47 negative keyword candidates · $4,200/mo recoverable', when: '2h ago' },
   { title: 'PMAX Asset Review', meta: 'Flagged 3 assets rated "Poor" with replacement suggestions',       when: '5h ago' },
   { title: 'CPA Monitor',       meta: 'Detected anomaly: or_sud_search CPA up 43% week over week',         when: '1d ago' },
+];
+
+// ─── Schedule ──────────────────────────────────────────────────────────
+// Next-up agents queued for this project. Empty → ScheduleCard falls back
+// to industry suggestions so the slot never reads dead.
+interface ScheduledAgent {
+  slug: string;
+  emoji: string;
+  name: string;
+  cadence: string;   // "MON 9AM" | "EVERY FRI" | "DAILY" — mono uppercase chip
+  nextRun: string;   // "in 2 days" | "tomorrow 9am" — relative
+}
+
+const SCHEDULE: Record<string, ScheduledAgent[]> = {
+  'boulder-care': [
+    { slug: 'weekly-audit',     emoji: '📊', name: 'Weekly Audit',        cadence: 'MON 9AM',   nextRun: 'in 2 days' },
+    { slug: 'spend-leak',       emoji: '💧', name: 'Spend Leak Detector', cadence: 'EVERY FRI', nextRun: 'in 5 days' },
+    { slug: 'negative-keyword', emoji: '🛡️', name: 'Negative Keyword',    cadence: 'BIWEEKLY',  nextRun: 'in 11 days' },
+  ],
+  'the-hoth': [
+    { slug: 'deep-account-audit', emoji: '🔍', name: 'Deep Account Audit', cadence: 'MONTHLY', nextRun: 'in 8 days' },
+    { slug: 'budget-pacer',       emoji: '⏱️', name: 'Budget Pacer',       cadence: 'DAILY',   nextRun: 'tomorrow 9am' },
+  ],
+  'durable': [
+    { slug: 'pmax',          emoji: '🎯', name: 'PMAX',          cadence: 'WED 9AM',   nextRun: 'in 4 days' },
+    { slug: 'budget-pacer',  emoji: '⏱️', name: 'Budget Pacer',  cadence: 'DAILY',     nextRun: 'tomorrow 9am' },
+    { slug: 'shopping-feed', emoji: '🛒', name: 'Shopping Feed', cadence: 'EVERY MON', nextRun: 'in 2 days' },
+  ],
+  'flock': [
+    { slug: 'weekly-audit',   emoji: '📊', name: 'Weekly Audit',   cadence: 'MON 9AM',   nextRun: 'in 2 days' },
+    { slug: 'competitor-spy', emoji: '🕵️', name: 'Competitor Spy', cadence: 'EVERY THU', nextRun: 'in 4 days' },
+  ],
+};
+
+const SCHEDULE_SUGGESTIONS: ScheduledAgent[] = [
+  { slug: 'weekly-audit',       emoji: '📊', name: 'Weekly Audit',        cadence: 'SUGGESTED', nextRun: 'set cadence' },
+  { slug: 'spend-leak',         emoji: '💧', name: 'Spend Leak Detector', cadence: 'SUGGESTED', nextRun: 'set cadence' },
+  { slug: 'deep-account-audit', emoji: '🔍', name: 'Deep Account Audit', cadence: 'SUGGESTED', nextRun: 'set cadence' },
 ];
 
 // ─── Avatar palette ────────────────────────────────────────────────────
@@ -204,67 +246,8 @@ export function ProjectPage() {
         <Tab>Settings</Tab>
       </nav>
 
-      {/* ── 4. Today's brief ──────────────────────────────────────── */}
-      <SectionHeading
-        title="Today's brief"
-        sub={
-          <>
-            <span className="tabular">4</span> findings · est.{' '}
-            <span className="tabular font-semibold" style={{ color: C.green }}>$5,400/mo</span>{' '}
-            recoverable · updated 2h ago
-          </>
-        }
-        right={<HeaderLink to="#">Run all audits</HeaderLink>}
-        marginTop="mt-9"
-      />
-
-      <div
-        className="mt-5 overflow-hidden rounded-[12px] border"
-        style={{ background: C.cardBg, borderColor: C.border }}
-      >
-        {FINDINGS.map((f, i) => {
-          const isLast = i === FINDINGS.length - 1;
-          const dot = f.tone === 'critical' ? C.redDot : C.amberDot;
-          return (
-            <a
-              key={i}
-              href="#"
-              className="grid grid-cols-[16px_1fr_auto_16px] items-center gap-4 px-5 py-4.5 transition-colors hover:bg-[#fafafd]"
-              style={{
-                borderBottom: isLast ? 'none' : `1px solid ${C.rowBorder}`,
-                paddingTop: 18, paddingBottom: 18,
-              }}
-            >
-              <span
-                className="h-[8px] w-[8px] rounded-full"
-                style={{
-                  background: dot,
-                  boxShadow: f.tone === 'critical' ? `0 0 0 3px rgba(239,68,68,0.12)` : 'none',
-                }}
-              />
-              <div className="min-w-0">
-                <div className="text-[15.5px] font-semibold leading-tight" style={{ color: C.ink, letterSpacing: '-0.005em' }}>
-                  {f.title}
-                </div>
-                <div className="mt-1.5 text-[12.5px]" style={{ color: C.neutral5 }}>
-                  <span>{f.source}</span>
-                  <span className="mx-1.5" style={{ color: C.neutral3 }}>·</span>
-                  {f.meta}
-                </div>
-              </div>
-              <div className="text-right">
-                <div className={`text-[16px] font-semibold leading-none ${f.rightTopColor}`}>
-                  {f.rightTop}
-                </div>
-                <div className="mt-1.5 text-[11.5px]" style={{ color: C.neutral4 }}>
-                  {f.rightBottom}
-                </div>
-              </div>
-              <CaretRight size={15} weight="bold" style={{ color: C.neutral4 }} />
-            </a>
-          );
-        })}
-      </div>
+      {/* ── 4. Today's brief — unified dark hero card ─────────────── */}
+      <TodaysBriefCard findings={FINDINGS} />
 
       {/* ── 5. Performance ────────────────────────────────────────── */}
       <SectionHeading
@@ -289,49 +272,13 @@ export function ProjectPage() {
 
       <DailyTrendChart data={SPEND_TREND} />
 
-      {/* ── 7. Recent activity ───────────────────────────────────── */}
-      <SectionHeading
-        title="Recent activity"
-        right={
-          <Link to="#" className="text-[13px] font-semibold transition-colors" style={{ color: C.purple }}>
-            View all
-          </Link>
-        }
-        marginTop="mt-14"
-      />
-
-      <div className="relative mt-5 pl-1">
-        <div
-          className="absolute bottom-3.5 left-[6px] top-3.5 w-px"
-          style={{ background: C.border }}
-        />
-        {ACTIVITY.map((a) => (
-          <div key={a.title} className="relative flex items-start gap-4 py-3">
-            <span
-              className="relative z-10 mt-2 h-[13px] w-[13px] shrink-0 rounded-full"
-              style={{
-                background: C.greenDot,
-                boxShadow: `0 0 0 3px ${C.pageBg}`,
-              }}
-            />
-            <div className="flex flex-1 items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-[14.5px] font-semibold" style={{ color: C.ink, letterSpacing: '-0.005em' }}>
-                  {a.title}
-                </div>
-                <div className="mt-1 text-[12.5px]" style={{ color: C.neutral5 }}>
-                  {a.meta}
-                </div>
-              </div>
-              <div className="whitespace-nowrap text-[12px]" style={{ color: C.neutral4 }}>
-                {a.when}
-              </div>
-            </div>
-          </div>
-        ))}
+      {/* ── 6. Schedule + Recent activity (2-up) ──────────────────── */}
+      <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <ScheduleCard projectId={project.id} />
+        <RecentActivityCard rows={ACTIVITY} />
       </div>
 
-      {/* ── 8. Campaigns ─────────────────────────────────────────── */}
+      {/* ── 7. Campaigns ─────────────────────────────────────────── */}
       <SectionHeading
         title="Campaigns"
         sub={<><span className="tabular">152</span> total · <span className="tabular">8</span> types</>}
@@ -353,6 +300,382 @@ export function ProjectPage() {
 }
 
 // ─── Subcomponents ─────────────────────────────────────────────────────
+
+/**
+ * Today's brief — the page's signature dark hero card.
+ *
+ * Recipe lifts directly from Dashboard activity hero (radial purple bloom
+ * masked at top + black-led vertical gradient body) so the design language
+ * stays one hand. Left column: eyebrow → narrative sentence → primary CTA.
+ * Right column: purple wave chart (pure decoration, no axis). Findings
+ * are nested inside the same card on a low-opacity inner surface — they
+ * belong to the brief, not a separate block.
+ */
+function TodaysBriefCard({ findings }: { findings: Finding[] }) {
+  // Wave shape (24 control points, mountain rising right).
+  const wavePts = [
+    0.62, 0.58, 0.54, 0.51, 0.48, 0.46, 0.42, 0.38,
+    0.34, 0.36, 0.32, 0.28, 0.24, 0.22, 0.26, 0.22,
+    0.18, 0.14, 0.10, 0.16, 0.20, 0.16, 0.12, 0.18,
+  ];
+  const W = 560;
+  const H = 200;
+  const pts = wavePts.map((y, i) => ({
+    x: (i / (wavePts.length - 1)) * W,
+    y: y * H,
+  }));
+  let line = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] ?? p2;
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    line += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+  }
+  const area = `${line} L ${W} ${H} L 0 ${H} Z`;
+
+  return (
+    <div
+      className="relative mt-9 overflow-hidden rounded-[16px] border"
+      style={{
+        background: 'linear-gradient(180deg, #07050D 0%, #0C0A14 100%)',
+        borderColor: '#1a1a22',
+      }}
+    >
+      {/* Top purple bloom — same radial recipe as Dashboard activity hero */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[280px]"
+        style={{
+          background:
+            'radial-gradient(ellipse 90% 70% at 50% 0%, rgba(127,90,240,0.22) 0%, transparent 70%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 90% 70% at 50% 0%, black 25%, transparent 80%)',
+          maskImage:
+            'radial-gradient(ellipse 90% 70% at 50% 0%, black 25%, transparent 80%)',
+        }}
+      />
+
+      {/* Top row: narrative + CTA on left, wave chart on right */}
+      <div className="relative grid grid-cols-1 gap-6 px-7 pb-7 pt-8 md:grid-cols-[1fr_minmax(300px,460px)] md:gap-8 md:px-9 md:pb-8 md:pt-9">
+        <div className="min-w-0">
+          <div className="flex items-baseline gap-3">
+            <h2
+              className="text-[22px] font-bold tracking-[-0.02em] text-white"
+              style={{ letterSpacing: '-0.025em' }}
+            >
+              Today's brief
+              <span style={{ color: '#A89BFF', fontStyle: 'italic' }}>.</span>
+            </h2>
+            <span
+              className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em]"
+              style={{ color: 'rgba(255,255,255,0.45)' }}
+            >
+              Updated 2h ago
+            </span>
+          </div>
+
+          <p
+            className="mt-4 max-w-[52ch] text-[15.5px] leading-[1.55]"
+            style={{ color: 'rgba(255,255,255,0.82)' }}
+          >
+            Search inefficiencies are driving up CPA. We found{' '}
+            <span className="font-semibold text-white">$5,400/mo</span> in
+            recoverable spend across 47 keywords and 3 campaigns.
+          </p>
+
+          <button
+            className="mt-5 inline-flex items-center gap-2 rounded-[10px] px-4 py-2.5 text-[13.5px] font-semibold text-white shadow-[0_1px_2px_rgba(124,109,255,0.5),0_12px_28px_-10px_rgba(124,109,255,0.65)] transition-transform hover:-translate-y-px"
+            style={{ background: C.purple }}
+          >
+            Run all audits
+            <ArrowRight size={13} weight="bold" />
+          </button>
+        </div>
+
+        {/* Wave chart — decoration only */}
+        <div className="relative -mr-1 self-end md:-mr-2 md:self-stretch">
+          <svg
+            width="100%"
+            height={H}
+            viewBox={`0 0 ${W} ${H}`}
+            preserveAspectRatio="none"
+            className="block"
+          >
+            <defs>
+              <linearGradient id="briefWaveFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#A89BFF" stopOpacity={0.38} />
+                <stop offset="100%" stopColor="#A89BFF" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="briefWaveStroke" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#7C6DFF" stopOpacity={0.55} />
+                <stop offset="100%" stopColor="#D4CDFF" stopOpacity={1} />
+              </linearGradient>
+            </defs>
+            <path d={area} fill="url(#briefWaveFill)" />
+            <path
+              d={line}
+              fill="none"
+              stroke="url(#briefWaveStroke)"
+              strokeWidth={2.2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      </div>
+
+      {/* Findings nested inside the same card */}
+      <div className="relative px-3 pb-3 md:px-4 md:pb-4">
+        <div
+          className="rounded-[12px] border"
+          style={{
+            background: 'rgba(255,255,255,0.025)',
+            borderColor: 'rgba(255,255,255,0.06)',
+          }}
+        >
+          {findings.map((f, i) => {
+            const isLast = i === findings.length - 1;
+            const dot = f.tone === 'critical' ? C.redDot : C.amberDot;
+            const valueColor =
+              f.valueTone === 'good' ? '#4ADE80' :     // green-400 — lifts on dark
+              f.valueTone === 'warn' ? '#FBBF24' :     // amber-400
+                                       'rgba(255,255,255,0.92)';
+            const dotHalo =
+              f.tone === 'critical'
+                ? '0 0 0 3px rgba(239,68,68,0.22), 0 0 12px rgba(239,68,68,0.18)'
+                : '0 0 0 3px rgba(245,158,11,0.18)';
+            return (
+              <a
+                key={i}
+                href="#"
+                className="grid grid-cols-[16px_1fr_auto_16px] items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.04]"
+                style={{
+                  borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.05)',
+                }}
+              >
+                <span
+                  className="h-[8px] w-[8px] rounded-full"
+                  style={{ background: dot, boxShadow: dotHalo }}
+                />
+                <div className="min-w-0">
+                  <div
+                    className="text-[14.5px] font-semibold leading-tight text-white"
+                    style={{ letterSpacing: '-0.005em' }}
+                  >
+                    {f.title}
+                  </div>
+                  <div
+                    className="mt-1 text-[12px]"
+                    style={{ color: 'rgba(255,255,255,0.55)' }}
+                  >
+                    <span>{f.source}</span>
+                    <span className="mx-1.5" style={{ color: 'rgba(255,255,255,0.25)' }}>·</span>
+                    {f.meta}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div
+                    className="tabular text-[15px] font-semibold leading-none"
+                    style={{ color: valueColor }}
+                  >
+                    {f.valueMain}
+                    {f.valueSuffix && (
+                      <span
+                        className="ml-0.5 text-[11.5px] font-medium"
+                        style={{ color: 'rgba(255,255,255,0.45)' }}
+                      >
+                        {f.valueSuffix}
+                      </span>
+                    )}
+                  </div>
+                  <div
+                    className="mt-1 text-[11px]"
+                    style={{ color: 'rgba(255,255,255,0.42)' }}
+                  >
+                    {f.valueLabel}
+                  </div>
+                </div>
+                <CaretRight size={14} weight="bold" style={{ color: 'rgba(255,255,255,0.35)' }} />
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * On the schedule — next-up agents queued for this project.
+ *
+ * Mono uppercase cadence chips ("MON 9AM", "EVERY FRI") signal cadence
+ * not duration. Empty project → falls back to industry suggestions with
+ * a "SUGGESTED" chip + "Set schedule" footer link.
+ */
+function ScheduleCard({ projectId }: { projectId: string }) {
+  const scheduled = SCHEDULE[projectId];
+  const rows = scheduled && scheduled.length > 0 ? scheduled : SCHEDULE_SUGGESTIONS;
+  const isSuggestion = !scheduled || scheduled.length === 0;
+
+  return (
+    <section>
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h2
+            className="text-[20px] font-bold leading-[1.05]"
+            style={{ color: C.ink, letterSpacing: '-0.02em' }}
+          >
+            {isSuggestion ? 'Suggested cadence' : 'On the schedule'}
+            <span style={{ color: C.purple, fontStyle: 'italic' }}>.</span>
+          </h2>
+          <p className="mt-1.5 text-[12px]" style={{ color: C.neutral5 }}>
+            {isSuggestion
+              ? "No schedule yet — here's a starter for this industry"
+              : (
+                <>
+                  <span className="tabular">{rows.length}</span>
+                  {' '}agents queued for this project
+                </>
+              )}
+          </p>
+        </div>
+        <Link
+          to="#"
+          className="inline-flex items-center gap-1.5 text-[13px] font-semibold transition-colors"
+          style={{ color: C.purple }}
+        >
+          {isSuggestion ? 'Set schedule' : 'Adjust schedule'}
+          <ArrowRight size={12} weight="bold" />
+        </Link>
+      </div>
+
+      <div
+        className="mt-4 overflow-hidden rounded-[12px] border"
+        style={{ background: C.cardBg, borderColor: C.border }}
+      >
+        {rows.map((r, i) => {
+          const isLast = i === rows.length - 1;
+          return (
+            <Link
+              key={`${r.slug}-${i}`}
+              to={`/agents/${r.slug}`}
+              className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#fafafd]"
+              style={{ borderBottom: isLast ? 'none' : `1px solid ${C.rowBorder}` }}
+            >
+              <span
+                className="grid h-[36px] w-[36px] place-items-center rounded-[9px] text-[16px]"
+                style={{ background: '#f1f0f8' }}
+                aria-hidden
+              >
+                {r.emoji}
+              </span>
+              <div className="min-w-0">
+                <div
+                  className="text-[13.5px] font-semibold leading-tight"
+                  style={{ color: C.ink, letterSpacing: '-0.005em' }}
+                >
+                  {r.name}
+                </div>
+                <div className="mt-1 flex items-center gap-2 text-[11.5px]" style={{ color: C.neutral5 }}>
+                  <span
+                    className="font-mono uppercase"
+                    style={{
+                      color: isSuggestion ? C.purple : C.neutral7,
+                      fontWeight: 600,
+                      letterSpacing: '0.08em',
+                    }}
+                  >
+                    {r.cadence}
+                  </span>
+                  <span style={{ color: C.neutral3 }}>·</span>
+                  <span className="tabular">{r.nextRun}</span>
+                </div>
+              </div>
+              <CaretRight size={14} weight="bold" style={{ color: C.neutral4 }} />
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Recent activity — green-dotted timeline of the last 3 runs. Lives in a
+ * light card to balance the Schedule card on the right of the 2-up.
+ */
+function RecentActivityCard({ rows }: { rows: ActivityRow[] }) {
+  return (
+    <section>
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h2
+            className="text-[20px] font-bold leading-[1.05]"
+            style={{ color: C.ink, letterSpacing: '-0.02em' }}
+          >
+            Recent activity
+            <span style={{ color: C.purple, fontStyle: 'italic' }}>.</span>
+          </h2>
+          <p className="mt-1.5 text-[12px]" style={{ color: C.neutral5 }}>
+            Last <span className="tabular">{rows.length}</span> completed runs
+          </p>
+        </div>
+        <Link
+          to="#"
+          className="inline-flex items-center gap-1.5 text-[13px] font-semibold transition-colors"
+          style={{ color: C.purple }}
+        >
+          View all
+          <ArrowRight size={12} weight="bold" />
+        </Link>
+      </div>
+
+      <div
+        className="mt-4 rounded-[12px] border px-5 py-4"
+        style={{ background: C.cardBg, borderColor: C.border }}
+      >
+        <div className="relative pl-1">
+          <div
+            className="absolute bottom-3.5 left-[6px] top-3.5 w-px"
+            style={{ background: C.border }}
+          />
+          {rows.map((a) => (
+            <div key={a.title} className="relative flex items-start gap-4 py-3">
+              <span
+                className="relative z-10 mt-2 h-[13px] w-[13px] shrink-0 rounded-full"
+                style={{
+                  background: C.greenDot,
+                  boxShadow: `0 0 0 3px ${C.cardBg}`,
+                }}
+              />
+              <div className="flex flex-1 items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div
+                    className="text-[13.5px] font-semibold"
+                    style={{ color: C.ink, letterSpacing: '-0.005em' }}
+                  >
+                    {a.title}
+                  </div>
+                  <div className="mt-1 text-[12px]" style={{ color: C.neutral5 }}>
+                    {a.meta}
+                  </div>
+                </div>
+                <div className="whitespace-nowrap text-[11.5px]" style={{ color: C.neutral4 }}>
+                  {a.when}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function SectionHeading({
   title, sub, right, marginTop = 'mt-12',
@@ -379,19 +702,6 @@ function SectionHeading({
       </div>
       {right}
     </div>
-  );
-}
-
-function HeaderLink({ children, to }: { children: React.ReactNode; to: string }) {
-  return (
-    <Link
-      to={to}
-      className="inline-flex items-center gap-1.5 text-[13px] font-semibold transition-colors"
-      style={{ color: C.purple }}
-    >
-      {children}
-      <ArrowRight size={12} weight="bold" />
-    </Link>
   );
 }
 
