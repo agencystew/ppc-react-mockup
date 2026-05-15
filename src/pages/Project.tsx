@@ -692,7 +692,7 @@ function SectionHeading({
           className="text-[26px] font-bold leading-[1.05]"
           style={{ color: C.ink, letterSpacing: '-0.02em' }}
         >
-          {title}<span style={{ color: C.purple }}>.</span>
+          {title}<span style={{ color: C.purple, fontStyle: 'italic' }}>.</span>
         </h2>
         {sub && (
           <p className="mt-2 text-[12.5px]" style={{ color: C.neutral5 }}>
