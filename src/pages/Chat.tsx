@@ -91,6 +91,8 @@ function PreChat() {
       <div className="mx-auto w-full max-w-[860px] flex-1 px-6 pb-20 pt-10 lg:px-10 lg:pt-14">
         <Hero project={project} />
 
+        <RecentChatsStrip />
+
         <TrustStrip />
 
         <PopularGrid />
@@ -98,6 +100,62 @@ function PreChat() {
         <SpecialistRow />
       </div>
     </div>
+  );
+}
+
+/* ─── Recent chats (PreChat) — primary entry to active threads ──────────── */
+
+function RecentChatsStrip() {
+  const recent = CHAT_HISTORY.slice(0, 6);
+  return (
+    <section className="mt-12">
+      <div className="mb-3 flex items-baseline justify-between">
+        <h2 className="text-[13px] font-semibold tracking-[-0.003em] text-ppc-ink">
+          Recent chats<span className="font-serif italic text-ppc-purple-500">.</span>
+        </h2>
+        <span
+          className="text-[10.5px] uppercase tracking-[0.10em] text-ppc-text-faint"
+          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+        >
+          {CHAT_HISTORY.length} threads
+        </span>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {recent.map((t) => {
+          const avatar = avatarForLabel(t.projectLabel);
+          return (
+            <Link
+              key={t.id}
+              to={`/chat/${t.id}`}
+              className="group flex items-start gap-2.5 rounded-[12px] border-[0.5px] border-ppc-card-border bg-white px-3.5 py-[12px] transition-all hover:-translate-y-[1px] hover:border-ppc-purple-300"
+            >
+              <span
+                aria-hidden
+                className="grid h-[26px] w-[26px] shrink-0 place-items-center rounded-[7px] text-[11px] font-bold leading-none"
+                style={{
+                  background: avatar.bg,
+                  color: avatar.fg,
+                  boxShadow: `inset 0 0 0 0.5px ${avatar.ring}`,
+                }}
+              >
+                {t.projectLabel.charAt(0)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="line-clamp-1 text-[13px] font-semibold leading-tight tracking-[-0.003em] text-ppc-ink">
+                  {t.title}
+                </p>
+                <p className="mt-[3px] truncate text-[11px] text-ppc-text-muted">
+                  {t.projectLabel} · {t.relativeTime}
+                </p>
+              </div>
+              {t.live && (
+                <span className="ppcio-live-dot mt-[7px] inline-block h-[6px] w-[6px] rounded-full bg-ppc-status-healthy" />
+              )}
+            </Link>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
