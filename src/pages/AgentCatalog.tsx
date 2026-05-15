@@ -172,38 +172,32 @@ export function AgentCatalog() {
 // ════════════════════════════════════════════════════════════════════════
 
 function HeroBlock() {
+  const runningCount = 4; // mock — eventually wired to actual run-state
   return (
-    <section className="grid gap-6 lg:grid-cols-[1fr_440px]">
-      {/* Left column splits into "top cluster" (eyebrow + H1) and "bottom
-       * cluster" (search + chips). The bottom cluster gets `mt-auto` so
-       * it sinks to the bottom of the row alongside the ScheduleCard CTA
-       * — otherwise the taller card creates a huge dead zone under the
-       * chips (Stewart 2026-05-15). */}
-      <div className="flex min-w-0 flex-col">
-        <div>
-          <span className="inline-flex items-center gap-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ppc-purple-700">
-            <Sparkle size={10} weight="fill" />
-            Agents
+    <section className="grid items-start gap-6 lg:grid-cols-[1fr_440px]">
+      <div className="flex flex-col">
+        <span className="inline-flex items-center gap-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ppc-purple-700">
+          <Sparkle size={10} weight="fill" />
+          Agents
+        </span>
+
+        <h1 className="mt-3 font-display text-[42px] font-black leading-[1.02] tracking-[-0.028em] text-ppc-ink sm:text-[48px]">
+          What do you want
+          <br />
+          to{' '}
+          <span
+            className="font-serif italic font-bold text-ppc-purple-500"
+            style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
+          >
+            accomplish
           </span>
+          <P char="?" />
+        </h1>
 
-          <h1 className="mt-3 font-display text-[42px] font-black leading-[1.02] tracking-[-0.028em] text-ppc-ink sm:text-[48px]">
-            What do you want
-            <br />
-            to{' '}
-            <span
-              className="font-serif italic font-bold text-ppc-purple-500"
-              style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-            >
-              accomplish
-            </span>
-            <P char="?" />
-          </h1>
-        </div>
-
-        <div className="mt-auto pt-8">
+        <div className="mt-7">
           <SearchBar />
 
-          <div className="mt-4 flex flex-wrap items-center gap-1.5">
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
             <span className="mr-1 text-[12px] text-ppc-text-muted">Try asking:</span>
             {SUGGESTIONS.map((s) => (
               <button
@@ -215,11 +209,62 @@ function HeroBlock() {
             ))}
           </div>
         </div>
+
+        {/* Workspace stat strip — bulks the left column so it visually
+         * balances the taller ScheduleCard without leaving a dead zone
+         * between the chips and the next section. */}
+        <WorkspaceStatStrip
+          specialists={AGENTS.length}
+          projects={PROJECTS.length}
+          running={runningCount}
+        />
       </div>
 
       <ScheduleCard projectCount={PROJECTS.length} />
     </section>
   );
+}
+
+function WorkspaceStatStrip({
+  specialists, projects, running,
+}: { specialists: number; projects: number; running: number }) {
+  return (
+    <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t-[0.5px] border-ppc-card-border pt-4 font-mono text-[11px] tracking-[0.04em] text-ppc-text-muted">
+      <Stat label="specialists" value={specialists} />
+      <Divider />
+      <Stat label="projects" value={projects} />
+      <Divider />
+      <span className="inline-flex items-center gap-1.5">
+        <span
+          className="h-[6px] w-[6px] rounded-full bg-[#5DC2A2]"
+          style={{ boxShadow: '0 0 0 2px rgba(93,194,162,0.22), 0 0 8px rgba(93,194,162,0.55)' }}
+        />
+        <span className="tabular-nums text-ppc-ink">{running}</span>
+        <span className="uppercase tracking-[0.12em] text-ppc-text-muted">running now</span>
+      </span>
+      <Divider />
+      <Link
+        to="/chat?intent=how-agents-think"
+        className="inline-flex items-center gap-1 text-ppc-purple-500 transition-colors hover:text-ppc-purple-700"
+      >
+        How agents think
+        <ArrowRight size={10} weight="bold" />
+      </Link>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <span className="inline-flex items-baseline gap-1.5">
+      <span className="tabular-nums text-[13px] font-semibold text-ppc-ink">{value}</span>
+      <span className="uppercase tracking-[0.12em] text-ppc-text-muted">{label}</span>
+    </span>
+  );
+}
+
+function Divider() {
+  return <span aria-hidden className="h-3 w-px bg-ppc-card-border" />;
 }
 
 function SearchBar() {
@@ -259,7 +304,7 @@ function ScheduleCard({ projectCount }: { projectCount: number }) {
   return (
     <Link
       to="/chat?intent=schedule"
-      className="group relative flex min-h-[360px] flex-col overflow-hidden rounded-[20px] p-7 text-white transition-transform hover:-translate-y-[1px] sm:p-8"
+      className="group relative flex flex-col overflow-hidden rounded-[20px] p-7 text-white transition-transform hover:-translate-y-[1px] sm:p-8"
       style={{
         background:
           'linear-gradient(160deg, #261850 0%, #150D2C 55%, #0A0618 100%)',
