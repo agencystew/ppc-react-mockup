@@ -245,26 +245,14 @@ function ActivityHero() {
         }}
       />
 
-      <div className="relative grid gap-10 px-10 pb-10 pt-12 sm:grid-cols-[1fr_minmax(260px,320px)] sm:gap-12 sm:px-14 sm:pt-14">
+      <div className="relative grid gap-10 px-10 pb-10 pt-8 sm:grid-cols-[1fr_minmax(260px,320px)] sm:gap-12 sm:px-14 sm:pt-10">
         {/* ─── Copy column ─────────────────────────────────────────── */}
         <div className="min-w-0">
-          <span
-            className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-white/55"
-            style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-          >
-            <span className="h-[5px] w-[5px] rounded-full bg-[#5DCAA5]" />
-            While you were away
-          </span>
-
-          <h2 className="mt-3 font-display text-[44px] font-black leading-[1.02] tracking-[-0.028em] text-white sm:text-[52px]">
+          <h2 className="font-display text-[60px] font-black leading-[0.95] tracking-[-0.030em] text-white sm:text-[76px]">
             Your agents have been busy<span style={{ color: '#9F86FF' }}>.</span>
           </h2>
-          <p className="mt-4 max-w-[480px] text-[15px] leading-[1.55] text-white/60">
-            {TOTAL_RUNS} reports wrapped across {TOTAL_PROJECTS_TOUCHED} projects in the last 24 hours.
-            Pick one to act on, or send a new specialist out.
-          </p>
 
-          <div className="mt-7 flex flex-col gap-2">
+          <div className="mt-8 flex flex-col gap-2">
             {ACTIVITY.map((row) => (
               <ActivityCard key={row.runId} row={row} />
             ))}

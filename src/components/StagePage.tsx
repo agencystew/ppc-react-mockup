@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Check, ArrowRight, ArrowUpRight, CaretDown, CaretUp, Waveform,
 } from '@phosphor-icons/react';
@@ -419,7 +420,7 @@ function RunningCanvas({ run }: { run: AgentRun }) {
 function HoldTightBand() {
   return (
     <div
-      className="relative overflow-hidden rounded-[16px] px-8 py-12 text-center sm:px-12 sm:py-14"
+      className="relative overflow-hidden rounded-[20px] px-8 py-16 text-center sm:px-12 sm:py-20"
       style={{
         background:
           'radial-gradient(120% 100% at 50% 0%, #F4EFFD 0%, #ECE7FB 55%, #F8F5FF 100%)',
@@ -427,26 +428,24 @@ function HoldTightBand() {
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute -left-24 top-[-30%] h-[260px] w-[260px] rounded-full"
+        className="pointer-events-none absolute -left-24 top-[-30%] h-[320px] w-[320px] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(127,90,240,0.14) 0%, transparent 65%)',
+        }}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-24 bottom-[-40%] h-[300px] w-[300px] rounded-full"
         style={{
           background:
             'radial-gradient(circle, rgba(127,90,240,0.12) 0%, transparent 65%)',
         }}
       />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -right-20 bottom-[-40%] h-[240px] w-[240px] rounded-full"
-        style={{
-          background:
-            'radial-gradient(circle, rgba(127,90,240,0.10) 0%, transparent 65%)',
-        }}
-      />
 
       <Ornament />
 
-      <p
-        className="relative mx-auto font-display text-[44px] font-extrabold leading-[1.05] tracking-[-0.025em] text-ppc-ink sm:text-[52px]"
-      >
+      <h2 className="relative mx-auto font-display text-[68px] font-extrabold leading-[0.98] tracking-[-0.035em] text-ppc-ink sm:text-[88px]">
         Hold{' '}
         <span
           className="italic"
@@ -459,11 +458,50 @@ function HoldTightBand() {
           tight
         </span>
         <span style={{ color: '#7F5AF0' }}>.</span>
+      </h2>
+
+      <p className="relative mx-auto mt-7 max-w-[560px] text-[19px] leading-[1.45] text-ppc-ink/70 sm:text-[20px]">
+        Grab a coffee{' '}
+        <span aria-hidden className="inline-block translate-y-[2px]" style={{ fontSize: '1.05em' }}>
+          ☕
+        </span>{' '}
+        or go launch another agent while you wait.
       </p>
-      <p className="relative mx-auto mt-4 max-w-[480px] text-[15px] leading-[1.55] text-ppc-ink/65">
-        The full report drops the moment your agent finishes. Findings,
-        priorities and recommendations — all in one place.
-      </p>
+
+      <div className="relative mt-9">
+        <Link
+          to="/agents"
+          className="group inline-flex items-center gap-2 rounded-full px-[22px] py-[14px] text-[15px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
+          style={{
+            background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
+            boxShadow:
+              '0 1px 0 rgba(255,255,255,0.22) inset, 0 10px 24px -10px rgba(127,90,240,0.65), 0 0 0 1px rgba(127,90,240,0.45)',
+          }}
+        >
+          Launch another agent
+          <ArrowRight
+            size={14}
+            weight="bold"
+            className="transition-transform group-hover:translate-x-[2px]"
+          />
+        </Link>
+      </div>
+
+      <div
+        className="relative mx-auto mt-12 max-w-[520px] pt-7"
+        style={{ borderTop: '0.5px solid rgba(127,90,240,0.22)' }}
+      >
+        <p className="text-[13.5px] leading-[1.55] text-ppc-ink/50">
+          All completed agent reports show up in your{' '}
+          <Link
+            to="/reports"
+            className="font-semibold text-ppc-purple-700/85 underline decoration-ppc-purple-700/30 underline-offset-[3px] transition-colors hover:text-ppc-purple-700 hover:decoration-ppc-purple-700/60"
+          >
+            reports area
+          </Link>
+          .
+        </p>
+      </div>
     </div>
   );
 }
