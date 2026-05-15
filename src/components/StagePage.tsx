@@ -388,7 +388,6 @@ function RunningCanvas({ run }: { run: AgentRun }) {
         <MissionFeedCard
           active={run.activeAgent}
           recentSteps={run.recentMissionSteps ?? []}
-          moreCount={run.moreRecentStepsCount}
         />
       )}
 
