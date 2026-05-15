@@ -61,18 +61,13 @@ export function AppShell() {
   /* Layout posture per route family:
    *  - /chat, /chat/:id and /v2/chat, /v2/chat/:id  → full-bleed (chat surface owns its own 3-col)
    *  - /v2/*                                         → full-bleed (v2 pages own their own bands)
-   *  - /agents/:slug/loading|run/:runId              → tighter gutter (the run page owns its rhythm)
    *  - everything else (v1 canonical)                → padded max-w-[1240px] wrapper
    *
-   * v1 pages were authored against the standard wrapper, so removing it breaks
-   * their spacing. The agent-run route gets its own breathing room because the
-   * dark mission-feed card already provides internal padding, and a wide outer
-   * gutter pushes the headline too far from the sidebar. */
+   * v1 pages were authored against this wrapper, so removing it breaks their spacing. */
   const isChat = pathname === '/chat' || pathname.startsWith('/chat/')
               || pathname === '/v2/chat' || pathname.startsWith('/v2/chat/');
   const isV2 = pathname === '/v2' || pathname.startsWith('/v2/');
-  const isAgentRun = /^\/agents\/[^/]+\/(loading|run)\//.test(pathname);
-  const fullBleed = isChat || isV2 || isAgentRun;
+  const fullBleed = isChat || isV2;
 
   return (
     <div className="flex min-h-screen w-full font-sans text-ppc-black">
