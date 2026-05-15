@@ -4,6 +4,7 @@ import {
   CaretRight, CaretDown, ArrowRight, Sparkle,
   MapTrifold, Path, Flag, Check, ShieldCheck, EnvelopeSimple,
   PaperPlaneTilt, Coffee, Tag, CurrencyDollar,
+  Clock, CalendarBlank, Minus, Plus,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
 import { PROJECTS, ACCOUNTS, CURRENT_PROJECT_ID } from '../mock/projects';
@@ -24,6 +25,8 @@ import type { AgentDefinition } from '../types/agent';
 //   - Accounts → Campaigns (with type tags + monthly spend)
 //   - Ad group toggle expands the form with ad groups under selected campaigns
 //   - Custom cron removed (same as Schedule only)
+//   - Schedule form EXPANDS inline below Run mode when 'recurring' or 'schedule-only'
+//     is picked — Daily / Weekly / Monthly each has its own dedicated fields.
 //
 // Hard rules: TIME + APPROVAL cues only. NEVER pre-run $ figures in left rail.
 
@@ -123,19 +126,64 @@ const RUN_MODES: Array<{ value: RunMode; label: string; sub: string }> = [
   { value: 'schedule-only', label: 'Schedule only',      sub: 'Queue for a future run' },
 ];
 
+// ─── Schedule config (expands inline when runMode != 'once') ─────────────
+//
+// Three dedicated frequency variants per Jose 2026-05-15:
+//   Daily   → 'Every N days'   + time + ends
+//   Weekly  → 'Every N weeks'  + weekdays + time + ends
+//   Monthly → 'Every N months' + day-of-month + time + ends
+//
+// Ends: never / on a date / after N runs.
+
+type ScheduleFrequency = 'daily' | 'weekly' | 'monthly';
+type ScheduleEndType   = 'never' | 'on_date' | 'after_runs';
+
+interface ScheduleConfig {
+  frequency: ScheduleFrequency;
+  interval:  number;             // every N [unit]
+  weekdays:  number[];           // 0=Mon … 6=Sun (display order)
+  monthDay:  number;             // 1..31
+  time:      string;             // 'HH:MM' 24h
+  ends:      ScheduleEndType;
+  endsDate:  string;             // 'YYYY-MM-DD'
+  endsAfter: number;             // run count
+}
+
+const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+
+const DEFAULT_SCHEDULE: ScheduleConfig = {
+  frequency: 'weekly',
+  interval:  1,
+  weekdays:  [2],     // Wed (Mon=0)
+  monthDay:  1,
+  time:      '09:00',
+  ends:      'never',
+  endsDate:  '',
+  endsAfter: 10,
+};
+
 export function AgentDetail() {
   void LAUNCH_LEVELS_REMOVED;
-  const { slug } = useParams();
+  // `id` is present when arriving via /projects/:id/agents/:slug — that route
+  // pre-scopes the launch panel to the project. Otherwise we're in the global
+  // catalog (/agents/:slug) and the user picks a project in the launch panel.
+  const { slug, id: scopedProjectId } = useParams();
   const navigate = useNavigate();
   const agent = AGENTS.find((a) => a.slug === slug);
+  const scopedProject = scopedProjectId
+    ? PROJECTS.find((p) => p.id === scopedProjectId) ?? null
+    : null;
 
-  const [selectedProject, setSelectedProject] = useState(CURRENT_PROJECT_ID);
+  const [selectedProject, setSelectedProject] = useState(
+    scopedProject?.id ?? CURRENT_PROJECT_ID,
+  );
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
   const [adGroupMode, setAdGroupMode] = useState(false);
   const [selectedAdGroups, setSelectedAdGroups] = useState<string[]>([]);
   const [runMode, setRunMode] = useState<RunMode>('once');
   const [steer, setSteer] = useState('');
   const [dateRange, setDateRange] = useState('last_30d');
+  const [schedule, setSchedule] = useState<ScheduleConfig>(DEFAULT_SCHEDULE);
 
   const projectCampaigns = useMemo(
     () => CAMPAIGNS_BY_PROJECT[selectedProject] ?? [],
@@ -170,12 +218,14 @@ export function AgentDetail() {
   };
 
   const handleLaunch = () => {
+    // Project-scoped launches stay scoped (URL preserves the project context).
+    const prefix = scopedProject ? `/projects/${scopedProject.id}` : '';
     if (agent.slug === 'competitor-spy') {
-      navigate('/agents/competitor-spy/run/run-competitor-spy-running');
+      navigate(`${prefix}/agents/competitor-spy/run/run-competitor-spy-running`);
     } else if (agent.slug === 'negative-keyword') {
       navigate('/reports/run-negative-keyword-completed');
     } else {
-      navigate(`/agents/${agent.slug}/run/run-${agent.slug}`);
+      navigate(`${prefix}/agents/${agent.slug}/run/run-${agent.slug}`);
     }
   };
 
@@ -216,6 +266,8 @@ export function AgentDetail() {
             toggleAdGroup={toggleAdGroup}
             runMode={runMode}
             setRunMode={setRunMode}
+            schedule={schedule}
+            setSchedule={setSchedule}
             steer={steer}
             setSteer={setSteer}
             dateRange={dateRange}
@@ -639,6 +691,8 @@ interface LaunchPanelProps {
   toggleAdGroup: (id: string) => void;
   runMode: RunMode;
   setRunMode: (m: RunMode) => void;
+  schedule: ScheduleConfig;
+  setSchedule: (s: ScheduleConfig) => void;
   steer: string;
   setSteer: (s: string) => void;
   dateRange: string;
@@ -652,7 +706,9 @@ function LaunchPanel(props: LaunchPanelProps) {
     selectedCampaigns, toggleCampaign,
     adGroupMode, setAdGroupMode,
     adGroupsForSelected, selectedAdGroups, toggleAdGroup,
-    runMode, setRunMode, steer, setSteer, dateRange, setDateRange,
+    runMode, setRunMode,
+    schedule, setSchedule,
+    steer, setSteer, dateRange, setDateRange,
     onLaunch,
   } = props;
 
@@ -900,6 +956,10 @@ function LaunchPanel(props: LaunchPanelProps) {
               );
             })}
           </div>
+
+          {runMode !== 'once' && (
+            <SchedulePanel value={schedule} onChange={setSchedule} />
+          )}
         </FieldBlock>
       </div>
 
@@ -1050,4 +1110,384 @@ function SelectControl<T extends string>({
       />
     </div>
   );
+}
+
+// ─── Schedule panel (expands when Run mode != 'once') ────────────────────
+//
+// Soft purple-tinted container nested inside the Run mode FieldBlock so it
+// visually belongs to the cadence choice (vs. floating as a sibling field).
+// Frequency segmented control on top, then per-variant body. Common controls
+// (At / Ends) stack below all variants so muscle memory stays intact when
+// switching between Daily / Weekly / Monthly.
+
+const FREQ_TABS: Array<{ value: ScheduleFrequency; label: string; unit: string; unitPlural: string }> = [
+  { value: 'daily',   label: 'Daily',   unit: 'day',   unitPlural: 'days'   },
+  { value: 'weekly',  label: 'Weekly',  unit: 'week',  unitPlural: 'weeks'  },
+  { value: 'monthly', label: 'Monthly', unit: 'month', unitPlural: 'months' },
+];
+
+function SchedulePanel({
+  value,
+  onChange,
+}: {
+  value: ScheduleConfig;
+  onChange: (s: ScheduleConfig) => void;
+}) {
+  const patch = (p: Partial<ScheduleConfig>) => onChange({ ...value, ...p });
+  const activeFreq = FREQ_TABS.find((f) => f.value === value.frequency) ?? FREQ_TABS[1];
+  const unitLabel = value.interval === 1 ? activeFreq.unit : activeFreq.unitPlural;
+
+  const summary = buildScheduleSummary(value);
+
+  return (
+    <div
+      className="mt-3 rounded-[14px] px-4 py-4"
+      style={{
+        background: '#FAF7FE',
+        boxShadow: 'inset 0 0 0 1px #ECE5F8',
+      }}
+    >
+      <div className="mb-3 flex items-baseline justify-between gap-3">
+        <p
+          className="font-mono text-[10px] font-bold uppercase tracking-[0.12em]"
+          style={{ color: '#7C45CB' }}
+        >
+          Schedule
+        </p>
+        <p className="text-[11px] text-ppc-text-muted">{summary}</p>
+      </div>
+
+      {/* Frequency segmented control */}
+      <div
+        className="mb-4 grid grid-cols-3 gap-1 rounded-[10px] p-1"
+        style={{
+          background: '#EFE7FB',
+          boxShadow: 'inset 0 0 0 1px #E4D9F5',
+        }}
+      >
+        {FREQ_TABS.map((f) => {
+          const active = f.value === value.frequency;
+          return (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => patch({ frequency: f.value })}
+              className="rounded-[7px] py-[7px] text-[12.5px] font-semibold transition-all"
+              style={{
+                background: active ? '#FFFFFF' : 'transparent',
+                color: active ? '#5A3FE0' : '#7B6F94',
+                boxShadow: active
+                  ? '0 1px 0 rgba(255,255,255,0.6) inset, 0 4px 10px -6px rgba(90,63,224,0.35), 0 0 0 1px rgba(127,90,240,0.18)'
+                  : 'none',
+              }}
+            >
+              {f.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Every N [unit] */}
+      <div className="mb-4 flex items-center gap-3">
+        <p className="shrink-0 text-[12px] font-semibold text-ppc-ink">Every</p>
+        <IntervalStepper
+          value={value.interval}
+          onChange={(n) => patch({ interval: n })}
+        />
+        <p className="text-[12.5px] text-ppc-text-muted">{unitLabel}</p>
+      </div>
+
+      {/* Variant-specific body */}
+      {value.frequency === 'weekly' && (
+        <WeekdayPicker
+          selected={value.weekdays}
+          onChange={(weekdays) => patch({ weekdays })}
+        />
+      )}
+
+      {value.frequency === 'monthly' && (
+        <MonthDayPicker
+          value={value.monthDay}
+          onChange={(monthDay) => patch({ monthDay })}
+        />
+      )}
+
+      {/* Common: At time + Ends */}
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <div>
+          <p className="mb-1.5 text-[11.5px] font-semibold text-ppc-ink">At</p>
+          <TimeInput
+            value={value.time}
+            onChange={(time) => patch({ time })}
+          />
+        </div>
+        <div>
+          <p className="mb-1.5 text-[11.5px] font-semibold text-ppc-ink">Ends</p>
+          <EndsControl
+            value={value.ends}
+            onChange={(ends) => patch({ ends })}
+          />
+        </div>
+      </div>
+
+      {value.ends === 'on_date' && (
+        <div className="mt-3">
+          <p className="mb-1.5 text-[11.5px] font-semibold text-ppc-ink">End date</p>
+          <input
+            type="date"
+            value={value.endsDate}
+            onChange={(e) => patch({ endsDate: e.target.value })}
+            className="w-full rounded-[10px] bg-white px-3 py-[9px] text-[13px] text-ppc-ink outline-none"
+            style={{ boxShadow: 'inset 0 0 0 1px #e7e2ef' }}
+          />
+        </div>
+      )}
+
+      {value.ends === 'after_runs' && (
+        <div className="mt-3 flex items-center gap-3">
+          <p className="shrink-0 text-[11.5px] font-semibold text-ppc-ink">After</p>
+          <IntervalStepper
+            value={value.endsAfter}
+            onChange={(n) => patch({ endsAfter: n })}
+            max={365}
+          />
+          <p className="text-[12px] text-ppc-text-muted">runs</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Compact -/+ stepper with a centered number, matching the soft purple skin.
+
+function IntervalStepper({
+  value,
+  onChange,
+  min = 1,
+  max = 99,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  min?: number;
+  max?: number;
+}) {
+  const clamp = (n: number) => Math.min(max, Math.max(min, n));
+  return (
+    <div
+      className="inline-flex items-center rounded-[10px] bg-white"
+      style={{ boxShadow: 'inset 0 0 0 1px #e7e2ef' }}
+    >
+      <button
+        type="button"
+        onClick={() => onChange(clamp(value - 1))}
+        className="grid h-[32px] w-[28px] place-items-center rounded-l-[10px] text-ppc-text-muted transition-colors hover:bg-[#F4EFFB] hover:text-ppc-ink"
+        aria-label="Decrease"
+      >
+        <Minus size={12} weight="bold" />
+      </button>
+      <input
+        type="number"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => onChange(clamp(parseInt(e.target.value || '1', 10)))}
+        className="h-[32px] w-[44px] border-0 bg-transparent text-center text-[13px] font-semibold text-ppc-ink outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+      />
+      <button
+        type="button"
+        onClick={() => onChange(clamp(value + 1))}
+        className="grid h-[32px] w-[28px] place-items-center rounded-r-[10px] text-ppc-text-muted transition-colors hover:bg-[#F4EFFB] hover:text-ppc-ink"
+        aria-label="Increase"
+      >
+        <Plus size={12} weight="bold" />
+      </button>
+    </div>
+  );
+}
+
+// Mon-Sun chips. Multi-select.
+
+function WeekdayPicker({
+  selected,
+  onChange,
+}: {
+  selected: number[];
+  onChange: (days: number[]) => void;
+}) {
+  const toggle = (i: number) => {
+    onChange(
+      selected.includes(i)
+        ? selected.filter((d) => d !== i)
+        : [...selected, i].sort((a, b) => a - b),
+    );
+  };
+  return (
+    <div>
+      <p className="mb-2 text-[11.5px] font-semibold text-ppc-ink">On days</p>
+      <div className="flex flex-wrap gap-[6px]">
+        {WEEKDAY_LABELS.map((label, i) => {
+          const active = selected.includes(i);
+          return (
+            <button
+              key={label}
+              type="button"
+              onClick={() => toggle(i)}
+              className="grid h-[34px] min-w-[42px] place-items-center rounded-[8px] px-2 text-[12px] font-semibold transition-all"
+              style={{
+                background: active ? '#FFFFFF' : 'transparent',
+                color: active ? '#5A3FE0' : '#6F6585',
+                boxShadow: active
+                  ? 'inset 0 0 0 1.5px #7F5AF0, 0 2px 6px -3px rgba(127,90,240,0.35)'
+                  : 'inset 0 0 0 1px #DFD4F0',
+              }}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Day-of-month picker. 1-31 grid. Single-select.
+
+function MonthDayPicker({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (d: number) => void;
+}) {
+  return (
+    <div>
+      <p className="mb-2 text-[11.5px] font-semibold text-ppc-ink">
+        On day <span className="font-mono text-[11px] text-ppc-text-muted">of the month</span>
+      </p>
+      <div className="grid grid-cols-7 gap-[5px]">
+        {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => {
+          const active = d === value;
+          return (
+            <button
+              key={d}
+              type="button"
+              onClick={() => onChange(d)}
+              className="grid h-[30px] place-items-center rounded-[7px] text-[11.5px] font-semibold transition-all"
+              style={{
+                background: active ? '#FFFFFF' : 'transparent',
+                color: active ? '#5A3FE0' : '#6F6585',
+                boxShadow: active
+                  ? 'inset 0 0 0 1.5px #7F5AF0, 0 2px 6px -3px rgba(127,90,240,0.35)'
+                  : 'inset 0 0 0 1px #DFD4F0',
+              }}
+            >
+              {d}
+            </button>
+          );
+        })}
+      </div>
+      <p className="mt-2 text-[11px] text-ppc-text-muted">
+        If the month has fewer days, runs on the last day.
+      </p>
+    </div>
+  );
+}
+
+// Pill-style time input — native picker on click. Clock icon as affordance.
+
+function TimeInput({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <label
+      className="flex items-center gap-2 rounded-[10px] bg-white px-3 py-[9px] transition-colors focus-within:bg-[#FBF9FD]"
+      style={{ boxShadow: 'inset 0 0 0 1px #e7e2ef' }}
+    >
+      <Clock size={13} weight="bold" className="text-ppc-text-muted" />
+      <input
+        type="time"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full border-0 bg-transparent text-[13px] font-medium text-ppc-ink outline-none"
+      />
+    </label>
+  );
+}
+
+// "Ends" dropdown — Never / On date / After N runs.
+
+function EndsControl({
+  value,
+  onChange,
+}: {
+  value: ScheduleEndType;
+  onChange: (v: ScheduleEndType) => void;
+}) {
+  return (
+    <div className="relative">
+      <CalendarBlank
+        size={13}
+        weight="bold"
+        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ppc-text-muted"
+      />
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as ScheduleEndType)}
+        className="w-full appearance-none rounded-[10px] bg-white pl-8 pr-8 py-[9px] text-[13px] font-medium text-ppc-ink outline-none focus:bg-[#FBF9FD]"
+        style={{ boxShadow: 'inset 0 0 0 1px #e7e2ef' }}
+      >
+        <option value="never">Never</option>
+        <option value="on_date">On date</option>
+        <option value="after_runs">After N runs</option>
+      </select>
+      <CaretDown
+        size={10}
+        weight="bold"
+        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ppc-text-muted"
+      />
+    </div>
+  );
+}
+
+// Human-readable summary for the schedule header chip.
+
+function buildScheduleSummary(s: ScheduleConfig): string {
+  const time = formatTime(s.time);
+  if (s.frequency === 'daily') {
+    return s.interval === 1
+      ? `Every day at ${time}`
+      : `Every ${s.interval} days at ${time}`;
+  }
+  if (s.frequency === 'weekly') {
+    const days =
+      s.weekdays.length === 0
+        ? '—'
+        : s.weekdays.length === 7
+          ? 'every day'
+          : s.weekdays.map((i) => WEEKDAY_LABELS[i]).join(', ');
+    const cadence = s.interval === 1 ? 'Weekly' : `Every ${s.interval} weeks`;
+    return `${cadence}, ${days} · ${time}`;
+  }
+  const ord = ordinal(s.monthDay);
+  const cadence = s.interval === 1 ? 'Monthly' : `Every ${s.interval} months`;
+  return `${cadence}, ${ord} · ${time}`;
+}
+
+function formatTime(t: string): string {
+  const [hStr, mStr] = t.split(':');
+  const h = parseInt(hStr || '9', 10);
+  const m = mStr ?? '00';
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = ((h + 11) % 12) + 1;
+  return `${h12}:${m} ${period}`;
+}
+
+function ordinal(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
