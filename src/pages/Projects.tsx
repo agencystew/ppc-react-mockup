@@ -57,10 +57,13 @@ const TONE = {
 } as const;
 
 const PRIORITY = {
-  high:   { color: '#C5301B', label: 'High',   weight: 700, italic: true },
+  high:   { color: '#C5301B', label: 'High',   weight: 700, italic: true  },
   medium: { color: '#946112', label: 'Medium', weight: 600, italic: false },
   low:    { color: '#7B7589', label: 'Low',    weight: 500, italic: false },
 } as const;
+/* Note: "High" leans on Figtree italic + 700 weight + red, not a serif
+ * face. Earlier rev tried Playfair italic — it read off-brand sitting
+ * next to Figtree everywhere else. Sans italic is enough emphasis. */
 
 type TabId = 'attention' | 'clear' | 'all';
 
@@ -131,17 +134,9 @@ export function Projects() {
           period. Filters button + New-project CTA pinned right.        */}
       <header className="reveal flex items-end justify-between gap-6" style={{ animationDelay: '0ms' }}>
         <div className="min-w-0 flex-1">
-          <div className="mono-eyebrow text-ppc-text-faint">
-            Roster <span className="mx-1.5 text-ppc-text-faint/55">/</span> Last 30 days
-          </div>
-          <h1 className="mt-2.5 font-display text-[46px] font-extrabold leading-[0.96] tracking-[-0.030em] text-ppc-ink">
+          <h1 className="font-display text-[46px] font-extrabold leading-[0.96] tracking-[-0.030em] text-ppc-ink">
             All projects<span className="text-ppc-purple-500">.</span>
           </h1>
-          <p className="mt-3 text-[13.5px] text-ppc-text-muted">
-            {PROJECTS.length} active accounts ·{' '}
-            <span className="font-medium text-ppc-ink">{attentionCount} need attention</span> ·{' '}
-            <span className="font-medium text-ppc-ink">{clearCount} all clear</span>
-          </p>
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -219,18 +214,18 @@ export function Projects() {
           accent="#3FB58C"
         />
         <KpiCard
-          label="Avg CPA"
-          value={`$${totals.cpa.toFixed(2)}`}
-          delta={{ tone: 'down', pct: 6.1, good: true }}
-          spark={[17, 15, 16, 14, 15, 13, 14, 12, 13, 11, 12, 10]}
-          accent="#3FB58C"
+          label="Open findings"
+          value={totals.findings.toLocaleString()}
+          delta={{ tone: 'down', pct: 4.0, good: true }}
+          spark={[16, 15, 17, 14, 13, 12, 13, 11, 12, 10, 11, 9]}
+          accent="#C5301B"
         />
         <KpiCard
-          label="CTR"
-          value="3.42%"
-          delta={{ tone: 'down', pct: 0.3 }}
-          spark={[13, 12, 14, 13, 14, 15, 14, 13, 13, 12, 13, 12]}
-          accent="#D49021"
+          label="Recoverable / mo"
+          value={`$${recoverable.toLocaleString()}`}
+          delta={{ tone: 'up', pct: 22.0 }}
+          spark={[8, 10, 9, 11, 10, 13, 12, 15, 14, 17, 16, 19]}
+          accent="#7F5AF0"
         />
       </section>
 
@@ -254,7 +249,7 @@ export function Projects() {
               The roster
             </span>
             <span className="mono-eyebrow text-ppc-text-faint">
-              · sorted by priority
+              · last 30 days · sorted by priority
             </span>
           </div>
           <span className="mono-eyebrow text-ppc-text-faint">
@@ -326,13 +321,11 @@ export function Projects() {
 
                   <Td last={isLast}>
                     <span
-                      className="text-[13.5px]"
+                      className="text-[13.5px] tracking-[-0.005em]"
                       style={{
                         color: pri.color,
                         fontWeight: pri.weight,
                         fontStyle: pri.italic ? 'italic' : 'normal',
-                        fontFamily: pri.italic ? 'PF-Marlet-Display, "Playfair Display", Figtree, Georgia, serif' : undefined,
-                        letterSpacing: pri.italic ? '-0.005em' : '-0.005em',
                       }}
                     >
                       {pri.label}
