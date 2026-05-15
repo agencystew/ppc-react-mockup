@@ -178,10 +178,20 @@ export function Dashboard() {
 
 function GreetingStrip() {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-end justify-between gap-4">
       <div>
-        <h1 className="font-display text-[28px] font-extrabold leading-none tracking-[-0.02em] text-ppc-ink">
-          Morning, Stewy<span className="text-ppc-purple-500">.</span>
+        <h1 className="font-display text-[30px] font-black leading-none tracking-[-0.022em] text-ppc-ink">
+          Morning,{' '}
+          <span
+            style={{
+              fontFamily: '"Playfair Display", Georgia, serif',
+              fontStyle: 'italic',
+              fontWeight: 600,
+            }}
+          >
+            Stewy
+          </span>
+          .
         </h1>
         <p className="mt-1.5 text-[13px] text-ppc-text-muted">
           Portfolio signals, projects, and what your agents found overnight.
@@ -200,58 +210,81 @@ function GreetingStrip() {
 
 /* ─── 2 · Activity hero (dark) ───────────────────────────────────────── */
 
+/* Brand language — pulled from the live ppc.io marketing site:
+ *   - Pure dark base + faint perspective grid (no radial purple bloom)
+ *   - Big bold WHITE Figtree headline with white period
+ *   - SERIF ITALIC gradient (Playfair Display, purple → peach) for one
+ *     accent moment per hero — the live site's signature gesture
+ *   - Purple SPARKLE CTA pill with glow halo
+ *   - Memoji-style agent avatars in a wreath, echoing the live site's
+ *     "Loved by the PPC community" treatment. No abstract orbs.
+ */
+
+const SERIF_GRADIENT_STYLE: React.CSSProperties = {
+  fontFamily: '"Playfair Display", Georgia, serif',
+  fontStyle: 'italic',
+  fontWeight: 500,
+  background:
+    'linear-gradient(120deg, #B98FF8 0%, #C690E5 32%, #E8B5A0 70%, #F2C9A8 100%)',
+  WebkitBackgroundClip: 'text',
+  backgroundClip: 'text',
+  color: 'transparent',
+  WebkitTextFillColor: 'transparent',
+};
+
 function ActivityHero() {
   return (
     <section
       className="relative overflow-hidden rounded-[20px] text-white"
       style={{
-        background:
-          'radial-gradient(120% 90% at 88% -10%, #1B0F39 0%, #0A0814 55%, #050310 100%)',
+        background: '#08060F',
         boxShadow:
           '0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(15,10,30,0.55)',
       }}
     >
-      {/* Top-right purple bloom */}
+      {/* Perspective grid, faded toward edges. The signature marketing-site
+          dark-hero treatment — replaces the previous radial-purple-bloom move,
+          which read as generic SaaS dashboard. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-32 -top-32 h-[480px] w-[480px] rounded-full"
+        className="pointer-events-none absolute inset-0"
         style={{
-          background:
-            'radial-gradient(circle, rgba(127,90,240,0.32) 0%, rgba(127,90,240,0.10) 35%, transparent 65%)',
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
+          `,
+          backgroundSize: '64px 64px',
+          backgroundPosition: '0 0, 0 0',
+          maskImage:
+            'radial-gradient(ellipse 90% 70% at 50% 0%, black 25%, transparent 80%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 90% 70% at 50% 0%, black 25%, transparent 80%)',
         }}
       />
-      {/* Bottom-left soft bloom */}
+      {/* Single soft purple glow up top, no second bloom. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -bottom-24 left-[6%] h-[300px] w-[300px] rounded-full"
+        className="pointer-events-none absolute -top-40 left-1/2 h-[460px] w-[820px] -translate-x-1/2 rounded-full"
         style={{
           background:
-            'radial-gradient(circle, rgba(127,90,240,0.10) 0%, transparent 65%)',
-        }}
-      />
-      {/* Starfield grain */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.06]"
-        style={{
-          backgroundImage:
-            'radial-gradient(rgba(255,255,255,0.55) 1px, transparent 1px)',
-          backgroundSize: '3px 3px',
-          mixBlendMode: 'screen',
+            'radial-gradient(ellipse, rgba(127,90,240,0.20) 0%, transparent 65%)',
         }}
       />
 
-      <div className="relative grid gap-8 px-10 pb-9 pt-11 sm:grid-cols-[1fr_minmax(260px,320px)] sm:gap-10 sm:px-12 sm:pt-12">
-        {/* Copy column ------------------------------------------------- */}
+      <div className="relative grid gap-10 px-10 pb-10 pt-12 sm:grid-cols-[1fr_minmax(260px,320px)] sm:gap-12 sm:px-14 sm:pt-14">
+        {/* ─── Copy column ─────────────────────────────────────────── */}
         <div className="min-w-0">
-          <Eyebrow>Recent agent activity</Eyebrow>
+          <span className="text-[14px] tracking-[-0.005em]" style={SERIF_GRADIENT_STYLE}>
+            While you were away
+          </span>
 
-          <h2 className="mt-3 font-display text-[42px] font-extrabold leading-[1.04] tracking-[-0.025em] text-white sm:text-[50px]">
-            Your agents have been busy
-            <span style={{ color: '#9F86FF' }}>.</span>
+          <h2 className="mt-2 font-display text-[44px] font-black leading-[1.02] tracking-[-0.028em] text-white sm:text-[56px]">
+            Your agents found{' '}
+            <span style={SERIF_GRADIENT_STYLE}>{TOTAL_SURFACED}</span>.
           </h2>
-          <p className="mt-4 max-w-[460px] text-[14.5px] leading-[1.55] text-white/65">
+          <p className="mt-4 max-w-[480px] text-[15px] leading-[1.55] text-white/60">
             {TOTAL_RUNS} reports wrapped across {TOTAL_PROJECTS_TOUCHED} projects in the last 24 hours.
+            Pick one to act on, or send a new specialist out.
           </p>
 
           <div className="mt-7 flex flex-col gap-2">
@@ -260,22 +293,23 @@ function ActivityHero() {
             ))}
           </div>
 
-          <div className="mt-6 flex items-center gap-3">
+          <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
             <Link
               to="/reports"
-              className="inline-flex items-center gap-2 rounded-[10px] px-[16px] py-[10px] text-[13px] font-semibold text-white transition-transform hover:-translate-y-[0.5px]"
+              className="ppcio-cta group relative inline-flex items-center gap-2 rounded-full px-[18px] py-[11px] text-[13.5px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
               style={{
-                background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
+                background:
+                  'linear-gradient(135deg, #9F86FF 0%, #7F5AF0 50%, #6A45E2 100%)',
                 boxShadow:
-                  '0 1px 0 rgba(255,255,255,0.18) inset, 0 6px 14px -6px rgba(127,90,240,0.55)',
+                  '0 4px 18px rgba(70,49,134,0.55), 0 0 12px rgba(209,133,236,0.50) inset, 0 0 0 1px rgba(255,255,255,0.10)',
               }}
             >
+              <Sparkle size={14} weight="fill" />
               See all reports
-              <ArrowRight size={13} weight="bold" />
             </Link>
             <Link
               to="/agents"
-              className="inline-flex items-center gap-1.5 text-[13px] font-medium text-white/70 transition-colors hover:text-white"
+              className="inline-flex items-center gap-1.5 text-[13px] font-medium text-white/65 transition-colors hover:text-white"
             >
               Or send a new specialist out
               <CaretRight size={11} weight="bold" />
@@ -283,58 +317,24 @@ function ActivityHero() {
           </div>
         </div>
 
-        {/* Right column · aggregate moment ----------------------------- */}
-        <div className="relative flex min-w-0 flex-col items-start sm:items-end">
-          <Eyebrow>Surfaced this week</Eyebrow>
+        {/* ─── Right column · agent wreath ─────────────────────────── */}
+        <div className="relative flex min-w-0 flex-col items-center justify-start sm:items-end sm:pt-2">
+          <AgentWreath rows={ACTIVITY} />
 
-          <div className="mt-3 font-display text-[58px] font-extrabold leading-none tracking-[-0.025em] text-white sm:text-[68px]">
-            {TOTAL_SURFACED}
-            <span className="ml-[2px] text-[18px] font-medium text-white/55">/mo</span>
-          </div>
-          <p className="mt-2 text-[12.5px] text-white/55 sm:text-right">
-            in projected upside, ready to deploy
-          </p>
-
-          {/* Decorative orb. Abstract "agent activity" mark. */}
-          <div className="relative mt-6 h-[140px] w-[140px] sm:h-[160px] sm:w-[160px]">
-            <span
-              aria-hidden
-              className="absolute inset-0 rounded-full"
+          <div className="mt-5 text-center sm:text-right">
+            <p
+              className="text-[12.5px] text-white/85"
               style={{
-                background:
-                  'radial-gradient(circle at 35% 30%, #C7B0FF 0%, #7F5AF0 35%, #3E2A8E 75%, #1A0F3A 100%)',
-                boxShadow:
-                  '0 0 0 1px rgba(199,176,255,0.25), 0 0 60px -8px rgba(127,90,240,0.55), inset 0 1px 0 rgba(255,255,255,0.30)',
+                fontFamily: '"Playfair Display", Georgia, serif',
+                fontStyle: 'italic',
+                fontWeight: 500,
               }}
-            />
-            {/* Inner highlight */}
-            <span
-              aria-hidden
-              className="absolute left-[18%] top-[12%] h-[28%] w-[36%] rounded-full"
-              style={{
-                background:
-                  'radial-gradient(ellipse, rgba(255,255,255,0.55) 0%, transparent 70%)',
-                filter: 'blur(2px)',
-              }}
-            />
-            {/* Orbiting halo ring */}
-            <span
-              aria-hidden
-              className="absolute inset-[-14px] rounded-full"
-              style={{
-                background:
-                  'conic-gradient(from 220deg, transparent 0deg, rgba(199,176,255,0.45) 60deg, transparent 140deg, transparent 360deg)',
-                mask: 'radial-gradient(circle, transparent 60%, #000 62%, #000 64%, transparent 66%)',
-                WebkitMask:
-                  'radial-gradient(circle, transparent 60%, #000 62%, #000 64%, transparent 66%)',
-              }}
-            />
-            {/* Pulse dot in the centre */}
-            <span
-              aria-hidden
-              className="ppcio-live-dot absolute left-1/2 top-1/2 h-[10px] w-[10px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
-              style={{ boxShadow: '0 0 14px rgba(255,255,255,0.85)' }}
-            />
+            >
+              Today's specialists
+            </p>
+            <p className="mt-1.5 text-[11.5px] leading-[1.45] text-white/45 sm:max-w-[200px]">
+              {ACTIVITY.map((r) => r.agentName).join(', ')}
+            </p>
           </div>
         </div>
       </div>
@@ -342,17 +342,84 @@ function ActivityHero() {
   );
 }
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
+/* Agent wreath — three emoji avatars echoing the marketing site's
+ * "Loved by the PPC community" laurel-wreath cluster. Center avatar
+ * sits forward with a stronger purple halo; flanking avatars step back. */
+function AgentWreath({ rows }: { rows: ActivityRow[] }) {
+  // Always render three slots even if rows < 3. Pad with subtle ghosts.
+  const triple = [
+    rows[0],
+    rows[1] ?? rows[0],
+    rows[2] ?? rows[0],
+  ];
   return (
-    <span
-      className="text-[10.5px] font-bold uppercase leading-none text-white/55"
-      style={{
-        fontFamily: '"Courier New", ui-monospace, monospace',
-        letterSpacing: '0.16em',
-      }}
+    <div className="relative flex items-end gap-2.5">
+      {/* Left laurel */}
+      <Laurel side="left" />
+
+      {triple.map((row, i) => {
+        const isCenter = i === 1;
+        return (
+          <Link
+            key={`${row.runId}-${i}`}
+            to={`/reports/${row.runId}`}
+            title={`${row.agentName} on ${row.projectName}`}
+            className="relative grid place-items-center rounded-full transition-transform hover:-translate-y-[2px]"
+            style={{
+              height: isCenter ? 64 : 52,
+              width: isCenter ? 64 : 52,
+              background:
+                'radial-gradient(circle at 35% 28%, #2A1D52 0%, #14092A 70%, #0A0418 100%)',
+              boxShadow: isCenter
+                ? '0 0 0 2px rgba(159,134,255,0.55), 0 6px 22px rgba(127,90,240,0.45), inset 0 1px 0 rgba(255,255,255,0.18)'
+                : '0 0 0 1.5px rgba(127,90,240,0.30), 0 4px 14px rgba(127,90,240,0.25), inset 0 1px 0 rgba(255,255,255,0.10)',
+              transform: isCenter ? 'translateY(-6px)' : undefined,
+            }}
+          >
+            <span
+              aria-hidden
+              className="leading-none"
+              style={{ fontSize: isCenter ? 30 : 24 }}
+            >
+              {row.agentEmoji}
+            </span>
+          </Link>
+        );
+      })}
+
+      {/* Right laurel */}
+      <Laurel side="right" />
+    </div>
+  );
+}
+
+function Laurel({ side }: { side: 'left' | 'right' }) {
+  // Eight tiny leaf strokes fanning around the cluster — cheap SVG copy
+  // of the marketing site's wreath without committing to a heavy asset.
+  const flip = side === 'right';
+  return (
+    <svg
+      width={28}
+      height={68}
+      viewBox="0 0 28 68"
+      aria-hidden
+      className={`shrink-0 ${flip ? 'scale-x-[-1]' : ''}`}
+      style={{ color: 'rgba(255,255,255,0.40)' }}
     >
-      {children}
-    </span>
+      {[8, 18, 30, 42, 54].map((y, i) => {
+        const len = 14 - Math.abs(i - 2) * 2;
+        return (
+          <path
+            key={y}
+            d={`M 22 ${y} q -${len} -3 -${len + 2} -7`}
+            stroke="currentColor"
+            strokeWidth={1.4}
+            strokeLinecap="round"
+            fill="none"
+          />
+        );
+      })}
+    </svg>
   );
 }
 
@@ -360,11 +427,10 @@ function ActivityCard({ row }: { row: ActivityRow }) {
   return (
     <Link
       to={`/reports/${row.runId}`}
-      className="group flex items-center gap-4 rounded-[12px] px-4 py-3 transition-colors hover:bg-white/[0.04]"
+      className="group flex items-center gap-4 rounded-[12px] px-4 py-3 transition-colors hover:bg-white/[0.05]"
       style={{
         background: 'rgba(255,255,255,0.025)',
-        boxShadow:
-          'inset 0 0 0 1px rgba(255,255,255,0.06)',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.07)',
       }}
     >
       {/* Project avatar. Tonal chip per project. */}
@@ -372,7 +438,7 @@ function ActivityCard({ row }: { row: ActivityRow }) {
         className="grid h-9 w-9 shrink-0 place-items-center rounded-[9px] text-[13px] font-bold text-white"
         style={{
           background: row.projectAvatarBg,
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22)',
         }}
       >
         {row.projectName.charAt(0)}
@@ -388,8 +454,11 @@ function ActivityCard({ row }: { row: ActivityRow }) {
           {row.headline}
         </p>
       </div>
-      <div className="hidden flex-col items-end gap-0.5 sm:flex">
-        <span className="rounded-[5px] bg-[#1B4A36] px-[7px] py-[2px] font-mono text-[10.5px] font-semibold leading-none text-[#7AECBE]">
+      <div className="hidden flex-col items-end gap-1 sm:flex">
+        <span
+          className="rounded-full px-[9px] py-[2px] text-[10.5px] font-semibold leading-none"
+          style={SERIF_GRADIENT_STYLE}
+        >
           {row.upside}
         </span>
         <span className="text-[10.5px] text-white/40">{row.finishedAt}</span>
@@ -741,51 +810,60 @@ function BottomDuo() {
 function AiVerdict() {
   return (
     <article
-      className="relative overflow-hidden rounded-[18px] px-7 py-6 text-white"
+      className="relative overflow-hidden rounded-[18px] px-7 py-7 text-white"
       style={{
-        background:
-          'radial-gradient(120% 90% at 88% 0%, #1B0F39 0%, #0A0814 60%, #050310 100%)',
+        background: '#08060F',
         boxShadow:
           '0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(15,10,30,0.55)',
       }}
     >
+      {/* Same perspective grid as the activity hero. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-20 -top-20 h-[260px] w-[260px] rounded-full"
+        className="pointer-events-none absolute inset-0"
         style={{
-          background:
-            'radial-gradient(circle, rgba(127,90,240,0.30) 0%, transparent 65%)',
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
+          `,
+          backgroundSize: '48px 48px',
+          maskImage:
+            'radial-gradient(ellipse 90% 80% at 50% 0%, black 20%, transparent 80%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 90% 80% at 50% 0%, black 20%, transparent 80%)',
         }}
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        className="pointer-events-none absolute -right-16 -top-16 h-[260px] w-[260px] rounded-full"
         style={{
-          backgroundImage:
-            'radial-gradient(rgba(255,255,255,0.55) 1px, transparent 1px)',
-          backgroundSize: '3px 3px',
-          mixBlendMode: 'screen',
+          background:
+            'radial-gradient(circle, rgba(127,90,240,0.22) 0%, transparent 65%)',
         }}
       />
 
       <div className="relative">
-        <Eyebrow>AI verdict</Eyebrow>
-        <h3 className="mt-3 font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.02em] text-white sm:text-[30px]">
+        <span className="text-[13px] tracking-[-0.005em]" style={SERIF_GRADIENT_STYLE}>
+          AI verdict
+        </span>
+        <h3 className="mt-2 font-display text-[28px] font-black leading-[1.05] tracking-[-0.022em] text-white sm:text-[30px]">
           You're winning in 7 accounts.<br />
-          Fix 1 issue, unlock <span style={{ color: '#9F86FF' }}>$12.4K</span>.
+          Fix 1 issue, unlock{' '}
+          <span style={SERIF_GRADIENT_STYLE}>$12.4K</span>.
         </h3>
-        <p className="mt-3 max-w-[440px] text-[13px] leading-[1.55] text-white/65">
+        <p className="mt-3 max-w-[440px] text-[13px] leading-[1.55] text-white/60">
           The HOTH's CPA jumped 38% over 30 days. Spend Leak Detector and Negative Keyword
           have priors that match the pattern.
         </p>
 
         <Link
           to="/projects/the-hoth"
-          className="mt-5 inline-flex items-center gap-2 rounded-[10px] px-[14px] py-[9px] text-[13px] font-semibold text-white transition-transform hover:-translate-y-[0.5px]"
+          className="mt-5 inline-flex items-center gap-2 rounded-full px-[16px] py-[10px] text-[13px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
           style={{
-            background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
+            background:
+              'linear-gradient(135deg, #9F86FF 0%, #7F5AF0 50%, #6A45E2 100%)',
             boxShadow:
-              '0 1px 0 rgba(255,255,255,0.18) inset, 0 6px 14px -6px rgba(127,90,240,0.55)',
+              '0 4px 18px rgba(70,49,134,0.55), 0 0 12px rgba(209,133,236,0.45) inset, 0 0 0 1px rgba(255,255,255,0.10)',
           }}
         >
           <Lightning size={13} weight="fill" />
