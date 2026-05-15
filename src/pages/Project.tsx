@@ -108,17 +108,40 @@ const SPEND_TREND = [
   4800,4650,4500,4350,4200,4050,3950,3850,
 ];
 
-interface Campaign { name: string; meta: string; cpaTone?: 'bad' | 'good' | 'neutral'; cpa: string; }
+// Campaigns — visual language matches AgentDetail launch form: human-friendly
+// name + type chip + mono spend + KPI ribbon. No raw monospace identifiers.
+type CampaignType = 'SEARCH' | 'PMAX' | 'SHOPPING' | 'DISPLAY';
+type CampaignTone = 'good' | 'bad' | 'neutral';
+interface Campaign {
+  name: string;
+  type: CampaignType;
+  spend: number;     // monthly $
+  conv: number;
+  cpa: number;
+  tone: CampaignTone;
+}
 const TOP_CAMPAIGNS: Campaign[] = [
-  { name: 'oh_brand_search', meta: '$5,274 · 126 conv',  cpa: '$42 CPA',  cpaTone: 'good'    },
-  { name: 'or_brand_search', meta: '$4,810 · 56 conv',   cpa: '$86 CPA',  cpaTone: 'neutral' },
-  { name: 'oh_sud_search',   meta: '$5,362 · 87 conv',   cpa: '$62 CPA',  cpaTone: 'neutral' },
+  { name: 'Brand · Recovery Centers',    type: 'SEARCH', spend: 5274, conv: 126, cpa: 42, tone: 'good'    },
+  { name: 'Brand · Sober Living',        type: 'SEARCH', spend: 4810, conv: 56,  cpa: 86, tone: 'neutral' },
+  { name: 'Non-Brand · Detox Programs',  type: 'SEARCH', spend: 5362, conv: 87,  cpa: 62, tone: 'good'    },
 ];
 const BAD_CAMPAIGNS: Campaign[] = [
-  { name: 'nm_sud_search',   meta: '$2,603 · 9 conv',    cpa: '$289 CPA', cpaTone: 'bad' },
-  { name: 'nc_brand_search', meta: '$5,043 · 28 conv',   cpa: '$180 CPA', cpaTone: 'bad' },
-  { name: 'co_sud_search',   meta: '$2,990 · 19 conv',   cpa: '$157 CPA', cpaTone: 'bad' },
+  { name: 'Non-Brand · NM Treatment',    type: 'SEARCH', spend: 2603, conv: 9,  cpa: 289, tone: 'bad' },
+  { name: 'Brand · NC Recovery Centers', type: 'SEARCH', spend: 5043, conv: 28, cpa: 180, tone: 'bad' },
+  { name: 'PMax · Treatment Locator',    type: 'PMAX',   spend: 2990, conv: 19, cpa: 157, tone: 'bad' },
 ];
+
+const CAMPAIGN_TYPE_STYLES: Record<CampaignType, { bg: string; fg: string }> = {
+  SEARCH:   { bg: '#E6E0FA', fg: '#534AB7' },
+  PMAX:     { bg: '#FDE9D7', fg: '#9C5A1A' },
+  SHOPPING: { bg: '#DAF3E5', fg: '#1F7A4F' },
+  DISPLAY:  { bg: '#FCE0E4', fg: '#A12A3A' },
+};
+
+function formatSpend(n: number): string {
+  if (n >= 1000) return `$${(n / 1000).toFixed(1).replace(/\.0$/, '')}K`;
+  return `$${n}`;
+}
 
 interface ActivityRow { title: string; meta: string; when: string; }
 const ACTIVITY: ActivityRow[] = [
@@ -368,7 +391,7 @@ function TodaysBriefCard({ findings }: { findings: Finding[] }) {
               className="text-[22px] font-bold tracking-[-0.02em] text-white"
               style={{ letterSpacing: '-0.025em' }}
             >
-              Today's brief
+              Weekly brief
               <span style={{ color: '#A89BFF', fontStyle: 'italic' }}>.</span>
             </h2>
             <span
@@ -392,7 +415,7 @@ function TodaysBriefCard({ findings }: { findings: Finding[] }) {
             className="mt-5 inline-flex items-center gap-2 rounded-[10px] px-4 py-2.5 text-[13.5px] font-semibold text-white shadow-[0_1px_2px_rgba(124,109,255,0.5),0_12px_28px_-10px_rgba(124,109,255,0.65)] transition-transform hover:-translate-y-px"
             style={{ background: C.purple }}
           >
-            Run all audits
+            See all discoveries
             <ArrowRight size={13} weight="bold" />
           </button>
         </div>
@@ -453,24 +476,24 @@ function TodaysBriefCard({ findings }: { findings: Finding[] }) {
               <a
                 key={i}
                 href="#"
-                className="grid grid-cols-[16px_1fr_auto_16px] items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.04]"
+                className="grid grid-cols-[16px_1fr_auto_16px] items-center gap-5 px-6 py-5 transition-colors hover:bg-white/[0.04]"
                 style={{
                   borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.05)',
                 }}
               >
                 <span
-                  className="h-[8px] w-[8px] rounded-full"
+                  className="h-[10px] w-[10px] rounded-full"
                   style={{ background: dot, boxShadow: dotHalo }}
                 />
                 <div className="min-w-0">
                   <div
-                    className="text-[14.5px] font-semibold leading-tight text-white"
-                    style={{ letterSpacing: '-0.005em' }}
+                    className="text-[22px] font-bold leading-tight text-white"
+                    style={{ letterSpacing: '-0.02em' }}
                   >
                     {f.title}
                   </div>
                   <div
-                    className="mt-1 text-[12px]"
+                    className="mt-2 text-[12.5px]"
                     style={{ color: 'rgba(255,255,255,0.55)' }}
                   >
                     <span>{f.source}</span>
@@ -480,13 +503,13 @@ function TodaysBriefCard({ findings }: { findings: Finding[] }) {
                 </div>
                 <div className="text-right">
                   <div
-                    className="tabular text-[15px] font-semibold leading-none"
-                    style={{ color: valueColor }}
+                    className="tabular text-[20px] font-bold leading-none"
+                    style={{ color: valueColor, letterSpacing: '-0.02em' }}
                   >
                     {f.valueMain}
                     {f.valueSuffix && (
                       <span
-                        className="ml-0.5 text-[11.5px] font-medium"
+                        className="ml-0.5 text-[13px] font-medium"
                         style={{ color: 'rgba(255,255,255,0.45)' }}
                       >
                         {f.valueSuffix}
@@ -494,13 +517,13 @@ function TodaysBriefCard({ findings }: { findings: Finding[] }) {
                     )}
                   </div>
                   <div
-                    className="mt-1 text-[11px]"
-                    style={{ color: 'rgba(255,255,255,0.42)' }}
+                    className="mt-1.5 text-[12px]"
+                    style={{ color: 'rgba(255,255,255,0.45)' }}
                   >
                     {f.valueLabel}
                   </div>
                 </div>
-                <CaretRight size={14} weight="bold" style={{ color: 'rgba(255,255,255,0.35)' }} />
+                <CaretRight size={16} weight="bold" style={{ color: 'rgba(255,255,255,0.4)' }} />
               </a>
             );
           })}
@@ -870,8 +893,22 @@ function DailyTrendChart({ data }: { data: number[] }) {
   );
 }
 
+function CampaignTypeChip({ type }: { type: CampaignType }) {
+  const s = CAMPAIGN_TYPE_STYLES[type];
+  return (
+    <span
+      className="inline-flex items-center rounded-[4px] px-[5px] py-[1px] font-mono text-[9.5px] font-bold uppercase tracking-[0.06em]"
+      style={{ background: s.bg, color: s.fg }}
+    >
+      {type}
+    </span>
+  );
+}
+
 function CampaignCard({
-  title, tone, items,
+  title,
+  tone,
+  items,
 }: {
   title: string;
   tone: 'good' | 'bad';
@@ -880,12 +917,12 @@ function CampaignCard({
   const dot   = tone === 'good' ? C.greenDot : C.redDot;
   const label = tone === 'good' ? C.green    : C.red;
   return (
-    <div
-      className="rounded-[12px] border px-5 py-5"
+    <section
+      className="rounded-[14px] border px-5 py-5"
       style={{ background: C.cardBg, borderColor: C.border }}
     >
       <div className="mb-4 flex items-center gap-2">
-        <span className="h-[7px] w-[7px] rounded-full" style={{ background: dot }} />
+        <span className="h-[8px] w-[8px] rounded-full" style={{ background: dot }} />
         <span
           className="font-mono text-[11px] font-semibold uppercase"
           style={{ color: label, letterSpacing: '0.14em' }}
@@ -893,29 +930,60 @@ function CampaignCard({
           {title}
         </span>
       </div>
-      <div>
+      <div className="-mx-1">
         {items.map((c, i) => {
           const isLast = i === items.length - 1;
-          const cpaColor = c.cpaTone === 'bad' ? C.red : c.cpaTone === 'good' ? C.green : C.neutral7;
+          const cpaColor = c.tone === 'bad' ? C.red : c.tone === 'good' ? C.green : C.neutral7;
+          const cpaWeight = c.tone === 'neutral' ? 500 : 600;
           return (
             <a
               key={c.name}
               href="#"
-              className="block py-3.5 transition-colors hover:bg-[#fafafd]"
+              className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-[8px] px-2 py-3 transition-colors hover:bg-[#FBF9FD]"
               style={{ borderBottom: isLast ? 'none' : `1px solid ${C.rowBorder}` }}
             >
-              <div className="font-mono text-[14px] font-semibold" style={{ color: C.ink }}>
-                {c.name}
+              <div className="flex min-w-0 flex-col gap-[6px] leading-tight">
+                <span
+                  className="truncate text-[13.5px] font-semibold"
+                  style={{ color: C.ink, letterSpacing: '-0.005em' }}
+                >
+                  {c.name}
+                </span>
+                <span className="flex flex-wrap items-center gap-[6px]">
+                  <CampaignTypeChip type={c.type} />
+                  <span
+                    className="inline-flex items-center gap-[3px] font-mono text-[10.5px] tabular"
+                    style={{ color: C.neutral5 }}
+                  >
+                    {formatSpend(c.spend)}/mo
+                  </span>
+                  <span className="text-[10.5px]" style={{ color: C.neutral4 }}>·</span>
+                  <span
+                    className="font-mono text-[10.5px] tabular"
+                    style={{ color: C.neutral5 }}
+                  >
+                    {c.conv} conv
+                  </span>
+                </span>
               </div>
-              <div className="mt-1.5 tabular text-[12px]" style={{ color: C.neutral5 }}>
-                {c.meta}
-                <span className="mx-1.5" style={{ color: C.neutral3 }}>·</span>
-                <span style={{ color: cpaColor, fontWeight: c.cpaTone === 'bad' ? 600 : 500 }}>{c.cpa}</span>
+              <div className="text-right">
+                <div
+                  className="tabular text-[15px] leading-none"
+                  style={{ color: cpaColor, fontWeight: cpaWeight, letterSpacing: '-0.01em' }}
+                >
+                  ${c.cpa}
+                </div>
+                <div
+                  className="mt-1 font-mono text-[9.5px] font-semibold uppercase tracking-[0.10em]"
+                  style={{ color: C.neutral4 }}
+                >
+                  CPA
+                </div>
               </div>
             </a>
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }
