@@ -1,48 +1,43 @@
 import { useMemo, useState } from 'react';
-import { Link, NavLink, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowUp, ArrowRight, CaretDown, CaretRight, ChatCircle,
-  DotsThree, MagnifyingGlass, NotePencil, Robot, ShareNetwork,
-  Sparkle, TrendUp, ChartBar, Coins, Users, Info, Broadcast,
-  Files, Target, Plus,
+  ArrowUp, ArrowRight, CaretDown, CaretLeft,
+  DotsThree, MagnifyingGlass, Robot, Sparkle, TrendUp,
+  ChartBar, Coins, Users, Info, Broadcast, Files, Target, Plus,
+  CalendarBlank,
 } from '@phosphor-icons/react';
 import { CHAT_HISTORY, SPECIALIST_CHIPS, findChatThread } from '../mock/chats';
 import type {
-  ChatActionChip, ChatChart, ChatMessage, ChatRunningCard, ChatThread,
+  ChatActionChip, ChatChart, ChatFactorsCard, ChatMessage,
+  ChatRunningCard, ChatThread,
 } from '../mock/chats';
 import { PROJECTS, CURRENT_PROJECT_ID } from '../mock/projects';
 import { AGENTS } from '../mock/agents';
 
-/* /chat       — empty state (centered hero · trust strip · explore grid)
- * /chat/:id   — active conversation
+/* /chat       — pre-chat hero (project pill · "Ask anything…" · explore grid)
+ * /chat/:id   — active conversation (single focused column, no inner rail)
  *
- * Surface owns its own three-column posture:
+ * Active-chat surface is a centered editorial column ≤680px wide:
  *
- *   [ AppShell sidebar ] [ inner chat-history rail ] [ chat workspace ]
+ *     [ Header: < Back · centered title · ⋯ ]
+ *     [ User bubble · right-aligned · lavender wash ]
+ *     [ AI message · "io" avatar · body · nested chart card ·
+ *       bullets · nested factors card · action chips ]
+ *     [ White reply dock · + · grow · purple send ]
+ *     [ "Answers are grounded in your Google Ads + GA4 data." ]
  *
- * AppShell flips to full-bleed for /chat routes so the inner rail can sit
- * flush against the dark sidebar without the global 1240px wrapper.
- *
- * Brand language: lavender canvas, white cards w/ 0.5px ppc-card-border,
- * Figtree display, Courier eyebrows, single italic purple period accent in
- * each title — same hand as Dashboard + Project + AgentCatalog. Reference
- * Stewart provided 2026-05-15. */
+ * Same v5 hand as Dashboard / Project / AgentCatalog: lavender canvas,
+ * white cards w/ 0.5px ppc-card-border, Figtree body, Courier mono for
+ * data, single italic purple period as the title accent. The chat surface
+ * is intentionally restrained — the only "moment" of colour tension is
+ * the red spike bar in the CPA chart. Reference: Stewart 2026-05-15. */
 
 export function Chat() {
   const { chatId } = useParams<{ chatId?: string }>();
   const activeThread = findChatThread(chatId);
-
-  return (
-    <div className="flex min-h-screen w-full">
-      <ChatHistoryRail activeId={activeThread?.id} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        {activeThread
-          ? <ActiveChat thread={activeThread} />
-          : <PreChat />
-        }
-      </div>
-    </div>
-  );
+  return activeThread
+    ? <ActiveChat thread={activeThread} />
+    : <PreChat />;
 }
 
 /* ═══ PROJECT AVATAR PALETTE ═══════════════════════════════════════════════
@@ -83,141 +78,6 @@ function avatarForId(id: string | undefined): AvatarToken {
   return PROJECT_AVATARS[id] ?? NEUTRAL_AVATAR;
 }
 
-/* ═══ INNER LEFT RAIL · chat history ═══════════════════════════════════════ */
-
-function ChatHistoryRail({ activeId }: { activeId?: string }) {
-  return (
-    <aside
-      className="sticky top-0 hidden h-screen w-[296px] shrink-0 flex-col border-r-[0.5px] border-ppc-card-border bg-white md:flex"
-    >
-      {/* Header — just the word, no count chatter */}
-      <div className="px-5 pt-[22px] pb-3">
-        <h2 className="text-[19px] font-bold tracking-[-0.012em] text-ppc-ink">
-          Chat<span className="font-serif italic text-ppc-purple-500">.</span>
-        </h2>
-      </div>
-
-      {/* New chat — full-width primary CTA */}
-      <div className="px-4 pb-[14px]">
-        <NavLink
-          to="/chat"
-          end
-          className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-[10px] px-3 py-[10px] text-[13.5px] font-semibold text-white transition-transform hover:-translate-y-[0.5px]"
-          style={{
-            background: 'linear-gradient(180deg, #8B68F2 0%, #7F5AF0 55%, #6B47E0 100%)',
-            boxShadow:
-              '0 1px 0 rgba(255,255,255,0.18) inset, 0 0 0 1px rgba(127,90,240,0.55), 0 6px 18px -6px rgba(127,90,240,0.55)',
-          }}
-        >
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-60"
-            style={{
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 55%)',
-            }}
-          />
-          <NotePencil size={14} weight="bold" className="relative" />
-          <span className="relative">New chat</span>
-        </NavLink>
-      </div>
-
-      {/* Recent + search row */}
-      <div className="flex items-center justify-between px-5 pb-2.5">
-        <button
-          type="button"
-          className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-ink transition-colors hover:text-ppc-purple-700"
-        >
-          Recent
-          <CaretDown size={10} weight="bold" className="text-ppc-text-faint" />
-        </button>
-        <button
-          type="button"
-          title="Search chats"
-          className="grid h-[22px] w-[22px] place-items-center rounded-[6px] text-ppc-text-muted transition-colors hover:bg-ppc-canvas hover:text-ppc-purple-700"
-        >
-          <MagnifyingGlass size={12} weight="bold" />
-        </button>
-      </div>
-
-      {/* List */}
-      <nav className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-3 pb-3">
-        {CHAT_HISTORY.map((t) => (
-          <ChatHistoryRow key={t.id} thread={t} active={t.id === activeId} />
-        ))}
-      </nav>
-
-      {/* Footer — view-all link */}
-      <div className="border-t-[0.5px] border-ppc-card-border px-5 py-3">
-        <Link
-          to="/chat"
-          className="inline-flex items-center gap-1 text-[12px] font-medium text-ppc-purple-700 transition-colors hover:text-ppc-purple-500"
-        >
-          View all chats
-          <ArrowRight size={11} weight="bold" />
-        </Link>
-      </div>
-    </aside>
-  );
-}
-
-function ChatHistoryRow({ thread, active }: { thread: ChatThread; active: boolean }) {
-  const avatar = avatarForLabel(thread.projectLabel);
-  return (
-    <Link
-      to={`/chat/${thread.id}`}
-      className={`group flex items-start gap-2.5 rounded-[10px] px-2.5 py-[10px] transition-colors ${
-        active
-          ? 'bg-ppc-purple-50'
-          : 'hover:bg-ppc-canvas/70'
-      }`}
-    >
-      <span className="min-w-0 flex-1">
-        <p className={`line-clamp-2 text-[12.5px] leading-[1.35] tracking-[-0.003em] ${
-          active ? 'font-semibold text-ppc-ink' : 'font-medium text-ppc-ink'
-        }`}>
-          {thread.title}
-        </p>
-        <span className="mt-[7px] flex items-center gap-1.5">
-          <span
-            aria-hidden
-            className="grid h-[16px] w-[16px] shrink-0 place-items-center rounded-[4px] text-[9px] font-bold leading-none"
-            style={{
-              background: avatar.bg,
-              color: avatar.fg,
-              boxShadow: `inset 0 0 0 0.5px ${avatar.ring}`,
-            }}
-          >
-            {thread.projectLabel.charAt(0)}
-          </span>
-          <span className="truncate text-[10.5px] font-medium text-ppc-text-muted">
-            {thread.projectLabel}
-          </span>
-        </span>
-      </span>
-      <span
-        className="shrink-0 pt-[1px] text-[10px] font-medium uppercase tracking-[0.04em] text-ppc-text-faint"
-        style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-      >
-        {compactTime(thread.relativeTime)}
-      </span>
-    </Link>
-  );
-}
-
-/** Shorten the human "2 days ago" / "last week" labels into the right-aligned
- *  date stamps the reference uses ("Tue", "Mon", "Apr 27", "10:24 AM"). */
-function compactTime(rel: string): string {
-  switch (rel) {
-    case 'just now':   return '10:24 AM';
-    case '2h ago':     return 'Yesterday';
-    case 'yesterday':  return 'Tue';
-    case '2 days ago': return 'Mon';
-    case '3 days ago': return 'Mon';
-    case 'last week':  return 'Apr 27';
-    default:           return rel;
-  }
-}
-
 /* ═══ PRE-CHAT STATE ═══════════════════════════════════════════════════════ */
 
 function PreChat() {
@@ -236,6 +96,8 @@ function PreChat() {
         <PopularGrid />
 
         <SpecialistRow />
+
+        <RecentChatsStrip />
       </div>
     </div>
   );
@@ -647,68 +509,56 @@ function SpecialistRow() {
   );
 }
 
-/* ═══ ACTIVE CHAT ══════════════════════════════════════════════════════════ */
+/* ═══ ACTIVE CHAT ══════════════════════════════════════════════════════════
+ *
+ * Single focused column (≤680px), no inner history rail. Editorial spacing,
+ * one moment of colour tension (red spike bar). Reference 2026-05-15. */
 
 function ActiveChat({ thread }: { thread: ChatThread }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <ActiveChatHeader thread={thread} />
-      <div className="flex-1 overflow-y-auto px-6 pb-40 pt-6 lg:px-10">
-        <div className="mx-auto w-full max-w-[780px] space-y-7">
+      <ActiveChatHeader title={thread.title} />
+      <div className="flex-1 overflow-y-auto px-5 pb-44 pt-8 sm:px-7">
+        <div className="mx-auto w-full max-w-[680px] space-y-7">
           {thread.messages.length === 0
             ? <EmptyThreadHint thread={thread} />
             : thread.messages.map((m) => (
-                <MessageRow key={m.id} message={m} />
+                <MessageRow
+                  key={m.id}
+                  message={m}
+                  timestamp={m.timestamp ?? ''}
+                />
               ))
           }
         </div>
       </div>
-      <ReplyDock thread={thread} />
+      <ReplyDock />
     </div>
   );
 }
 
-function ActiveChatHeader({ thread }: { thread: ChatThread }) {
+/* ─── Header · < Back · centered title · ⋯ ──────────────────────────────── */
+
+function ActiveChatHeader({ title }: { title: string }) {
   const navigate = useNavigate();
-  const avatar = avatarForLabel(thread.projectLabel);
   return (
-    <header className="sticky top-0 z-10 border-b-[0.5px] border-ppc-card-border bg-ppc-canvas/85 px-6 py-3.5 backdrop-blur-md lg:px-10">
-      <div className="mx-auto flex w-full max-w-[780px] items-center gap-3">
+    <header className="sticky top-0 z-10 bg-ppc-canvas/85 px-4 pt-4 pb-3 backdrop-blur-md sm:px-7">
+      <div className="mx-auto grid w-full max-w-[680px] grid-cols-[auto_1fr_auto] items-center gap-3">
         <button
+          type="button"
           onClick={() => navigate('/chat')}
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-[8px] border-[0.5px] border-ppc-card-border bg-white text-ppc-text-muted transition-colors hover:border-ppc-purple-300 hover:text-ppc-purple-500 md:hidden"
-          title="Back to chats"
+          className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[12.5px] font-medium text-ppc-text-muted transition-colors hover:text-ppc-ink"
         >
-          <CaretRight size={14} weight="bold" className="rotate-180" />
+          <CaretLeft size={12} weight="bold" />
+          <span>Back to chats</span>
         </button>
-        <span
-          aria-hidden
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-[7px] text-[12px] font-semibold"
-          style={{
-            background: avatar.bg,
-            color: avatar.fg,
-            boxShadow: `inset 0 0 0 0.5px ${avatar.ring}`,
-          }}
-        >
-          {thread.monogram}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[13.5px] font-semibold leading-tight tracking-[-0.005em] text-ppc-ink">
-            {thread.title}
-          </p>
-          <p className="mt-[1px] truncate text-[11px] text-ppc-text-muted">
-            {thread.projectLabel} · <span className="font-mono tracking-[0.04em]">{thread.model}</span>
-          </p>
-        </div>
+        <h1 className="truncate text-center text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink">
+          {title}
+        </h1>
         <button
-          title="Share thread"
-          className="grid h-8 w-8 place-items-center rounded-[8px] border-[0.5px] border-ppc-card-border bg-white text-ppc-text-muted transition-colors hover:border-ppc-purple-300 hover:text-ppc-purple-500"
-        >
-          <ShareNetwork size={13} weight="duotone" />
-        </button>
-        <button
+          type="button"
           title="More"
-          className="grid h-8 w-8 place-items-center rounded-[8px] border-[0.5px] border-ppc-card-border bg-white text-ppc-text-muted transition-colors hover:border-ppc-purple-300 hover:text-ppc-purple-500"
+          className="grid h-7 w-7 place-items-center rounded-full border-[0.5px] border-ppc-card-border bg-white text-ppc-text-muted transition-colors hover:border-ppc-purple-300 hover:text-ppc-purple-500"
         >
           <DotsThree size={14} weight="bold" />
         </button>
@@ -736,69 +586,106 @@ function EmptyThreadHint({ thread }: { thread: ChatThread }) {
   );
 }
 
-function MessageRow({ message }: { message: ChatMessage }) {
-  if (message.role === 'user') {
-    return (
-      <div className="flex justify-end">
-        <div className="max-w-[78%] rounded-[16px] rounded-tr-[6px] border-[0.5px] border-ppc-purple-500/22 bg-ppc-purple-500/14 px-4 py-2.5">
-          <p className="text-[13.5px] leading-[1.55] text-ppc-ink">{message.body}</p>
-        </div>
+/* ─── Message router ────────────────────────────────────────────────────── */
+
+function MessageRow({ message, timestamp }: { message: ChatMessage; timestamp: string }) {
+  return message.role === 'user'
+    ? <UserBubble body={message.body ?? ''} timestamp={timestamp} />
+    : <AssistantBlock message={message} timestamp={timestamp} />;
+}
+
+/* ─── User · right-aligned lavender bubble + timestamp ──────────────────── */
+
+function UserBubble({ body, timestamp }: { body: string; timestamp: string }) {
+  return (
+    <div className="flex flex-col items-end">
+      <div
+        className="max-w-[82%] rounded-[18px] bg-[#EBE6FB] px-[18px] py-[11px]"
+      >
+        <p className="text-[14px] leading-[1.55] text-ppc-ink">{body}</p>
       </div>
-    );
-  }
+      <p className="mt-1.5 pr-1 text-[11px] text-ppc-text-faint">{timestamp}</p>
+    </div>
+  );
+}
+
+/* ─── Assistant · avatar + outer card (body, chart, bullets, factors) ──── */
+
+function AssistantBlock({ message, timestamp }: { message: ChatMessage; timestamp: string }) {
   return (
     <div className="flex gap-3">
-      <span
-        aria-hidden
-        className="grid h-7 w-7 shrink-0 place-items-center rounded-[7px] bg-ppc-purple-500 text-[10.5px] font-bold text-white shadow-[0_4px_14px_-4px_rgba(127,90,240,0.55)]"
-      >
-        io
-      </span>
-      <div className="min-w-0 flex-1 pt-px">
-        {message.body && (
-          <p className="text-[14px] leading-[1.65] text-ppc-ink">
-            {renderInlineMarkdown(message.body)}
-          </p>
-        )}
+      <IoAvatar />
+      <div className="min-w-0 flex-1">
+        <article className="rounded-[18px] border-[0.5px] border-ppc-card-border bg-white px-5 py-[18px] sm:px-6 sm:py-5">
+          {message.body && (
+            <p className="text-[14px] leading-[1.6] text-ppc-ink">
+              {renderInlineMarkdown(message.body)}
+            </p>
+          )}
+          <p className="mt-2 text-right text-[11px] text-ppc-text-faint">{timestamp}</p>
 
-        {message.bullets && (
-          <ul className="mt-3 flex flex-col gap-2.5">
-            {message.bullets.map((b, i) => (
-              <li key={i} className="flex gap-3">
-                <span className="mt-[9px] h-[5px] w-[5px] shrink-0 rounded-full bg-ppc-purple-700" />
-                <p className="text-[13px] leading-[1.6] text-ppc-ink">
-                  <span className="font-semibold">{b.lead}</span> {b.rest}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
+          {message.chart && (
+            <div className="mt-4">
+              <ChartCard chart={message.chart} />
+            </div>
+          )}
 
-        {message.chart && (
-          <div className="mt-4">
-            <ChartCard chart={message.chart} />
-          </div>
-        )}
+          {message.bullets && (
+            <ul className="mt-4 flex flex-col gap-2.5">
+              {message.bullets.map((b, i) => (
+                <li key={i} className="flex gap-3">
+                  <span className="mt-[8px] h-[5px] w-[5px] shrink-0 rounded-full bg-ppc-purple-500" />
+                  <p className="text-[13.5px] leading-[1.55] text-ppc-ink">
+                    {b.lead && <span className="font-semibold">{b.lead}</span>}
+                    {b.lead && b.rest ? ' ' : ''}
+                    {b.rest}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
 
-        {message.followUp && (
-          <p className="mt-4 text-[14px] leading-[1.65] text-ppc-ink">{message.followUp}</p>
-        )}
+          {message.factors && (
+            <div className="mt-4">
+              <FactorsCard factors={message.factors} />
+            </div>
+          )}
 
-        {message.chips && (
-          <div className="mt-3.5 flex flex-wrap gap-1.5">
+          {message.followUp && (
+            <p className="mt-4 text-[13.5px] leading-[1.6] text-ppc-ink">
+              {message.followUp}
+            </p>
+          )}
+
+          {message.running && (
+            <div className="mt-4">
+              <InlineRunningCard run={message.running} />
+            </div>
+          )}
+        </article>
+
+        {message.chips && message.chips.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
             {message.chips.map((c, i) => (
-              <FollowUpChip key={i} chip={c} />
+              <ActionChip key={i} chip={c} />
             ))}
-          </div>
-        )}
-
-        {message.running && (
-          <div className="mt-4">
-            <InlineRunningCard run={message.running} />
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+/* ─── "io" avatar — solid purple roundel ────────────────────────────────── */
+
+function IoAvatar() {
+  return (
+    <span
+      aria-hidden
+      className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ppc-purple-500 text-white shadow-[0_4px_14px_-4px_rgba(127,90,240,0.45)]"
+    >
+      <span className="text-[12px] font-bold leading-none tracking-[-0.01em]">io</span>
+    </span>
   );
 }
 
@@ -811,27 +698,44 @@ function renderInlineMarkdown(text: string): React.ReactNode {
   );
 }
 
+/* ─── Chart card — 14 bars on lavender, last one red ────────────────────── */
+
 function ChartCard({ chart }: { chart: ChatChart }) {
-  const maxValue = useMemo(() => Math.max(...chart.bars.map((b) => b.value)) || 100, [chart.bars]);
+  const maxValue = useMemo(
+    () => Math.max(...chart.bars.map((b) => b.value)) || 100,
+    [chart.bars],
+  );
   return (
-    <div className="rounded-[12px] border-[0.5px] border-ppc-card-border bg-white px-5 py-4">
-      <div className="mb-3.5 flex items-baseline justify-between">
-        <p className="text-[12px] font-semibold tracking-[-0.005em] text-ppc-ink">{chart.label}</p>
-        <p className="font-mono text-[11px] tabular-nums text-ppc-status-critical">{chart.delta}</p>
+    <div className="rounded-[14px] border-[0.5px] border-ppc-card-border bg-white px-5 py-[18px]">
+      <div className="mb-4 flex items-baseline justify-between gap-3">
+        <p className="text-[13px] font-semibold tracking-[-0.005em] text-ppc-ink">
+          {chart.label}
+        </p>
+        <p
+          className="text-[11.5px] font-medium tabular-nums text-ppc-status-critical"
+          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+        >
+          {chart.delta}
+        </p>
       </div>
-      <div className="flex h-[64px] items-end gap-1">
-        {chart.bars.map((b, i) => {
-          const heightPct = Math.max(8, (b.value / maxValue) * 100);
-          return (
-            <div
-              key={i}
-              className={`flex-1 rounded-t-[2px] ${b.spike ? 'bg-ppc-status-critical' : 'bg-ppc-panel-soft'}`}
-              style={{ height: `${heightPct}%` }}
-            />
-          );
-        })}
+      <div className="relative">
+        <div className="flex h-[88px] items-end gap-[6px]">
+          {chart.bars.map((b, i) => {
+            const heightPct = Math.max(14, (b.value / maxValue) * 100);
+            return (
+              <div
+                key={i}
+                className={`flex-1 rounded-t-[3px] ${b.spike ? 'bg-[#E24B4A]' : 'bg-[#E7E0F5]'}`}
+                style={{ height: `${heightPct}%` }}
+              />
+            );
+          })}
+        </div>
       </div>
-      <div className="mt-2 flex justify-between font-mono text-[10px] tabular-nums text-ppc-text-faint">
+      <div
+        className="mt-2 flex justify-between text-[10.5px] tabular-nums text-ppc-text-faint"
+        style={{ fontFamily: '"Courier New", ui-monospace, monospace', letterSpacing: '0.04em' }}
+      >
         <span>{chart.axisLeft}</span>
         <span>{chart.axisRight}</span>
       </div>
@@ -839,24 +743,78 @@ function ChartCard({ chart }: { chart: ChatChart }) {
   );
 }
 
-function FollowUpChip({ chip }: { chip: ChatActionChip }) {
-  const schedule = chip.variant === 'schedule';
+/* ─── Factors card — Top contributing factors table ─────────────────────── */
+
+function FactorsCard({ factors }: { factors: ChatFactorsCard }) {
+  return (
+    <div className="rounded-[14px] border-[0.5px] border-ppc-card-border bg-white px-5 py-[18px]">
+      <p className="text-[13px] font-semibold tracking-[-0.005em] text-ppc-ink">
+        {factors.title}
+      </p>
+      <ul className="mt-3 divide-y divide-[#F0EDF8]">
+        {factors.rows.map((r, i) => (
+          <li key={i} className="flex items-center justify-between py-[11px]">
+            <span className="text-[13.5px] text-ppc-ink">{r.label}</span>
+            <span
+              className={`text-[13px] tabular-nums ${
+                r.tone === 'muted'
+                  ? 'text-ppc-text-faint'
+                  : 'font-medium text-ppc-status-critical'
+              }`}
+              style={
+                r.tone === 'muted'
+                  ? undefined
+                  : { fontFamily: '"Courier New", ui-monospace, monospace' }
+              }
+            >
+              {r.value}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {factors.linkLabel && (
+        <div className="mt-2 flex justify-end">
+          <Link
+            to={factors.linkHref ?? '#'}
+            className="inline-flex items-center gap-1 text-[12.5px] font-medium text-ppc-purple-700 transition-colors hover:text-ppc-purple-500"
+          >
+            {factors.linkLabel}
+            <ArrowRight size={11} weight="bold" />
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Action chips — follow-up suggestions below the AI card ────────────── */
+
+const ACTION_ICONS: Record<NonNullable<ChatActionChip['icon']>, React.ComponentType<{ size?: number; weight?: 'regular' | 'bold' | 'duotone' | 'fill' }>> = {
+  'magnifying-glass': MagnifyingGlass,
+  'chart-bar':        ChartBar,
+  'calendar':         CalendarBlank,
+  'sparkle':          Sparkle,
+  'users':            Users,
+};
+
+function ActionChip({ chip }: { chip: ChatActionChip }) {
+  const Icon = chip.icon ? ACTION_ICONS[chip.icon] : null;
   return (
     <button
-      className={`inline-flex items-center gap-1.5 rounded-full border-[0.5px] px-3 py-[7px] text-[12px] font-medium transition-colors ${
-        schedule
-          ? 'border-ppc-purple-500/35 bg-ppc-purple-500/10 text-ppc-purple-700 hover:bg-ppc-purple-500/16'
-          : 'border-ppc-card-border bg-white text-ppc-ink hover:border-ppc-purple-300 hover:bg-ppc-purple-50/60'
-      }`}
+      type="button"
+      className="inline-flex items-center gap-1.5 rounded-full border-[0.5px] border-ppc-card-border bg-white px-3.5 py-[8px] text-[12.5px] font-medium text-ppc-ink transition-colors hover:border-ppc-purple-300 hover:bg-ppc-purple-50/60"
     >
-      <span aria-hidden className="text-[13px] leading-none">{chip.emoji}</span>
+      {Icon
+        ? <Icon size={13} weight="regular" />
+        : chip.emoji
+          ? <span aria-hidden className="text-[12.5px] leading-none">{chip.emoji}</span>
+          : null}
       {chip.label}
-      {schedule && (
-        <ArrowRight size={10} weight="bold" className="opacity-80" />
-      )}
     </button>
   );
 }
+
+/* ─── Running card — kept as a dark "moment" inside the assistant card ─── */
 
 function InlineRunningCard({ run }: { run: ChatRunningCard }) {
   return (
@@ -899,7 +857,7 @@ function InlineRunningCard({ run }: { run: ChatRunningCard }) {
           Stage {run.stageCurrent} of {run.stageTotal} · {run.stageDescription}
         </p>
         <Link
-          to="/agents/competitor-spy/loading/run-competitor-spy-running"
+          to="/agents/deep-account-audit/loading/run-deep-account-audit-running"
           className="inline-flex items-center gap-1 text-[11.5px] font-medium text-ppc-purple-300 transition-colors hover:text-white"
         >
           Watch live <ArrowRight size={11} weight="bold" />
@@ -909,73 +867,42 @@ function InlineRunningCard({ run }: { run: ChatRunningCard }) {
   );
 }
 
-/* ─── Active-chat reply dock — same dark input language as the pre-chat ── */
+/* ─── Reply dock — WHITE composer, + and purple send, footer disclaimer ── */
 
-function ReplyDock({ thread }: { thread: ChatThread }) {
-  const avatar = avatarForLabel(thread.projectLabel);
+function ReplyDock() {
   return (
-    <div className="sticky bottom-0 border-t-[0.5px] border-ppc-card-border bg-ppc-canvas/85 px-6 pb-6 pt-4 backdrop-blur-md lg:px-10">
-      <div className="mx-auto w-full max-w-[780px]">
-        <div
-          className="relative overflow-hidden rounded-[14px]"
-          style={{
-            background: 'linear-gradient(180deg, #15101F 0%, #0F0A1E 55%, #0A0617 100%)',
-            boxShadow:
-              '0 1px 0 rgba(255,255,255,0.06) inset, 0 14px 30px -16px rgba(15,10,30,0.55), 0 0 0 1px rgba(127,90,240,0.12)',
-          }}
-        >
-          <div className="flex items-center gap-3 px-4 pt-3.5 pb-3">
-            <input
-              type="text"
-              placeholder="Reply or ask something else…"
-              className="flex-1 bg-transparent text-[13.5px] text-white outline-none placeholder:text-white/45"
-            />
-            <kbd
-              className="inline-flex h-[20px] items-center rounded-[5px] border border-white/[0.10] bg-white/[0.05] px-[7px] font-mono text-[10.5px] leading-none text-white/65"
-              style={{ fontFamily: '"Courier New", ui-monospace, Menlo, monospace' }}
+    <div className="sticky bottom-0 bg-ppc-canvas/85 px-5 pb-5 pt-3 backdrop-blur-md sm:px-7">
+      <div className="mx-auto w-full max-w-[680px]">
+        <div className="rounded-[18px] border-[0.5px] border-ppc-card-border bg-white px-5 pt-4 pb-3 shadow-[0_4px_24px_-12px_rgba(15,10,30,0.10)]">
+          <input
+            type="text"
+            placeholder="Reply or ask something else…"
+            className="w-full bg-transparent text-[14px] text-ppc-ink outline-none placeholder:text-ppc-text-faint"
+          />
+          <div className="mt-3 flex items-center justify-between">
+            <button
+              type="button"
+              title="Attach"
+              className="grid h-9 w-9 place-items-center rounded-[10px] border-[0.5px] border-ppc-card-border bg-white text-ppc-text-muted transition-colors hover:border-ppc-purple-300 hover:text-ppc-purple-500"
             >
-              ⌘↵
-            </kbd>
-          </div>
-          <div
-            className="flex items-center justify-between gap-2 px-3 pb-2.5"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.045)' }}
-          >
-            <div className="flex flex-wrap items-center gap-1.5 pt-2">
-              <DarkChip
-                icon={
-                  <span
-                    aria-hidden
-                    className="grid h-[14px] w-[14px] place-items-center rounded-[4px] text-[8px] font-bold leading-none"
-                    style={{ background: avatar.bg, color: avatar.fg }}
-                  >
-                    {thread.projectLabel.charAt(0)}
-                  </span>
-                }
-                label={thread.projectLabel}
-              />
-              <DarkChip
-                icon={<Robot size={11} weight="duotone" className="text-white/65" />}
-                label="General"
-              />
-            </div>
+              <Plus size={14} weight="bold" />
+            </button>
             <button
               type="button"
               title="Send"
-              className="mt-2 grid h-[30px] w-[30px] place-items-center rounded-[8px] text-white transition-transform hover:-translate-y-[1px]"
+              className="grid h-9 w-9 place-items-center rounded-[10px] bg-ppc-purple-500 text-white transition-transform hover:-translate-y-[1px]"
               style={{
-                background: 'linear-gradient(180deg, #8B68F2 0%, #7F5AF0 60%, #6B47E0 100%)',
                 boxShadow:
-                  '0 1px 0 rgba(255,255,255,0.20) inset, 0 0 0 1px rgba(127,90,240,0.55), 0 6px 18px -4px rgba(127,90,240,0.55)',
+                  '0 1px 0 rgba(255,255,255,0.20) inset, 0 6px 18px -6px rgba(127,90,240,0.55)',
               }}
             >
-              <ArrowUp size={13} weight="bold" />
+              <ArrowUp size={15} weight="bold" />
             </button>
           </div>
         </div>
-        <p className="mt-2 text-center text-[10.5px] text-ppc-text-faint">
+        <p className="mt-3 text-center text-[11px] text-ppc-text-faint">
           <ChatCircle size={10} weight="duotone" className="-mt-px mr-1 inline" />
-          Answers are grounded in your Google Ads + GA4 data. Verify before changing budgets.
+          Answers are grounded in your Google Ads + GA4 data.
         </p>
       </div>
     </div>

@@ -23,8 +23,28 @@ export interface ChatChart {
 
 export interface ChatActionChip {
   emoji: string;
+  /** Optional Phosphor icon hint — falls back to emoji if absent. Used by the
+   *  active-chat action chip row, which renders thin-stroke icons over emoji
+   *  for a refined editorial feel that matches the reference. */
+  icon?: 'magnifying-glass' | 'chart-bar' | 'calendar' | 'users' | 'sparkle';
   label: string;
   variant?: 'default' | 'schedule';
+}
+
+export interface ChatFactor {
+  label: string;
+  /** Display value, e.g. "+12%", "+24%", or "—" for "not yet quantified". */
+  value: string;
+  /** Tone drives the value's color. Default = critical (red), muted for "—". */
+  tone?: 'critical' | 'muted';
+}
+
+export interface ChatFactorsCard {
+  title: string;
+  rows: ChatFactor[];
+  /** Right-aligned link inside the card ("View details →"). */
+  linkLabel: string;
+  linkHref?: string;
 }
 
 export interface ChatRunningCard {
@@ -41,11 +61,17 @@ export interface ChatRunningCard {
 export interface ChatMessage {
   id: string;
   role: ChatRole;
-  /** Plain-text body. For assistant messages, body is the lede before bullets/chart. */
+  /** Plain-text body. For assistant messages, body is the lede before chart/bullets/factors. */
   body?: string;
+  /** Wall-clock timestamp shown muted next to the message ("10:42 AM"). */
+  timestamp?: string;
+  /** Bullets render with a small purple dot. `lead` is optional emphasized prefix;
+   *  if empty, the bullet renders as a single flat sentence (the 2026-05-15 ref shape). */
   bullets?: { lead: string; rest: string }[];
   chart?: ChatChart;
-  /** Lower-body paragraph rendered AFTER chart, BEFORE chips. */
+  /** Sub-card with weighted contributing factors + "View details" link. */
+  factors?: ChatFactorsCard;
+  /** Lower-body paragraph rendered AFTER chart, BEFORE chips. Optional. */
   followUp?: string;
   chips?: ChatActionChip[];
   running?: ChatRunningCard;
@@ -89,28 +115,16 @@ const SMITH_LAW_THREAD: ChatThread = {
       id: 'm1',
       role: 'user',
       body: "Why did Smith Law's CPA spike yesterday?",
+      timestamp: '10:42 AM',
     },
     {
       id: 'm2',
       role: 'assistant',
-      body: "Smith Law's CPA jumped from **$143 to $217** yesterday. I pulled the last 14 days. Three things shifted at once:",
-      bullets: [
-        {
-          lead: 'Auction pressure.',
-          rest: 'Smith & Associates bumped bids on your top 5 terms. Their impression share is up 12% week-over-week.',
-        },
-        {
-          lead: 'Time-of-day drift.',
-          rest: "38% of yesterday's spend ran between 11pm–5am, vs your typical 14%.",
-        },
-        {
-          lead: 'Conversion gap.',
-          rest: "A lead-form variant launched Sunday hasn't fired any conversions. Could be tracking, could be the form itself.",
-        },
-      ],
+      body: "Smith Law's CPA jumped from **$143 to $217** yesterday. Here are the three biggest drivers.",
+      timestamp: '10:42 AM',
       chart: {
         kind: 'bars',
-        label: 'CPA · last 14 days',
+        label: 'CPA · Last 14 days',
         delta: '+52% on May 13',
         axisLeft: 'APR 30',
         axisRight: 'MAY 13',
@@ -121,24 +135,38 @@ const SMITH_LAW_THREAD: ChatThread = {
           { value: 45 }, { value: 95, spike: true },
         ],
       },
-      followUp:
-        "My money's on the lead-form. The tracking pixel probably isn't firing on the new variant, which means real conversions are happening but Google Ads can't see them. Want me to verify?",
+      bullets: [
+        { lead: 'Auction pressure', rest: 'increased 12% WoW across top terms.' },
+        { lead: 'Time-of-day shift:', rest: '38% of spend ran 11pm–5am vs 14% typical.' },
+        { lead: '', rest: "A lead form variant launched Sunday hasn't fired any conversions." },
+      ],
+      factors: {
+        title: 'Top contributing factors',
+        rows: [
+          { label: 'Auction pressure',     value: '+12%' },
+          { label: 'Time-of-day shift',    value: '+24%' },
+          { label: 'Conversion gap (form)', value: '—', tone: 'muted' },
+        ],
+        linkLabel: 'View details',
+        linkHref: '/reports/run-deep-audit-001',
+      },
       chips: [
-        { emoji: '🔍', label: 'Check form tracking' },
-        { emoji: '📊', label: 'Full account audit' },
-        { emoji: '🕵️', label: 'Look into Smith & Associates' },
-        { emoji: '🗓️', label: 'Schedule a daily check', variant: 'schedule' },
+        { emoji: '🔍', icon: 'magnifying-glass', label: 'Check form tracking' },
+        { emoji: '📊', icon: 'chart-bar',        label: 'Full account audit' },
+        { emoji: '🗓️', icon: 'calendar',         label: 'Schedule a daily check' },
       ],
     },
     {
       id: 'm3',
       role: 'user',
       body: 'Yeah, check the form tracking',
+      timestamp: '10:44 AM',
     },
     {
       id: 'm4',
       role: 'assistant',
       body: 'On it. Sending Account Audit in to verify the tracking pixel on the new variant.',
+      timestamp: '10:44 AM',
       running: {
         agentEmoji: '📊',
         agentName: 'Account Audit',
