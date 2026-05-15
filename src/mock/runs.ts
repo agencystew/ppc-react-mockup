@@ -45,6 +45,27 @@ const COMPETITOR_SPY_RUNNING: AgentRun = {
       description: 'Competitor set confirmed',
     },
     {
+      time: '1m 48s',
+      title: 'Captured 387 landing page snapshots',
+      description: 'Funnel surfaces archived for diff against your account',
+    },
+    // ── below the fold (revealed via "+ N more tasks complete") ──────────
+    {
+      time: '1m 12s',
+      title: 'Cross-referenced ad library',
+      description: 'Confirmed rivals are running ads we surfaced live',
+    },
+    {
+      time: '0m 54s',
+      title: 'Estimated 30-day spend per rival',
+      description: 'SimilarWeb + auction insights triangulated',
+    },
+    {
+      time: '0m 28s',
+      title: 'Loaded historic CPCs',
+      description: 'Last 90 days of CPC data ingested',
+    },
+    {
       time: '0m 00s',
       title: 'Mission started',
       description: 'Initializing Competitor Spy',

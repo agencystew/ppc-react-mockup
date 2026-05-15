@@ -3,12 +3,12 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   CaretRight, CaretDown, ArrowRight, Sparkle,
   MapTrifold, Path, Flag, Check, ShieldCheck, EnvelopeSimple,
-  PaperPlaneTilt, Coffee,
+  PaperPlaneTilt, Coffee, Tag, CurrencyDollar,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
 import { PROJECTS, ACCOUNTS, CURRENT_PROJECT_ID } from '../mock/projects';
 import { SpyMascot } from '../components/SpyMascot';
-import type { LaunchLevel, AgentDefinition } from '../types/agent';
+import type { AgentDefinition } from '../types/agent';
 
 // Agent Detail · /agents/:slug
 //
@@ -16,49 +16,155 @@ import type { LaunchLevel, AgentDefinition } from '../types/agent';
 // dark hero card with a signature mascot (the SAME spy that runs the
 // report — continuity is the point), and clean white cards underneath.
 //
-// 2-column layout: editorial LEFT, sticky LAUNCH PANEL RIGHT — the right
-// rail is the muscle memory once you've used the app a few times.
+// 2-column page layout: editorial LEFT, sticky LAUNCH PANEL RIGHT — the
+// right rail is the muscle memory once you've used the app a few times.
 //
-// Hard rules: TIME + APPROVAL cues only. NEVER pre-run $ figures.
+// Launch panel (post 2026-05-15 Jose feedback):
+//   - Launch level removed — implicit by Project + Campaigns
+//   - Accounts → Campaigns (with type tags + monthly spend)
+//   - Ad group toggle expands the form with ad groups under selected campaigns
+//   - Custom cron removed (same as Schedule only)
+//
+// Hard rules: TIME + APPROVAL cues only. NEVER pre-run $ figures in left rail.
 
-const LAUNCH_LEVELS: Array<{ value: LaunchLevel; label: string; sub: string }> = [
-  { value: 'account',  label: 'Account-wide', sub: 'Selected accounts' },
-  { value: 'project',  label: 'Project',      sub: 'This client only' },
-  { value: 'campaign', label: 'Campaign',     sub: 'Specific campaigns' },
-  { value: 'adgroup',  label: 'Ad group',     sub: 'Narrowest scope' },
-];
+// ─── Campaigns + ad groups mock (per project) ────────────────────────────
 
-type RunMode = 'once' | 'recurring' | 'schedule-only' | 'custom';
+interface MockCampaign {
+  id: string;
+  name: string;
+  type: 'SEARCH' | 'PMAX' | 'SHOPPING' | 'DISPLAY';
+  labels?: string[];
+  monthlySpend: number;
+}
+
+interface MockAdGroup {
+  id: string;
+  campaignId: string;
+  name: string;
+  monthlySpend: number;
+}
+
+const CAMPAIGNS_BY_PROJECT: Record<string, MockCampaign[]> = {
+  'boulder-care': [
+    { id: 'c-bc-1', name: 'Brand · Recovery Centers',  type: 'SEARCH', labels: ['Brand', 'Top-perf'], monthlySpend: 4280 },
+    { id: 'c-bc-2', name: 'Non-Brand · Drug Rehab',    type: 'SEARCH', labels: ['Non-brand'],         monthlySpend: 8740 },
+    { id: 'c-bc-3', name: 'PMax · Treatment Locator',  type: 'PMAX',   labels: ['Test'],              monthlySpend: 2110 },
+    { id: 'c-bc-4', name: 'Search · Detox Programs',   type: 'SEARCH', labels: ['Non-brand'],         monthlySpend: 5630 },
+    { id: 'c-bc-5', name: 'Display · Family Support',  type: 'DISPLAY',                               monthlySpend: 980 },
+  ],
+  'the-hoth': [
+    { id: 'c-hoth-1', name: 'Brand · HOTH SEO',          type: 'SEARCH', labels: ['Brand'],     monthlySpend: 3120 },
+    { id: 'c-hoth-2', name: 'Non-Brand · Link Building', type: 'SEARCH', labels: ['Non-brand'], monthlySpend: 7860 },
+    { id: 'c-hoth-3', name: 'PMax · SEO Services',       type: 'PMAX',                          monthlySpend: 4210 },
+  ],
+  'durable': [
+    { id: 'c-dur-1', name: 'Brand · Durable.co',          type: 'SEARCH', labels: ['Brand', 'Top-perf'], monthlySpend: 6120 },
+    { id: 'c-dur-2', name: 'Non-Brand · AI Site Builder', type: 'SEARCH', labels: ['Non-brand'],         monthlySpend: 12480 },
+    { id: 'c-dur-3', name: 'PMax · SMB Acquisition',      type: 'PMAX',                                  monthlySpend: 8210 },
+    { id: 'c-dur-4', name: 'Display · Retargeting',       type: 'DISPLAY',                               monthlySpend: 1640 },
+  ],
+  'linkbuilder': [
+    { id: 'c-lb-1', name: 'Brand · LinkBuilder.io',  type: 'SEARCH', labels: ['Brand'],     monthlySpend: 2210 },
+    { id: 'c-lb-2', name: 'Non-Brand · Backlinks',   type: 'SEARCH', labels: ['Non-brand'], monthlySpend: 4580 },
+  ],
+  'livingyoung': [
+    { id: 'c-ly-1', name: 'Brand · LivingYoung Center',  type: 'SEARCH', labels: ['Brand'],     monthlySpend: 1830 },
+    { id: 'c-ly-2', name: 'Non-Brand · Med Spa Local',   type: 'SEARCH', labels: ['Non-brand'], monthlySpend: 3260 },
+    { id: 'c-ly-3', name: 'PMax · Aesthetic Treatments', type: 'PMAX',                          monthlySpend: 2480 },
+  ],
+  'authority-builders': [
+    { id: 'c-ab-1', name: 'Brand · Authority Builders', type: 'SEARCH', labels: ['Brand'],     monthlySpend: 2680 },
+    { id: 'c-ab-2', name: 'Non-Brand · Link Service',   type: 'SEARCH', labels: ['Non-brand'], monthlySpend: 5120 },
+  ],
+  'edwin-novel': [
+    { id: 'c-en-1', name: 'Brand · Edwin Novel',          type: 'SEARCH',   labels: ['Brand'], monthlySpend: 1980 },
+    { id: 'c-en-2', name: 'Shopping · Engagement Rings',  type: 'SHOPPING',                    monthlySpend: 6240 },
+    { id: 'c-en-3', name: 'PMax · D2C Jewelry',           type: 'PMAX',     labels: ['Test'],  monthlySpend: 4810 },
+  ],
+  'flock': [
+    { id: 'c-fl-1', name: 'Brand · Flock Edinburgh',      type: 'SEARCH', labels: ['Brand'],     monthlySpend: 3420 },
+    { id: 'c-fl-2', name: 'Brand · Flock London',         type: 'SEARCH', labels: ['Brand'],     monthlySpend: 4180 },
+    { id: 'c-fl-3', name: 'Non-Brand · Travel Booking',   type: 'SEARCH', labels: ['Non-brand'], monthlySpend: 7920 },
+    { id: 'c-fl-4', name: 'PMax · Group Travel',          type: 'PMAX',                          monthlySpend: 5680 },
+  ],
+};
+
+const AD_GROUPS_BY_CAMPAIGN: Record<string, MockAdGroup[]> = {
+  'c-bc-1':  [
+    { id: 'ag-bc-1a', campaignId: 'c-bc-1', name: 'Brand / Direct',        monthlySpend: 1840 },
+    { id: 'ag-bc-1b', campaignId: 'c-bc-1', name: 'Brand / Detox Centers', monthlySpend: 1320 },
+    { id: 'ag-bc-1c', campaignId: 'c-bc-1', name: 'Brand / Sober Living',  monthlySpend: 1120 },
+  ],
+  'c-bc-2':  [
+    { id: 'ag-bc-2a', campaignId: 'c-bc-2', name: 'Drug Rehab / Inpatient',    monthlySpend: 3210 },
+    { id: 'ag-bc-2b', campaignId: 'c-bc-2', name: 'Drug Rehab / Outpatient',   monthlySpend: 2780 },
+    { id: 'ag-bc-2c', campaignId: 'c-bc-2', name: 'Drug Rehab / Insurance',    monthlySpend: 2750 },
+  ],
+  'c-bc-3':  [
+    { id: 'ag-bc-3a', campaignId: 'c-bc-3', name: 'Asset Group · Locator',    monthlySpend: 2110 },
+  ],
+  'c-bc-4':  [
+    { id: 'ag-bc-4a', campaignId: 'c-bc-4', name: 'Detox / Alcohol',  monthlySpend: 2820 },
+    { id: 'ag-bc-4b', campaignId: 'c-bc-4', name: 'Detox / Opioid',   monthlySpend: 2810 },
+  ],
+  'c-dur-2': [
+    { id: 'ag-dur-2a', campaignId: 'c-dur-2', name: 'AI Site Builder / Small Biz', monthlySpend: 5240 },
+    { id: 'ag-dur-2b', campaignId: 'c-dur-2', name: 'AI Site Builder / Creators',  monthlySpend: 4120 },
+    { id: 'ag-dur-2c', campaignId: 'c-dur-2', name: 'AI Site Builder / Agencies',  monthlySpend: 3120 },
+  ],
+};
+
+const LAUNCH_LEVELS_REMOVED = true; // documentation flag — see header note
+
+type RunMode = 'once' | 'recurring' | 'schedule-only';
 const RUN_MODES: Array<{ value: RunMode; label: string; sub: string }> = [
   { value: 'once',          label: 'Run once now',       sub: 'Single launch, this run only' },
   { value: 'recurring',     label: 'Run now + schedule', sub: 'Run today, then on a cadence' },
   { value: 'schedule-only', label: 'Schedule only',      sub: 'Queue for a future run' },
-  { value: 'custom',        label: 'Custom cron',        sub: 'Power-user cadence' },
 ];
 
 export function AgentDetail() {
+  void LAUNCH_LEVELS_REMOVED;
   const { slug } = useParams();
   const navigate = useNavigate();
   const agent = AGENTS.find((a) => a.slug === slug);
 
   const [selectedProject, setSelectedProject] = useState(CURRENT_PROJECT_ID);
-  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
-  const [launchLevel, setLaunchLevel] = useState<LaunchLevel>('account');
+  const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
+  const [adGroupMode, setAdGroupMode] = useState(false);
+  const [selectedAdGroups, setSelectedAdGroups] = useState<string[]>([]);
   const [runMode, setRunMode] = useState<RunMode>('once');
   const [steer, setSteer] = useState('');
   const [dateRange, setDateRange] = useState('last_30d');
 
-  const projectAccounts = useMemo(
-    () => ACCOUNTS.filter((a) => a.projectId === selectedProject),
+  const projectCampaigns = useMemo(
+    () => CAMPAIGNS_BY_PROJECT[selectedProject] ?? [],
     [selectedProject],
   );
+
+  const adGroupsForSelected = useMemo(() => {
+    const targetCampaigns = selectedCampaigns.length ? selectedCampaigns : projectCampaigns.map((c) => c.id);
+    return targetCampaigns.flatMap((cid) => AD_GROUPS_BY_CAMPAIGN[cid] ?? []);
+  }, [selectedCampaigns, projectCampaigns]);
 
   if (!agent) {
     return <NotFound />;
   }
 
-  const toggleAccount = (id: string) => {
-    setSelectedAccounts((prev) =>
+  const toggleCampaign = (id: string) => {
+    setSelectedCampaigns((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+    setSelectedAdGroups((prev) =>
+      prev.filter((agId) => {
+        const ag = Object.values(AD_GROUPS_BY_CAMPAIGN).flat().find((a) => a.id === agId);
+        return ag && ag.campaignId !== id;
+      }),
+    );
+  };
+
+  const toggleAdGroup = (id: string) => {
+    setSelectedAdGroups((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
@@ -72,6 +178,8 @@ export function AgentDetail() {
       navigate(`/agents/${agent.slug}/run/run-${agent.slug}`);
     }
   };
+
+  void ACCOUNTS; // legacy mock kept for other surfaces; not used here
 
   return (
     <div className="font-sans text-ppc-ink">
@@ -90,12 +198,22 @@ export function AgentDetail() {
         <aside className="lg:sticky lg:top-8 lg:h-fit">
           <LaunchPanel
             selectedProject={selectedProject}
-            setSelectedProject={(id) => { setSelectedProject(id); setSelectedAccounts([]); }}
-            projectAccounts={projectAccounts}
-            selectedAccounts={selectedAccounts}
-            toggleAccount={toggleAccount}
-            launchLevel={launchLevel}
-            setLaunchLevel={setLaunchLevel}
+            setSelectedProject={(id) => {
+              setSelectedProject(id);
+              setSelectedCampaigns([]);
+              setSelectedAdGroups([]);
+            }}
+            projectCampaigns={projectCampaigns}
+            selectedCampaigns={selectedCampaigns}
+            toggleCampaign={toggleCampaign}
+            adGroupMode={adGroupMode}
+            setAdGroupMode={(v) => {
+              setAdGroupMode(v);
+              if (!v) setSelectedAdGroups([]);
+            }}
+            adGroupsForSelected={adGroupsForSelected}
+            selectedAdGroups={selectedAdGroups}
+            toggleAdGroup={toggleAdGroup}
             runMode={runMode}
             setRunMode={setRunMode}
             steer={steer}
@@ -291,15 +409,32 @@ function HowItThinks({ steps }: { steps: [string, string, string] }) {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="relative grid gap-4 sm:grid-cols-3">
         {steps.map((label, i) => (
-          <ThinkingCard
-            key={i}
-            index={i + 1}
-            kicker={THINKING_KICKERS[i]}
-            label={label}
-            Icon={THINKING_ICONS[i]}
-          />
+          <div key={i} className="relative">
+            <ThinkingCard
+              index={i + 1}
+              kicker={THINKING_KICKERS[i]}
+              label={label}
+              Icon={THINKING_ICONS[i]}
+            />
+            {i < steps.length - 1 && (
+              <span
+                aria-hidden
+                className="pointer-events-none absolute right-[-22px] top-1/2 hidden -translate-y-1/2 items-center sm:flex"
+                style={{ color: '#B6A8DC' }}
+              >
+                <span
+                  className="mr-[3px] h-px w-[10px]"
+                  style={{
+                    background:
+                      'repeating-linear-gradient(to right, currentColor 0, currentColor 2px, transparent 2px, transparent 4px)',
+                  }}
+                />
+                <ArrowRight size={11} weight="bold" />
+              </span>
+            )}
+          </div>
         ))}
       </div>
     </section>
@@ -319,7 +454,7 @@ function ThinkingCard({
 }) {
   return (
     <div
-      className="group relative flex flex-col gap-5 overflow-hidden rounded-[16px] bg-white px-6 pb-6 pt-7 transition-transform hover:-translate-y-[2px]"
+      className="group relative flex h-full flex-col gap-5 overflow-hidden rounded-[16px] bg-white px-6 pb-6 pt-7 transition-transform hover:-translate-y-[2px]"
       style={{
         boxShadow:
           '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.12)',
@@ -360,6 +495,8 @@ function ThinkingCard({
 }
 
 // ─── What you walk away with ─────────────────────────────────────────────
+// Pixel-matched to Stewart's reference (2026-05-15):
+//   2-column layout — DARK editorial card LEFT + LIGHT 2x2 grid RIGHT.
 
 interface Deliverable {
   title: string;
@@ -370,79 +507,119 @@ function WhatYouGet() {
   const items: Deliverable[] = [
     {
       title: 'Coffee-break delivery',
-      sub: "Runs in the background. We email when the report's ready.",
+      sub: "Runs in the background. We email you when the report's ready.",
     },
     {
       title: 'Prioritized findings with impact',
-      sub: 'Every finding is ranked, reasoned, and sized.',
+      sub: 'Every finding is ranked, reasoned, and sized by opportunity.',
     },
     {
       title: 'Client-ready report',
-      sub: 'Hand it over as-is. No re-editing required.',
+      sub: 'Polished, structured, and branded. Zero re-editing required.',
     },
     {
       title: 'Full audit trail',
-      sub: 'Every tool call, every source, every judgment.',
+      sub: 'Every source, screenshot, and tool call logged for full transparency.',
     },
   ];
 
   return (
-    <section
-      className="relative overflow-hidden rounded-[16px] px-7 py-7"
-      style={{
-        background: '#F2EEFB',
-        boxShadow: 'inset 0 0 0 1px #e1d8f0',
-      }}
-    >
-      <div className="mb-5 flex items-center gap-3">
+    <section className="grid gap-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      {/* LEFT — dark editorial */}
+      <div
+        className="relative overflow-hidden rounded-[16px] px-7 py-7 text-white"
+        style={{
+          background:
+            'radial-gradient(120% 90% at 88% -10%, #1B0F39 0%, #0A0814 55%, #050310 100%)',
+          boxShadow:
+            '0 1px 0 rgba(255,255,255,0.04) inset, 0 18px 32px -24px rgba(15,10,30,0.4)',
+        }}
+      >
         <span
-          className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[12px]"
+          aria-hidden
+          className="pointer-events-none absolute -right-20 -top-20 h-[260px] w-[260px] rounded-full"
           style={{
-            background: 'linear-gradient(155deg, #C9B5FF 0%, #8B6CF5 60%, #5A3FE0 100%)',
-            boxShadow:
-              '0 1px 0 rgba(255,255,255,0.35) inset, 0 6px 14px -6px rgba(127,90,240,0.45)',
+            background:
+              'radial-gradient(circle, rgba(127,90,240,0.22) 0%, rgba(127,90,240,0.06) 40%, transparent 70%)',
           }}
-        >
-          <PaperPlaneTilt size={20} weight="fill" className="text-white" />
-        </span>
-        <div>
-          <h3 className="text-[18px] font-semibold tracking-[-0.01em] text-ppc-ink">
-            What you walk away with
-          </h3>
-          <p className="mt-[2px] text-[13px] text-ppc-text-muted">
-            What lands in your inbox. Every time.
-          </p>
+        />
+
+        <div className="relative flex items-center gap-3">
+          <span
+            className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[12px]"
+            style={{
+              background: 'linear-gradient(155deg, #C9B5FF 0%, #8B6CF5 60%, #5A3FE0 100%)',
+              boxShadow:
+                '0 1px 0 rgba(255,255,255,0.35) inset, 0 6px 14px -6px rgba(127,90,240,0.45)',
+            }}
+          >
+            <PaperPlaneTilt size={20} weight="fill" className="text-white" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-[18px] font-semibold leading-tight tracking-[-0.01em] text-white">
+              What you walk away with<span style={{ color: '#9F86FF' }}>.</span>
+            </h3>
+            <p className="mt-[3px] text-[13px] leading-snug text-white/55">
+              What lands in your inbox. Every time.
+            </p>
+          </div>
+        </div>
+
+        <div
+          aria-hidden
+          className="relative mt-6 h-px w-full"
+          style={{ background: 'rgba(255,255,255,0.08)' }}
+        />
+
+        <p className="relative mt-5 text-[14px] leading-[1.6] text-white/75">
+          We handle the heavy lifting end-to-end&mdash;so you get sharp, client-ready insights without lifting a finger.
+        </p>
+
+        <div className="relative mt-7 flex items-center gap-2">
+          <Sparkle size={14} weight="fill" style={{ color: '#9F86FF' }} />
+          <span
+            className="text-[13px] font-semibold tracking-[-0.005em]"
+            style={{ color: '#B6A0FF' }}
+          >
+            Runs while you focus on what matters.
+          </span>
         </div>
       </div>
 
-      <ul className="grid gap-3 sm:grid-cols-2">
-        {items.map((it, i) => (
-          <li
-            key={i}
-            className="flex items-start gap-3 rounded-[12px] bg-white px-5 py-4"
-            style={{ boxShadow: 'inset 0 0 0 1px #ece6f3' }}
-          >
-            <span
-              className="mt-[2px] grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full"
-              style={{
-                background: 'linear-gradient(155deg, #6FE0AC 0%, #3FB985 100%)',
-                boxShadow:
-                  '0 1px 0 rgba(255,255,255,0.45) inset, 0 3px 8px -4px rgba(63,185,133,0.45)',
-              }}
-            >
-              <Check size={12} weight="bold" className="text-white" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink">
-                {it.title}
-              </p>
-              <p className="mt-1 text-[12.5px] leading-[1.55] text-ppc-text-muted">
-                {it.sub}
-              </p>
-            </div>
-          </li>
-        ))}
-      </ul>
+      {/* RIGHT — 2x2 check grid */}
+      <div
+        className="rounded-[16px] px-6 py-6"
+        style={{
+          background: '#FFFFFF',
+          boxShadow:
+            '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.12)',
+        }}
+      >
+        <ul className="grid h-full gap-x-6 gap-y-5 sm:grid-cols-2">
+          {items.map((it, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <span
+                className="mt-[2px] grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full"
+                style={{
+                  background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 60%, #5A3FE0 100%)',
+                  boxShadow:
+                    '0 1px 0 rgba(255,255,255,0.45) inset, 0 3px 8px -4px rgba(127,90,240,0.45)',
+                }}
+              >
+                <Check size={12} weight="bold" className="text-white" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink">
+                  {it.title}
+                </p>
+                <p className="mt-1 text-[12.5px] leading-[1.55] text-ppc-text-muted">
+                  {it.sub}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }
@@ -452,11 +629,14 @@ function WhatYouGet() {
 interface LaunchPanelProps {
   selectedProject: string;
   setSelectedProject: (id: string) => void;
-  projectAccounts: typeof ACCOUNTS;
-  selectedAccounts: string[];
-  toggleAccount: (id: string) => void;
-  launchLevel: LaunchLevel;
-  setLaunchLevel: (l: LaunchLevel) => void;
+  projectCampaigns: MockCampaign[];
+  selectedCampaigns: string[];
+  toggleCampaign: (id: string) => void;
+  adGroupMode: boolean;
+  setAdGroupMode: (v: boolean) => void;
+  adGroupsForSelected: MockAdGroup[];
+  selectedAdGroups: string[];
+  toggleAdGroup: (id: string) => void;
   runMode: RunMode;
   setRunMode: (m: RunMode) => void;
   steer: string;
@@ -468,16 +648,23 @@ interface LaunchPanelProps {
 
 function LaunchPanel(props: LaunchPanelProps) {
   const {
-    selectedProject, setSelectedProject, projectAccounts,
-    selectedAccounts, toggleAccount, launchLevel, setLaunchLevel,
+    selectedProject, setSelectedProject, projectCampaigns,
+    selectedCampaigns, toggleCampaign,
+    adGroupMode, setAdGroupMode,
+    adGroupsForSelected, selectedAdGroups, toggleAdGroup,
     runMode, setRunMode, steer, setSteer, dateRange, setDateRange,
     onLaunch,
   } = props;
 
-  const accountSummary =
-    selectedAccounts.length === 0
-      ? `All ${projectAccounts.length}`
-      : `${selectedAccounts.length} of ${projectAccounts.length}`;
+  const campaignSummary =
+    selectedCampaigns.length === 0
+      ? `All ${projectCampaigns.length}`
+      : `${selectedCampaigns.length} of ${projectCampaigns.length}`;
+
+  const adGroupSummary =
+    selectedAdGroups.length === 0
+      ? `All ${adGroupsForSelected.length}`
+      : `${selectedAdGroups.length} of ${adGroupsForSelected.length}`;
 
   return (
     <div
@@ -487,7 +674,6 @@ function LaunchPanel(props: LaunchPanelProps) {
           '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 24px 48px -28px rgba(15,10,30,0.16)',
       }}
     >
-      {/* Sticky header with title + duration chip */}
       <div className="border-b border-[#efeaf4] px-7 pb-5 pt-7">
         <h3 className="font-display text-[22px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ppc-ink">
           Configure &amp; launch<span style={{ color: '#7F5AF0' }}>.</span>
@@ -506,24 +692,24 @@ function LaunchPanel(props: LaunchPanelProps) {
           />
         </FieldBlock>
 
-        <FieldBlock label="Accounts" hint={`${accountSummary} selected`}>
+        <FieldBlock label="Campaigns" hint={`${campaignSummary} selected`}>
           <div
-            className="max-h-[180px] overflow-y-auto rounded-[12px] bg-white p-1"
+            className="max-h-[240px] overflow-y-auto rounded-[12px] bg-white p-1"
             style={{ boxShadow: 'inset 0 0 0 1px #e7e2ef' }}
           >
-            {projectAccounts.map((acc) => {
-              const checked = selectedAccounts.includes(acc.id);
+            {projectCampaigns.map((c) => {
+              const checked = selectedCampaigns.includes(c.id);
               return (
                 <button
-                  key={acc.id}
+                  key={c.id}
                   type="button"
-                  onClick={() => toggleAccount(acc.id)}
-                  className={`flex w-full items-center gap-3 rounded-[8px] px-3 py-[10px] text-left transition-colors ${
+                  onClick={() => toggleCampaign(c.id)}
+                  className={`flex w-full items-start gap-3 rounded-[8px] px-3 py-[10px] text-left transition-colors ${
                     checked ? 'bg-[#F0EBFA]' : 'hover:bg-[#FBF9FD]'
                   }`}
                 >
                   <span
-                    className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px]"
+                    className="mt-[3px] grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px]"
                     style={{
                       background: checked ? '#7F5AF0' : 'transparent',
                       boxShadow: checked
@@ -533,12 +719,19 @@ function LaunchPanel(props: LaunchPanelProps) {
                   >
                     {checked && <Check size={11} weight="bold" className="text-white" />}
                   </span>
-                  <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                  <span className="flex min-w-0 flex-1 flex-col gap-[5px] leading-tight">
                     <span className="truncate text-[13.5px] font-semibold text-ppc-ink">
-                      {acc.name}
+                      {c.name}
                     </span>
-                    <span className="mt-[2px] font-mono text-[11px] text-ppc-text-faint">
-                      {acc.customerId}
+                    <span className="flex flex-wrap items-center gap-[6px]">
+                      <CampaignTypeChip type={c.type} />
+                      {c.labels?.map((label) => (
+                        <LabelChip key={label}>{label}</LabelChip>
+                      ))}
+                      <span className="inline-flex items-center gap-[3px] font-mono text-[10.5px] text-ppc-text-muted">
+                        <CurrencyDollar size={9} weight="bold" />
+                        {formatSpend(c.monthlySpend)}/mo
+                      </span>
                     </span>
                   </span>
                 </button>
@@ -547,34 +740,94 @@ function LaunchPanel(props: LaunchPanelProps) {
           </div>
         </FieldBlock>
 
-        <FieldBlock label="Launch level">
-          <div className="grid grid-cols-2 gap-2">
-            {LAUNCH_LEVELS.map((l) => {
-              const active = l.value === launchLevel;
-              return (
-                <button
-                  key={l.value}
-                  type="button"
-                  onClick={() => setLaunchLevel(l.value)}
-                  className={`rounded-[10px] px-3.5 py-[10px] text-left transition-colors ${
-                    active ? 'bg-[#F0EBFA]' : 'bg-white hover:bg-[#FBF9FD]'
-                  }`}
-                  style={{
-                    boxShadow: active
-                      ? 'inset 0 0 0 1.5px #7F5AF0'
-                      : 'inset 0 0 0 1px #e7e2ef',
-                  }}
+        {/* Ad group toggle — Jose 2026-05-15 */}
+        <FieldBlock label="Target ad groups" hint={adGroupMode ? 'On' : 'Off'}>
+          <button
+            type="button"
+            onClick={() => setAdGroupMode(!adGroupMode)}
+            className={`flex w-full items-center justify-between gap-3 rounded-[10px] px-3.5 py-[11px] text-left transition-colors ${
+              adGroupMode ? 'bg-[#F0EBFA]' : 'bg-white hover:bg-[#FBF9FD]'
+            }`}
+            style={{
+              boxShadow: adGroupMode
+                ? 'inset 0 0 0 1.5px #7F5AF0'
+                : 'inset 0 0 0 1px #e7e2ef',
+            }}
+          >
+            <span className="flex min-w-0 flex-col leading-tight">
+              <span className="text-[13px] font-semibold text-ppc-ink">
+                {adGroupMode ? 'Narrowing to specific ad groups' : 'Use entire campaigns'}
+              </span>
+              <span className="mt-[2px] text-[11.5px] text-ppc-text-muted">
+                {adGroupMode
+                  ? 'Pick ad groups inside the selected campaigns'
+                  : 'Toggle on to pick specific ad groups'}
+              </span>
+            </span>
+            <ToggleSwitch on={adGroupMode} />
+          </button>
+
+          {adGroupMode && (
+            <div className="mt-3">
+              <div className="mb-2 flex items-baseline justify-between gap-3">
+                <p className="text-[11.5px] font-semibold tracking-[-0.005em] text-ppc-ink">
+                  Ad groups
+                </p>
+                <p className="text-[11.5px] text-ppc-text-muted">
+                  {adGroupSummary} selected
+                </p>
+              </div>
+
+              {adGroupsForSelected.length === 0 ? (
+                <div
+                  className="rounded-[10px] px-3.5 py-3 text-[12px] text-ppc-text-muted"
+                  style={{ boxShadow: 'inset 0 0 0 1px #e7e2ef', background: '#FBF9FD' }}
                 >
-                  <span className="block text-[13px] font-semibold text-ppc-ink">
-                    {l.label}
-                  </span>
-                  <span className="mt-[3px] block text-[11.5px] leading-[1.35] text-ppc-text-muted">
-                    {l.sub}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                  Select campaigns above to see their ad groups.
+                </div>
+              ) : (
+                <div
+                  className="max-h-[180px] overflow-y-auto rounded-[12px] bg-white p-1"
+                  style={{ boxShadow: 'inset 0 0 0 1px #e7e2ef' }}
+                >
+                  {adGroupsForSelected.map((ag) => {
+                    const checked = selectedAdGroups.includes(ag.id);
+                    return (
+                      <button
+                        key={ag.id}
+                        type="button"
+                        onClick={() => toggleAdGroup(ag.id)}
+                        className={`flex w-full items-center gap-3 rounded-[8px] px-3 py-[9px] text-left transition-colors ${
+                          checked ? 'bg-[#F0EBFA]' : 'hover:bg-[#FBF9FD]'
+                        }`}
+                      >
+                        <span
+                          className="grid h-[16px] w-[16px] shrink-0 place-items-center rounded-[4px]"
+                          style={{
+                            background: checked ? '#7F5AF0' : 'transparent',
+                            boxShadow: checked
+                              ? 'none'
+                              : 'inset 0 0 0 1.5px #c9c1da',
+                          }}
+                        >
+                          {checked && <Check size={10} weight="bold" className="text-white" />}
+                        </span>
+                        <span className="flex min-w-0 flex-1 items-center justify-between gap-3 leading-tight">
+                          <span className="truncate text-[12.5px] font-medium text-ppc-ink">
+                            {ag.name}
+                          </span>
+                          <span className="inline-flex items-center gap-[3px] font-mono text-[10.5px] text-ppc-text-muted">
+                            <CurrencyDollar size={9} weight="bold" />
+                            {formatSpend(ag.monthlySpend)}/mo
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </FieldBlock>
 
         <FieldBlock label="Date range">
@@ -650,7 +903,6 @@ function LaunchPanel(props: LaunchPanelProps) {
         </FieldBlock>
       </div>
 
-      {/* Footer — pinned launch button */}
       <div
         className="border-t border-[#efeaf4] px-7 py-5"
         style={{ background: '#FBF9FD' }}
@@ -680,6 +932,68 @@ function LaunchPanel(props: LaunchPanelProps) {
       </div>
     </div>
   );
+}
+
+function ToggleSwitch({ on }: { on: boolean }) {
+  return (
+    <span
+      className="relative inline-block h-[20px] w-[36px] shrink-0 rounded-full transition-colors"
+      style={{
+        background: on ? '#7F5AF0' : '#dcd5e9',
+        boxShadow: on
+          ? '0 1px 0 rgba(255,255,255,0.25) inset, 0 4px 10px -4px rgba(127,90,240,0.45)'
+          : 'inset 0 0 0 1px #c9c1da',
+      }}
+    >
+      <span
+        className="absolute top-[2px] h-[16px] w-[16px] rounded-full bg-white transition-transform"
+        style={{
+          transform: on ? 'translateX(18px)' : 'translateX(2px)',
+          boxShadow: '0 1px 2px rgba(15,10,30,0.18)',
+        }}
+      />
+    </span>
+  );
+}
+
+const CAMPAIGN_TYPE_STYLES: Record<MockCampaign['type'], { bg: string; fg: string }> = {
+  SEARCH:   { bg: '#E6E0FA', fg: '#534AB7' },
+  PMAX:     { bg: '#FDE9D7', fg: '#9C5A1A' },
+  SHOPPING: { bg: '#DAF3E5', fg: '#1F7A4F' },
+  DISPLAY:  { bg: '#FCE0E4', fg: '#A12A3A' },
+};
+
+function CampaignTypeChip({ type }: { type: MockCampaign['type'] }) {
+  const s = CAMPAIGN_TYPE_STYLES[type];
+  return (
+    <span
+      className="inline-flex items-center rounded-[4px] px-[5px] py-[1px] font-mono text-[9.5px] font-bold uppercase tracking-[0.06em]"
+      style={{ background: s.bg, color: s.fg }}
+    >
+      {type}
+    </span>
+  );
+}
+
+function LabelChip({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      className="inline-flex items-center gap-[3px] rounded-[4px] px-[5px] py-[1px] text-[10px] font-medium"
+      style={{
+        background: '#F2EEFB',
+        color: '#6B6480',
+        boxShadow: 'inset 0 0 0 1px #e1d8f0',
+      }}
+    >
+      <Tag size={8} weight="bold" />
+      {children}
+    </span>
+  );
+}
+
+function formatSpend(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, '')}K`;
+  return `${n}`;
 }
 
 function FieldBlock({

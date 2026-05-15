@@ -534,6 +534,13 @@ function MissionFeedCard({
   active: AgentStageRunning;
   recentSteps: MissionFeedStep[];
 }) {
+  // Show the first 4 receipts inline, hide the rest behind an
+  // "+ N more tasks complete" reveal. Designer call 2026-05-15: keeps the
+  // card vertically contained at launch and lets users dig in if curious.
+  const VISIBLE = 4;
+  const visibleSteps  = recentSteps.slice(0, VISIBLE);
+  const hiddenSteps   = recentSteps.slice(VISIBLE);
+
   return (
     <section
       className="relative overflow-hidden rounded-[16px]"
@@ -544,7 +551,7 @@ function MissionFeedCard({
       }}
     >
       <ActivePanel active={active} />
-      <StepsTrail steps={recentSteps} />
+      <StepsTrail visible={visibleSteps} hidden={hiddenSteps} />
     </section>
   );
 }
@@ -552,20 +559,20 @@ function MissionFeedCard({
 function ActivePanel({ active }: { active: AgentStageRunning }) {
   const progress = Math.max(0, Math.min(100, active.progressPct ?? 0));
   return (
-    <div className="relative overflow-hidden px-8 pb-7 pt-7 sm:px-10 sm:pb-8 sm:pt-8">
+    <div className="relative px-7 pb-6 pt-[22px] sm:px-9 sm:pb-7 sm:pt-6">
       <div className="relative flex flex-wrap items-center justify-between gap-3">
         <RunningPulse />
-        <span className="tabular-nums font-display text-[15px] font-semibold tracking-[-0.005em] text-white">
+        <span className="tabular-nums text-[13.5px] font-semibold tracking-[-0.005em] text-white">
           {active.elapsed}
         </span>
       </div>
 
-      <p className="relative mt-6 max-w-[720px] font-display text-[26px] font-bold leading-[1.25] tracking-[-0.018em] text-white sm:text-[30px]">
+      <p className="relative mt-[18px] max-w-[680px] font-display text-[22px] font-bold leading-[1.28] tracking-[-0.015em] text-white sm:text-[24px]">
         {active.task}
       </p>
 
       <div
-        className="relative mt-7 h-[6px] overflow-hidden rounded-full"
+        className="relative mt-5 h-[5px] overflow-hidden rounded-full"
         style={{ background: 'rgba(255,255,255,0.07)' }}
       >
         <div
@@ -586,7 +593,7 @@ function ActivePanel({ active }: { active: AgentStageRunning }) {
 function RunningPulse() {
   return (
     <span
-      className="inline-flex items-center gap-[8px] rounded-full px-3 py-[6px] text-[12.5px] font-semibold leading-none tracking-[-0.005em]"
+      className="inline-flex items-center gap-[7px] rounded-full px-[11px] py-[5px] text-[12px] font-semibold leading-none tracking-[-0.005em]"
       style={{
         background: 'rgba(127,90,240,0.22)',
         color: '#C9B5FF',
@@ -604,54 +611,101 @@ function RunningPulse() {
   );
 }
 
-function StepsTrail({ steps }: { steps: MissionFeedStep[] }) {
-  if (steps.length === 0) return null;
+function StepsTrail({
+  visible, hidden,
+}: {
+  visible: MissionFeedStep[];
+  hidden: MissionFeedStep[];
+}) {
+  const [open, setOpen] = useState(false);
+  if (visible.length === 0) return null;
   return (
-    <ul
-      className="flex flex-col px-8 sm:px-10"
-      style={{ borderTop: '0.5px solid rgba(255,255,255,0.07)' }}
+    <div style={{ borderTop: '0.5px solid rgba(255,255,255,0.07)' }}>
+      <ul className="flex flex-col px-7 sm:px-9">
+        {visible.map((s, i) => (
+          <StepRow
+            key={i}
+            step={s}
+            isLast={i === visible.length - 1 && (!open || hidden.length === 0)}
+          />
+        ))}
+        {open && hidden.map((s, i) => (
+          <StepRow
+            key={`h-${i}`}
+            step={s}
+            isLast={i === hidden.length - 1}
+          />
+        ))}
+      </ul>
+      {hidden.length > 0 && <MoreTasksToggle count={hidden.length} open={open} onClick={() => setOpen(v => !v)} />}
+    </div>
+  );
+}
+
+function MoreTasksToggle({
+  count, open, onClick,
+}: {
+  count: number;
+  open: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex w-full items-center justify-center gap-2 px-7 py-[14px] text-[12.5px] font-medium transition-colors sm:px-9"
+      style={{
+        color: 'rgba(255,255,255,0.55)',
+        borderTop: '0.5px solid rgba(255,255,255,0.05)',
+      }}
     >
-      {steps.map((s, i) => (
-        <StepRow key={i} step={s} isLast={i === steps.length - 1} />
-      ))}
-    </ul>
+      <span className="transition-colors group-hover:text-white">
+        {open ? `Hide ${count} task${count === 1 ? '' : 's'}` : `+ ${count} more task${count === 1 ? '' : 's'} complete`}
+      </span>
+      <CaretDown
+        size={11}
+        weight="bold"
+        className={`transition-transform ${open ? 'rotate-180' : ''}`}
+        style={{ color: 'rgba(255,255,255,0.45)' }}
+      />
+    </button>
   );
 }
 
 function StepRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
   return (
     <li
-      className="flex items-center gap-5 py-[18px]"
+      className="flex items-center gap-4 py-[14px]"
       style={{ borderBottom: isLast ? 'none' : '0.5px solid rgba(255,255,255,0.05)' }}
     >
       <span
-        className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full"
+        className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full"
         style={{
           background:
             'linear-gradient(155deg, #8E6CF5 0%, #7F5AF0 55%, #5A3FE0 100%)',
           boxShadow:
-            'inset 0 0 0 1px rgba(255,255,255,0.18), 0 4px 12px -4px rgba(127,90,240,0.55)',
+            'inset 0 0 0 1px rgba(255,255,255,0.16), 0 3px 10px -3px rgba(127,90,240,0.50)',
         }}
       >
-        <Check size={15} weight="bold" className="text-white" />
+        <Check size={13} weight="bold" className="text-white" />
       </span>
       <span
-        className="tabular-nums shrink-0 text-[12.5px] font-medium"
+        className="tabular-nums shrink-0 text-[12px] font-medium"
         style={{
-          color: 'rgba(255,255,255,0.58)',
+          color: 'rgba(255,255,255,0.55)',
           fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
-          width: 72,
+          width: 56,
         }}
       >
         {step.time}
       </span>
       <div className="min-w-0 flex-1 leading-snug">
-        <p className="text-[15px] font-semibold tracking-[-0.005em] text-white">
+        <p className="text-[14px] font-semibold tracking-[-0.005em] text-white">
           {step.title}
         </p>
         <p
-          className="mt-[3px] text-[13px] leading-[1.5]"
-          style={{ color: 'rgba(255,255,255,0.55)' }}
+          className="mt-[2px] text-[12.5px] leading-[1.45]"
+          style={{ color: 'rgba(255,255,255,0.52)' }}
         >
           {step.description}
         </p>
