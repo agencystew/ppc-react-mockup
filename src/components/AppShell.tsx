@@ -22,9 +22,10 @@ import { SIDEBAR_REPORT_PAGES } from '../mock/reports';
 
 interface SubPage { label: string; to: string; }
 const AGENT_PAGES: SubPage[] = [
-  { label: 'Catalog',         to: '/agents' },
-  { label: 'Detail · Launch', to: '/agents/competitor-spy' },
-  { label: 'Loading',         to: '/agents/competitor-spy/loading/run-competitor-spy-running' },
+  { label: 'Catalog',                to: '/agents' },
+  { label: 'Detail · Launch',        to: '/agents/competitor-spy' },
+  { label: 'Loading · multi-step',   to: '/agents/competitor-spy/loading/run-competitor-spy-running' },
+  { label: 'Loading · single-step',  to: '/agents/spend-leak/loading/run-spend-leak-running' },
 ];
 
 // Reports dropdown — index + every individual report keyed by runId.

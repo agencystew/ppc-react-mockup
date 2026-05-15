@@ -66,6 +66,56 @@ const COMPETITOR_SPY_RUNNING: AgentRun = {
   liveSignalsLabel: "We're analyzing live signals across 8 rival accounts.",
 };
 
+// ─── SPEND LEAK · RUNNING (single-step demo) ─────────────────────────────
+//
+// Counterpart to the multi-step Competitor Spy view. Most agents in
+// PPC.io are a single self-contained operation rather than a stage tree,
+// so this view drops the stage-level Completed / Up next sections and
+// leaves the user with just the live mission card + the lavender signals
+// callout at the bottom.
+const SPEND_LEAK_RUNNING: AgentRun = {
+  runId: 'run-spend-leak-running',
+  agentSlug: 'spend-leak',
+  projectId: 'boulder-care',
+  status: 'running',
+  parentAgent: { icon: '🔍', name: 'Spend Leak Detector' },
+  stage: { current: 1, total: 1 },
+  headline: 'Hunting wasted spend.',
+  description:
+    'Scanning 90 days of search terms across 8 campaigns to flag zero-conversion spend.',
+  activeAgent: {
+    initial: 'L',
+    role: 'Spend Leak Detector',
+    task: 'Scanning 90 days of search terms across 8 campaigns for zero-conversion spend',
+    elapsed: '2m 12s',
+    progressPct: 45,
+  },
+  recentMissionSteps: [
+    {
+      time: '2m 10s',
+      title: 'Pulled search terms report',
+      description: 'Last 90 days · 8 active search campaigns',
+    },
+    {
+      time: '1m 24s',
+      title: 'Loaded conversion history',
+      description: 'Cross-referenced against 12 months of converting queries',
+    },
+    {
+      time: '0m 38s',
+      title: 'Filtered by spend floor',
+      description: '2,847 candidate terms with $5+ spend isolated',
+    },
+    {
+      time: '0m 00s',
+      title: 'Mission started',
+      description: 'Initializing Spend Leak Detector',
+    },
+  ],
+  // NB: no completedStages / upcomingStages — single-step view.
+  liveSignalsLabel: 'Surfacing zero-conversion terms in real time.',
+};
+
 // ─── COMPETITOR SPY · COMPLETED ───────────────────────────────────────────
 const COMPETITOR_SPY_COMPLETED: AgentRun = {
   runId: 'run-competitor-spy-completed',
@@ -362,6 +412,7 @@ export const RUNS: Record<string, AgentRun> = {
   [COMPETITOR_SPY_RUNNING.runId]:   COMPETITOR_SPY_RUNNING,
   [COMPETITOR_SPY_COMPLETED.runId]: COMPETITOR_SPY_COMPLETED,
   [NEGATIVE_KEYWORD_COMPLETED.runId]: NEGATIVE_KEYWORD_COMPLETED,
+  [SPEND_LEAK_RUNNING.runId]:       SPEND_LEAK_RUNNING,
 };
 
 // Recent runs across all projects, for the Dashboard rollup.

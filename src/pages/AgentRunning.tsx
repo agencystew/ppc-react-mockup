@@ -19,24 +19,41 @@ export function AgentRunning() {
 
   return (
     <div className="font-sans text-ppc-ink">
-      <TopBar icon={run.parentAgent.icon} name={run.parentAgent.name} />
+      <TopBar
+        icon={run.parentAgent.icon}
+        name={run.parentAgent.name}
+        summary={run.description}
+      />
       <StagePage run={run} />
     </div>
   );
 }
 
-function TopBar({ icon, name }: { icon: string; name: string }) {
+function TopBar({
+  icon, name, summary,
+}: {
+  icon: string;
+  name: string;
+  summary?: string;
+}) {
   return (
-    <div className="mb-9 flex items-center gap-3">
+    <div className="mb-7 flex items-start gap-3">
       <span
-        className="grid h-9 w-9 place-items-center rounded-full text-[17px] leading-none"
+        className="mt-[2px] grid h-9 w-9 shrink-0 place-items-center rounded-full text-[17px] leading-none"
         style={{ background: '#E9E3FF' }}
       >
         {icon}
       </span>
-      <span className="text-[18px] font-semibold tracking-[-0.012em] text-ppc-ink">
-        {name}
-      </span>
+      <div className="min-w-0 leading-tight">
+        <p className="text-[18px] font-semibold tracking-[-0.012em] text-ppc-ink">
+          {name}
+        </p>
+        {summary && (
+          <p className="mt-[3px] max-w-[560px] text-[13.5px] leading-[1.5] text-ppc-text-muted">
+            {summary}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

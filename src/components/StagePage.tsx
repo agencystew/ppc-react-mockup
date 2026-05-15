@@ -415,9 +415,13 @@ function RunningHero({ headline }: { headline: string }) {
   const body = hasPeriod ? headline.slice(0, -1) : headline;
   return (
     <div>
-      <h1 className="font-display text-[64px] font-extrabold leading-[1.04] tracking-[-0.035em] text-ppc-ink sm:text-[72px]">
+      <h1 className="font-display text-[72px] font-extrabold leading-[1.02] tracking-[-0.035em] text-ppc-ink sm:text-[84px]">
         {body}
-        {hasPeriod && <span style={{ color: '#7F5AF0' }}>.</span>}
+        {hasPeriod && (
+          <span className="ppcio-period-pulse" style={{ color: '#7F5AF0' }}>
+            .
+          </span>
+        )}
       </h1>
     </div>
   );
@@ -518,20 +522,20 @@ function ActivePanel({ active }: { active: AgentStageRunning }) {
 function RunningPulse() {
   return (
     <span
-      className="inline-flex items-center gap-2 text-[10.5px] font-bold uppercase leading-none tracking-[0.18em]"
+      className="inline-flex items-center gap-[10px] text-[13px] font-bold uppercase leading-none tracking-[0.14em]"
       style={{
-        color: '#C9B5FF',
+        color: '#D3C6FF',
         fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
       }}
     >
       <span
-        className="ppcio-live-dot relative inline-block h-[7px] w-[7px] rounded-full"
+        className="ppcio-live-dot relative inline-block h-[8px] w-[8px] rounded-full"
         style={{
           background: '#C9B5FF',
-          boxShadow: '0 0 0 3px rgba(127,90,240,0.30), 0 0 10px rgba(201,181,255,0.55)',
+          boxShadow: '0 0 0 4px rgba(127,90,240,0.28), 0 0 12px rgba(201,181,255,0.65)',
         }}
       />
-      Running
+      Agent Running
     </span>
   );
 }
@@ -554,13 +558,13 @@ function StepRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
       style={{ borderBottom: isLast ? 'none' : '0.5px solid rgba(255,255,255,0.05)' }}
     >
       <span
-        className="mt-[3px] grid h-[20px] w-[20px] shrink-0 place-items-center rounded-full"
+        className="mt-[3px] grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full"
         style={{
-          background: 'rgba(93,202,165,0.14)',
-          boxShadow: 'inset 0 0 0 0.5px rgba(93,202,165,0.40)',
+          background: 'rgba(127,90,240,0.15)',
+          boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.45)',
         }}
       >
-        <Check size={11} weight="bold" style={{ color: '#5DCAA5' }} />
+        <Check size={12} weight="bold" style={{ color: '#C9B5FF' }} />
       </span>
       <span
         className="tabular-nums shrink-0 pt-[4px] text-[11.5px] font-semibold uppercase tracking-[0.08em]"
@@ -576,8 +580,16 @@ function StepRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
         <p className="text-[14.5px] font-semibold tracking-[-0.005em] text-white">
           {step.title}
         </p>
-        <p className="mt-[3px] text-[13px] leading-[1.5]" style={{ color: 'rgba(255,255,255,0.55)' }}>
-          {step.description}
+        <p
+          className="mt-[4px] inline-flex items-center gap-[6px] text-[13px] leading-[1.5]"
+          style={{ color: 'rgba(255,255,255,0.55)' }}
+        >
+          <ArrowUpRight
+            size={13}
+            weight="bold"
+            style={{ color: '#5DCAA5', flexShrink: 0 }}
+          />
+          <span>{step.description}</span>
         </p>
       </div>
     </li>
@@ -589,7 +601,7 @@ function StepRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
 function CompletedStagesSection({ stages }: { stages: AgentStageCompleted[] }) {
   return (
     <div>
-      <p className="mb-5 text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">Completed</p>
+      <p className="mb-5 text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">Completed Agents</p>
       <div className="relative pl-[14px]">
         <span
           aria-hidden

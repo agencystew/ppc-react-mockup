@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  CaretRight, CaretDown, ArrowRight, Clock, Sparkle,
+  CaretRight, CaretDown, ArrowRight, Sparkle,
   MapTrifold, Path, Flag, Check, ShieldCheck, EnvelopeSimple,
-  PaperPlaneTilt,
+  PaperPlaneTilt, Coffee,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
 import { PROJECTS, ACCOUNTS, CURRENT_PROJECT_ID } from '../mock/projects';
