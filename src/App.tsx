@@ -30,13 +30,6 @@ import { DevPrimitives } from './pages/_dev/Primitives';
    AgentResults page patterns with Jose's evidence model. */
 import { ReportV3 } from './pages/_v3/ReportV3';
 
-/* Temporary preview routes — three archived parallel design variants
-   restored for side-by-side comparison (2026-05-16). Not part of the
-   committed app surface; remove these imports + routes after review. */
-import { ReportMagazine } from './pages/_v3/_archive/ReportMagazine';
-import { ReportBloomberg } from './pages/_v3/_archive/v2/ReportBloomberg';
-import { ReportAudit } from './pages/_v3/_archive/v3-audit-attempt/ReportAudit';
-
 /* v4 report summary redesign (2026-05-15)
    Replaces v1's split FindingTiles + RecommendationsSection with a single
    stacked feed of paired Discovery cards. Atomic unit for the upcoming Key
@@ -106,11 +99,6 @@ export default function App() {
         {/* ─── v3 reports evidence redesign ─────────────────────────────
            Single rebuild after parallel-agent variants were archived. */}
         <Route path="v3/reports/run-competitor-spy" element={<ReportV3 />} />
-
-        {/* Archived variants restored for side-by-side preview (2026-05-16). */}
-        <Route path="v3/reports/run-competitor-spy-magazine"  element={<ReportMagazine />} />
-        <Route path="v3/reports/run-competitor-spy-bloomberg" element={<ReportBloomberg />} />
-        <Route path="v3/reports/run-competitor-spy-audit"     element={<ReportAudit />} />
 
         {/* ─── v4 summary tab redesign ──────────────────────────────────
            Discovery cards (finding+rec paired). Same page chrome as v1;
