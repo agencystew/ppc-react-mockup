@@ -175,134 +175,115 @@ function StrategyVerdictCard({
         </div>
       </div>
 
-      {/* Tight headline — arrival moment, not a verdict statement */}
-      <h2
-        className="relative mt-4 font-display font-extrabold text-white"
-        style={{
-          fontSize: 'clamp(28px, 2.8vw, 36px)',
-          letterSpacing: '-0.024em',
-          lineHeight: 1.1,
-        }}
-      >
-        Agent run complete
-        <span style={{ color: '#A88CFF' }}>.</span>
-      </h2>
-      <p
-        className="relative mt-2 text-[15px]"
-        style={{ color: 'rgba(184,174,218,0.85)' }}
-      >
-        {discoveries.length} findings ready —{' '}
-        <span style={{ color: 'rgba(255,255,255,0.92)' }}>
-          click any card to dive in.
-        </span>
-      </p>
-
-      {/* 4 action cards — one per discovery, click → smooth-scroll to it */}
-      <div className="relative mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {discoveries.map((d) => (
-          <VerdictDiscoveryCard key={d.id} discovery={d} />
-        ))}
-      </div>
-
-      {/* Subtle scroll nudge — no big purple CTA */}
-      <a
-        href={`#discovery-${discoveries[0]?.id ?? ''}`}
-        className="relative mx-auto mt-7 flex w-fit items-center gap-[8px] text-[13px] transition-colors hover:text-white"
-        style={{
-          color: 'rgba(184,174,218,0.70)',
-          letterSpacing: '0.02em',
-        }}
-      >
-        Findings below
-        <span
+      {/* Centered "Explore your findings" hero moment.
+          Replaces the previous 4 preview cards (which duplicated the
+          headlines of the discoveries directly below — the same line
+          appeared twice on screen). Now the verdict card is a tight
+          arrival + an elevated invitation to scroll, in the spirit of
+          the AgentRunning "Hold tight" page: bold sans + serif italic
+          + decorative sparkle + a playful downward arrow. */}
+      <div className="relative mt-7 flex flex-col items-center text-center">
+        {/* Decorative sparkle with thin flanking lines */}
+        <div
           aria-hidden
+          className="mb-6 flex items-center gap-[14px]"
+        >
+          <span
+            style={{
+              width: '36px',
+              height: '1px',
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(168,140,255,0.55) 100%)',
+            }}
+          />
+          <Sparkle
+            size={20}
+            weight="fill"
+            style={{
+              color: '#A88CFF',
+              filter: 'drop-shadow(0 0 14px rgba(127,90,240,0.60))',
+            }}
+          />
+          <span
+            style={{
+              width: '36px',
+              height: '1px',
+              background:
+                'linear-gradient(90deg, rgba(168,140,255,0.55) 0%, transparent 100%)',
+            }}
+          />
+        </div>
+
+        {/* Bold sans + serif italic mix — same energy as "Hold tight." */}
+        <h2
+          className="font-display font-black text-white"
           style={{
-            color: '#A88CFF',
-            fontSize: '12px',
-            transform: 'translateY(1px)',
-            display: 'inline-block',
+            fontSize: 'clamp(38px, 4.4vw, 60px)',
+            letterSpacing: '-0.032em',
+            lineHeight: 1.04,
           }}
         >
-          ↓
-        </span>
-      </a>
+          Explore your{' '}
+          <span
+            className="font-serif italic"
+            style={{ color: '#A88CFF', fontWeight: 600 }}
+          >
+            findings
+          </span>
+          <span style={{ color: '#A88CFF' }}>.</span>
+        </h2>
+
+        <p
+          className="mt-4 text-[16px]"
+          style={{ color: 'rgba(184,174,218,0.85)' }}
+        >
+          {discoveries.length} high-impact moves waiting below.
+        </p>
+
+        {/* Playful downward arrow — sinuous S-curve, clickable scroll-jump */}
+        <a
+          href={`#discovery-${discoveries[0]?.id ?? ''}`}
+          aria-label="Scroll to findings"
+          className="mt-8 inline-block transition-transform hover:translate-y-[3px]"
+        >
+          <PlayfulDownArrow />
+        </a>
+      </div>
     </section>
   );
 }
 
-// ─── Verdict discovery card — preview of one finding inside the verdict ───
-// Lives on the dark verdict surface. White-tint-on-dark, with a soft hover
-// lift. Click smooth-scrolls to the matching DiscoveryCardV5 below.
+// ─── Playful downward arrow ──────────────────────────────────────────────
+// Sinuous S-curve drawn left-right-left then tipped with a small chevron.
+// Lives at the bottom of the verdict card and invites the eye downward.
 
-function VerdictDiscoveryCard({ discovery }: { discovery: DiscoveryV5 }) {
-  const meta = READINESS_META[discovery.readiness];
-
+function PlayfulDownArrow() {
   return (
-    <a
-      href={`#discovery-${discovery.id}`}
-      className="group relative flex flex-col rounded-[14px] p-[18px] transition-all hover:-translate-y-[1px]"
+    <svg
+      width="56"
+      height="76"
+      viewBox="0 0 56 76"
+      fill="none"
+      aria-hidden
       style={{
-        background: 'rgba(255,255,255,0.04)',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.10)',
-        minHeight: '128px',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
-        e.currentTarget.style.boxShadow =
-          'inset 0 0 0 1px rgba(168,140,255,0.40)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-        e.currentTarget.style.boxShadow =
-          'inset 0 0 0 1px rgba(255,255,255,0.10)';
+        color: '#A88CFF',
+        filter: 'drop-shadow(0 0 14px rgba(127,90,240,0.45))',
       }}
     >
-      {/* Top meta row: rank + readiness */}
-      <div className="mb-3 flex items-center gap-[8px] text-[12.5px]">
-        <span
-          aria-hidden
-          className="inline-block h-[7px] w-[7px] rounded-full"
-          style={{
-            background: meta.dot,
-            boxShadow: `0 0 0 2.5px ${meta.dot}26`,
-          }}
-        />
-        <span
-          className="tabular-nums font-bold"
-          style={{ color: 'rgba(255,255,255,0.92)' }}
-        >
-          {String(discovery.rank).padStart(2, '0')}
-        </span>
-        <span style={{ color: 'rgba(184,174,218,0.45)' }}>·</span>
-        <span
-          className="font-semibold"
-          style={{ color: 'rgba(255,255,255,0.85)' }}
-        >
-          {meta.label}
-        </span>
-      </div>
-
-      {/* Title — the action, 2–3 lines */}
-      <p
-        className="flex-1 text-[15px] leading-[1.35]"
-        style={{
-          color: 'rgba(255,255,255,0.96)',
-          fontWeight: 600,
-          letterSpacing: '-0.01em',
-        }}
-      >
-        {discovery.headline}
-      </p>
-
-      {/* Arrow — bottom-right, subtle, animates on hover */}
-      <span
-        aria-hidden
-        className="mt-3 flex justify-end transition-transform group-hover:translate-x-[2px]"
-        style={{ color: 'rgba(168,140,255,0.70)' }}
-      >
-        <ArrowRight size={14} weight="bold" />
-      </span>
-    </a>
+      <path
+        d="M 28 4 C 12 14, 44 28, 28 42 C 12 56, 44 60, 28 68"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M 21 62 L 28 70 L 35 62"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
