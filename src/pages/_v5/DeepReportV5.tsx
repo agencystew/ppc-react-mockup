@@ -457,7 +457,11 @@ function PhaseCard({
   phase: PhaseV5;
   sectionRef: (el: HTMLElement | null) => void;
 }) {
-  const [dataOpen, setDataOpen] = useState(false);
+  // Raw data defaults to open. Deep Report is for the skeptical operator
+  // (and for Google Ads API reviewers) — they expect to see the underlying
+  // tables, not click a "Show me" button to reveal them. The collapse stays
+  // as a polite-fold for users who want to hide it, but it's not the default.
+  const [dataOpen, setDataOpen] = useState(true);
 
   return (
     <article
@@ -560,9 +564,7 @@ function PhaseCard({
               </span>
               <span>
                 <span className="block text-[16px] font-bold text-ppc-ink">
-                  {dataOpen
-                    ? 'Hide the raw data'
-                    : 'See the data the agent worked from'}
+                  Raw data
                 </span>
                 <span className="mt-0.5 block text-[13.5px] text-ppc-text-muted">
                   {phase.dataPointsLabel} · {phase.toolCallCount} tool calls

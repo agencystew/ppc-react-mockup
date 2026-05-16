@@ -3,19 +3,25 @@ import { useParams, Link, Navigate } from 'react-router-dom';
 import {
   ArrowRight, ArrowUp, ArrowDown,
   Lightning, CaretDown, CaretRight,
+  ChartLineUp, Briefcase, Brain, Gear,
+  Sparkle, PencilSimple, Coffee, ArrowUpRight,
+  Lightbulb, Target as TargetIcon, Compass, ShieldCheck, ClockCounterClockwise,
+  PaperPlaneTilt, Plus, Database,
 } from '@phosphor-icons/react';
 import { PROJECTS } from '../mock/projects';
 
 /* Project detail · /projects/:id
  *
- * Editorial-grade dashboard, sized to match Stewart's reference screenshots.
- * Light page on a soft lavender field (#f7f6fc) punctuated by three dark
- * "Run an agent" cards in the middle and a dark command bar at the foot —
- * the page's signature visual move. Every section heading is bold display
- * sans with a single purple period dot.
+ * Three big-bold tabs sit under the hero — Overview, Business Context,
+ * Memory — plus a gear icon flush right for Settings. The tab card style
+ * mirrors `/reports/:runId` V5: white active card with 2px purple ring +
+ * 44px icon tile + 18px label + 13.5px subtitle.
  *
- * Top → bottom: breadcrumb + run agent ▸ hero ▸ tabs ▸ Today's brief
- * ▸ Run an agent ▸ Performance ▸ Recent activity ▸ Campaigns ▸ ask bar.
+ * Overview keeps the original signature: dark "Weekly brief" hero card,
+ * Performance KPIs, Schedule + Recent activity, Campaigns. Business Context
+ * folds the old Competitors + AI Instructions tabs into one beautifully
+ * structured surface. Memory is the new addition — io's accumulated
+ * project context with an ask-anything composer pinned to the bottom.
  */
 
 // ─── Tokens ────────────────────────────────────────────────────────────
