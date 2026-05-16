@@ -29,8 +29,6 @@ import {
   ShieldCheck,
   Sparkle,
   Stack,
-  Lightning,
-  Compass,
   Warning,
   Path,
   Database,
@@ -512,33 +510,14 @@ function PhaseCard({
           <span style={{ color: '#7F5AF0' }}>.</span>
         </h3>
 
-        {/* Four fields with icon-led labels — same pattern as Discovery card */}
-        <div className="mt-9 grid grid-cols-1 gap-x-14 gap-y-10 md:grid-cols-2">
-          <PhaseField
-            label="What it checked"
-            icon={<MagnifyingGlass size={15} weight="bold" />}
-            color="#534AB7"
-            body={phase.checked}
-          />
-          <PhaseField
-            label="What it found"
-            icon={<Sparkle size={15} weight="fill" />}
-            color="#7F5AF0"
-            body={phase.found}
-            emphasis
-          />
-          <PhaseField
-            label="Reasoning"
-            icon={<Lightning size={15} weight="fill" />}
-            color="#2A7E5E"
-            body={phase.reasoning}
-          />
-          <PhaseField
-            label="Passed forward"
-            icon={<Compass size={15} weight="bold" />}
-            color="#915214"
-            body={phase.passedForward}
-          />
+        {/* Four fields in a clean 2x2 — same restraint as the discovery
+            card's DiscoverySectionField. No icon chips, no rainbow accents.
+            Typography does the hierarchy work. */}
+        <div className="mt-9 grid grid-cols-1 gap-x-14 gap-y-9 md:grid-cols-2">
+          <PhaseField label="What it checked" body={phase.checked} />
+          <PhaseField label="What it found" body={phase.found} emphasis />
+          <PhaseField label="Reasoning" body={phase.reasoning} />
+          <PhaseField label="Passed forward" body={phase.passedForward} />
         </div>
 
         {/* Data drawer — toggle on the left, Export CSV on the right */}
@@ -614,37 +593,27 @@ function PhaseCard({
 
 function PhaseField({
   label,
-  icon,
-  color,
   body,
   emphasis,
 }: {
   label: string;
-  icon: React.ReactNode;
-  color: string;
   body: string;
   emphasis?: boolean;
 }) {
   return (
     <div>
       <h5
-        className="mb-3 flex items-center gap-[8px] text-[16px] font-bold"
-        style={{ color, letterSpacing: '-0.012em' }}
+        className="mb-3 text-[15px] font-bold text-ppc-ink"
+        style={{ letterSpacing: '-0.008em' }}
       >
-        <span
-          aria-hidden
-          className="inline-flex h-[28px] w-[28px] items-center justify-center rounded-[8px]"
-          style={{ background: hexToTint(color, 0.1), color }}
-        >
-          {icon}
-        </span>
         {label}
       </h5>
       <p
-        className="text-[15.5px] leading-[1.7]"
+        className="text-[16px] leading-[1.7]"
         style={{
-          color: emphasis ? '#1a1625' : '#6b6480',
+          color: emphasis ? '#1a1625' : '#3c3849',
           fontWeight: emphasis ? 500 : 400,
+          letterSpacing: '-0.005em',
         }}
       >
         {body}
@@ -1163,14 +1132,6 @@ const SYNTHESIS_STATE_META: Record<
   open:      { label: 'Open question',  text: '#534AB7' },
   watchlist: { label: 'Watchlist',      text: '#5b5575' },
 };
-
-function hexToTint(hex: string, alpha: number): string {
-  const clean = hex.replace('#', '');
-  const r = parseInt(clean.substring(0, 2), 16);
-  const g = parseInt(clean.substring(2, 4), 16);
-  const b = parseInt(clean.substring(4, 6), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
 
 // Silence unused — kept for future affordances.
 void Check;
