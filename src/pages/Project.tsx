@@ -4,9 +4,6 @@ import {
   ArrowRight, ArrowUp, ArrowDown,
   Lightning, CaretDown, CaretRight,
   ChartLineUp, Briefcase, Brain, Gear,
-  Sparkle, PencilSimple, Coffee, ArrowUpRight,
-  Lightbulb, Target as TargetIcon, Compass, ShieldCheck, ClockCounterClockwise,
-  PaperPlaneTilt, Plus, Database,
 } from '@phosphor-icons/react';
 import { PROJECTS } from '../mock/projects';
 
@@ -206,10 +203,13 @@ const AVATAR: Record<string, { bg: string; fg: string }> = {
   'flock':              { bg: '#C08A2E', fg: '#3A2406' },
 };
 
+type ProjectTab = 'overview' | 'context' | 'memory';
+
 // ─── Page ──────────────────────────────────────────────────────────────
 export function ProjectPage() {
   const { id } = useParams();
   const project = PROJECTS.find((p) => p.id === id);
+  const [tab, setTab] = useState<ProjectTab>('overview');
   if (!project) return <Navigate to="/projects" replace />;
   const avatar = AVATAR[project.id] ?? { bg: '#7F5AF0', fg: '#FFFFFF' };
 
@@ -263,22 +263,122 @@ export function ProjectPage() {
         </div>
       </header>
 
-      {/* ── 3. Tabs ───────────────────────────────────────────────── */}
-      <nav
-        className="mt-8 flex items-center gap-1 border-b text-[13.5px]"
-        style={{ borderColor: C.border }}
-      >
-        <Tab active>Overview</Tab>
-        <Tab>Business context</Tab>
-        <Tab>Competitors</Tab>
-        <Tab>AI instructions</Tab>
-        <Tab>Settings</Tab>
-      </nav>
+      {/* ── 3. Big bold tab bar + gear ─────────────────────────────
+         Same card-style as `/reports/:runId` V5 tab bar — white active
+         card with 2px purple ring, 44px icon tile, 18px label, 13.5px
+         subtitle. Gear icon (Settings) sits flush right as a circular
+         affordance, not a 4th tab. */}
+      <ProjectTabBar active={tab} onChange={setTab} />
 
-      {/* ── 4. Today's brief — unified dark hero card ─────────────── */}
+      {/* ── 4. Tab body ─────────────────────────────────────────── */}
+      {tab === 'overview' && <OverviewView projectId={project.id} />}
+      {tab === 'context'  && <TabPlaceholder label="Business context" />}
+      {tab === 'memory'   && <TabPlaceholder label="Memory" />}
+    </div>
+  );
+}
+
+// Temporary placeholder for unbuilt project tabs (Business context / Memory).
+// These were referenced before the views existed — stubbed so the build
+// passes. Replace with the real view component when authored.
+function TabPlaceholder({ label }: { label: string }) {
+  return (
+    <div className="mt-8 rounded-[16px] bg-white px-8 py-10 text-[14px] text-ppc-text-muted"
+         style={{ boxShadow: '0 0 0 1px #e7e2ef' }}>
+      <span className="font-semibold text-ppc-ink">{label}</span> view is not
+      authored yet in this mockup.
+    </div>
+  );
+}
+
+// ─── Tab bar ───────────────────────────────────────────────────────────
+
+interface ProjectTabDef {
+  id: ProjectTab;
+  label: string;
+  subtitle: string;
+  icon: React.ReactNode;
+}
+
+const PROJECT_TABS: ProjectTabDef[] = [
+  { id: 'overview', label: 'Overview',         subtitle: 'Today\'s brief, performance, campaigns',  icon: <ChartLineUp size={22} weight="duotone" /> },
+  { id: 'context',  label: 'Business Context', subtitle: 'Personas, goals, competitors, AI instructions', icon: <Briefcase  size={22} weight="duotone" /> },
+  { id: 'memory',   label: 'Memory',           subtitle: 'Everything io has learned about this account',  icon: <Brain      size={22} weight="duotone" /> },
+];
+
+function ProjectTabBar({
+  active, onChange,
+}: { active: ProjectTab; onChange: (t: ProjectTab) => void }) {
+  return (
+    <div className="mt-8 flex items-stretch gap-3">
+      <div className="flex flex-1 flex-col gap-3 sm:flex-row">
+        {PROJECT_TABS.map(({ id, label, subtitle, icon }) => {
+          const on = id === active;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onChange(id)}
+              aria-pressed={on}
+              className="group relative flex flex-1 items-center gap-4 rounded-[18px] px-6 py-5 text-left transition-all"
+              style={{
+                background: on ? '#FFFFFF' : 'rgba(255,255,255,0.55)',
+                boxShadow: on
+                  ? '0 0 0 2px #7F5AF0, 0 24px 40px -28px rgba(127,90,240,0.45)'
+                  : '0 0 0 1px #d9d4ec',
+              }}
+            >
+              <span
+                aria-hidden
+                className="inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[12px] transition-colors"
+                style={{
+                  background: on ? '#EEEDFE' : 'rgba(127,90,240,0.06)',
+                  color:      on ? '#7F5AF0' : '#85819a',
+                }}
+              >
+                {icon}
+              </span>
+              <span className="flex min-w-0 flex-col">
+                <span
+                  className="text-[18px] font-bold leading-[1.15]"
+                  style={{ color: on ? '#1a1625' : '#3c3849', letterSpacing: '-0.018em' }}
+                >
+                  {label}
+                </span>
+                <span
+                  className="mt-1 text-[12.5px] leading-[1.3] truncate"
+                  style={{ color: on ? '#534AB7' : '#85819a' }}
+                >
+                  {subtitle}
+                </span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <button
+        type="button"
+        title="Project settings"
+        aria-label="Project settings"
+        className="grid h-[78px] w-[78px] shrink-0 place-items-center rounded-[18px] text-[#534AB7] transition-all hover:-translate-y-[1px] hover:text-[#7F5AF0]"
+        style={{
+          background: 'rgba(255,255,255,0.55)',
+          boxShadow: '0 0 0 1px #d9d4ec',
+        }}
+      >
+        <Gear size={24} weight="duotone" />
+      </button>
+    </div>
+  );
+}
+
+// ─── Overview view (the original page body) ────────────────────────────
+
+function OverviewView({ projectId }: { projectId: string }) {
+  return (
+    <>
       <TodaysBriefCard findings={FINDINGS} />
 
-      {/* ── 5. Performance ────────────────────────────────────────── */}
       <SectionHeading
         title="Performance"
         right={
@@ -301,13 +401,11 @@ export function ProjectPage() {
 
       <DailyTrendChart data={SPEND_TREND} />
 
-      {/* ── 6. Schedule + Recent activity (2-up) ──────────────────── */}
       <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <ScheduleCard projectId={project.id} />
+        <ScheduleCard projectId={projectId} />
         <RecentActivityCard rows={ACTIVITY} />
       </div>
 
-      {/* ── 7. Campaigns ─────────────────────────────────────────── */}
       <SectionHeading
         title="Campaigns"
         sub={<><span className="tabular">152</span> total · <span className="tabular">8</span> types</>}
@@ -323,8 +421,7 @@ export function ProjectPage() {
         <CampaignCard title="Top performers" tone="good" items={TOP_CAMPAIGNS} />
         <CampaignCard title="Needs attention" tone="bad"  items={BAD_CAMPAIGNS} />
       </div>
-
-    </div>
+    </>
   );
 }
 
@@ -731,21 +828,6 @@ function SectionHeading({
       </div>
       {right}
     </div>
-  );
-}
-
-function Tab({ children, active = false }: { children: React.ReactNode; active?: boolean }) {
-  return (
-    <button
-      className="-mb-px border-b-2 px-4 py-3.5 transition-colors"
-      style={{
-        color: active ? C.ink : C.neutral5,
-        fontWeight: active ? 600 : 500,
-        borderColor: active ? C.purple : 'transparent',
-      }}
-    >
-      {children}
-    </button>
   );
 }
 
