@@ -14,7 +14,6 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
-  ArrowRight,
   ArrowUp,
   ArrowDown,
   CaretDown,
@@ -920,179 +919,107 @@ function ContextCrossCheckCard({
 // STRATEGY SYNTHESIS  (dark climax)
 // ═════════════════════════════════════════════════════════════════════════
 
+// Synthesis card — DEMOTED from a dark hero "Final synthesis" climax to a
+// small white traceability footer. The prose ("This is what produced your
+// AI Summary", intro paragraph, context recap, Final-Strategy quote) is
+// redundant with the AI Summary tab and the ContextCrossCheckCard above.
+// What remains: the audit trail of which specialist findings made the
+// verdict, and which got held back + why. Useful for the skeptical operator
+// and for Google API reviewers; not a second hero card.
+
 function StrategySynthesisCard({
   synthesis,
 }: {
   synthesis: StrategySynthesisData;
 }) {
+  const acceptedCount = synthesis.accepted.length;
+  const downgradedCount = synthesis.downgraded.length;
+
   return (
     <section
-      className="relative mt-10 overflow-hidden rounded-[24px] text-white"
+      className="relative mt-10 overflow-hidden rounded-[20px] bg-white"
       style={{
-        background: 'linear-gradient(180deg, #0F0A1E 0%, #07050D 100%)',
         boxShadow:
-          '0 1px 0 rgba(255,255,255,0.06) inset, 0 30px 60px -30px rgba(15,10,30,0.55)',
+          '0 0 0 1px #e8e2f0, 0 1px 0 rgba(15,10,30,0.02), 0 24px 40px -28px rgba(15,10,30,0.10)',
       }}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute"
-        style={{
-          top: '-100px',
-          right: '-80px',
-          width: '420px',
-          height: '320px',
-          background:
-            'radial-gradient(ellipse, rgba(127,90,240,0.22) 0%, transparent 65%)',
-        }}
-      />
-
-      <div className="relative px-12 py-12">
-        <header className="mb-6 flex items-center gap-[10px]">
-          <Sparkle size={14} weight="fill" style={{ color: '#A88CFF' }} />
-          <span
-            className="text-[12px] font-semibold uppercase text-white"
-            style={{ letterSpacing: '0.08em' }}
+      <div className="relative px-10 py-9 sm:px-12 sm:py-10">
+        <header className="mb-5">
+          <h3
+            className="font-display text-[26px] font-extrabold text-ppc-ink sm:text-[30px]"
+            style={{ letterSpacing: '-0.022em', lineHeight: 1.15 }}
           >
-            {synthesis.agent} · Final synthesis
-          </span>
+            How the AI Summary was assembled
+            <span style={{ color: '#7F5AF0' }}>.</span>
+          </h3>
+          <p
+            className="mt-3 text-[16px] leading-[1.6] text-ppc-text-muted"
+            style={{ maxWidth: '780px' }}
+          >
+            The Strategy Agent reconciled the specialist findings against
+            your business context. {acceptedCount}{' '}
+            {acceptedCount === 1 ? 'made the verdict' : 'made the verdict'};
+            {' '}{downgradedCount}{' '}
+            {downgradedCount === 1 ? 'was held back' : 'were held back'}.
+          </p>
         </header>
 
-        <h2
-          className="font-display font-black text-white"
-          style={{
-            fontSize: 'clamp(34px, 4.4vw, 52px)',
-            letterSpacing: '-0.032em',
-            lineHeight: '1.00',
-            maxWidth: '820px',
-          }}
-        >
-          This is what produced your AI Summary
-          <span style={{ color: '#7F5AF0' }}>.</span>
-        </h2>
-
-        <p
-          className="mt-6 text-[16.5px] leading-[1.65]"
-          style={{ color: 'rgba(184,174,218,0.95)', maxWidth: '720px' }}
-        >
-          {synthesis.intro}
-        </p>
-
-        <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="mt-7 grid grid-cols-1 gap-x-12 gap-y-8 md:grid-cols-2">
           <div>
-            <h5
-              className="mb-2 text-[14px] font-semibold"
-              style={{ color: '#C9B5FF' }}
+            <h4
+              className="mb-4 flex items-center gap-[10px] text-[14px] font-bold text-ppc-ink"
+              style={{ letterSpacing: '-0.005em' }}
             >
-              Context the agent used
-            </h5>
-            <p
-              className="text-[15px] leading-[1.6]"
-              style={{ color: 'rgba(255,255,255,0.85)' }}
-            >
-              {synthesis.contextUsedSummary}
-            </p>
+              <span
+                aria-hidden
+                className="inline-block h-[8px] w-[8px] rounded-full"
+                style={{
+                  background: '#5DCAA5',
+                  boxShadow: '0 0 0 3px rgba(93,202,165,0.18)',
+                }}
+              />
+              Made the verdict
+              <span
+                className="tabular-nums font-semibold"
+                style={{ color: '#85819a' }}
+              >
+                · {acceptedCount}
+              </span>
+            </h4>
+            <div className="flex flex-col gap-2">
+              {synthesis.accepted.map((rec) => (
+                <SynthesisRow key={rec.rank} rec={rec} />
+              ))}
+            </div>
           </div>
+
           <div>
-            <h5
-              className="mb-2 text-[14px] font-semibold"
-              style={{ color: '#D7B57A' }}
+            <h4
+              className="mb-4 flex items-center gap-[10px] text-[14px] font-bold text-ppc-ink"
+              style={{ letterSpacing: '-0.005em' }}
             >
-              Context that was missing
-            </h5>
-            <p
-              className="text-[15px] leading-[1.6]"
-              style={{ color: 'rgba(255,255,255,0.7)' }}
-            >
-              {synthesis.missingSummary}
-            </p>
+              <span
+                aria-hidden
+                className="inline-block h-[8px] w-[8px] rounded-full"
+                style={{
+                  background: '#B07820',
+                  boxShadow: '0 0 0 3px rgba(186,117,23,0.18)',
+                }}
+              />
+              Held back
+              <span
+                className="tabular-nums font-semibold"
+                style={{ color: '#85819a' }}
+              >
+                · {downgradedCount}
+              </span>
+            </h4>
+            <div className="flex flex-col gap-2">
+              {synthesis.downgraded.map((rec) => (
+                <SynthesisRow key={rec.rank} rec={rec} />
+              ))}
+            </div>
           </div>
-        </div>
-
-        <div
-          aria-hidden
-          className="my-10 h-px"
-          style={{
-            background:
-              'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.10) 50%, transparent 100%)',
-          }}
-        />
-
-        <div>
-          <h4
-            className="mb-5 text-[18px] font-bold text-white"
-            style={{ letterSpacing: '-0.012em' }}
-          >
-            Recommendations that survived the cross-check
-          </h4>
-          <div className="flex flex-col gap-3">
-            {synthesis.accepted.map((rec) => (
-              <SynthesisRow key={rec.rank} rec={rec} />
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-10">
-          <h4
-            className="mb-5 text-[18px] font-bold text-white"
-            style={{ letterSpacing: '-0.012em' }}
-          >
-            Recommendations that got downgraded
-          </h4>
-          <div className="flex flex-col gap-3">
-            {synthesis.downgraded.map((rec) => (
-              <SynthesisRow key={rec.rank} rec={rec} />
-            ))}
-          </div>
-        </div>
-
-        <div
-          className="mt-10 rounded-[20px] px-8 py-7"
-          style={{
-            background: 'rgba(255,255,255,0.04)',
-            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-          }}
-        >
-          <h5
-            className="mb-3 text-[14px] font-semibold"
-            style={{ color: '#C9B5FF' }}
-          >
-            Final strategy
-          </h5>
-          <p
-            className="text-[19px] leading-[1.55]"
-            style={{
-              color: 'rgba(255,255,255,0.95)',
-              fontWeight: 500,
-              letterSpacing: '-0.012em',
-              maxWidth: '760px',
-            }}
-          >
-            {synthesis.finalStrategy}
-          </p>
-        </div>
-
-        <div className="mt-10">
-          <a
-            href="#top"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="inline-flex items-center gap-2 rounded-[12px] px-[16px] py-[11px] text-[13.5px] font-semibold text-white transition-transform hover:-translate-y-[0.5px]"
-            style={{
-              background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
-              boxShadow:
-                '0 1px 0 rgba(255,255,255,0.18) inset, 0 6px 14px -6px rgba(127,90,240,0.55)',
-            }}
-          >
-            <ArrowRight
-              size={12}
-              weight="bold"
-              style={{ transform: 'rotate(-90deg)' }}
-            />
-            {synthesis.backToSummaryLabel}
-          </a>
         </div>
       </div>
     </section>
@@ -1103,53 +1030,36 @@ function SynthesisRow({ rec }: { rec: SynthesisRecommendation }) {
   const meta = SYNTHESIS_STATE_META[rec.state];
   const body = (
     <article
-      className="flex items-start gap-5 rounded-[16px] px-6 py-5 transition-colors"
-      style={{
-        background: 'rgba(255,255,255,0.04)',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-      }}
+      className="rounded-[12px] px-4 py-3 transition-colors"
+      style={{ background: '#FAFAFD', boxShadow: 'inset 0 0 0 1px #ece6f3' }}
     >
-      <span
-        className="inline-flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-full"
-        style={{ background: meta.dotBg }}
-      >
+      <div className="flex items-baseline gap-[10px]">
         <span
-          aria-hidden
-          className="inline-block h-[10px] w-[10px] rounded-full"
-          style={{ background: meta.dot }}
-        />
-      </span>
-      <div className="flex-1">
-        <div className="flex flex-wrap items-baseline gap-3">
-          <span
-            className="text-[11.5px] font-bold uppercase tabular-nums"
-            style={{ color: meta.label, letterSpacing: '0.08em' }}
-          >
-            #{String(rec.rank).padStart(2, '0')} · {meta.text}
-          </span>
-        </div>
-        <p
-          className="mt-1 text-[15.5px] font-semibold leading-[1.45]"
-          style={{ color: 'white', maxWidth: '720px' }}
+          className="tabular-nums font-bold text-ppc-ink"
+          style={{ fontSize: '14px', letterSpacing: '-0.005em' }}
         >
-          {rec.title}
-        </p>
-        {rec.whyNote && (
-          <p
-            className="mt-2 text-[14px] leading-[1.6]"
-            style={{ color: 'rgba(184,174,218,0.85)', maxWidth: '720px' }}
-          >
-            {rec.whyNote}
-          </p>
-        )}
+          {String(rec.rank).padStart(2, '0')}
+        </span>
+        <span
+          className="text-[11.5px] font-semibold uppercase"
+          style={{ letterSpacing: '0.06em', color: meta.text }}
+        >
+          {meta.label}
+        </span>
       </div>
-      {rec.discoveryHref && (
-        <CaretRight
-          size={14}
-          weight="bold"
-          className="mt-[6px] shrink-0"
-          style={{ color: 'rgba(184,174,218,0.5)' }}
-        />
+      <p
+        className="mt-1 text-[15px] font-semibold leading-[1.4] text-ppc-ink"
+        style={{ letterSpacing: '-0.008em' }}
+      >
+        {rec.title}
+      </p>
+      {rec.whyNote && (
+        <p
+          className="mt-1.5 text-[13.5px] leading-[1.55]"
+          style={{ color: '#6b6480' }}
+        >
+          {rec.whyNote}
+        </p>
       )}
     </article>
   );
@@ -1157,7 +1067,7 @@ function SynthesisRow({ rec }: { rec: SynthesisRecommendation }) {
     return (
       <a
         href={rec.discoveryHref}
-        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-ppc-purple-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F0A1E]"
+        className="block transition-transform hover:-translate-y-[0.5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-ppc-purple-500/60"
       >
         {body}
       </a>
@@ -1168,32 +1078,12 @@ function SynthesisRow({ rec }: { rec: SynthesisRecommendation }) {
 
 const SYNTHESIS_STATE_META: Record<
   Readiness,
-  { dot: string; dotBg: string; label: string; text: string }
+  { label: string; text: string }
 > = {
-  ready: {
-    dot: '#5DCAA5',
-    dotBg: 'rgba(93,202,165,0.18)',
-    label: '#7FE3BA',
-    text: 'Ready to act',
-  },
-  review: {
-    dot: '#E2A536',
-    dotBg: 'rgba(226,165,54,0.18)',
-    label: '#F3CB7A',
-    text: 'Needs review',
-  },
-  open: {
-    dot: '#A88CFF',
-    dotBg: 'rgba(168,140,255,0.18)',
-    label: '#C9B5FF',
-    text: 'Open question',
-  },
-  watchlist: {
-    dot: '#C7C0DE',
-    dotBg: 'rgba(199,192,222,0.18)',
-    label: '#D9D3F0',
-    text: 'Watchlist',
-  },
+  ready:     { label: 'Ready to act',   text: '#1F6F4F' },
+  review:    { label: 'Needs review',   text: '#915214' },
+  open:      { label: 'Open question',  text: '#534AB7' },
+  watchlist: { label: 'Watchlist',      text: '#5b5575' },
 };
 
 function hexToTint(hex: string, alpha: number): string {

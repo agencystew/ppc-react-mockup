@@ -660,7 +660,7 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
         {
           rank: 1,
           state: 'ready',
-          title: 'No rival owns "same-day intake" — the strongest unclaimed angle.',
+          title: 'Build 3 RSAs around "same-day intake".',
           discoveryHref: '#discovery-d-1',
           whyNote:
             "Whitespace cleared the business-context cross-check: operational hours confirm Boulder Care can deliver.",
@@ -668,7 +668,7 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
         {
           rank: 3,
           state: 'ready',
-          title: 'Add 3 untracked rivals to your watchlist.',
+          title: 'Add 3 untracked rivals to your Boulder Care watchlist.',
           discoveryHref: '#discovery-d-3',
           whyNote: 'Pure visibility add — no spend or campaign changes required.',
         },
@@ -677,7 +677,7 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
         {
           rank: 2,
           state: 'review',
-          title: 'Aspen Recovery Group is the dominant rival across every keyword.',
+          title: 'Outflank Aspen on the 4 keywords where they go thin.',
           discoveryHref: '#discovery-d-2',
           whyNote:
             "Held in review because the bid-strategy lever depends on whether Brand and Generic Search campaigns are on Smart Bidding — the agent can't verify this from auction insights alone.",
@@ -685,7 +685,7 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
         {
           rank: 4,
           state: 'open',
-          title: "Branded CPC sits at $42 — agent doesn't have enough context to call it.",
+          title: 'Add lead-to-sale rate before judging the $42 branded CPC.',
           discoveryHref: '#discovery-d-4',
           whyNote:
             'Held as an open question because lead-to-sale rate per campaign is missing. Acting without it would be exactly the move that creates "we cut brand spend and conversions tanked" stories.',
