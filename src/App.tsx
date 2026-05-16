@@ -30,12 +30,26 @@ import { DevPrimitives } from './pages/_dev/Primitives';
    AgentResults page patterns with Jose's evidence model. */
 import { ReportV3 } from './pages/_v3/ReportV3';
 
+/* Temporary preview routes — three archived parallel design variants
+   restored for side-by-side comparison (2026-05-16). Not part of the
+   committed app surface; remove these imports + routes after review. */
+import { ReportMagazine } from './pages/_v3/_archive/ReportMagazine';
+import { ReportBloomberg } from './pages/_v3/_archive/v2/ReportBloomberg';
+import { ReportAudit } from './pages/_v3/_archive/v3-audit-attempt/ReportAudit';
+
 /* v4 report summary redesign (2026-05-15)
    Replaces v1's split FindingTiles + RecommendationsSection with a single
    stacked feed of paired Discovery cards. Atomic unit for the upcoming Key
    Discoveries cross-report aggregator. See
    docs/plans/2026-05-15-summary-section-v4-design.md. */
 import { AgentResultsV4 } from './pages/_v4/AgentResultsV4';
+
+/* v5 report — world-class redesign (2026-05-16)
+   Builds on v4 with four new trust layers: Investigation hero · Strategy
+   Verdict · Business Context on every card · Checks Before Export. Drops
+   the Methodology tab — folds into Deep Report. See
+   docs/plans/2026-05-16-agent-results-v5-design.md. */
+import { AgentResultsV5 } from './pages/_v5/AgentResultsV5';
 
 export default function App() {
   return (
@@ -55,7 +69,10 @@ export default function App() {
         <Route path="agents/:slug/loading/:runId" element={<AgentRunning />} />
         <Route path="agents/:slug/run/:runId" element={<AgentRunning />} />
         <Route path="reports" element={<Reports />} />
-        <Route path="reports/:runId" element={<AgentResults />} />
+        {/* v5 promoted to canonical /reports/:runId on 2026-05-16.
+           The previous v1 report page is reachable at /v1/reports/:runId. */}
+        <Route path="reports/:runId" element={<AgentResultsV5 />} />
+        <Route path="v1/reports/:runId" element={<AgentResults />} />
 
         <Route path="projects" element={<Projects />} />
         <Route path="projects/:id" element={<ProjectPage />} />
@@ -66,7 +83,7 @@ export default function App() {
         <Route path="projects/:id/agents/:slug" element={<AgentDetail />} />
         <Route path="projects/:id/agents/:slug/loading/:runId" element={<AgentRunning />} />
         <Route path="projects/:id/agents/:slug/run/:runId" element={<AgentRunning />} />
-        <Route path="projects/:id/runs/:runId" element={<AgentResults />} />
+        <Route path="projects/:id/runs/:runId" element={<AgentResultsV5 />} />
         <Route path="projects/:id/reports" element={<Reports />} />
 
         {/* ─── v2 (parked for A/B comparison) ─────────────────────────
@@ -90,11 +107,23 @@ export default function App() {
            Single rebuild after parallel-agent variants were archived. */}
         <Route path="v3/reports/run-competitor-spy" element={<ReportV3 />} />
 
+        {/* Archived variants restored for side-by-side preview (2026-05-16). */}
+        <Route path="v3/reports/run-competitor-spy-magazine"  element={<ReportMagazine />} />
+        <Route path="v3/reports/run-competitor-spy-bloomberg" element={<ReportBloomberg />} />
+        <Route path="v3/reports/run-competitor-spy-audit"     element={<ReportAudit />} />
+
         {/* ─── v4 summary tab redesign ──────────────────────────────────
            Discovery cards (finding+rec paired). Same page chrome as v1;
            only the Summary tab body differs. Compare v1↔v4 by swapping
            `/v4` in/out of the URL:  /reports/<id>  ↔  /v4/reports/<id>. */}
         <Route path="v4/reports/:runId" element={<AgentResultsV4 />} />
+
+        {/* ─── v5 report — world-class redesign ─────────────────────────
+           New chrome (own InvestigationHero + StrategyVerdict + Finding↔
+           Next-Step Discovery cards). AI Summary | Deep Report tabs only.
+           Compare v4↔v5 by swapping `/v4`↔`/v5` in the URL. Only the
+           competitor-spy fixture is authored in v5 (so far). */}
+        <Route path="v5/reports/:runId" element={<AgentResultsV5 />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
