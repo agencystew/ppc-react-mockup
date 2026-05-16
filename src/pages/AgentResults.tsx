@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import {
   CaretRight, CaretDown, CaretUp, Share, Plus, ArrowRight, ArrowUp,
-  ArrowsClockwise, Flag, ShieldCheck, Target, ChartBar,
+  Flag, ShieldCheck, Target, ChartBar,
   Binoculars, MagnifyingGlass, Database, Cpu, Clock, Quotes,
-  Lightning, TrendUp,
+  Lightning, TrendUp, Compass, Question, FileCsv, ChatTeardropDots,
 } from '@phosphor-icons/react';
 import { StagePage } from '../components/StagePage';
 import { SpyMascot } from '../components/SpyMascot';
@@ -52,10 +52,7 @@ type ReportTab = 'summary' | 'full' | 'methodology';
 export interface ReportConfig {
   generated: { date: string; time: string };
   mascot: () => React.ReactNode;
-  summary: {
-    findingTiles: FindingTile[];
-    recs: RecRow[];
-  };
+  summary: SummaryData;
   fullReport: Section[];
   methodology: {
     intro: string;
@@ -64,6 +61,71 @@ export interface ReportConfig {
     specialists: { icon: Section['icon']; name: string; role: string; tools: string[] }[];
     freshness: string;
   };
+}
+
+// Summary tab data — strategist-led structure.
+//
+// Order of consumption mirrors the page flow:
+//   1. verdict     — the so-what, written like a signed memo
+//   2. actions     — three decision cards (sorted by readiness then impact)
+//   3. insights    — supporting findings ("what we found")
+//   4. checks      — operational questions to resolve before exporting
+//
+// Lead with judgment + action, not with raw findings. Findings now play
+// the supporting role they should have played all along.
+export interface SummaryData {
+  verdict: VerdictData;
+  actions: ActionCardData[];
+  insights: InsightCardData[];
+  checks: CheckData[];
+}
+
+export interface VerdictData {
+  /** One-sentence judgment. Should name the cause, not just the surface metric. */
+  statement: string;
+  /** Counts feed the inline classifier line. */
+  actionsReady: number;
+  actionsReview: number;
+  /** Pre-action risk written as a single sentence — "main risk: …". */
+  risk: string;
+}
+
+export type ActionReadiness = 'ready' | 'needs-review' | 'needs-brand-review';
+
+export interface ActionCardData {
+  /** Display category eyebrow (e.g. "NEGATIVES", "BIDDING", "AD COPY"). */
+  category: string;
+  title: string;
+  readiness: ActionReadiness;
+  /** Secondary chips after the readiness chip. Tone drives chip styling. */
+  badges: ActionBadge[];
+  whyMatters: string;
+  expected: string;
+  tradeoff: string;
+  primaryCta: string;
+  secondaryCta: string;
+}
+
+export interface ActionBadge {
+  label: string;
+  /**
+   * `risk-low` → green tint. `impact-high` → red-orange. `check` → amber.
+   * `count` → neutral. `meta` → muted lavender (e.g. "Copy drafts available").
+   */
+  tone: 'risk-low' | 'impact-high' | 'check' | 'count' | 'meta';
+}
+
+export interface InsightCardData {
+  title: string;
+  whatWeSaw: string;
+  whyItMatters: string;
+  signal: string;
+  evidenceLabel: string;
+}
+
+export interface CheckData {
+  title: string;
+  body: string;
 }
 
 function AgentReportView({ run, config }: { run: AgentRun; config: ReportConfig }) {
@@ -79,11 +141,7 @@ function AgentReportView({ run, config }: { run: AgentRun; config: ReportConfig 
       <HeroCard run={run} mascot={config.mascot()} />
       <Tabs active={tab} onChange={setTab} />
       {tab === 'summary' && (
-        <SummaryView
-          findingTiles={config.summary.findingTiles}
-          recs={config.summary.recs}
-          onSeeFullReport={() => setTab('full')}
-        />
+        <SummaryView summary={config.summary} onSeeFullReport={() => setTab('full')} />
       )}
       {tab === 'full' && <FullReportView sections={config.fullReport} />}
       {tab === 'methodology' && <MethodologyView methodology={config.methodology} />}
@@ -456,101 +514,688 @@ export function Tabs({
   );
 }
 
-// ─── Summary view ────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════
+// Summary view · strategist-led
+// ════════════════════════════════════════════════════════════════════════
+//
+// Order:
+//   1. Strategist verdict     — dark callout, the so-what
+//   2. Top recommended actions — three decision cards, color-coded by readiness
+//   3. What we found          — supporting insight cards
+//   4. Checks before export   — questions to resolve before acting
+//   5. Full-report CTA        — footer
+//
+// Replaces the legacy "What we found → Top recommendations" pair that led
+// with raw findings. The page now leads with judgment and action.
 
 function SummaryView({
-  findingTiles,
-  recs,
+  summary,
   onSeeFullReport,
 }: {
-  findingTiles: FindingTile[];
-  recs: RecRow[];
+  summary: SummaryData;
+  onSeeFullReport: () => void;
+}) {
+  return (
+    <div className="mb-10 space-y-8">
+      <StrategistVerdict
+        verdict={summary.verdict}
+        actionCount={summary.actions.length}
+        onSeeFullReport={onSeeFullReport}
+      />
+      <TopActionsSection actions={summary.actions} />
+      <WhatWeFoundSection insights={summary.insights} />
+      <ChecksSection checks={summary.checks} />
+      <FullReportFooter onSeeFullReport={onSeeFullReport} />
+    </div>
+  );
+}
+
+// ─── 1. Strategist verdict ───────────────────────────────────────────────
+//
+// Compact dark callout. Reads like a signed memo: eyebrow, single-sentence
+// verdict, action classifier, pre-action risk. No mascot, no perspective
+// grid — visually quieter than the hero so the two dark panels coexist.
+
+function StrategistVerdict({
+  verdict,
+  actionCount,
+  onSeeFullReport,
+}: {
+  verdict: VerdictData;
+  actionCount: number;
   onSeeFullReport: () => void;
 }) {
   return (
     <section
-      className="mb-7 rounded-[16px] bg-white px-7 py-7"
+      className="relative overflow-hidden rounded-[18px] text-white"
       style={{
+        background:
+          'radial-gradient(110% 100% at 18% 0%, #1B0F39 0%, #0A0518 55%, #050308 100%)',
         boxShadow:
-          '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.12)',
+          '0 1px 0 rgba(255,255,255,0.05) inset, 0 24px 50px -28px rgba(15,10,30,0.55)',
       }}
     >
-      <WhatWeFoundHeader onSeeFullReport={onSeeFullReport} />
-      <FindingTiles tiles={findingTiles} />
-      <RecommendationsSection recs={recs} onSeeFullReport={onSeeFullReport} />
+      {/* Top sheen */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-12 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(201,181,255,0.45) 35%, rgba(201,181,255,0.45) 65%, transparent 100%)',
+        }}
+      />
+      {/* Soft upper-left bloom — mirror of the hero's upper-right.
+          Keeps the two dark panels distinct without competing. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -left-24 -top-32 h-[360px] w-[360px] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(127,90,240,0.32) 0%, rgba(127,90,240,0.10) 42%, transparent 70%)',
+        }}
+      />
+      {/* Subtle grain */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.07]"
+        style={{
+          backgroundImage:
+            'radial-gradient(rgba(255,255,255,0.7) 1px, transparent 1px)',
+          backgroundSize: '3px 3px',
+          mixBlendMode: 'screen',
+        }}
+      />
+
+      <div className="relative grid gap-7 px-9 py-8 sm:grid-cols-[1.4fr_1fr] sm:px-11 sm:py-9">
+        {/* Left: eyebrow + verdict statement */}
+        <div className="min-w-0">
+          <VerdictEyebrow />
+          <h3 className="mt-5 font-display text-[28px] font-extrabold leading-[1.15] tracking-[-0.022em] text-white sm:text-[32px]">
+            {verdict.statement}
+          </h3>
+
+          <p className="mt-5 max-w-[520px] text-[14.5px] leading-[1.6] text-white/72">
+            We surfaced{' '}
+            <VerdictNumber>{actionCount}</VerdictNumber> useful actions
+            {verdict.actionsReady > 0 && (
+              <>
+                {' '}—{' '}
+                <VerdictNumber>{verdict.actionsReady}</VerdictNumber>{' '}
+                ready to export
+              </>
+            )}
+            {verdict.actionsReview > 0 && (
+              <>
+                ,{' '}
+                <VerdictNumber>{verdict.actionsReview}</VerdictNumber>{' '}
+                need review before acting
+              </>
+            )}
+            .
+          </p>
+        </div>
+
+        {/* Right: risk panel + CTAs */}
+        <div className="flex min-w-0 flex-col justify-between gap-6 sm:items-end">
+          <div
+            className="w-full rounded-[12px] px-5 py-4 sm:max-w-[340px]"
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+            }}
+          >
+            <div className="mb-2 flex items-center gap-[7px]">
+              <span
+                aria-hidden
+                className="h-[6px] w-[6px] rounded-full"
+                style={{
+                  background: '#E2A536',
+                  boxShadow: '0 0 0 3px rgba(226,165,54,0.18)',
+                }}
+              />
+              <span
+                className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-white/55"
+                style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+              >
+                Main risk
+              </span>
+            </div>
+            <p className="text-[13px] leading-[1.55] text-white/85">
+              {verdict.risk}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById('top-actions');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              className="inline-flex items-center gap-2 rounded-[10px] px-[16px] py-[10px] text-[13px] font-semibold text-white transition-transform hover:-translate-y-[0.5px]"
+              style={{
+                background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
+                boxShadow:
+                  '0 1px 0 rgba(255,255,255,0.18) inset, 0 6px 14px -6px rgba(127,90,240,0.55)',
+              }}
+            >
+              Review actions
+              <ArrowRight size={12} weight="bold" />
+            </button>
+            <button
+              type="button"
+              onClick={onSeeFullReport}
+              className="inline-flex items-center gap-1.5 rounded-[10px] px-[14px] py-[10px] text-[13px] font-semibold text-white/85 transition-colors hover:bg-white/[0.06] hover:text-white"
+              style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.18)' }}
+            >
+              View full evidence
+              <ArrowRight size={11} weight="bold" />
+            </button>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
 
-function WhatWeFoundHeader({ onSeeFullReport }: { onSeeFullReport: () => void }) {
+function VerdictEyebrow() {
   return (
-    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-      <h3 className="text-[18px] font-semibold tracking-[-0.01em] text-ppc-ink">
-        What we found
-      </h3>
+    <span
+      className="inline-flex items-center gap-2 rounded-full px-[11px] py-[5px] text-[10.5px] font-bold uppercase tracking-[0.14em]"
+      style={{
+        background: 'rgba(127,90,240,0.16)',
+        color: '#C9B5FF',
+        boxShadow: 'inset 0 0 0 1px rgba(159,134,255,0.30)',
+        fontFamily: '"Courier New", ui-monospace, monospace',
+      }}
+    >
+      <Compass size={11} weight="fill" />
+      Strategist verdict
+    </span>
+  );
+}
+
+function VerdictNumber({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      className="font-display font-extrabold text-white"
+      style={{
+        fontFeatureSettings: '"tnum" 1',
+        letterSpacing: '-0.015em',
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+// ─── 2. Top recommended actions ──────────────────────────────────────────
+//
+// Three decision cards. Each card carries:
+//   - numbered + category eyebrow
+//   - large title
+//   - readiness chip + secondary badges
+//   - Why this matters / Expected outcome / Tradeoff or risk
+//   - footer with primary + secondary CTA + "Ask follow-up"
+//
+// Left rail is color-coded by readiness — emerald (ready), amber (review),
+// purple (brand review). Communicates safety at a glance.
+
+function TopActionsSection({ actions }: { actions: ActionCardData[] }) {
+  return (
+    <section id="top-actions" className="scroll-mt-6">
+      <SectionTitle
+        title="Top recommended actions"
+        sub="Prioritised by impact, confidence, and ease of review."
+      />
+      <div className="flex flex-col gap-5">
+        {actions.map((a, i) => (
+          <ActionCard key={i} index={i + 1} action={a} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ActionCard({ index, action }: { index: number; action: ActionCardData }) {
+  const rail = READINESS_THEME[action.readiness];
+  return (
+    <article
+      className="relative overflow-hidden rounded-[18px] bg-white"
+      style={{
+        boxShadow:
+          '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 24px 40px -28px rgba(15,10,30,0.14)',
+      }}
+    >
+      {/* Readiness rail (full-height) */}
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-[4px]"
+        style={{ background: rail.rail }}
+      />
+
+      <div className="relative pb-7 pl-9 pr-7 pt-7 sm:pl-11 sm:pr-9 sm:pt-8">
+        {/* Numbered category eyebrow */}
+        <div
+          className="mb-3 flex items-center gap-[10px] text-[11px] font-semibold uppercase leading-none"
+          style={{
+            fontFamily: '"Courier New", ui-monospace, monospace',
+            letterSpacing: '0.14em',
+            color: rail.eyebrow,
+          }}
+        >
+          <span
+            className="inline-flex h-[20px] min-w-[20px] items-center justify-center rounded-[5px] px-[5px] tabular-nums"
+            style={{
+              background: rail.numberBg,
+              color: rail.numberFg,
+              boxShadow: `inset 0 0 0 1px ${rail.numberRing}`,
+            }}
+          >
+            {String(index).padStart(2, '0')}
+          </span>
+          <span className="text-ppc-text-muted">{action.category}</span>
+        </div>
+
+        {/* Title */}
+        <h4 className="font-display text-[23px] font-extrabold leading-[1.2] tracking-[-0.018em] text-ppc-ink sm:text-[25px]">
+          {action.title}
+        </h4>
+
+        {/* Badges */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <ReadinessChip readiness={action.readiness} />
+          {action.badges.map((b, i) => (
+            <ActionBadgePill key={i} badge={b} />
+          ))}
+        </div>
+
+        {/* Body — three labeled sections */}
+        <div className="mt-6 space-y-5">
+          <ActionDetail label="Why this matters" body={action.whyMatters} />
+          <ActionDetail label="Expected outcome" body={action.expected} />
+          <ActionDetail label="Tradeoff / risk"  body={action.tradeoff} />
+        </div>
+
+        {/* Footer — actions */}
+        <footer
+          className="mt-7 flex flex-wrap items-center justify-between gap-3 pt-5"
+          style={{ borderTop: '1px solid #f0eaf6' }}
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <PrimaryPillButton>{action.primaryCta}</PrimaryPillButton>
+            <GhostPillButton icon={<FileCsv size={13} weight="bold" />}>
+              {action.secondaryCta}
+            </GhostPillButton>
+          </div>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-ppc-text-muted transition-colors hover:text-ppc-purple-600"
+          >
+            <ChatTeardropDots size={13} weight="bold" />
+            Ask follow-up
+          </button>
+        </footer>
+      </div>
+    </article>
+  );
+}
+
+function ActionDetail({ label, body }: { label: string; body: string }) {
+  return (
+    <div className="grid gap-1.5 sm:grid-cols-[160px_1fr] sm:gap-5">
+      <span
+        className="pt-[3px] text-[10.5px] font-bold uppercase leading-none text-ppc-text-muted"
+        style={{
+          fontFamily: '"Courier New", ui-monospace, monospace',
+          letterSpacing: '0.12em',
+        }}
+      >
+        {label}
+      </span>
+      <p className="max-w-[560px] text-[13.5px] leading-[1.6] text-ppc-ink/85">
+        {body}
+      </p>
+    </div>
+  );
+}
+
+// Readiness theme — keys to ActionReadiness.
+const READINESS_THEME: Record<
+  ActionReadiness,
+  {
+    rail: string;
+    eyebrow: string;
+    numberBg: string;
+    numberFg: string;
+    numberRing: string;
+    chipBg: string;
+    chipFg: string;
+    chipRing: string;
+    chipDot: string;
+    chipLabel: string;
+  }
+> = {
+  ready: {
+    rail: 'linear-gradient(180deg, #5DCAA5 0%, #2F9A7A 100%)',
+    eyebrow: '#1F8A5A',
+    numberBg: '#E0F4EA',
+    numberFg: '#1F8A5A',
+    numberRing: 'rgba(31,138,90,0.20)',
+    chipBg: '#DEF7E7',
+    chipFg: '#1F8A5A',
+    chipRing: 'rgba(31,138,90,0.22)',
+    chipDot: '#1F8A5A',
+    chipLabel: 'Ready to export',
+  },
+  'needs-review': {
+    rail: 'linear-gradient(180deg, #E2A536 0%, #B07820 100%)',
+    eyebrow: '#915214',
+    numberBg: '#FCEDD0',
+    numberFg: '#915214',
+    numberRing: 'rgba(145,82,20,0.20)',
+    chipBg: '#FFE8C7',
+    chipFg: '#915214',
+    chipRing: 'rgba(145,82,20,0.22)',
+    chipDot: '#B07820',
+    chipLabel: 'Needs review',
+  },
+  'needs-brand-review': {
+    rail: 'linear-gradient(180deg, #A88CFF 0%, #7F5AF0 100%)',
+    eyebrow: '#534AB7',
+    numberBg: '#EDE7FB',
+    numberFg: '#534AB7',
+    numberRing: 'rgba(83,74,183,0.20)',
+    chipBg: '#EDE7FB',
+    chipFg: '#534AB7',
+    chipRing: 'rgba(83,74,183,0.22)',
+    chipDot: '#7F5AF0',
+    chipLabel: 'Needs brand review',
+  },
+};
+
+function ReadinessChip({ readiness }: { readiness: ActionReadiness }) {
+  const t = READINESS_THEME[readiness];
+  return (
+    <span
+      className="inline-flex items-center gap-[7px] rounded-full px-[11px] py-[5px] text-[11.5px] font-semibold"
+      style={{
+        background: t.chipBg,
+        color: t.chipFg,
+        boxShadow: `inset 0 0 0 1px ${t.chipRing}`,
+      }}
+    >
+      <span
+        aria-hidden
+        className="h-[6px] w-[6px] rounded-full"
+        style={{ background: t.chipDot }}
+      />
+      {t.chipLabel}
+    </span>
+  );
+}
+
+function ActionBadgePill({ badge }: { badge: ActionBadge }) {
+  const style = BADGE_TONES[badge.tone];
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-[10px] py-[4px] text-[11px] font-semibold"
+      style={{
+        background: style.bg,
+        color: style.fg,
+        boxShadow: `inset 0 0 0 1px ${style.ring}`,
+        fontFamily: style.mono
+          ? '"Courier New", ui-monospace, monospace'
+          : undefined,
+        letterSpacing: style.mono ? '0.04em' : undefined,
+      }}
+    >
+      {badge.label}
+    </span>
+  );
+}
+
+const BADGE_TONES: Record<
+  ActionBadge['tone'],
+  { bg: string; fg: string; ring: string; mono?: boolean }
+> = {
+  'risk-low':    { bg: '#E6F7EE', fg: '#1F8A5A', ring: 'rgba(31,138,90,0.18)' },
+  'impact-high': { bg: '#FFE6E0', fg: '#B7321E', ring: 'rgba(183,50,30,0.20)' },
+  'check':       { bg: '#FFF1DA', fg: '#915214', ring: 'rgba(145,82,20,0.22)' },
+  'count':       { bg: '#F2EEF9', fg: '#3C3489', ring: 'rgba(60,52,137,0.18)', mono: true },
+  'meta':        { bg: '#EFEAFA', fg: '#534AB7', ring: 'rgba(83,74,183,0.18)' },
+};
+
+// ─── 3. What we found (supporting insights) ──────────────────────────────
+
+function WhatWeFoundSection({ insights }: { insights: InsightCardData[] }) {
+  return (
+    <section>
+      <SectionTitle
+        title="What we found"
+        sub="The evidence behind the recommended actions."
+      />
+      <div className="grid gap-4 sm:grid-cols-3">
+        {insights.map((ins, i) => (
+          <InsightCard key={i} insight={ins} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function InsightCard({ insight }: { insight: InsightCardData }) {
+  return (
+    <article
+      className="flex flex-col rounded-[14px] bg-white px-5 py-5"
+      style={{
+        boxShadow:
+          '0 0 0 1px #e8e2f0, 0 1px 0 rgba(15,10,30,0.02), 0 14px 28px -22px rgba(15,10,30,0.10)',
+      }}
+    >
+      <h4 className="text-[15px] font-semibold leading-[1.3] tracking-[-0.005em] text-ppc-ink">
+        {insight.title}
+      </h4>
+
+      <div className="mt-4 space-y-4">
+        <InsightBlock label="What we saw"   body={insight.whatWeSaw} />
+        <InsightBlock label="Why it matters" body={insight.whyItMatters} />
+      </div>
+
+      <div className="my-4 flex items-center gap-2">
+        <span
+          aria-hidden
+          className="h-[5px] w-[5px] rounded-full"
+          style={{ background: '#7F5AF0' }}
+        />
+        <span
+          className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-ppc-text-muted"
+          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+        >
+          Signal
+        </span>
+      </div>
+      <p className="text-[12.5px] leading-[1.5] text-ppc-ink/85">
+        {insight.signal}
+      </p>
+
+      <button
+        type="button"
+        className="mt-5 inline-flex items-center gap-1.5 self-start text-[12.5px] font-semibold text-ppc-purple-500 transition-colors hover:text-ppc-purple-600"
+      >
+        <MagnifyingGlass size={11} weight="bold" />
+        {insight.evidenceLabel}
+        <ArrowRight size={11} weight="bold" />
+      </button>
+    </article>
+  );
+}
+
+function InsightBlock({ label, body }: { label: string; body: string }) {
+  return (
+    <div>
+      <p
+        className="mb-1 text-[10px] font-bold uppercase leading-none text-ppc-text-muted"
+        style={{
+          fontFamily: '"Courier New", ui-monospace, monospace',
+          letterSpacing: '0.12em',
+        }}
+      >
+        {label}
+      </p>
+      <p className="text-[12.5px] leading-[1.5] text-ppc-ink/85">{body}</p>
+    </div>
+  );
+}
+
+// ─── 4. Checks before export ─────────────────────────────────────────────
+//
+// Calm panel — communicates careful review, not failure. Soft amber tint
+// signals "decision pending" without alarm.
+
+function ChecksSection({ checks }: { checks: CheckData[] }) {
+  return (
+    <section
+      className="rounded-[16px] px-7 py-7"
+      style={{
+        background: 'linear-gradient(180deg, #FFF9EE 0%, #FBF6E5 100%)',
+        boxShadow: 'inset 0 0 0 1px #f3e6c5',
+      }}
+    >
+      <div className="mb-5 flex items-start gap-4">
+        <span
+          className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-[10px]"
+          style={{
+            background: 'linear-gradient(155deg, #F4CC7A 0%, #C38A1E 100%)',
+            boxShadow:
+              '0 1px 0 rgba(255,255,255,0.45) inset, 0 6px 14px -6px rgba(195,138,30,0.45)',
+          }}
+        >
+          <Question size={18} weight="bold" className="text-white" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-[18px] font-semibold tracking-[-0.01em] text-ppc-ink">
+            Checks before export
+          </h3>
+          <p className="mt-1 max-w-[640px] text-[13px] leading-[1.55] text-ppc-text-muted">
+            These don't block the report — they help avoid risky changes
+            before anything is exported or applied.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {checks.map((c, i) => (
+          <CheckRow key={i} check={c} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CheckRow({ check }: { check: CheckData }) {
+  return (
+    <div
+      className="flex flex-wrap items-start justify-between gap-4 rounded-[12px] bg-white px-5 py-4"
+      style={{ boxShadow: 'inset 0 0 0 1px #f0e6cc' }}
+    >
+      <div className="min-w-0 flex-1">
+        <h4 className="text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink">
+          {check.title}
+        </h4>
+        <p className="mt-1.5 max-w-[640px] text-[13px] leading-[1.55] text-ppc-text-muted">
+          {check.body}
+        </p>
+      </div>
+      <button
+        type="button"
+        className="inline-flex shrink-0 items-center gap-1.5 rounded-[10px] px-[14px] py-[8px] text-[12.5px] font-semibold text-ppc-ink transition-colors hover:bg-ppc-panel-soft"
+        style={{ boxShadow: 'inset 0 0 0 1px #ddd3c2', background: '#FFFDF7' }}
+      >
+        Resolve
+        <ArrowRight size={11} weight="bold" />
+      </button>
+    </div>
+  );
+}
+
+// ─── 5. Full report footer CTA ───────────────────────────────────────────
+
+function FullReportFooter({ onSeeFullReport }: { onSeeFullReport: () => void }) {
+  return (
+    <div className="flex justify-center pt-2">
       <button
         type="button"
         onClick={onSeeFullReport}
-        className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-ppc-purple-500 transition-colors hover:text-ppc-purple-600"
+        className="inline-flex items-center gap-2 rounded-[10px] bg-white px-[18px] py-[12px] text-[13px] font-semibold text-ppc-ink transition-colors hover:bg-ppc-panel-soft"
+        style={{
+          boxShadow:
+            '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 14px 28px -22px rgba(15,10,30,0.10)',
+        }}
       >
-        See full report
+        <MagnifyingGlass size={13} weight="bold" className="text-ppc-purple-500" />
+        View full report with evidence
         <ArrowRight size={12} weight="bold" />
       </button>
     </div>
   );
 }
 
-interface FindingTile {
-  title: string;
-  description: string;
-  impact: 'high' | 'medium' | 'low';
-  metrics: { value: string; label: string }[];
-}
+// ─── Shared section header (used by Top actions + What we found) ─────────
 
-function FindingTiles({ tiles }: { tiles: FindingTile[] }) {
+function SectionTitle({ title, sub }: { title: string; sub: string }) {
   return (
-    <div className="mb-9 grid gap-4 sm:grid-cols-3">
-      {tiles.map((t, i) => (
-        <FindingTileCard key={i} {...t} />
-      ))}
+    <div className="mb-5">
+      <h3 className="text-[20px] font-semibold tracking-[-0.012em] text-ppc-ink">
+        {title}
+      </h3>
+      <p className="mt-1 text-[13px] leading-[1.55] text-ppc-text-muted">
+        {sub}
+      </p>
     </div>
   );
 }
 
-function FindingTileCard({ title, description, impact, metrics }: FindingTile) {
+// ─── Pill buttons (used by ActionCard footer) ────────────────────────────
+
+function PrimaryPillButton({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="flex flex-col rounded-[14px] px-5 py-5"
+    <button
+      type="button"
+      className="inline-flex items-center gap-1.5 rounded-[10px] px-[14px] py-[9px] text-[12.5px] font-semibold text-white transition-transform hover:-translate-y-[0.5px]"
       style={{
-        background: '#FAF7FB',
+        background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
         boxShadow:
-          'inset 0 0 0 1px #eae3f1, 0 1px 0 rgba(15,10,30,0.02)',
+          '0 1px 0 rgba(255,255,255,0.18) inset, 0 6px 14px -6px rgba(127,90,240,0.55)',
       }}
     >
-      <h4 className="text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">
-        {title}
-      </h4>
-      <p className="mt-2 flex-1 text-[13px] leading-[1.55] text-ppc-text-muted">
-        {description}
-      </p>
-      <div className="mt-3">
-        <ImpactChip impact={impact} />
-      </div>
-      <div className="mt-4 flex items-end gap-6">
-        {metrics.map((m, i) => (
-          <div key={i} className="min-w-0">
-            <p className="font-display text-[20px] font-extrabold leading-none tracking-[-0.015em] text-ppc-ink">
-              {m.value}
-            </p>
-            <p className="mt-1.5 text-[11.5px] leading-[1.35] text-ppc-text-muted">
-              {m.label}
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
+      {children}
+      <ArrowRight size={11} weight="bold" />
+    </button>
   );
 }
+
+function GhostPillButton({
+  children,
+  icon,
+}: {
+  children: React.ReactNode;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      className="inline-flex items-center gap-1.5 rounded-[10px] border border-ppc-card-border bg-white px-[12px] py-[8px] text-[12.5px] font-medium text-ppc-ink transition-colors hover:bg-ppc-panel-soft"
+    >
+      {icon}
+      {children}
+    </button>
+  );
+}
+
+// ─── Legacy ImpactChip export ────────────────────────────────────────────
+// Used by /v4 SummaryV4. Kept here so /v4 keeps compiling — the v1 summary
+// no longer renders these directly.
 
 export function ImpactChip({ impact }: { impact: 'high' | 'medium' | 'low' }) {
   const styles = {
@@ -583,145 +1228,6 @@ export function ImpactChip({ impact }: { impact: 'high' | 'medium' | 'low' }) {
       }}
     >
       {styles.label}
-    </span>
-  );
-}
-
-// ─── Top recommendations ─────────────────────────────────────────────────
-
-interface RecRow {
-  title: string;
-  chips: { label: string; tone: 'win' | 'impact' }[];
-  icon: 'rise' | 'refresh' | 'shield';
-}
-
-function RecommendationsSection({
-  recs,
-  onSeeFullReport,
-}: {
-  recs: RecRow[];
-  onSeeFullReport: () => void;
-}) {
-  return (
-    <div>
-      <div className="mb-1 flex items-baseline justify-between">
-        <h3 className="text-[18px] font-semibold tracking-[-0.01em] text-ppc-ink">
-          Top recommendations
-        </h3>
-      </div>
-      <p className="mb-4 text-[13px] text-ppc-text-muted">
-        Prioritized actions to close the gaps
-      </p>
-      <div
-        className="mb-4 overflow-hidden rounded-[12px]"
-        style={{ boxShadow: 'inset 0 0 0 1px #ece6f3' }}
-      >
-        {recs.map((r, i) => (
-          <RecRowItem key={i} {...r} isLast={i === recs.length - 1} />
-        ))}
-      </div>
-      <button
-        type="button"
-        onClick={onSeeFullReport}
-        className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-ppc-purple-500 transition-colors hover:text-ppc-purple-600"
-      >
-        See full report with evidence
-        <ArrowRight size={12} weight="bold" />
-      </button>
-    </div>
-  );
-}
-
-function RecRowItem({
-  title,
-  chips,
-  icon,
-  isLast,
-}: RecRow & { isLast: boolean }) {
-  return (
-    <div
-      className={`flex items-center gap-4 px-5 py-4 transition-colors hover:bg-[#FBF9FD] ${
-        isLast ? '' : 'border-b border-[#efeaf4]'
-      }`}
-    >
-      <RecIcon kind={icon} />
-      <div className="min-w-0 flex-1">
-        <p className="text-[14.5px] font-semibold tracking-[-0.005em] text-ppc-ink">
-          {title}
-        </p>
-        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-ppc-text-muted">
-          {chips.map((c, i) => (
-            <span key={i} className="flex items-center gap-2">
-              <RecChip {...c} />
-              {i < chips.length - 1 && (
-                <span className="text-ppc-text-faint">·</span>
-              )}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RecIcon({ kind }: { kind: 'rise' | 'refresh' | 'shield' }) {
-  if (kind === 'rise') {
-    return (
-      <span
-        className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[10px]"
-        style={{
-          background: 'linear-gradient(155deg, #6FE0AC 0%, #3FB985 100%)',
-          boxShadow:
-            '0 1px 0 rgba(255,255,255,0.45) inset, 0 6px 14px -6px rgba(63,185,133,0.45)',
-        }}
-      >
-        <ArrowUp size={18} weight="bold" className="text-white" />
-      </span>
-    );
-  }
-  if (kind === 'refresh') {
-    return (
-      <span
-        className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[10px]"
-        style={{
-          background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 60%, #5A3FE0 100%)',
-          boxShadow:
-            '0 1px 0 rgba(255,255,255,0.35) inset, 0 6px 14px -6px rgba(127,90,240,0.45)',
-        }}
-      >
-        <ArrowsClockwise size={18} weight="bold" className="text-white" />
-      </span>
-    );
-  }
-  return (
-    <span
-      className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[10px]"
-      style={{
-        background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 60%, #5A3FE0 100%)',
-        boxShadow:
-          '0 1px 0 rgba(255,255,255,0.35) inset, 0 6px 14px -6px rgba(127,90,240,0.45)',
-      }}
-    >
-      <Flag size={18} weight="fill" className="text-white" />
-    </span>
-  );
-}
-
-function RecChip({ label, tone }: { label: string; tone: 'win' | 'impact' }) {
-  const styles =
-    tone === 'win'
-      ? { bg: '#E6F7EE', fg: '#1F8A5A', ring: 'rgba(31,138,90,0.18)' }
-      : { bg: '#FFE6E0', fg: '#B7321E', ring: 'rgba(183,50,30,0.18)' };
-  return (
-    <span
-      className="inline-flex items-center rounded-full px-[9px] py-[3px] text-[11px] font-semibold"
-      style={{
-        background: styles.bg,
-        color: styles.fg,
-        boxShadow: `inset 0 0 0 1px ${styles.ring}`,
-      }}
-    >
-      {label}
     </span>
   );
 }
@@ -1457,59 +1963,119 @@ function CompetitorSpyHero() {
 // Competitor Spy · report config
 // ════════════════════════════════════════════════════════════════════════
 
-const COMPETITOR_SPY_FINDING_TILES: FindingTile[] = [
-  {
-    title: 'Bidding gaps on core terms',
-    description:
-      'Rivals are consistently outranking you on high-intent terms with higher bids and better ad rank.',
-    impact: 'high',
-    metrics: [
-      { value: '$3.1K/mo', label: 'Potential upside' },
-      { value: '8',        label: 'Affected' },
-    ],
+const COMPETITOR_SPY_SUMMARY: SummaryData = {
+  verdict: {
+    statement:
+      'Competitor pressure is costing visibility on your highest-intent terms.',
+    actionsReady: 1,
+    actionsReview: 2,
+    risk:
+      'Bid changes depend on the campaign bidding strategy — confirm the right control lever before touching bids.',
   },
-  {
-    title: 'Winning copy patterns',
-    description:
-      'Top rivals convert 64% of impression share with outcome-driven headlines and strong CTAs.',
-    impact: 'high',
-    metrics: [
-      { value: '+64%', label: 'Impression share' },
-      { value: '12',   label: 'Examples identified' },
-    ],
-  },
-  {
-    title: 'Auction overlap risk',
-    description:
-      'Rivals overlap with you on 41% of spend, driving up CPCs on key terms.',
-    impact: 'medium',
-    metrics: [
-      { value: '41%', label: 'Overlap rate' },
-      { value: '5',   label: 'Rivals competing' },
-    ],
-  },
-];
 
-const COMPETITOR_SPY_RECS: RecRow[] = [
-  {
-    title: 'Raise bids on 8 high-intent keywords',
-    chips: [
-      { label: 'Quick win',   tone: 'win' },
-      { label: 'High impact', tone: 'impact' },
-    ],
-    icon: 'rise',
-  },
-  {
-    title: 'Refresh headlines to match winning patterns',
-    chips: [{ label: 'High impact', tone: 'impact' }],
-    icon: 'refresh',
-  },
-  {
-    title: 'Add negative keywords to stop wasted spend',
-    chips: [{ label: 'Quick win', tone: 'win' }],
-    icon: 'shield',
-  },
-];
+  // Order: safest → riskiest. Lead with "Ready to export" so the user
+  // sees the immediate win before the actions that need judgment.
+  actions: [
+    {
+      category: 'Negatives',
+      title: 'Add negative keywords to reduce wasted spend',
+      readiness: 'ready',
+      badges: [
+        { label: 'Low risk',  tone: 'risk-low' },
+        { label: '24 terms',  tone: 'count' },
+      ],
+      whyMatters:
+        'Search terms with spend and no conversion signal are leaking budget from campaigns that should be cleaner. 24 queries converted at <0.5% over the last 60 days.',
+      expected:
+        'Redirect ~$420/mo back to converting terms without changing campaign structure or bidding strategy.',
+      tradeoff:
+        'Review ambiguous terms before upload — a handful look informational but may have defensive value during competitor surges.',
+      primaryCta: 'Review 24 terms',
+      secondaryCta: 'Export CSV',
+    },
+    {
+      category: 'Bidding',
+      title: 'Review bid pressure on 8 high-intent keywords',
+      readiness: 'needs-review',
+      badges: [
+        { label: 'High impact',                 tone: 'impact-high' },
+        { label: 'Bidding strategy check needed', tone: 'check' },
+        { label: '8 keywords',                  tone: 'count' },
+      ],
+      whyMatters:
+        'Rivals are outranking you by 1.5+ positions on terms where you already spend heavily. 41% spend overlap means you\'re fighting the same auctions on the same queries.',
+      expected:
+        '~$3.1K/mo upside if you recover impression share on the contested set — bid simulator confidence 84%.',
+      tradeoff:
+        'If these campaigns use Smart Bidding or a portfolio strategy, direct keyword bid changes may not be the right lever. tCPA, budget, or conversion-quality changes might be the actual control instead.',
+      primaryCta: 'Review 8 keywords',
+      secondaryCta: 'Check bidding strategy',
+    },
+    {
+      category: 'Ad copy',
+      title: 'Refresh headlines in high-overlap ad groups',
+      readiness: 'needs-brand-review',
+      badges: [
+        { label: 'Copy drafts available', tone: 'meta' },
+        { label: '3 ad groups',           tone: 'count' },
+      ],
+      whyMatters:
+        'Top rivals open with the outcome the buyer wants ("$2M+ won for clients", "Get the settlement you deserve"). Your top ad groups lead with the service category — your two best-performing existing ads already use outcome framing, so this is a pattern, not a guess.',
+      expected:
+        '+64% impression-share lift modelled from rival ads with similar framing. 12 ready-to-test templates already extracted and de-duped.',
+      tradeoff:
+        'Drafts need a brand-voice + compliance pass before going live — bar-association rules on settlement claims and "guarantee" language vary by state.',
+      primaryCta: 'Review draft headlines',
+      secondaryCta: 'Edit with AI',
+    },
+  ],
+
+  insights: [
+    {
+      title: 'Bidding gaps on core terms',
+      whatWeSaw:
+        '8 high-intent keywords are losing rank against the same 3 rivals across all 7 days sampled.',
+      whyItMatters:
+        'Lost visibility on commercial-intent terms flows directly to advertisers you already track — this is the spend you can recover fastest.',
+      signal:
+        '−1.8 avg position gap · $3.1K/mo modelled upside · 84% bid-simulator confidence',
+      evidenceLabel: 'View evidence',
+    },
+    {
+      title: 'Winning copy patterns',
+      whatWeSaw:
+        'Top rivals use outcome-led headlines ("$2M+ won", "settlement you deserve"). Your ads lead with category.',
+      whyItMatters:
+        'Specific, outcome-framed copy converts 64% more impression share in the same auctions you\'re already paying to enter.',
+      signal:
+        '47 unique RSAs sampled · 12 patterns identified · 3 repeat across all top rivals',
+      evidenceLabel: 'View examples',
+    },
+    {
+      title: 'Auction overlap risk',
+      whatWeSaw:
+        '5 rivals overlap with you on 41% of spend; 3 of them are growing month-over-month.',
+      whyItMatters:
+        'The CPC pressure is concentrated, not random — the same rivals are pushing prices on the auctions you most need to win.',
+      signal:
+        '41% overlap rate · 5 rivals · +28% CPC vs uncontested terms',
+      evidenceLabel: 'View rivals',
+    },
+  ],
+
+  checks: [
+    {
+      title: 'Confirm bidding strategy',
+      body:
+        'We need to confirm whether the 3 affected campaigns use Manual CPC, Smart Bidding (tCPA/tROAS), or a portfolio strategy. Bid changes only make sense for Manual CPC — for Smart Bidding the right lever is target CPA, budget, or conversion-quality adjustments.',
+    },
+    {
+      title: 'Clarify defensive search terms',
+      body:
+        'A handful of the 24 zero-conversion terms (e.g. "free injury lawyer", "injury lawyer near me free") may be intentional defensive coverage rather than waste. Confirm intent before excluding so we don\'t cede those impressions to a rival.',
+    },
+  ],
+};
 
 const COMPETITOR_SPY_METHODOLOGY: ReportConfig['methodology'] = {
   intro:
@@ -1554,10 +2120,7 @@ const COMPETITOR_SPY_METHODOLOGY: ReportConfig['methodology'] = {
 const COMPETITOR_SPY_REPORT: ReportConfig = {
   generated: { date: 'May 13, 2025', time: '2:14 PM' },
   mascot: () => <CompetitorSpyHero />,
-  summary: {
-    findingTiles: COMPETITOR_SPY_FINDING_TILES,
-    recs: COMPETITOR_SPY_RECS,
-  },
+  summary: COMPETITOR_SPY_SUMMARY,
   fullReport: COMPETITOR_SPY_FULL_REPORT,
   methodology: COMPETITOR_SPY_METHODOLOGY,
 };
