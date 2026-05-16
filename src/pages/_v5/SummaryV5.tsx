@@ -1205,23 +1205,6 @@ function PrimaryButton({
   );
 }
 
-function SecondaryButton({
-  label,
-  icon,
-}: {
-  label: string;
-  icon?: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      className="inline-flex items-center gap-1.5 rounded-[12px] border border-ppc-card-border bg-white px-[14px] py-[10px] text-[13.5px] font-medium text-ppc-text-muted transition-colors hover:bg-ppc-panel-soft hover:text-ppc-ink"
-    >
-      {icon}
-      {label}
-    </button>
-  );
-}
 
 
 // ── Helpers ──────────────────────────────────────────────────────────────
