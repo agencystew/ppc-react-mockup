@@ -1771,7 +1771,7 @@ function MemoryComposer({ projectName }: { projectName: string }) {
         className="relative overflow-hidden rounded-[20px]"
         style={{
           background: 'linear-gradient(180deg, #15101F 0%, #0F0A1E 55%, #0A0617 100%)',
-          boxShadow: '0 1px 0 rgba(255,255,255,0.06) inset, 0 22px 48px -22px rgba(15,10,30,0.65), 0 0 0 1px rgba(127,90,240,0.14)',
+          boxShadow: '0 1px 0 rgba(255,255,255,0.06) inset, 0 22px 48px -22px rgba(15,10,30,0.55), 0 0 0 1px rgba(127,90,240,0.14)',
         }}
       >
         <div

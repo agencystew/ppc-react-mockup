@@ -16,6 +16,10 @@ import {
   ArrowRight,
   X,
   Check,
+  Target,
+  MagnifyingGlass,
+  Lightbulb,
+  Warning,
 } from '@phosphor-icons/react';
 
 import { SpyMascot } from '../../components/SpyMascot';
@@ -453,7 +457,22 @@ function DiscoveryCardV5({
       }}
     >
       <div className="relative px-10 py-10 sm:px-14 sm:py-12">
-        {/* Headline — pure editorial opener. No chrome above it. */}
+        {/* Universal finding marker — a single purple Target glyph above
+            the headline. Same icon on every card so the page reads with
+            visual rhythm; one accent colour, no rainbow. Soft drop-shadow
+            gives it lift without a chip/box. */}
+        <div className="mb-5" aria-hidden>
+          <Target
+            size={28}
+            weight="duotone"
+            style={{
+              color: '#7F5AF0',
+              filter: 'drop-shadow(0 0 14px rgba(127,90,240,0.32))',
+            }}
+          />
+        </div>
+
+        {/* Headline — pure editorial opener. */}
         <h4
           className="font-display text-[30px] font-extrabold text-ppc-ink sm:text-[34px]"
           style={{
@@ -468,10 +487,12 @@ function DiscoveryCardV5({
         <DiscoverySectionField
           label="What we found"
           body={discovery.whatWeFound}
+          icon={<MagnifyingGlass size={17} weight="regular" />}
         />
         <DiscoverySectionField
           label={`Why it matters for ${projectName}`}
           body={discovery.whyItMatters}
+          icon={<Lightbulb size={17} weight="regular" />}
         />
 
         <ActionCallout discovery={discovery} />
@@ -479,8 +500,13 @@ function DiscoveryCardV5({
         <DiscoverySectionField
           label="Expected outcome"
           body={discovery.expectedOutcome}
+          icon={<Sparkle size={17} weight="regular" />}
         />
-        <DiscoverySectionField label="Risk" body={discovery.tradeoffRisk} />
+        <DiscoverySectionField
+          label="Risk"
+          body={discovery.tradeoffRisk}
+          icon={<Warning size={17} weight="regular" />}
+        />
 
         {/* CTAs — restrained. No eyebrow, no subtitle, no tool-calls metadata. */}
         <div className="mt-10 flex flex-wrap items-center gap-3">
@@ -513,21 +539,34 @@ function DiscoveryCardV5({
   );
 }
 
-// ─── Discovery section field — clean label + generous body, no icon chip ───
+// ─── Discovery section field — label + body with an optional subtle purple
+//     accent icon. ONE purple, never tinted backgrounds, all icons the same
+//     size + weight so they read as accent marks not chips.
 
 function DiscoverySectionField({
   label,
   body,
+  icon,
 }: {
   label: string;
   body: string;
+  icon?: React.ReactNode;
 }) {
   return (
     <section className="mt-9">
       <h5
-        className="text-[17px] font-bold text-ppc-ink"
+        className="flex items-center gap-[10px] text-[17px] font-bold text-ppc-ink"
         style={{ letterSpacing: '-0.012em' }}
       >
+        {icon && (
+          <span
+            aria-hidden
+            className="inline-flex shrink-0"
+            style={{ color: '#7F5AF0' }}
+          >
+            {icon}
+          </span>
+        )}
         {label}
       </h5>
       <p
