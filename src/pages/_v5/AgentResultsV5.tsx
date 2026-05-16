@@ -1,20 +1,21 @@
 // v5 report page · world-class redesign
 //
-// New chrome (no shared HeroCard with v1) because the v5 InvestigationHero
-// is its own thing. Only Breadcrumbs is reused from the v1 page chrome.
+// Chrome flow:
+//   Breadcrumbs   →   ReportOpener (slim editorial strip)   →   Tab bar
+//   The "payoff" moment now lives INSIDE the AI Summary verdict card
+//   (StrategyVerdictCard, dark refined surface). The page chrome stays calm.
 //
 // Routes:
-//   /v5/reports/:runId   →  this page (v5 preview)
-//   /reports/:runId      →  canonical v1 (unchanged)
+//   /reports/:runId      →  canonical v5 (this page)
+//   /v1/reports/:runId   →  v1 preserved for comparison
 //
-// Tab model: AI Summary | Deep Report. Methodology folds into Deep Report
-// in Chunk 3 — no top-level Methodology tab.
+// Tab model: AI Summary | Deep Report.
 //
 // Design doc: docs/plans/2026-05-16-agent-results-v5-design.md
 
 import { useState } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
-import { ArrowLeft, Sparkle, Path } from '@phosphor-icons/react';
+import { Sparkle, Path } from '@phosphor-icons/react';
 
 import { Breadcrumbs } from '../AgentResults';
 import { RUNS } from '../../mock/runs';
@@ -22,7 +23,7 @@ import { PROJECTS } from '../../mock/projects';
 
 import { SummaryV5 } from './SummaryV5';
 import { DeepReportV5 } from './DeepReportV5';
-import { InvestigationHero } from './InvestigationHero';
+import { ReportOpener } from './ReportOpener';
 import { COMPETITOR_SPY_V5 } from './data';
 
 type V5Tab = 'summary' | 'deep';
@@ -64,13 +65,11 @@ export function AgentResultsV5() {
 
   return (
     <div className="font-sans text-ppc-ink">
-      <V5Badge runId={completedRun.runId} />
       <Breadcrumbs trail={['Reports', run.parentAgent.name, projectName]} />
 
-      {/* Hero sits ABOVE the tabs and is shared by both tabs. */}
       {hasV5Data && (
         <div className="mx-auto w-full max-w-[1200px]">
-          <InvestigationHero data={COMPETITOR_SPY_V5.hero} />
+          <ReportOpener data={COMPETITOR_SPY_V5.hero} />
         </div>
       )}
 
@@ -84,41 +83,6 @@ export function AgentResultsV5() {
       ) : (
         <V5EmptyNote runId={completedRun.runId} />
       )}
-    </div>
-  );
-}
-
-// ─── V5 surface markers ──────────────────────────────────────────────────
-
-function V5Badge({ runId }: { runId: string }) {
-  return (
-    <div className="mb-3 flex items-center justify-between gap-3">
-      <span
-        className="inline-flex items-center gap-2 rounded-full px-[12px] py-[5px] text-[11px] font-bold uppercase tracking-[0.10em]"
-        style={{
-          background: 'linear-gradient(135deg, #1A0D38 0%, #2D1B5A 100%)',
-          color: '#C9B5FF',
-          fontFamily: '"Courier New", ui-monospace, monospace',
-          boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.32)',
-        }}
-      >
-        <span
-          aria-hidden
-          className="h-[5px] w-[5px] rounded-full"
-          style={{
-            background: '#A88CFF',
-            boxShadow: '0 0 0 2px rgba(127,90,240,0.32)',
-          }}
-        />
-        V5 · World-class summary preview
-      </span>
-      <Link
-        to={`/v1/reports/${runId}`}
-        className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-ppc-text-muted transition-colors hover:text-ppc-purple-500"
-      >
-        <ArrowLeft size={12} weight="bold" />
-        Compare v1
-      </Link>
     </div>
   );
 }

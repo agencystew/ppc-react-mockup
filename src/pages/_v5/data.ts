@@ -21,23 +21,12 @@ export type Impact = 'high' | 'medium' | 'low';
 export type Shape = 'verdict' | 'fact' | 'gap' | 'pattern';
 export type ContextStatus = 'upgraded' | 'complete' | 'downgraded';
 
-export type PowerStatIcon =
-  | 'path'
-  | 'lightning'
-  | 'clock'
-  | 'magnifying-glass'
-  | 'target'
-  | 'puzzle'
-  | 'database'
-  | 'stack';
-
-export interface PowerStat {
-  iconId: PowerStatIcon;
-  value: string;        // "6", "161", "7-day"
-  label: string;        // "Specialist phases", "Tool invocations", "Lookback window"
-}
-
-export interface InvestigationHeroData {
+// ReportOpenerData replaces the old InvestigationHeroData. The page no longer
+// opens with a dark slab + mascot + power stats; that maximalist moment was
+// retired in favour of a slim editorial strip (this data) + a dark refined
+// verdict card (StrategyVerdictData.h1 + headline + body). Receipts that used
+// to be three power-stat boxes now whisper as a single mono caption.
+export interface ReportOpenerData {
   agentName: string;
   agentSlug: string;
   projectName: string;
@@ -45,9 +34,7 @@ export interface InvestigationHeroData {
   projectAvatarBg: string;
   duration: string;             // "7m 12s" — post-run elapsed
   window: string;               // "7-day window"
-
-  headline: string;             // Figtree 900 + purple period — the moment
-  powerStats: PowerStat[];      // 3 lavender stat boxes showcasing the agent's depth
+  receipts: string;             // "161 tool calls · 84 SERPs · 6 phases"
 }
 
 export interface TriageRow {
@@ -59,7 +46,8 @@ export interface TriageRow {
 
 export interface StrategyVerdictData {
   agentName: string;               // for the eyebrow byline
-  headline: string;                // confident strategist sentence, NOT a $ figure
+  h1?: string;                     // short imposing punch — "The gap to press." (falls back to headline if absent)
+  headline: string;                // longer dek/lede line directly under the h1
   body: string;                    // 2–3 sentences of judgment
   bullets: string[];               // action-oriented strategic moves, 3–4 bullets
 
@@ -115,7 +103,7 @@ export interface AskTheAgentData {
 }
 
 export interface AgentResultsV5Data {
-  hero: InvestigationHeroData;
+  hero: ReportOpenerData;
   verdict: StrategyVerdictData;
   discoveries: DiscoveryV5[];
   checks: CheckItem[];
@@ -219,17 +207,12 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
     projectAvatarBg: '#3FB985',
     duration: '7m 12s',
     window: '7-day window',
-
-    headline: 'Competitor Spy went deep.',
-    powerStats: [
-      { iconId: 'path',      value: '6',     label: 'Specialist phases' },
-      { iconId: 'lightning', value: '161',   label: 'Tool invocations' },
-      { iconId: 'magnifying-glass', value: '84', label: 'SERPs reviewed' },
-    ],
+    receipts: '161 tool calls · 84 SERPs · 6 phases',
   },
 
   verdict: {
     agentName: 'Competitor Spy',
+    h1: 'The gap to press.',
     headline: "Outflank Aspen where they're thinnest — not where they're saturated.",
     body:
       "You're not losing to a generalist. You're losing to a specialist who's decided Boulder Care's market is profitable. Aspen sits top-3 on every high-intent recovery keyword you bid on, but rotates to position 4 on exactly 4 of them. That's the gap to press.",

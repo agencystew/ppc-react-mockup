@@ -67,57 +67,139 @@ export function SummaryV5({ data }: { data: AgentResultsV5Data }) {
 }
 
 // ═════════════════════════════════════════════════════════════════════════
-// STRATEGY VERDICT  (no triage filler, no "why downgraded" panel)
+// STRATEGY VERDICT  (dark refined surface — the page's signature payoff)
 // ═════════════════════════════════════════════════════════════════════════
+//
+// Anatomy:
+//   1. Mono eyebrow      — "◆ COMPETITOR SPY'S VERDICT"
+//   2. Imposing H1       — short punch (data.h1), purple period
+//   3. Lede              — longer dek line (data.headline)
+//   4. Body paragraph    — judgment, muted on dark
+//   5. Bulleted moves    — soft purple dot, lavender-white body
+//   6. CTAs              — purple gradient primary, ghost secondary
+//
+// Surface follows the black-led pattern (vertical gradient #0F0A1E → #07050D,
+// subtle purple bloom top-right ~0.20 alpha, never pure black).
 
 function StrategyVerdictCard({ data }: { data: StrategyVerdictData }) {
+  // h1 is the short imposing punch; falls back to headline if a fixture
+  // hasn't been authored with a separate h1 yet.
+  const h1 = data.h1 ?? data.headline;
+  const showLede = Boolean(data.h1) && data.headline && data.headline !== data.h1;
+
   return (
     <section
-      className="relative overflow-hidden rounded-[24px] bg-white"
+      className="relative overflow-hidden rounded-[28px] text-white"
       style={{
-        padding: '48px 56px 44px',
+        background: 'linear-gradient(180deg, #0F0A1E 0%, #07050D 100%)',
         boxShadow:
-          '0 0 0 1px #e8e2f0, 0 24px 48px -28px rgba(15,10,30,0.18)',
+          'inset 0 1px 0 rgba(255,255,255,0.05), 0 30px 60px -28px rgba(15,10,30,0.55)',
+        padding: 'clamp(40px, 5vw, 64px) clamp(32px, 4.5vw, 64px)',
       }}
     >
-      {/* Eyebrow + headline collapsed into one moderately-large line */}
-      <h2
-        className="font-display font-bold text-ppc-ink"
+      {/* Top-right purple bloom — quiet atmosphere, not chrome */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute"
         style={{
-          fontSize: 'clamp(24px, 2.6vw, 30px)',
-          letterSpacing: '-0.022em',
-          lineHeight: 1.3,
-          maxWidth: '980px',
+          top: '-160px',
+          right: '-140px',
+          width: '560px',
+          height: '380px',
+          background:
+            'radial-gradient(ellipse, rgba(127,90,240,0.22) 0%, transparent 62%)',
+        }}
+      />
+      {/* Faint dot-grid texture — adds depth without pattern */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            'radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+          maskImage:
+            'linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%)',
+        }}
+      />
+
+      {/* Eyebrow */}
+      <p
+        className="relative mb-7 flex items-center gap-[10px]"
+        style={{
+          fontFamily: '"Courier New", ui-monospace, monospace',
+          fontSize: '11.5px',
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          color: 'rgba(201,181,255,0.75)',
+          fontWeight: 700,
         }}
       >
-        <span style={{ color: '#7F5AF0', marginRight: '10px' }}>◆</span>
-        <span style={{ color: '#534AB7', fontWeight: 600 }}>
-          {data.agentName}'s verdict —
-        </span>{' '}
-        {data.headline}
+        <span style={{ color: '#A88CFF', fontSize: '13px' }}>◆</span>
+        {data.agentName}'s verdict
+      </p>
+
+      {/* H1 — short imposing punch with purple period */}
+      <h2
+        className="relative font-display font-black text-white"
+        style={{
+          fontSize: 'clamp(46px, 5.4vw, 76px)',
+          letterSpacing: '-0.038em',
+          lineHeight: 0.96,
+          maxWidth: '880px',
+        }}
+      >
+        {h1.replace(/\.$/, '')}
+        <span style={{ color: '#A88CFF' }}>.</span>
       </h2>
 
+      {/* Lede — longer dek directly under the h1 */}
+      {showLede && (
+        <p
+          className="relative mt-6 font-display"
+          style={{
+            fontSize: 'clamp(20px, 1.85vw, 26px)',
+            fontWeight: 500,
+            lineHeight: 1.4,
+            letterSpacing: '-0.014em',
+            color: 'rgba(255,255,255,0.86)',
+            maxWidth: '780px',
+          }}
+        >
+          {data.headline}
+        </p>
+      )}
+
+      {/* Body — strategist judgment, muted lavender */}
       <p
-        className="mt-6 text-[17px] leading-[1.7] text-ppc-text-muted"
-        style={{ maxWidth: '760px' }}
+        className="relative mt-8 text-[16px] leading-[1.75]"
+        style={{
+          color: 'rgba(184,174,218,0.82)',
+          maxWidth: '740px',
+        }}
       >
         {data.body}
       </p>
 
+      {/* Bulleted moves */}
       {data.bullets && data.bullets.length > 0 && (
-        <ul className="mt-9 flex flex-col gap-4" style={{ maxWidth: '820px' }}>
+        <ul
+          className="relative mt-9 flex flex-col gap-[14px]"
+          style={{ maxWidth: '820px' }}
+        >
           {data.bullets.map((b, i) => (
-            <VerdictBullet key={i} text={b} />
+            <DarkVerdictBullet key={i} text={b} />
           ))}
         </ul>
       )}
 
-      <div className="mt-10 flex flex-wrap items-center gap-3">
+      {/* CTAs */}
+      <div className="relative mt-10 flex flex-wrap items-center gap-3">
         <PrimaryButton
           label={data.primaryCta}
           icon={<ArrowRight size={12} weight="bold" />}
         />
-        <SecondaryButton
+        <DarkGhostButton
           label={data.secondaryCta}
           icon={<ChatCircle size={13} weight="bold" />}
         />
@@ -126,33 +208,57 @@ function StrategyVerdictCard({ data }: { data: StrategyVerdictData }) {
   );
 }
 
-function VerdictBullet({ text }: { text: string }) {
+function DarkVerdictBullet({ text }: { text: string }) {
   return (
-    <li className="flex items-start gap-4">
+    <li className="flex items-start gap-[14px]">
       <span
         aria-hidden
-        className="mt-[10px] inline-flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-full"
+        className="mt-[10px] inline-block h-[6px] w-[6px] shrink-0 rounded-full"
         style={{
-          background: 'rgba(127,90,240,0.12)',
+          background: '#A88CFF',
+          boxShadow: '0 0 0 4px rgba(168,140,255,0.12)',
         }}
-      >
-        <span
-          aria-hidden
-          className="inline-block h-[8px] w-[8px] rounded-full"
-          style={{ background: '#7F5AF0' }}
-        />
-      </span>
+      />
       <span
-        className="text-[16px] leading-[1.65]"
+        className="text-[15.5px] leading-[1.62]"
         style={{
-          color: '#1a1625',
-          fontWeight: 500,
-          letterSpacing: '-0.008em',
+          color: 'rgba(255,255,255,0.92)',
+          fontWeight: 400,
+          letterSpacing: '-0.005em',
         }}
       >
         {text}
       </span>
     </li>
+  );
+}
+
+function DarkGhostButton({
+  label,
+  icon,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      className="inline-flex items-center gap-1.5 rounded-[12px] px-[14px] py-[10px] text-[13.5px] font-medium transition-colors"
+      style={{
+        color: 'rgba(255,255,255,0.88)',
+        background: 'rgba(255,255,255,0.04)',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.14)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+      }}
+    >
+      {icon}
+      {label}
+    </button>
   );
 }
 
