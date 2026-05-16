@@ -584,6 +584,22 @@ function PhaseCard({
             <div className="mt-6">
               <ToolsUsedRow tools={phase.toolsUsed} />
               <DataPreviewTable preview={phase.dataPreview} />
+              <p
+                className="mt-4 flex items-start gap-[8px] text-[13px] leading-[1.55]"
+                style={{ color: '#6b6480' }}
+              >
+                <span
+                  aria-hidden
+                  className="mt-[5px] inline-block h-[6px] w-[6px] shrink-0 rounded-full"
+                  style={{ background: '#A88CFF' }}
+                />
+                <span>
+                  <span className="font-semibold" style={{ color: '#3c3849' }}>
+                    Source ·
+                  </span>{' '}
+                  {phase.dataSource}
+                </span>
+              </p>
             </div>
           )}
         </div>

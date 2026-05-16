@@ -144,6 +144,11 @@ export interface PhaseV5 {
   toolsUsed: string[];           // ["serp_api.search", "web.scrape", "domain.lookup"]
   toolCallCount: number;
   dataPointsLabel: string;       // "8 rivals · 12 keywords · 84 SERPs"
+  dataSource: string;            // Human-readable provenance under the table —
+                                 // "Pulled via Google Ads API (Auction Insights)
+                                 // · 30-day window". Required for Google Ads
+                                 // API Standard Access RMF — reporting tools
+                                 // must clearly label data sources.
   dataPreview: PhaseDataPreview;
 }
 
@@ -436,6 +441,8 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
         toolsUsed: ['serp_api.search', 'web.scrape', 'domain.lookup'],
         toolCallCount: 47,
         dataPointsLabel: '8 rivals · 12 keywords · 84 SERPs',
+        dataSource:
+          'Pulled via Google SERP API + domain lookup · 7-day window (2026-05-09 → 2026-05-16)',
         dataPreview: {
           headers: ['Rival', 'Domain', 'Est. spend', 'Active since'],
           rows: [
@@ -467,6 +474,8 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
         toolsUsed: ['google_ads.auction_insights', 'google_ads.report'],
         toolCallCount: 18,
         dataPointsLabel: '120 data points · 8 rivals × 15 keywords',
+        dataSource:
+          'Pulled via Google Ads API · Auction Insights + Reports · 30-day window (2026-04-16 → 2026-05-16)',
         dataPreview: {
           headers: ['Rival', 'Impr. share', 'Overlap', 'Outrank'],
           rows: [
@@ -498,6 +507,8 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
         toolsUsed: ['serp_api.ads', 'ad_library.fetch'],
         toolCallCount: 32,
         dataPointsLabel: '47 ad variants captured across 8 rivals',
+        dataSource:
+          'Pulled via Google SERP API (ads) + Google Ads Transparency Center · daily snapshots over 7 days',
         dataPreview: {
           headers: ['Angle', 'Rivals using', 'Avg. CTR'],
           rows: [
@@ -529,6 +540,8 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
         toolsUsed: ['web.scrape', 'screenshot.capture', 'lighthouse.audit'],
         toolCallCount: 33,
         dataPointsLabel: '11 landing pages · form fields · social proof inventory',
+        dataSource:
+          'Pulled via headless browser scrape + Google Lighthouse audit · captured 2026-05-15',
         dataPreview: {
           headers: ['Landing page', 'Form fields', 'Reviews shown', 'Page speed'],
           rows: [
@@ -559,6 +572,8 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
         toolsUsed: ['similarweb.api', 'google_ads.auction_insights', 'cpc.estimate'],
         toolCallCount: 22,
         dataPointsLabel: 'Spend estimates · 30 / 90 / 180 day windows',
+        dataSource:
+          'Pulled via SimilarWeb API + Google Ads Auction Insights + category CPC benchmarks · ±20% confidence band',
         dataPreview: {
           headers: ['Rival', '30-day est.', 'Trend', 'Confidence'],
           rows: [
@@ -590,6 +605,8 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
         toolsUsed: ['compare.matrix', 'ctr.benchmark'],
         toolCallCount: 9,
         dataPointsLabel: '11 unclaimed angles with CTR benchmarks',
+        dataSource:
+          'Synthesized from Copy Analysis phase (47 rival ad variants) + Boulder Care ICP from project profile · 7-day window',
         dataPreview: {
           headers: ['Unclaimed angle', 'Rivals running', 'Best rival CTR'],
           rows: [
