@@ -37,7 +37,12 @@ export function SummaryV5({ data }: { data: AgentResultsV5Data }) {
   return (
     <>
       <div className="mx-auto w-full max-w-[1200px] pb-16">
-        <StrategyVerdictCard data={data.verdict} />
+        <StrategyVerdictCard
+          data={data.verdict}
+          discoveries={data.discoveries}
+          duration={data.hero.duration}
+          window={data.hero.window}
+        />
         <DiscoverySection
           discoveries={data.discoveries}
           projectName={data.hero.projectName}
@@ -58,206 +63,242 @@ export function SummaryV5({ data }: { data: AgentResultsV5Data }) {
 }
 
 // ═════════════════════════════════════════════════════════════════════════
-// STRATEGY VERDICT  (dark refined surface — the page's signature payoff)
+// STRATEGY VERDICT  (dark refined surface — slim arrival moment, not a text monolith)
 // ═════════════════════════════════════════════════════════════════════════
 //
-// Anatomy:
-//   1. Mono eyebrow      — "◆ COMPETITOR SPY'S VERDICT"
-//   2. Imposing H1       — short punch (data.h1), purple period
-//   3. Lede              — longer dek line (data.headline)
-//   4. Body paragraph    — judgment, muted on dark
-//   5. Bulleted moves    — soft purple dot, lavender-white body
-//   6. CTAs              — purple gradient primary, ghost secondary
+// Previously a maximalist hero card with H1 + lede + body paragraph + 4
+// bullets + 2 CTAs that duplicated the discoveries below. Stewart's call:
+// "massive and a text monolith." Redesigned to a tight arrival surface
+// that previews the findings instead of restating them in prose.
 //
-// Surface follows the black-led pattern (vertical gradient #0F0A1E → #07050D,
-// subtle purple bloom top-right ~0.20 alpha, never pure black).
+// Anatomy:
+//   1. Small kicker     — "◆ Competitor Spy"
+//   2. Tight headline   — "Agent complete." (purple period)
+//   3. Completion meta  — ✓ Completed · 7m 12s · 7-day window
+//   4. 4 action cards   — one per discovery, click → smooth scroll
+//   5. Scroll nudge     — quiet "↓" cue, no purple-button CTA
 
-function StrategyVerdictCard({ data }: { data: StrategyVerdictData }) {
-  // h1 is the short imposing punch; falls back to headline if a fixture
-  // hasn't been authored with a separate h1 yet.
-  const h1 = data.h1 ?? data.headline;
-  const showLede = Boolean(data.h1) && data.headline && data.headline !== data.h1;
-
+function StrategyVerdictCard({
+  data,
+  discoveries,
+  duration,
+  window: timeWindow,
+}: {
+  data: StrategyVerdictData;
+  discoveries: DiscoveryV5[];
+  duration: string;
+  window: string;
+}) {
   return (
     <section
-      className="relative overflow-hidden rounded-[28px] text-white"
+      className="relative overflow-hidden rounded-[24px] text-white"
       style={{
         background: 'linear-gradient(180deg, #0F0A1E 0%, #07050D 100%)',
         boxShadow:
           'inset 0 1px 0 rgba(255,255,255,0.05), 0 30px 60px -28px rgba(15,10,30,0.55)',
-        padding: 'clamp(40px, 5vw, 64px) clamp(32px, 4.5vw, 64px)',
+        padding: 'clamp(28px, 3.4vw, 44px) clamp(28px, 3.6vw, 48px)',
       }}
     >
-      {/* Top-right purple bloom — quiet atmosphere, not chrome */}
+      {/* Top-right purple bloom */}
       <span
         aria-hidden
         className="pointer-events-none absolute"
         style={{
-          top: '-160px',
-          right: '-140px',
-          width: '560px',
-          height: '380px',
+          top: '-140px',
+          right: '-120px',
+          width: '500px',
+          height: '320px',
           background:
-            'radial-gradient(ellipse, rgba(127,90,240,0.22) 0%, transparent 62%)',
-        }}
-      />
-      {/* Faint dot-grid texture — adds depth without pattern */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            'radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
-          maskImage:
-            'linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%)',
+            'radial-gradient(ellipse, rgba(127,90,240,0.20) 0%, transparent 62%)',
         }}
       />
 
-      {/* Kicker — magazine-style label above the H1. Sans, semibold, readable.
-          Dropped the AI-slop "tiny uppercase mono eyebrow" convention. */}
-      <p
-        className="relative mb-6 flex items-center gap-[11px]"
+      {/* Header row — kicker + completion meta on one tight line */}
+      <div className="relative flex flex-wrap items-baseline justify-between gap-x-6 gap-y-3">
+        <p
+          className="flex items-baseline gap-[10px]"
+          style={{
+            fontSize: '16px',
+            letterSpacing: '-0.005em',
+            color: 'rgba(201,181,255,0.90)',
+            fontWeight: 600,
+          }}
+        >
+          <span
+            aria-hidden
+            style={{
+              color: '#A88CFF',
+              fontSize: '14px',
+              textShadow: '0 0 12px rgba(168,140,255,0.55)',
+            }}
+          >
+            ◆
+          </span>
+          {data.agentName}
+        </p>
+
+        <div className="flex flex-wrap items-center gap-[12px] text-[14px]">
+          <span
+            className="inline-flex items-center gap-[8px] rounded-full px-[12px] py-[5px] font-semibold"
+            style={{
+              background: 'rgba(93,202,165,0.14)',
+              color: '#9CE5C5',
+              boxShadow: 'inset 0 0 0 1px rgba(93,202,165,0.32)',
+              letterSpacing: '-0.005em',
+            }}
+          >
+            <span
+              aria-hidden
+              className="inline-flex h-[14px] w-[14px] items-center justify-center rounded-full"
+              style={{ background: '#5DCAA5' }}
+            >
+              <Check size={9} weight="bold" style={{ color: '#0F0A1E' }} />
+            </span>
+            Completed
+          </span>
+          <span style={{ color: 'rgba(184,174,218,0.85)' }}>
+            <span
+              className="tabular-nums font-bold"
+              style={{ color: 'rgba(255,255,255,0.92)' }}
+            >
+              {duration}
+            </span>
+            <span style={{ margin: '0 8px', color: 'rgba(184,174,218,0.40)' }}>
+              ·
+            </span>
+            {timeWindow}
+          </span>
+        </div>
+      </div>
+
+      {/* Tight headline — arrival moment, not a verdict statement */}
+      <h2
+        className="relative mt-4 font-display font-extrabold text-white"
         style={{
-          fontSize: '17px',
-          letterSpacing: '-0.008em',
-          color: 'rgba(201,181,255,0.90)',
-          fontWeight: 600,
+          fontSize: 'clamp(28px, 2.8vw, 36px)',
+          letterSpacing: '-0.024em',
+          lineHeight: 1.1,
         }}
       >
+        Agent run complete
+        <span style={{ color: '#A88CFF' }}>.</span>
+      </h2>
+      <p
+        className="relative mt-2 text-[15px]"
+        style={{ color: 'rgba(184,174,218,0.85)' }}
+      >
+        {discoveries.length} findings ready —{' '}
+        <span style={{ color: 'rgba(255,255,255,0.92)' }}>
+          click any card to dive in.
+        </span>
+      </p>
+
+      {/* 4 action cards — one per discovery, click → smooth-scroll to it */}
+      <div className="relative mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {discoveries.map((d) => (
+          <VerdictDiscoveryCard key={d.id} discovery={d} />
+        ))}
+      </div>
+
+      {/* Subtle scroll nudge — no big purple CTA */}
+      <a
+        href={`#discovery-${discoveries[0]?.id ?? ''}`}
+        className="relative mx-auto mt-7 flex w-fit items-center gap-[8px] text-[13px] transition-colors hover:text-white"
+        style={{
+          color: 'rgba(184,174,218,0.70)',
+          letterSpacing: '0.02em',
+        }}
+      >
+        Findings below
         <span
           aria-hidden
           style={{
             color: '#A88CFF',
-            fontSize: '15px',
-            textShadow: '0 0 12px rgba(168,140,255,0.55)',
+            fontSize: '12px',
+            transform: 'translateY(1px)',
+            display: 'inline-block',
           }}
         >
-          ◆
+          ↓
         </span>
-        {data.agentName}'s verdict
-      </p>
-
-      {/* H1 — short imposing punch with purple period */}
-      <h2
-        className="relative font-display font-black text-white"
-        style={{
-          fontSize: 'clamp(46px, 5.4vw, 76px)',
-          letterSpacing: '-0.038em',
-          lineHeight: 0.96,
-          maxWidth: '880px',
-        }}
-      >
-        {h1.replace(/\.$/, '')}
-        <span style={{ color: '#A88CFF' }}>.</span>
-      </h2>
-
-      {/* Lede — longer dek directly under the h1 */}
-      {showLede && (
-        <p
-          className="relative mt-6 font-display"
-          style={{
-            fontSize: 'clamp(20px, 1.85vw, 26px)',
-            fontWeight: 500,
-            lineHeight: 1.4,
-            letterSpacing: '-0.014em',
-            color: 'rgba(255,255,255,0.86)',
-            maxWidth: '780px',
-          }}
-        >
-          {data.headline}
-        </p>
-      )}
-
-      {/* Body — strategist judgment, muted lavender */}
-      <p
-        className="relative mt-8 text-[16px] leading-[1.75]"
-        style={{
-          color: 'rgba(184,174,218,0.82)',
-          maxWidth: '740px',
-        }}
-      >
-        {data.body}
-      </p>
-
-      {/* Bulleted moves */}
-      {data.bullets && data.bullets.length > 0 && (
-        <ul
-          className="relative mt-9 flex flex-col gap-[14px]"
-          style={{ maxWidth: '820px' }}
-        >
-          {data.bullets.map((b, i) => (
-            <DarkVerdictBullet key={i} text={b} />
-          ))}
-        </ul>
-      )}
-
-      {/* CTAs */}
-      <div className="relative mt-10 flex flex-wrap items-center gap-3">
-        <PrimaryButton
-          label={data.primaryCta}
-          icon={<ArrowRight size={12} weight="bold" />}
-        />
-        <DarkGhostButton
-          label={data.secondaryCta}
-          icon={<ChatCircle size={13} weight="bold" />}
-        />
-      </div>
+      </a>
     </section>
   );
 }
 
-function DarkVerdictBullet({ text }: { text: string }) {
-  return (
-    <li className="flex items-start gap-[14px]">
-      <span
-        aria-hidden
-        className="mt-[10px] inline-block h-[6px] w-[6px] shrink-0 rounded-full"
-        style={{
-          background: '#A88CFF',
-          boxShadow: '0 0 0 4px rgba(168,140,255,0.12)',
-        }}
-      />
-      <span
-        className="text-[15.5px] leading-[1.62]"
-        style={{
-          color: 'rgba(255,255,255,0.92)',
-          fontWeight: 400,
-          letterSpacing: '-0.005em',
-        }}
-      >
-        {text}
-      </span>
-    </li>
-  );
-}
+// ─── Verdict discovery card — preview of one finding inside the verdict ───
+// Lives on the dark verdict surface. White-tint-on-dark, with a soft hover
+// lift. Click smooth-scrolls to the matching DiscoveryCardV5 below.
 
-function DarkGhostButton({
-  label,
-  icon,
-}: {
-  label: string;
-  icon?: React.ReactNode;
-}) {
+function VerdictDiscoveryCard({ discovery }: { discovery: DiscoveryV5 }) {
+  const meta = READINESS_META[discovery.readiness];
+
   return (
-    <button
-      type="button"
-      className="inline-flex items-center gap-1.5 rounded-[12px] px-[14px] py-[10px] text-[13.5px] font-medium transition-colors"
+    <a
+      href={`#discovery-${discovery.id}`}
+      className="group relative flex flex-col rounded-[14px] p-[18px] transition-all hover:-translate-y-[1px]"
       style={{
-        color: 'rgba(255,255,255,0.88)',
         background: 'rgba(255,255,255,0.04)',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.14)',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.10)',
+        minHeight: '128px',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+        e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
+        e.currentTarget.style.boxShadow =
+          'inset 0 0 0 1px rgba(168,140,255,0.40)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+        e.currentTarget.style.boxShadow =
+          'inset 0 0 0 1px rgba(255,255,255,0.10)';
       }}
     >
-      {icon}
-      {label}
-    </button>
+      {/* Top meta row: rank + readiness */}
+      <div className="mb-3 flex items-center gap-[8px] text-[12.5px]">
+        <span
+          aria-hidden
+          className="inline-block h-[7px] w-[7px] rounded-full"
+          style={{
+            background: meta.dot,
+            boxShadow: `0 0 0 2.5px ${meta.dot}26`,
+          }}
+        />
+        <span
+          className="tabular-nums font-bold"
+          style={{ color: 'rgba(255,255,255,0.92)' }}
+        >
+          {String(discovery.rank).padStart(2, '0')}
+        </span>
+        <span style={{ color: 'rgba(184,174,218,0.45)' }}>·</span>
+        <span
+          className="font-semibold"
+          style={{ color: 'rgba(255,255,255,0.85)' }}
+        >
+          {meta.label}
+        </span>
+      </div>
+
+      {/* Title — the action, 2–3 lines */}
+      <p
+        className="flex-1 text-[15px] leading-[1.35]"
+        style={{
+          color: 'rgba(255,255,255,0.96)',
+          fontWeight: 600,
+          letterSpacing: '-0.01em',
+        }}
+      >
+        {discovery.headline}
+      </p>
+
+      {/* Arrow — bottom-right, subtle, animates on hover */}
+      <span
+        aria-hidden
+        className="mt-3 flex justify-end transition-transform group-hover:translate-x-[2px]"
+        style={{ color: 'rgba(168,140,255,0.70)' }}
+      >
+        <ArrowRight size={14} weight="bold" />
+      </span>
+    </a>
   );
 }
 
@@ -947,32 +988,6 @@ function ChatBody({
   );
 }
 
-// ═════════════════════════════════════════════════════════════════════════
-// SHARED PRIMITIVES
-// ═════════════════════════════════════════════════════════════════════════
-
-function PrimaryButton({
-  label,
-  icon,
-}: {
-  label: string;
-  icon?: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      className="inline-flex items-center gap-1.5 rounded-[12px] px-[16px] py-[11px] text-[13.5px] font-semibold text-white transition-transform hover:-translate-y-[0.5px]"
-      style={{
-        background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
-        boxShadow:
-          '0 1px 0 rgba(255,255,255,0.18) inset, 0 6px 14px -6px rgba(127,90,240,0.55)',
-      }}
-    >
-      {label}
-      {icon}
-    </button>
-  );
-}
 
 
 

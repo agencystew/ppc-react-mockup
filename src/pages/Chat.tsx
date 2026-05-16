@@ -3,8 +3,8 @@ import { Link, NavLink, useParams } from 'react-router-dom';
 import {
   ArrowUp, ArrowRight, CaretDown, ChatCircle,
   DotsThree, MagnifyingGlass, NotePencil, Robot, Sparkle, TrendUp,
-  ChartBar, Coins, Users, Info, Broadcast, Files, Target, Plus,
-  CalendarBlank,
+  ChartBar, Coins, Users, Info, Plus,
+  CalendarBlank, Brain, ClockCounterClockwise, ShieldCheck,
 } from '@phosphor-icons/react';
 import { CHAT_HISTORY, SPECIALIST_CHIPS, findChatThread } from '../mock/chats';
 import type {
@@ -485,55 +485,140 @@ function DarkChip({ icon, label }: { icon: React.ReactNode; label: string }) {
   );
 }
 
-/* ─── Trust strip ───────────────────────────────────────────────────────── */
-
-interface TrustItem { icon: React.ReactNode; title: string; body: string; }
-const TRUST: TrustItem[] = [
-  {
-    icon: <Broadcast size={15} weight="duotone" />,
-    title: 'Live data. Always current',
-    body:  'Answers are based on your latest Google Ads data.',
-  },
-  {
-    icon: <Files size={15} weight="duotone" />,
-    title: 'Sources you can trust',
-    body:  'We show the data and logic behind every answer.',
-  },
-  {
-    icon: <Target size={15} weight="duotone" />,
-    title: 'Built for action',
-    body:  'From insight to action in just a few clicks.',
-  },
-];
+/* ─── Memory moment ─────────────────────────────────────────────────────
+ *
+ * Replaces the old 3-card trust strip ("Live data / Sources / Built for
+ * action"). One dark editorial card with the "io" purple roundel + a
+ * memory-themed promise. Three quiet pillars run along the bottom — they
+ * still carry the trust beats (live data, sourced, action-ready) but
+ * framed as facets of one capability: memory. */
 
 function TrustStrip() {
   return (
-    <section className="mt-12 grid gap-4 sm:grid-cols-3">
-      {TRUST.map((item) => (
+    <section className="mt-14">
+      <div
+        className="relative overflow-hidden rounded-[20px]"
+        style={{
+          background: 'linear-gradient(180deg, #15101F 0%, #0F0A1E 55%, #0A0617 100%)',
+          boxShadow:
+            '0 1px 0 rgba(255,255,255,0.06) inset, 0 22px 48px -22px rgba(15,10,30,0.55), 0 0 0 1px rgba(127,90,240,0.14)',
+        }}
+      >
+        {/* Top-right purple bloom — same recipe as DarkInput */}
         <div
-          key={item.title}
-          className="flex flex-col gap-2"
-        >
+          aria-hidden
+          className="pointer-events-none absolute -right-20 -top-24 h-[320px] w-[360px] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(127,90,240,0.28) 0%, transparent 65%)',
+          }}
+        />
+
+        {/* Hero row: roundel + headline + counter */}
+        <div className="relative grid grid-cols-1 items-center gap-6 px-7 pt-8 pb-6 md:grid-cols-[auto_1fr_auto] md:gap-8 md:px-9 md:pt-9 md:pb-7">
           <span
             aria-hidden
-            className="grid h-[34px] w-[34px] place-items-center rounded-[9px]"
+            className="grid h-[60px] w-[60px] place-items-center rounded-full text-white"
             style={{
-              background: 'linear-gradient(155deg, #F3F0FF 0%, #E9E3FF 100%)',
-              color: '#534AB7',
-              boxShadow: 'inset 0 0 0 0.5px rgba(127,90,240,0.18)',
+              background: 'linear-gradient(180deg, #8E6BF5 0%, #7F5AF0 60%, #6E47E0 100%)',
+              boxShadow:
+                '0 1px 0 rgba(255,255,255,0.22) inset, 0 0 0 1px rgba(127,90,240,0.55), 0 18px 36px -14px rgba(127,90,240,0.55)',
             }}
           >
-            {item.icon}
+            <Brain size={24} weight="duotone" />
           </span>
-          <p className="text-[13.5px] font-semibold tracking-[-0.005em] text-ppc-ink">
-            {item.title}<span className="font-serif italic text-ppc-purple-500">.</span>
-          </p>
-          <p className="text-[12.5px] leading-[1.55] text-ppc-text-muted">
-            {item.body}
-          </p>
+
+          <div className="min-w-0">
+            <div
+              className="font-mono text-[10.5px] font-semibold uppercase"
+              style={{ color: '#A89BFF', letterSpacing: '0.14em' }}
+            >
+              io has a long memory
+            </div>
+            <h2 className="mt-2 font-display text-[26px] font-extrabold leading-[1.1] tracking-[-0.022em] text-white">
+              Every chat builds on the last
+              <span className="font-serif italic text-ppc-purple-300">.</span>
+            </h2>
+            <p
+              className="mt-2 max-w-[52ch] text-[13.5px] leading-[1.6]"
+              style={{ color: 'rgba(255,255,255,0.65)' }}
+            >
+              io remembers your accounts, your decisions, your brand voice, and what every agent has surfaced —
+              and pulls from it before answering. You never start from zero.
+            </p>
+          </div>
+
+          <div
+            className="hidden flex-col items-end gap-1 rounded-[14px] bg-white/[0.05] px-4 py-3 md:flex"
+            style={{ boxShadow: 'inset 0 0 0 0.5px rgba(255,255,255,0.10)' }}
+          >
+            <span
+              className="tabular text-[24px] font-extrabold leading-none text-white"
+              style={{ letterSpacing: '-0.02em' }}
+            >
+              1,247
+            </span>
+            <span
+              className="font-mono text-[10px] font-semibold uppercase"
+              style={{ color: '#A89BFF', letterSpacing: '0.14em' }}
+            >
+              memories so far
+            </span>
+          </div>
         </div>
-      ))}
+
+        {/* Bottom row: three quiet pillars */}
+        <div
+          className="relative grid grid-cols-1 gap-0 border-t border-white/[0.06] px-5 sm:grid-cols-3"
+        >
+          <MemoryPillar
+            icon={<ClockCounterClockwise size={13} weight="duotone" />}
+            title="Always current"
+            body="Reads your latest Google Ads + GA4 numbers before answering."
+          />
+          <MemoryPillar
+            icon={<ShieldCheck size={13} weight="duotone" />}
+            title="Cites every claim"
+            body="Every answer shows the data, the date range, the GAQL it pulled."
+            divider
+          />
+          <MemoryPillar
+            icon={<Sparkle size={13} weight="duotone" />}
+            title="Gets sharper weekly"
+            body="Patterns from across your roster compound into smarter answers."
+            divider
+          />
+        </div>
+      </div>
     </section>
+  );
+}
+
+function MemoryPillar({
+  icon, title, body, divider = false,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+  divider?: boolean;
+}) {
+  return (
+    <div
+      className={`flex flex-col gap-1.5 py-5 sm:px-5 ${divider ? 'sm:border-l sm:border-white/[0.06]' : ''}`}
+    >
+      <span
+        className="inline-flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase"
+        style={{ color: '#A89BFF', letterSpacing: '0.14em' }}
+      >
+        {icon}
+        {title}
+      </span>
+      <p
+        className="text-[12.5px] leading-[1.55]"
+        style={{ color: 'rgba(255,255,255,0.6)' }}
+      >
+        {body}
+      </p>
+    </div>
   );
 }
 
