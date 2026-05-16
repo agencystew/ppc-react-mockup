@@ -123,19 +123,27 @@ function StrategyVerdictCard({ data }: { data: StrategyVerdictData }) {
         }}
       />
 
-      {/* Eyebrow */}
+      {/* Kicker — magazine-style label above the H1. Sans, semibold, readable.
+          Dropped the AI-slop "tiny uppercase mono eyebrow" convention. */}
       <p
-        className="relative mb-7 flex items-center gap-[10px]"
+        className="relative mb-6 flex items-center gap-[11px]"
         style={{
-          fontFamily: '"Courier New", ui-monospace, monospace',
-          fontSize: '11.5px',
-          letterSpacing: '0.14em',
-          textTransform: 'uppercase',
-          color: 'rgba(201,181,255,0.75)',
-          fontWeight: 700,
+          fontSize: '17px',
+          letterSpacing: '-0.008em',
+          color: 'rgba(201,181,255,0.90)',
+          fontWeight: 600,
         }}
       >
-        <span style={{ color: '#A88CFF', fontSize: '13px' }}>◆</span>
+        <span
+          aria-hidden
+          style={{
+            color: '#A88CFF',
+            fontSize: '15px',
+            textShadow: '0 0 12px rgba(168,140,255,0.55)',
+          }}
+        >
+          ◆
+        </span>
         {data.agentName}'s verdict
       </p>
 
