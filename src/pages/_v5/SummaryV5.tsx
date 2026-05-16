@@ -531,60 +531,67 @@ function ActionCallout({ discovery }: { discovery: DiscoveryV5 }) {
       />
 
       <div className="relative px-9 py-9 sm:px-10 sm:py-10">
-        {/* Identity strip: ● rank · readiness · impact */}
-        <div
-          className="flex flex-wrap items-center gap-[10px] text-[15px]"
-          style={{
-            color: 'rgba(184,174,218,0.85)',
-            letterSpacing: '-0.005em',
-          }}
-        >
-          <span
-            aria-hidden
-            className="inline-block h-[9px] w-[9px] rounded-full"
+        {/* Header — ONE line: ◆ Action (larger anchor) on the left,
+            identity meta (rank · readiness · impact) on the right. */}
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-3">
+          <p
+            className="flex items-baseline gap-[12px] font-display"
             style={{
-              background: meta.dot,
-              boxShadow: `0 0 0 3px ${meta.dot}26`,
+              color: 'rgba(255,255,255,0.96)',
+              fontWeight: 800,
+              fontSize: '26px',
+              letterSpacing: '-0.022em',
+              lineHeight: 1,
             }}
-          />
-          <span
-            className="tabular-nums font-bold"
-            style={{ color: 'rgba(255,255,255,0.92)' }}
           >
-            {String(discovery.rank).padStart(2, '0')}
-          </span>
-          <span style={{ color: 'rgba(184,174,218,0.40)' }}>·</span>
-          <span style={{ fontWeight: 600, color: 'rgba(255,255,255,0.92)' }}>
-            {meta.label}
-          </span>
-          <span style={{ color: 'rgba(184,174,218,0.40)' }}>·</span>
-          <span>{impactLabel}</span>
-        </div>
+            <span
+              aria-hidden
+              style={{
+                color: '#A88CFF',
+                fontSize: '20px',
+                textShadow: '0 0 14px rgba(168,140,255,0.55)',
+                transform: 'translateY(-1px)',
+                display: 'inline-block',
+              }}
+            >
+              ◆
+            </span>
+            Action
+          </p>
 
-        {/* ◆ Action kicker */}
-        <p
-          className="mt-5 flex items-center gap-[11px] text-[17px] font-semibold"
-          style={{
-            color: 'rgba(201,181,255,0.90)',
-            letterSpacing: '-0.005em',
-          }}
-        >
-          <span
-            aria-hidden
+          <div
+            className="flex flex-wrap items-center gap-[8px] text-[14px]"
             style={{
-              color: '#A88CFF',
-              fontSize: '15px',
-              textShadow: '0 0 12px rgba(168,140,255,0.55)',
+              color: 'rgba(184,174,218,0.80)',
+              letterSpacing: '-0.005em',
             }}
           >
-            ◆
-          </span>
-          Action
-        </p>
+            <span
+              aria-hidden
+              className="inline-block h-[8px] w-[8px] rounded-full"
+              style={{
+                background: meta.dot,
+                boxShadow: `0 0 0 3px ${meta.dot}26`,
+              }}
+            />
+            <span
+              className="tabular-nums font-bold"
+              style={{ color: 'rgba(255,255,255,0.92)' }}
+            >
+              {String(discovery.rank).padStart(2, '0')}
+            </span>
+            <span style={{ color: 'rgba(184,174,218,0.40)' }}>·</span>
+            <span style={{ fontWeight: 600, color: 'rgba(255,255,255,0.92)' }}>
+              {meta.label}
+            </span>
+            <span style={{ color: 'rgba(184,174,218,0.40)' }}>·</span>
+            <span>{impactLabel}</span>
+          </div>
+        </div>
 
         {/* Action body — what to do next, in editorial prose, white-on-dark */}
         <p
-          className="mt-3 text-[17px] leading-[1.7]"
+          className="mt-5 text-[17px] leading-[1.7]"
           style={{
             color: 'rgba(255,255,255,0.92)',
             fontWeight: 500,
