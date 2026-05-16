@@ -657,6 +657,17 @@ function ToolsUsedRow({ tools }: { tools: string[] }) {
   );
 }
 
+// Data preview table — the forensic surface for skeptical operators (and for
+// Google Ads API reviewers checking RMF reporting compliance). Per Jose:
+// numbers must be easy to spot. Treatment:
+//   • Numeric columns: 16px Figtree 600 tabular-nums in ink — full contrast,
+//     heavier weight than the label column so the data is what the eye lands on.
+//   • Label column (typically first): 15.5px ink regular — readable but quieter
+//     than the data it describes.
+//   • Headers: 13.5px semibold dark gray, Title Case (not uppercase-tracked).
+//   • Generous row height (py-4) — operators read these, not skim them.
+//   • Resting tint on canvas, hover surface flips to white.
+
 function DataPreviewTable({
   preview,
 }: {
@@ -671,10 +682,15 @@ function DataPreviewTable({
         <table className="w-full">
           <thead>
             <tr style={{ borderBottom: '1px solid #d9d4ec' }}>
-              {preview.headers.map((h) => (
+              {preview.headers.map((h, j) => (
                 <th
                   key={h}
-                  className="px-5 py-3.5 text-left text-[13px] font-semibold text-ppc-text-muted"
+                  className="px-5 py-4 text-[13.5px] font-bold"
+                  style={{
+                    color: '#3c3849',
+                    letterSpacing: '-0.005em',
+                    textAlign: j === 0 ? 'left' : 'right',
+                  }}
                   scope="col"
                 >
                   {h}
@@ -697,11 +713,15 @@ function DataPreviewTable({
                 {row.map((cell, j) => (
                   <td
                     key={j}
-                    className={`px-5 py-3.5 text-[14px] ${
-                      j === 0
-                        ? 'font-medium text-ppc-ink'
-                        : 'tabular-nums text-ppc-text-muted'
-                    }`}
+                    className="px-5 py-4"
+                    style={{
+                      fontSize: j === 0 ? '15.5px' : '16px',
+                      fontWeight: j === 0 ? 500 : 600,
+                      color: '#1a1625',
+                      fontVariantNumeric: 'tabular-nums',
+                      textAlign: j === 0 ? 'left' : 'right',
+                      letterSpacing: '-0.008em',
+                    }}
                   >
                     {cell}
                   </td>
@@ -712,7 +732,10 @@ function DataPreviewTable({
         </table>
       </div>
       {preview.moreCount && preview.moreLabel && (
-        <div className="border-t border-ppc-card-border bg-white px-5 py-3 text-[12.5px] text-ppc-text-faint">
+        <div
+          className="border-t bg-white px-5 py-3.5 text-[13.5px]"
+          style={{ borderColor: '#ece6f3', color: '#6b6480' }}
+        >
           Showing {preview.rows.length} of{' '}
           {preview.rows.length + preview.moreCount} {preview.moreLabel}.{' '}
           <button
