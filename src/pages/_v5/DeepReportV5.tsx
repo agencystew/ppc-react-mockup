@@ -541,44 +541,48 @@ function PhaseCard({
           />
         </div>
 
-        {/* Data drawer */}
+        {/* Data drawer — toggle on the left, Export CSV on the right */}
         <div className="mt-10 border-t border-ppc-card-border pt-7">
-          <button
-            type="button"
-            onClick={() => setDataOpen((v) => !v)}
-            aria-expanded={dataOpen}
-            className="flex w-full items-center justify-between gap-4 text-left transition-colors hover:text-ppc-purple-500"
-          >
-            <span className="flex items-center gap-3">
-              <span
-                className="inline-flex h-[40px] w-[40px] items-center justify-center rounded-[12px]"
+          <div className="flex items-center justify-between gap-4">
+            <button
+              type="button"
+              onClick={() => setDataOpen((v) => !v)}
+              aria-expanded={dataOpen}
+              className="flex flex-1 items-center justify-between gap-4 text-left transition-colors hover:text-ppc-purple-500"
+            >
+              <span className="flex items-center gap-3">
+                <span
+                  className="inline-flex h-[40px] w-[40px] items-center justify-center rounded-[12px]"
+                  style={{
+                    background: dataOpen
+                      ? 'rgba(127,90,240,0.14)'
+                      : 'rgba(127,90,240,0.06)',
+                    color: '#7F5AF0',
+                  }}
+                >
+                  <Stack size={18} weight="bold" />
+                </span>
+                <span>
+                  <span className="block text-[16px] font-bold text-ppc-ink">
+                    Raw data
+                  </span>
+                  <span className="mt-0.5 block text-[13.5px] text-ppc-text-muted">
+                    {phase.dataPointsLabel} · {phase.toolCallCount} tool calls
+                  </span>
+                </span>
+              </span>
+              <CaretDown
+                size={16}
+                weight="bold"
+                className="shrink-0 text-ppc-text-faint transition-transform"
                 style={{
-                  background: dataOpen
-                    ? 'rgba(127,90,240,0.14)'
-                    : 'rgba(127,90,240,0.06)',
-                  color: '#7F5AF0',
+                  transform: dataOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                 }}
-              >
-                <Stack size={18} weight="bold" />
-              </span>
-              <span>
-                <span className="block text-[16px] font-bold text-ppc-ink">
-                  Raw data
-                </span>
-                <span className="mt-0.5 block text-[13.5px] text-ppc-text-muted">
-                  {phase.dataPointsLabel} · {phase.toolCallCount} tool calls
-                </span>
-              </span>
-            </span>
-            <CaretDown
-              size={16}
-              weight="bold"
-              className="shrink-0 text-ppc-text-faint transition-transform"
-              style={{
-                transform: dataOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              }}
-            />
-          </button>
+              />
+            </button>
+
+            <ExportCsvButton phaseSlug={phase.slug} />
+          </div>
 
           {dataOpen && (
             <div className="mt-6">
@@ -646,6 +650,41 @@ function PhaseField({
         {body}
       </p>
     </div>
+  );
+}
+
+// Export CSV — mock action for the mockup, but visually a real export
+// affordance. Mirrors the convention of Stripe Dashboard / Linear / GA4
+// where data tables ship with a download button at the top-right. Critical
+// for Google Ads API Standard Access RMF: "if providing CSV/PDF download,
+// link must be prominently displayed."
+function ExportCsvButton({ phaseSlug }: { phaseSlug: string }) {
+  const [done, setDone] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        // Mock: in production this hits the export endpoint for `phaseSlug`.
+        // Acknowledge in the UI so the action feels real on the mockup.
+        setDone(true);
+        setTimeout(() => setDone(false), 1800);
+      }}
+      aria-label={`Export ${phaseSlug} data as CSV`}
+      className="inline-flex shrink-0 items-center gap-2 rounded-[12px] px-[14px] py-[10px] text-[13.5px] font-semibold transition-colors"
+      style={{
+        color: done ? '#1F6F4F' : '#3c3849',
+        background: done ? 'rgba(93,202,165,0.12)' : '#FFFFFF',
+        boxShadow: `inset 0 0 0 1px ${done ? 'rgba(93,202,165,0.32)' : '#d9d4ec'}`,
+        letterSpacing: '-0.005em',
+      }}
+    >
+      {done ? (
+        <Check size={14} weight="bold" />
+      ) : (
+        <DownloadSimple size={14} weight="bold" />
+      )}
+      {done ? 'Exported' : 'Export CSV'}
+    </button>
   );
 }
 
