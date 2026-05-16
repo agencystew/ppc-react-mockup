@@ -18,6 +18,7 @@ import {
   Compass,
   Lightning,
   Sparkle,
+  PuzzlePiece,
   Warning,
   ArrowRight,
   ArrowUp,
@@ -713,96 +714,6 @@ function ContextStatusBadge({ status }: { status: ContextStatus }) {
   );
 }
 
-function EvidenceEyebrow({
-  toolCalls,
-  dataPoints,
-}: {
-  toolCalls: number;
-  dataPoints: string;
-}) {
-  return (
-    <span className="inline-flex items-center gap-[8px] text-[12.5px] text-ppc-text-faint">
-      <Target size={12} weight="bold" />
-      <span className="tabular-nums">{toolCalls} tool calls</span>
-      <span>·</span>
-      <span>{dataPoints}</span>
-    </span>
-  );
-}
-
-// ═════════════════════════════════════════════════════════════════════════
-// CHECKS BEFORE EXPORT
-// ═════════════════════════════════════════════════════════════════════════
-
-function ChecksBeforeExport({
-  checks,
-}: {
-  checks: AgentResultsV5Data['checks'];
-}) {
-  return (
-    <section className="mb-12">
-      <header className="mb-6">
-        <h3
-          className="mb-2 font-display font-bold text-ppc-ink"
-          style={{ fontSize: '22px', letterSpacing: '-0.018em' }}
-        >
-          Checks before export.
-        </h3>
-        <p className="text-[14.5px] leading-[1.55] text-ppc-text-muted">
-          A few things to confirm before acting on the ready-to-go findings.
-        </p>
-      </header>
-
-      <div className="flex flex-col gap-3">
-        {checks.map((check, i) => (
-          <CheckCard key={i} {...check} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function CheckCard({
-  title,
-  body,
-  linkLabel,
-  linkHref,
-}: {
-  title: string;
-  body: string;
-  linkLabel: string;
-  linkHref: string;
-}) {
-  return (
-    <article
-      className="rounded-[16px] bg-white px-6 py-5"
-      style={{ boxShadow: '0 0 0 1px #ece6f3, 0 1px 0 rgba(15,10,30,0.02)' }}
-    >
-      <div className="flex items-start gap-4">
-        <Square
-          size={18}
-          weight="regular"
-          className="mt-[3px] shrink-0 text-ppc-text-faint"
-          aria-hidden
-        />
-        <div className="flex-1">
-          <h4 className="text-[15.5px] font-semibold text-ppc-ink">{title}</h4>
-          <p className="mt-1.5 text-[14px] leading-[1.6] text-ppc-text-muted">
-            {body}
-          </p>
-          <a
-            href={linkHref}
-            className="mt-3 inline-flex items-center gap-1 text-[13.5px] font-semibold text-ppc-purple-500 transition-colors hover:text-ppc-purple-600"
-          >
-            {linkLabel}
-            <CaretRight size={11} weight="bold" />
-          </a>
-        </div>
-      </div>
-    </article>
-  );
-}
-
 // ═════════════════════════════════════════════════════════════════════════
 // ASK THE AGENT
 // ═════════════════════════════════════════════════════════════════════════
@@ -1206,16 +1117,6 @@ function SecondaryButton({
   );
 }
 
-function GhostButton({ label }: { label: string }) {
-  return (
-    <button
-      type="button"
-      className="inline-flex items-center gap-1 rounded-[10px] px-[12px] py-[8px] text-[13px] font-medium text-ppc-text-muted transition-colors hover:bg-ppc-panel-soft hover:text-ppc-ink"
-    >
-      {label}
-    </button>
-  );
-}
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
