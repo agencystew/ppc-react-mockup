@@ -1,28 +1,19 @@
 // v5 AI Summary tab.
 //
-// Layout (Hero lives one level up in AgentResultsV5, ABOVE the tabs):
-//   1. StrategyVerdictCard      — punchy strategist take, no filler triage list
-//   2. DiscoveryCardV5 stack    — 6 paired fields with icon-led labels
-//   3. ChecksBeforeExport       — operational pre-flight
-//   4. AskTheAgentBar           — run-specific suggestion chips
+// Layout (the ReportOpener strip lives one level up in AgentResultsV5):
+//   1. StrategyVerdictCard      — dark refined surface, the page's payoff
+//   2. DiscoverySection         — linear-vertical cards, each with a dark
+//                                  Action callout as the visual beat
+//   3. AskTheAgentBar           — run-specific suggestion chips
 //
 // Design doc: docs/plans/2026-05-16-agent-results-v5-design.md
 
 import { useState } from 'react';
 import {
-  CaretRight,
   ChatCircle,
-  MagnifyingGlass,
   PaperPlaneTilt,
-  Target,
-  Compass,
-  Lightning,
   Sparkle,
-  PuzzlePiece,
-  Warning,
   ArrowRight,
-  ArrowUp,
-  ArrowDown,
   X,
   Check,
 } from '@phosphor-icons/react';
@@ -30,7 +21,6 @@ import {
 import { SpyMascot } from '../../components/SpyMascot';
 import type {
   AgentResultsV5Data,
-  ContextStatus,
   DiscoveryV5,
   Impact,
   Readiness,
@@ -50,6 +40,7 @@ export function SummaryV5({ data }: { data: AgentResultsV5Data }) {
         <StrategyVerdictCard data={data.verdict} />
         <DiscoverySection
           discoveries={data.discoveries}
+          projectName={data.hero.projectName}
           onAction={setActiveAction}
         />
         <AskTheAgentBar data={data.ask} />
@@ -276,9 +267,11 @@ function DarkGhostButton({
 
 function DiscoverySection({
   discoveries,
+  projectName,
   onAction,
 }: {
   discoveries: DiscoveryV5[];
+  projectName: string;
   onAction: (d: DiscoveryV5) => void;
 }) {
   return (
@@ -318,19 +311,23 @@ function DiscoverySection({
           </span>
           <span style={{ color: '#3C3489' }}>.</span>
         </h3>
-        <p className="mt-5 text-[16px] leading-[1.55] text-ppc-text-muted">
+        <p className="mt-5 text-[17px] leading-[1.55] text-ppc-text-muted">
           {discoveries.length} in priority order — pick one to act on, or scan
           the lot.
         </p>
       </header>
 
-      {/* Two-column: mini findings rail + stacked cards */}
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[200px_1fr]">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[220px_1fr]">
         <FindingsRail discoveries={discoveries} />
 
-        <div className="flex min-w-0 flex-col gap-6">
+        <div className="flex min-w-0 flex-col gap-10">
           {discoveries.map((d) => (
-            <DiscoveryCardV5 key={d.id} discovery={d} onAction={onAction} />
+            <DiscoveryCardV5
+              key={d.id}
+              discovery={d}
+              projectName={projectName}
+              onAction={onAction}
+            />
           ))}
         </div>
       </div>
@@ -342,64 +339,51 @@ function FindingsRail({ discoveries }: { discoveries: DiscoveryV5[] }) {
   return (
     <aside className="hidden lg:sticky lg:top-[200px] lg:block lg:self-start">
       <p
-        className="mb-4 text-[11.5px] font-bold uppercase"
-        style={{ letterSpacing: '0.12em', color: '#534AB7' }}
+        className="mb-4 text-[13px] font-bold uppercase"
+        style={{ letterSpacing: '0.08em', color: '#85819a' }}
       >
-        Key findings
+        Findings
       </p>
       <ol className="relative flex flex-col gap-1">
         <span
           aria-hidden
-          className="absolute left-[15px] top-3 bottom-3 w-[2px]"
-          style={{ background: '#e6e1ef' }}
+          className="absolute left-[15px] top-3 bottom-3 w-[1.5px]"
+          style={{ background: '#e0dbed' }}
         />
-        {discoveries.map((d) => {
-          const meta = RAIL_READINESS_META[d.readiness];
-          return (
-            <li key={d.id}>
-              <a
-                href={`#discovery-${d.id}`}
-                className="relative flex items-start gap-3 rounded-[10px] px-2 py-2.5 text-left transition-colors hover:bg-white/60"
+        {discoveries.map((d) => (
+          <li key={d.id}>
+            <a
+              href={`#discovery-${d.id}`}
+              className="relative flex items-start gap-3 rounded-[10px] px-2 py-2.5 text-left transition-colors hover:bg-white/60"
+            >
+              <span
+                aria-hidden
+                className="relative z-10 inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full"
+                style={{
+                  background: '#FFFFFF',
+                  boxShadow: '0 0 0 2px #ECEAFA, inset 0 0 0 1px #d9d4ec',
+                }}
               >
                 <span
-                  aria-hidden
-                  className="relative z-10 inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full"
-                  style={{
-                    background: meta.dotBg,
-                    boxShadow: '0 0 0 2px #ECEAFA',
-                  }}
+                  className="text-[11.5px] font-bold tabular-nums"
+                  style={{ color: '#534AB7' }}
                 >
-                  <span
-                    className="text-[10.5px] font-bold tabular-nums"
-                    style={{ color: meta.dot }}
-                  >
-                    {String(d.rank).padStart(2, '0')}
-                  </span>
+                  {String(d.rank).padStart(2, '0')}
                 </span>
-                <span
-                  className="text-[13px] font-medium leading-[1.35] text-ppc-ink"
-                  style={{ letterSpacing: '-0.005em' }}
-                >
-                  {shortenHeadline(d.headline)}
-                </span>
-              </a>
-            </li>
-          );
-        })}
+              </span>
+              <span
+                className="text-[14px] font-medium leading-[1.4] text-ppc-ink"
+                style={{ letterSpacing: '-0.005em' }}
+              >
+                {shortenHeadline(d.headline)}
+              </span>
+            </a>
+          </li>
+        ))}
       </ol>
     </aside>
   );
 }
-
-const RAIL_READINESS_META: Record<
-  Readiness,
-  { dot: string; dotBg: string }
-> = {
-  ready:     { dot: '#1F6F4F', dotBg: 'rgba(93,202,165,0.18)' },
-  review:    { dot: '#915214', dotBg: 'rgba(186,117,23,0.18)' },
-  open:      { dot: '#534AB7', dotBg: 'rgba(127,90,240,0.18)' },
-  watchlist: { dot: '#5b5575', dotBg: 'rgba(145,138,178,0.20)' },
-};
 
 function shortenHeadline(s: string): string {
   // First clause before the em-dash or first 60 chars.
@@ -411,420 +395,207 @@ function shortenHeadline(s: string): string {
 
 function DiscoveryCardV5({
   discovery,
+  projectName,
   onAction,
 }: {
   discovery: DiscoveryV5;
+  projectName: string;
   onAction: (d: DiscoveryV5) => void;
 }) {
-  const railGradient = READINESS_RAIL[discovery.readiness];
-  const readinessMeta = READINESS_META[discovery.readiness];
-  const impactDot = IMPACT_STYLES[discovery.impact].dot;
-
   return (
     <article
       id={`discovery-${discovery.id}`}
-      className="relative overflow-hidden rounded-[20px] bg-white"
+      className="relative overflow-hidden rounded-[24px] bg-white"
       style={{
         boxShadow:
           '0 0 0 1px #e8e2f0, 0 1px 0 rgba(15,10,30,0.02), 0 24px 40px -28px rgba(15,10,30,0.14)',
       }}
     >
-      <span
-        aria-hidden
-        className="absolute inset-y-0 left-0 w-[4px]"
-        style={{ background: railGradient }}
-      />
-
-      <div className="relative px-10 py-9 sm:px-12 sm:py-10">
-        <header className="mb-5 flex items-center gap-3">
-          <ReadinessChip readiness={discovery.readiness} />
-          <span
-            aria-hidden
-            className="inline-block h-[5px] w-[5px] rounded-full"
-            style={{ background: impactDot }}
-          />
-          <span className="text-[12.5px] font-medium text-ppc-text-muted">
-            {readinessMeta.impactCopy(discovery.impact)}
-          </span>
-        </header>
-
+      <div className="relative px-10 py-10 sm:px-14 sm:py-12">
+        {/* Headline — pure editorial opener. No chrome above it. */}
         <h4
-          className="font-display text-[28px] font-extrabold text-ppc-ink sm:text-[32px]"
+          className="font-display text-[30px] font-extrabold text-ppc-ink sm:text-[34px]"
           style={{
-            letterSpacing: '-0.024em',
-            lineHeight: 1.15,
+            letterSpacing: '-0.026em',
+            lineHeight: 1.12,
             maxWidth: '900px',
           }}
         >
           {discovery.headline}
         </h4>
 
-        {/* Split: LEFT (grounding) → squiggly arrow → RIGHT (action, dark) */}
-        <div className="mt-10 grid grid-cols-1 gap-y-8 md:grid-cols-[1fr_72px_1fr] md:items-stretch">
-          {/* LEFT — grounding */}
-          <div className="flex flex-col gap-7">
-            <Field
-              label="What we found"
-              icon={<MagnifyingGlass size={15} weight="bold" />}
-              labelColor="#534AB7"
-              body={discovery.whatWeFound}
-            />
-            <Field
-              label="Why it matters"
-              icon={<Lightning size={15} weight="fill" />}
-              labelColor="#2A7E5E"
-              body={discovery.whyItMatters}
-            />
-            <BusinessContextField
-              value={discovery.businessContextUsed}
-              status={discovery.contextStatus}
-              missing={discovery.contextMissingItem}
-            />
-          </div>
+        <DiscoverySectionField
+          label="What we found"
+          body={discovery.whatWeFound}
+        />
+        <DiscoverySectionField
+          label={`Why it matters for ${projectName}`}
+          body={discovery.whyItMatters}
+        />
 
-          {/* Squiggly arrow — playful purple bridge from analysis to action */}
-          <div className="hidden items-center justify-center md:flex">
-            <SquigglyArrow />
-          </div>
+        <ActionCallout discovery={discovery} />
 
-          {/* RIGHT — dark action panel */}
-          <aside
-            className="relative overflow-hidden rounded-[20px] p-7"
+        <DiscoverySectionField
+          label="Expected outcome"
+          body={discovery.expectedOutcome}
+        />
+        <DiscoverySectionField label="Risk" body={discovery.tradeoffRisk} />
+
+        {/* CTAs — restrained. No eyebrow, no subtitle, no tool-calls metadata. */}
+        <div className="mt-10 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onAction(discovery)}
+            className="inline-flex items-center justify-center gap-2 rounded-[14px] px-7 py-4 text-[16px] font-bold text-white transition-transform hover:-translate-y-[1px]"
             style={{
-              background:
-                'radial-gradient(120% 80% at 50% 0%, #1A1030 0%, #0F0A1E 60%)',
-              boxShadow: '0 24px 40px -28px rgba(15,10,30,0.45)',
+              background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
+              boxShadow:
+                '0 1px 0 rgba(255,255,255,0.22) inset, 0 12px 24px -10px rgba(127,90,240,0.65)',
+              letterSpacing: '-0.012em',
             }}
           >
-            <span
-              aria-hidden
-              className="pointer-events-none absolute"
-              style={{
-                top: '-60px',
-                right: '-60px',
-                width: '220px',
-                height: '180px',
-                background:
-                  'radial-gradient(ellipse, rgba(127,90,240,0.30) 0%, transparent 60%)',
-              }}
-            />
-            <p
-              className="relative mb-5 text-[11.5px] font-bold uppercase"
-              style={{ letterSpacing: '0.12em', color: '#C9B5FF' }}
-            >
-              The move
-            </p>
-
-            <div className="relative flex flex-col gap-6">
-              <DarkField
-                label="What to do next"
-                icon={<Compass size={15} weight="bold" />}
-                body={discovery.whatToDoNext}
-                emphasis
-              />
-              <DarkField
-                label="Expected outcome"
-                icon={<Sparkle size={15} weight="fill" />}
-                body={discovery.expectedOutcome}
-              />
-              <DarkField
-                label="Tradeoff / risk"
-                icon={<Warning size={15} weight="fill" />}
-                body={discovery.tradeoffRisk}
-              />
-            </div>
-          </aside>
+            {discovery.primaryCta}
+            <ArrowRight size={16} weight="bold" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onAction(discovery)}
+            className="inline-flex items-center gap-2 rounded-[14px] px-[18px] py-[14px] text-[15px] font-semibold text-ppc-text-muted transition-colors hover:bg-ppc-panel-soft hover:text-ppc-ink"
+            style={{ boxShadow: 'inset 0 0 0 1px #d9d4ec' }}
+          >
+            <ChatCircle size={15} weight="bold" />
+            Ask the agent
+          </button>
         </div>
-
-        {/* BIG action band — closes the "what next" loop */}
-        <ActionBand
-          discovery={discovery}
-          onAction={() => onAction(discovery)}
-        />
       </div>
     </article>
   );
 }
 
-function ActionBand({
-  discovery,
-  onAction,
+// ─── Discovery section field — clean label + generous body, no icon chip ───
+
+function DiscoverySectionField({
+  label,
+  body,
 }: {
-  discovery: DiscoveryV5;
-  onAction: () => void;
+  label: string;
+  body: string;
 }) {
-  const isOpen = discovery.readiness === 'open';
-  const ctaLabel = isOpen
-    ? 'Discuss with the agent'
-    : discovery.primaryCta;
-  const ctaSubtitle = isOpen
-    ? 'Chat about the missing context with Competitor Spy'
-    : (() => {
-        if (discovery.readiness === 'ready')
-          return 'Preview the change before anything ships';
-        if (discovery.readiness === 'review')
-          return 'Walk through the items before approving';
-        return 'Pick up where the agent left off';
-      })();
-  const ctaIcon = isOpen ? (
-    <ChatCircle size={18} weight="fill" />
-  ) : (
-    <ArrowRight size={18} weight="bold" />
+  return (
+    <section className="mt-9">
+      <h5
+        className="text-[17px] font-bold text-ppc-ink"
+        style={{ letterSpacing: '-0.012em' }}
+      >
+        {label}
+      </h5>
+      <p
+        className="mt-3 text-[17px] leading-[1.7]"
+        style={{ color: '#3c3849', maxWidth: '820px' }}
+      >
+        {body}
+      </p>
+    </section>
   );
+}
+
+// ─── Action callout — dark refined surface, the card's signature beat ─────
+// Identity (rank · readiness · impact) lives inside the callout, not above.
+// One ◆ Action kicker. Same surface language as the verdict card.
+
+function ActionCallout({ discovery }: { discovery: DiscoveryV5 }) {
+  const meta = READINESS_META[discovery.readiness];
+  const impactLabel = IMPACT_STYLES[discovery.impact].label;
 
   return (
-    <div
-      className="relative mt-10 overflow-hidden rounded-[20px]"
+    <section
+      className="relative mt-10 overflow-hidden rounded-[22px] text-white"
       style={{
-        background:
-          'linear-gradient(135deg, #F6F0FF 0%, #ECE5FF 50%, #F4ECFF 100%)',
-        boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.16)',
+        background: 'linear-gradient(180deg, #0F0A1E 0%, #07050D 100%)',
+        boxShadow:
+          'inset 0 1px 0 rgba(255,255,255,0.05), 0 24px 40px -28px rgba(15,10,30,0.55)',
       }}
     >
-      {/* Soft purple bloom */}
+      {/* Top-right purple bloom — atmosphere, not chrome */}
       <span
         aria-hidden
         className="pointer-events-none absolute"
         style={{
-          top: '-60px',
-          right: '-60px',
-          width: '240px',
-          height: '180px',
+          top: '-100px',
+          right: '-80px',
+          width: '420px',
+          height: '260px',
           background:
-            'radial-gradient(ellipse, rgba(127,90,240,0.25) 0%, transparent 65%)',
+            'radial-gradient(ellipse, rgba(127,90,240,0.20) 0%, transparent 62%)',
         }}
       />
 
-      <div className="relative flex flex-col items-stretch gap-5 px-7 py-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex-1">
-          <p
-            className="mb-1 text-[11.5px] font-bold uppercase"
-            style={{ letterSpacing: '0.12em', color: '#534AB7' }}
-          >
-            What next
-          </p>
-          <p
-            className="text-[15px] leading-[1.45]"
-            style={{ color: '#1a1625', fontWeight: 500 }}
-          >
-            {ctaSubtitle}
-          </p>
-          <div className="mt-2 flex items-center gap-3 text-[12px] text-ppc-text-muted">
-            <Target size={11} weight="bold" />
-            <span className="tabular-nums">{discovery.toolCalls} tool calls</span>
-            <span style={{ color: '#c9c2dd' }}>·</span>
-            <button
-              type="button"
-              className="font-semibold text-ppc-purple-700 transition-colors hover:text-ppc-purple-500"
-            >
-              Show working
-            </button>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={onAction}
-          className="inline-flex items-center justify-center gap-2.5 rounded-[14px] px-7 py-4 text-[16px] font-bold text-white transition-transform hover:-translate-y-[1px]"
+      <div className="relative px-9 py-9 sm:px-10 sm:py-10">
+        {/* Identity strip: ● rank · readiness · impact */}
+        <div
+          className="flex flex-wrap items-center gap-[10px] text-[15px]"
           style={{
-            background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
-            boxShadow:
-              '0 1px 0 rgba(255,255,255,0.22) inset, 0 12px 24px -10px rgba(127,90,240,0.65)',
-            letterSpacing: '-0.012em',
-            minWidth: '260px',
+            color: 'rgba(184,174,218,0.85)',
+            letterSpacing: '-0.005em',
           }}
-        >
-          {ctaIcon}
-          {ctaLabel}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  icon,
-  labelColor,
-  body,
-  emphasis,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  labelColor: string;
-  body: string;
-  emphasis?: boolean;
-}) {
-  return (
-    <div>
-      <h5
-        className="mb-3 flex items-center gap-[8px] text-[16px] font-bold"
-        style={{
-          color: labelColor,
-          letterSpacing: '-0.012em',
-        }}
-      >
-        <span
-          aria-hidden
-          className="inline-flex h-[28px] w-[28px] items-center justify-center rounded-[8px]"
-          style={{
-            background: hexToTint(labelColor, 0.1),
-            color: labelColor,
-          }}
-        >
-          {icon}
-        </span>
-        {label}
-      </h5>
-      <p
-        className="text-[15px] leading-[1.7]"
-        style={{
-          color: emphasis ? '#1a1625' : '#6b6480',
-          fontWeight: emphasis ? 500 : 400,
-        }}
-      >
-        {body}
-      </p>
-    </div>
-  );
-}
-
-function DarkField({
-  label,
-  icon,
-  body,
-  emphasis,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  body: string;
-  emphasis?: boolean;
-}) {
-  return (
-    <div>
-      <h5
-        className="mb-3 flex items-center gap-[8px] text-[15.5px] font-bold"
-        style={{ color: '#C9B5FF', letterSpacing: '-0.012em' }}
-      >
-        <span
-          aria-hidden
-          className="inline-flex h-[28px] w-[28px] items-center justify-center rounded-[8px]"
-          style={{
-            background: 'rgba(168,140,255,0.18)',
-            color: '#C9B5FF',
-          }}
-        >
-          {icon}
-        </span>
-        {label}
-      </h5>
-      <p
-        className="text-[14.5px] leading-[1.7]"
-        style={{
-          color: emphasis
-            ? 'rgba(255,255,255,0.95)'
-            : 'rgba(184,174,218,0.92)',
-          fontWeight: emphasis ? 500 : 400,
-        }}
-      >
-        {body}
-      </p>
-    </div>
-  );
-}
-
-function SquigglyArrow() {
-  return (
-    <svg
-      width="72"
-      height="48"
-      viewBox="0 0 72 48"
-      aria-hidden
-      className="overflow-visible"
-    >
-      <path
-        d="M 4 24 C 14 8, 22 40, 36 22 L 52 22"
-        fill="none"
-        stroke="#7F5AF0"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M 47 16 L 56 22 L 47 28"
-        fill="none"
-        stroke="#7F5AF0"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function BusinessContextField({
-  value,
-  status,
-  missing,
-}: {
-  value: string;
-  status: ContextStatus;
-  missing?: string;
-}) {
-  const labelColor = '#915214';
-  return (
-    <div>
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <h5
-          className="flex items-center gap-[8px] text-[16px] font-bold"
-          style={{ color: labelColor, letterSpacing: '-0.012em' }}
         >
           <span
             aria-hidden
-            className="inline-flex h-[28px] w-[28px] items-center justify-center rounded-[8px]"
+            className="inline-block h-[9px] w-[9px] rounded-full"
             style={{
-              background: hexToTint(labelColor, 0.1),
-              color: labelColor,
+              background: meta.dot,
+              boxShadow: `0 0 0 3px ${meta.dot}26`,
+            }}
+          />
+          <span
+            className="tabular-nums font-bold"
+            style={{ color: 'rgba(255,255,255,0.92)' }}
+          >
+            {String(discovery.rank).padStart(2, '0')}
+          </span>
+          <span style={{ color: 'rgba(184,174,218,0.40)' }}>·</span>
+          <span style={{ fontWeight: 600, color: 'rgba(255,255,255,0.92)' }}>
+            {meta.label}
+          </span>
+          <span style={{ color: 'rgba(184,174,218,0.40)' }}>·</span>
+          <span>{impactLabel}</span>
+        </div>
+
+        {/* ◆ Action kicker */}
+        <p
+          className="mt-5 flex items-center gap-[11px] text-[17px] font-semibold"
+          style={{
+            color: 'rgba(201,181,255,0.90)',
+            letterSpacing: '-0.005em',
+          }}
+        >
+          <span
+            aria-hidden
+            style={{
+              color: '#A88CFF',
+              fontSize: '15px',
+              textShadow: '0 0 12px rgba(168,140,255,0.55)',
             }}
           >
-            <PuzzlePiece size={15} weight="fill" />
+            ◆
           </span>
-          Business context used
-        </h5>
-        <ContextStatusBadge status={status} />
-      </div>
-      <p className="text-[15px] leading-[1.7] text-ppc-text-muted">{value}</p>
-      {status === 'downgraded' && missing && (
-        <p className="mt-2 text-[14px] leading-[1.55]">
-          <span style={{ color: labelColor, fontWeight: 600 }}>Missing: </span>
-          <span style={{ color: labelColor }}>{missing}</span>{' '}
-          <a
-            href="/projects/boulder-care/context"
-            className="inline-flex items-center gap-1 font-semibold text-ppc-purple-500 hover:text-ppc-purple-600"
-          >
-            Add to project
-            <CaretRight size={11} weight="bold" />
-          </a>
+          Action
         </p>
-      )}
-    </div>
-  );
-}
 
-function ContextStatusBadge({ status }: { status: ContextStatus }) {
-  if (status === 'complete') return null;
-  const isUp = status === 'upgraded';
-  return (
-    <span
-      className="inline-flex items-center gap-1 align-middle text-[12px] font-semibold"
-      style={{ color: isUp ? '#2A7E5E' : '#915214' }}
-    >
-      {isUp ? (
-        <ArrowUp size={11} weight="bold" />
-      ) : (
-        <ArrowDown size={11} weight="bold" />
-      )}
-      {isUp ? 'Upgraded' : 'Confidence reduced'}
-    </span>
+        {/* Action body — what to do next, in editorial prose, white-on-dark */}
+        <p
+          className="mt-3 text-[17px] leading-[1.7]"
+          style={{
+            color: 'rgba(255,255,255,0.92)',
+            fontWeight: 500,
+            letterSpacing: '-0.005em',
+            maxWidth: '820px',
+          }}
+        >
+          {discovery.whatToDoNext}
+        </p>
+      </div>
+    </section>
   );
 }
 
@@ -1173,23 +944,6 @@ function ChatBody({
 // SHARED PRIMITIVES
 // ═════════════════════════════════════════════════════════════════════════
 
-function ReadinessChip({ readiness }: { readiness: Readiness }) {
-  const meta = READINESS_META[readiness];
-  return (
-    <span
-      className="inline-flex items-center gap-[7px] rounded-full px-[12px] py-[5px] text-[12.5px] font-semibold"
-      style={{ background: meta.bg, color: meta.text }}
-    >
-      <span
-        aria-hidden
-        className="inline-block h-[7px] w-[7px] rounded-full"
-        style={{ background: meta.dot }}
-      />
-      {meta.label}
-    </span>
-  );
-}
-
 function PrimaryButton({
   label,
   icon,
@@ -1215,26 +969,9 @@ function PrimaryButton({
 
 
 
-// ── Helpers ──────────────────────────────────────────────────────────────
-
-function hexToTint(hex: string, alpha: number): string {
-  const clean = hex.replace('#', '');
-  const r = parseInt(clean.substring(0, 2), 16);
-  const g = parseInt(clean.substring(2, 4), 16);
-  const b = parseInt(clean.substring(4, 6), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
 // ═════════════════════════════════════════════════════════════════════════
 // PALETTES
 // ═════════════════════════════════════════════════════════════════════════
-
-const READINESS_RAIL: Record<Readiness, string> = {
-  ready:     'linear-gradient(180deg, #6FD9B0 0%, #4FB892 100%)',
-  review:    'linear-gradient(180deg, #E2A536 0%, #B07820 100%)',
-  open:      'linear-gradient(180deg, #A88CFF 0%, #7F5AF0 100%)',
-  watchlist: 'linear-gradient(180deg, #C7C0DE 0%, #918AB2 100%)',
-};
 
 const READINESS_META: Record<
   Readiness,

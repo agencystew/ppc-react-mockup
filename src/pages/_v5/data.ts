@@ -256,13 +256,12 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
       readiness: 'ready',
       impact: 'high',
       shape: 'gap',
-      headline:
-        'No rival owns "same-day intake" — the strongest unclaimed angle in your market.',
+      headline: 'Build 3 RSAs around "same-day intake".',
 
       whatWeFound:
         '3 rivals run adjacent timeline copy at 0.4%+ CTR. The same-day intake angle itself is empty — no advertiser is leading with it on any of the 12 keywords tested.',
       whyItMatters:
-        "For addiction recovery, hours matter. Patients searching at 11pm aren't comparing five providers — they're trying one. Owning \"same-day intake\" is the difference between being found and being chosen.",
+        "For Boulder Care, hours matter. Your ICP notes 64% of intake calls happen outside business hours — patients searching at 11pm aren't comparing five providers, they're trying one. Owning \"same-day intake\" is the difference between being found and being chosen, and it's the rare angle no rival has claimed yet.",
       businessContextUsed:
         "Boulder Care's ICP notes 64% of intake calls happen outside business hours. The unclaimed positioning matches your operational reality.",
       contextStatus: 'upgraded',
@@ -286,13 +285,12 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
       readiness: 'review',
       impact: 'high',
       shape: 'verdict',
-      headline:
-        'Aspen Recovery Group is the dominant rival across every keyword you bid on.',
+      headline: 'Outflank Aspen on the 4 keywords where they go thin.',
 
       whatWeFound:
         '$12K/mo estimated spend, active since 2019, 312 active ad days last year. Aspen appears in the top 3 paid positions on all 12 keywords we tested — and rotates to position 4 on exactly 4 of them.',
       whyItMatters:
-        "A saturated competitor isn't testing — they've decided your market is profitable. You're either contesting it or ceding it. The strategic question is where to contest, not whether.",
+        "Aspen has decided Boulder Care's market is profitable, and they're not testing — they're saturating. Per your ICP, you have direct overlap with Aspen on 9 of your 12 core recovery keywords, and they sit top-3 on every one. The strategic question isn't whether to contest, it's where: the 4 keywords where they rotate to position 4 are the gap to press.",
       businessContextUsed:
         'Boulder Care ICP confirms outpatient addiction recovery is your core service, which Aspen also targets. Direct overlap on 9 of 12 keywords.',
       contextStatus: 'upgraded',
@@ -316,12 +314,12 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
       readiness: 'ready',
       impact: 'medium',
       shape: 'fact',
-      headline: 'Add 3 untracked rivals to your watchlist.',
+      headline: 'Add 3 untracked rivals to your Boulder Care watchlist.',
 
       whatWeFound:
         'Mountain View Wellness and Rocky Mountain Recovery are the most consistent bidders on your top recovery terms, both growing month-over-month. Front Range Treatment Co joined the auction in the last 90 days.',
       whyItMatters:
-        "These rivals were already pressuring the CPCs you blamed on Aspen. You weren't tracking them — so you didn't know.",
+        "Boulder Care's tracked-competitor list was last updated 6 months ago, so Mountain View Wellness and Rocky Mountain Recovery — both growing month-over-month — have been pressuring your CPCs without ever showing up in your weekly snapshots. Front Range Treatment Co joined the auction in the last 90 days. You were blaming Aspen for spend you couldn't fully explain.",
       businessContextUsed:
         "Boulder Care's tracked-competitor list was last updated 6 months ago. The agent cross-checked the live auction against your project profile.",
       contextStatus: 'upgraded',
@@ -345,13 +343,12 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
       readiness: 'open',
       impact: 'high',
       shape: 'fact',
-      headline:
-        "Branded CPC sits at $42 — the agent doesn't have enough context to call it good or bad yet.",
+      headline: 'Add lead-to-sale rate before judging the $42 branded CPC.',
 
       whatWeFound:
         'Branded search "boulder care" averages $42 CPC over the last 30 days. 4 rivals bid on your name, including Aspen Recovery. Branded impression share is 78% — meaning 22% of branded searches see a competitor first.',
       whyItMatters:
-        "Branded spend is either your most efficient channel (intent is highest) or your most wasteful (you'd convert these patients organically). The right answer depends on lead-to-sale rate by source — which the agent doesn't have.",
+        "Branded spend is either Boulder Care's most efficient channel (intent is highest) or its most wasteful (these patients would convert organically). Your $42 branded CPC and 78% impression share are facts, but the right answer depends on lead-to-sale rate by source — which isn't in your project profile yet. Acting without it is exactly the move that creates \"we cut brand spend and conversions tanked\" stories.",
       businessContextUsed:
         'Boulder Care ICP and target CPA were considered. Lead-to-sale rate per campaign is missing — this finding is therefore an open question, not an action.',
       contextStatus: 'downgraded',
