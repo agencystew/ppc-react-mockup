@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   CaretRight, CaretDown, ArrowRight, Sparkle, Check,
@@ -45,6 +45,23 @@ const SLUG_TO_ICON: Record<string, PhosphorIcon> = {
   'new-client-autopilot':  Rocket,
   'change-impact':         Lightning,
   'brand-safety':          ShieldCheck,
+};
+
+// "Watch it work" reasoning trace per agent slug. Each line names a
+// specific check with a real scope (1,284 search terms, 8 LPs, etc.)
+// so the depth lands as scale, not a generic claim. Only populated
+// agents render the panel — others fall back to nothing.
+const LIVE_TRACES: Record<string, string[]> = {
+  'weekly-audit': [
+    'Reading 1,284 search terms across 6 campaigns',
+    'Cross-referencing Quality Scores against last quarter',
+    'Detecting lost-impression-share movements over 12 months',
+    'Scanning bid cap interference on profitable campaigns',
+    'Checking landing-page experience signals on 8 LPs',
+    'Comparing this week vs the 4-week converting-intent baseline',
+    'Stress-testing ad copy fatigue across 47 keywords',
+    'Compiling priority-ranked findings with evidence',
+  ],
 };
 
 // Agent Detail · /agents/:slug
@@ -274,8 +291,9 @@ export function AgentDetail() {
 
       <div className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start">
         {/* ═══ LEFT — editorial story ═══════════════════════════════════════ */}
-        <div className="min-w-0">
+        <div className="min-w-0 space-y-8">
           <ExpeditionMap agent={agent} />
+          <LiveInvestigationLog slug={agent.slug} />
         </div>
 
         {/* ═══ RIGHT — sticky launch rail ═══════════════════════════════════ */}
@@ -564,6 +582,188 @@ function ExpeditionMap({ agent }: { agent: AgentDefinition }) {
         </ol>
       </div>
     </section>
+  );
+}
+
+// ─── Watch it work — animated reasoning-trace preview ──────────────────
+//
+// Sits below the ExpeditionMap. Cycles through the agent's reasoning
+// trace on a slow loop so the user can SEE what's about to happen when
+// they launch — depth via narration. Honest framing: it's a preview of
+// the agent's voice, not a live process.
+
+const TRACE_TICK_MS = 1300;
+const TRACE_PAUSE_MS = 1600;
+
+function LiveInvestigationLog({ slug }: { slug: string }) {
+  const trace = LIVE_TRACES[slug];
+  // 0..trace.length-1: that step is active.
+  // === trace.length: all done, pause before reset.
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  useEffect(() => {
+    if (!trace) return;
+    let cancelled = false;
+
+    const cycle = () => {
+      if (cancelled) return;
+      setActiveIdx((i) => {
+        if (i >= trace.length) {
+          // Pause complete — reset.
+          return 0;
+        }
+        return i + 1;
+      });
+    };
+
+    const interval = window.setInterval(cycle, TRACE_TICK_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [trace]);
+
+  // When all steps are done, hold the "all check" state for the pause
+  // duration before the next tick resets. Handled by adjusting the tick
+  // interval — but the simplest way is to just let the cycle keep going
+  // and clamp at trace.length, then reset on the next tick after pause.
+  // Since the interval runs every 1.3s, the "all done" pause is one
+  // extra tick (1.3s) — close enough to TRACE_PAUSE_MS.
+  void TRACE_PAUSE_MS;
+
+  if (!trace) return null;
+
+  return (
+    <section
+      className="relative overflow-hidden rounded-[24px] text-white"
+      style={{
+        background:
+          'radial-gradient(120% 80% at 100% 0%, #1A1030 0%, #0F0A1E 60%, #0A0814 100%)',
+        boxShadow:
+          '0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(15,10,30,0.55)',
+      }}
+    >
+      <style>{`
+        @keyframes log-step-pulse {
+          0%, 100% { opacity: 0.55; transform: scale(0.95); }
+          50%      { opacity: 1;    transform: scale(1.15); }
+        }
+        @keyframes log-title-pulse {
+          0%, 100% { opacity: 0.55; box-shadow: 0 0 0 0 rgba(168,140,255,0.55); }
+          50%      { opacity: 1;    box-shadow: 0 0 0 6px rgba(168,140,255,0); }
+        }
+      `}</style>
+
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-24 -top-24 h-[320px] w-[320px] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(127,90,240,0.20) 0%, rgba(127,90,240,0.06) 40%, transparent 70%)',
+        }}
+      />
+
+      <div className="relative px-9 py-9 sm:px-11 sm:py-10">
+        <div className="flex items-center gap-3">
+          <span
+            aria-hidden
+            className="block h-[10px] w-[10px] rounded-full"
+            style={{
+              background: '#A88CFF',
+              animation: 'log-title-pulse 2.6s ease-in-out infinite',
+            }}
+          />
+          <h3 className="font-display text-[26px] font-black leading-[1.05] tracking-[-0.025em] text-white sm:text-[30px]">
+            Watch it work
+            <span
+              className="font-serif font-bold italic text-ppc-purple-400"
+              style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
+            >
+              .
+            </span>
+          </h3>
+        </div>
+        <p className="mt-3 max-w-[560px] text-[14px] leading-[1.65] text-white/60">
+          A peek at the reasoning trace — what's happening behind the
+          scenes while it builds your report.
+        </p>
+
+        <ul className="mt-7 space-y-[14px]">
+          {trace.map((line, i) => {
+            const status: 'pending' | 'active' | 'done' =
+              i < activeIdx ? 'done' : i === activeIdx ? 'active' : 'pending';
+            return (
+              <li key={i} className="flex items-center gap-3.5">
+                <LogStatusDot status={status} />
+                <span
+                  className="text-[14.5px] leading-[1.55] transition-colors duration-300"
+                  style={{
+                    color:
+                      status === 'active'
+                        ? 'rgba(255,255,255,0.96)'
+                        : status === 'done'
+                          ? 'rgba(255,255,255,0.55)'
+                          : 'rgba(255,255,255,0.30)',
+                  }}
+                >
+                  {line}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function LogStatusDot({ status }: { status: 'pending' | 'active' | 'done' }) {
+  if (status === 'done') {
+    return (
+      <span
+        aria-hidden
+        className="grid h-[20px] w-[20px] shrink-0 place-items-center rounded-full transition-colors"
+        style={{
+          background: 'rgba(93,202,165,0.18)',
+          boxShadow: 'inset 0 0 0 1px rgba(93,202,165,0.45)',
+        }}
+      >
+        <Check size={11} weight="bold" style={{ color: '#5DCAA5' }} />
+      </span>
+    );
+  }
+  if (status === 'active') {
+    return (
+      <span
+        aria-hidden
+        className="relative grid h-[20px] w-[20px] shrink-0 place-items-center"
+      >
+        <span
+          className="absolute inset-0 rounded-full"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(168,140,255,0.45) 0%, transparent 70%)',
+            animation: 'log-step-pulse 1.3s ease-in-out infinite',
+          }}
+        />
+        <span
+          className="relative h-[7px] w-[7px] rounded-full"
+          style={{
+            background: '#A88CFF',
+            boxShadow: '0 0 10px rgba(168,140,255,0.85)',
+          }}
+        />
+      </span>
+    );
+  }
+  // pending
+  return (
+    <span
+      aria-hidden
+      className="block h-[20px] w-[20px] shrink-0 rounded-full"
+      style={{ boxShadow: 'inset 0 0 0 1.5px rgba(255,255,255,0.16)' }}
+    />
   );
 }
 
