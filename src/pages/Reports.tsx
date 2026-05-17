@@ -2,13 +2,14 @@ import { Link } from 'react-router-dom';
 import {
   MagnifyingGlass, CaretDown, ArrowRight, ArrowUp, ArrowDown, Sparkle,
   Check, PaperPlaneTilt, PushPin, Rows, SquaresFour, Lightning,
-  Compass,
+  Compass, CaretRight, ArrowUpRight,
 } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   NEEDS_TODAY, READY_FOR_CLIENT, FYI_REPORTS,
-  ACTIONED_THIS_MONTH, SPECIALISTS_RUNNING,
+  ACTIONED_THIS_MONTH, SPECIALISTS_RUNNING, ACCOUNTS_COVERED,
   type NeedsReport, type ReadyReport, type FyiReport, type ReportStatus,
+  type SubFinding,
 } from '../mock/reports';
 import { PROJECTS } from '../mock/projects';
 
@@ -46,6 +47,7 @@ interface FlatReport {
   primaryMetricLabel?: string;
   whyNow?: string;
   pinned?: boolean;
+  subFindings: SubFinding[];
 }
 
 export function Reports() {
@@ -66,18 +68,21 @@ export function Reports() {
       primaryMetricLabel: r.primaryMetric.label,
       whyNow: r.whyNow,
       pinned: r.pinned,
+      subFindings: r.subFindings,
     }));
     const ready: FlatReport[] = READY_FOR_CLIENT.map((r: ReadyReport) => ({
       id: r.id, runId: r.runId, agentName: r.agentName, agentEmoji: r.agentEmoji,
       projectId: r.projectId, projectName: r.projectName,
       headline: r.headline, subline: r.subline, finishedLabel: r.finishedLabel,
       bucket: 'ready', status: r.status,
+      subFindings: r.subFindings,
     }));
     const fyi: FlatReport[] = FYI_REPORTS.map((r: FyiReport) => ({
       id: r.id, runId: r.runId, agentName: r.agentName, agentEmoji: r.agentEmoji,
       projectId: r.projectId, projectName: r.projectName,
       headline: r.headline, subline: r.subline, finishedLabel: r.finishedLabel,
       bucket: 'fyi',
+      subFindings: r.subFindings,
     }));
     return [...needs, ...ready, ...fyi];
   }, []);
@@ -215,46 +220,202 @@ interface OperatorProps {
   urgent?: FlatReport;
 }
 
+/* ReportsHero — the editorial dark hero card at the top of the Operator
+ * view. Same hand as the verdict card on individual reports (sandwich
+ * layout, ◆ kicker, italic-period headline, dot-separated stats shelf).
+ * Replaces the previous 4-card KPI quartet, which felt generic.
+ *
+ * Anatomy, top → bottom, all centered:
+ *   1. ◆ Reports · ✓ Live · Last 7 days
+ *   2. Sparkle decoration with thin flanking lines
+ *   3. "Your inbox of findings." (mega headline, italic-purple period)
+ *   4. Sub-line — where the findings come from
+ *   5. Stats row — all post-run roll-ups, no pre-run $ claims */
+function ReportsHero({
+  counts,
+}: {
+  counts: { all: number; needs: number; ready: number; fyi: number; actioned: number };
+}) {
+  return (
+    <section
+      className="reveal relative overflow-hidden rounded-[22px] text-white"
+      style={{
+        animationDelay: '120ms',
+        background: 'linear-gradient(180deg, #0F0A1E 0%, #07050D 100%)',
+        boxShadow:
+          'inset 0 1px 0 rgba(255,255,255,0.05), 0 30px 60px -32px rgba(15,10,30,0.45)',
+        padding: 'clamp(28px, 3.2vw, 44px) clamp(28px, 3.4vw, 48px)',
+      }}
+    >
+      {/* Top-right purple bloom — same recipe as the verdict card */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute"
+        style={{
+          top: '-130px',
+          right: '-110px',
+          width: '460px',
+          height: '300px',
+          background:
+            'radial-gradient(ellipse, rgba(127,90,240,0.18) 0%, transparent 62%)',
+        }}
+      />
+
+      <div className="relative flex flex-col items-center text-center">
+        {/* TOP META — ◆ Reports · ✓ Live · Last 7 days */}
+        <div className="flex flex-wrap items-center justify-center gap-x-[14px] gap-y-2 text-[14.5px]">
+          <span
+            className="inline-flex items-baseline gap-[10px]"
+            style={{
+              letterSpacing: '-0.008em',
+              color: 'rgba(214,200,255,0.95)',
+              fontWeight: 600,
+            }}
+          >
+            <span
+              aria-hidden
+              style={{
+                color: '#A88CFF',
+                fontSize: '13px',
+                textShadow: '0 0 14px rgba(168,140,255,0.65)',
+              }}
+            >
+              ◆
+            </span>
+            Reports
+          </span>
+
+          <span aria-hidden style={{ color: 'rgba(184,174,218,0.30)' }}>·</span>
+
+          {/* ✓ Live pill — green dot + label */}
+          <span
+            className="inline-flex items-center gap-[8px] rounded-full px-[12px] py-[5px] font-semibold"
+            style={{
+              background: 'rgba(93,202,165,0.14)',
+              color: '#9CE5C5',
+              boxShadow: 'inset 0 0 0 1px rgba(93,202,165,0.32)',
+              letterSpacing: '-0.005em',
+              fontSize: '13.5px',
+            }}
+          >
+            <span
+              aria-hidden
+              className="live-pulse h-[6px] w-[6px] rounded-full"
+              style={{ background: '#5DCAA5' }}
+            />
+            Live
+          </span>
+
+          <span aria-hidden style={{ color: 'rgba(184,174,218,0.30)' }}>·</span>
+
+          <span style={{ color: 'rgba(184,174,218,0.85)' }}>Last 7 days</span>
+        </div>
+
+        {/* Sparkle decoration — smaller than the verdict card's to signal
+            this is an INBOX moment, not the payoff moment. */}
+        <div aria-hidden className="my-[18px] flex items-center gap-[14px]">
+          <span
+            style={{
+              width: '32px',
+              height: '1px',
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(168,140,255,0.55) 100%)',
+            }}
+          />
+          <Sparkle
+            size={16}
+            weight="fill"
+            style={{
+              color: '#A88CFF',
+              filter: 'drop-shadow(0 0 12px rgba(127,90,240,0.55))',
+            }}
+          />
+          <span
+            style={{
+              width: '32px',
+              height: '1px',
+              background:
+                'linear-gradient(90deg, rgba(168,140,255,0.55) 0%, transparent 100%)',
+            }}
+          />
+        </div>
+
+        {/* Headline — slightly smaller than verdict card (this is the inbox,
+            not the moment of arrival). Same italic-purple period motif. */}
+        <h2
+          className="font-display font-black text-white"
+          style={{
+            fontSize: 'clamp(30px, 3.4vw, 44px)',
+            letterSpacing: '-0.028em',
+            lineHeight: 1.06,
+          }}
+        >
+          Your inbox of{' '}
+          <span
+            className="font-serif italic"
+            style={{ color: '#A88CFF', fontWeight: 600 }}
+          >
+            findings
+          </span>
+          <span style={{ color: '#A88CFF' }}>.</span>
+        </h2>
+
+        <p
+          className="mt-3 text-[14.5px]"
+          style={{ color: 'rgba(184,174,218,0.85)' }}
+        >
+          Sorted by what needs you across {ACCOUNTS_COVERED} accounts.
+        </p>
+
+        {/* Bottom stats row — value(bold-tabular-white) + noun(muted-lavender)
+            pairs, dot-separated at 0.30 alpha. All post-run roll-ups; no
+            pre-run dollar claims. */}
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-[14px] gap-y-2 text-[14px]">
+          <HeroStat value={counts.all.toString()}      label="reports this week" />
+          <HeroDot />
+          <HeroStat value={counts.needs.toString()}    label="need you" />
+          <HeroDot />
+          <HeroStat value="9"                          label="auto-shipped" />
+          <HeroDot />
+          <HeroStat value={counts.actioned.toString()} label="actioned this month" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HeroStat({ value, label }: { value: string; label: string }) {
+  return (
+    <span
+      className="inline-flex items-baseline gap-[6px]"
+      style={{ color: 'rgba(184,174,218,0.85)' }}
+    >
+      <span
+        className="tabular-nums font-bold"
+        style={{ color: 'rgba(255,255,255,0.94)', letterSpacing: '-0.005em' }}
+      >
+        {value}
+      </span>
+      <span>{label}</span>
+    </span>
+  );
+}
+
+function HeroDot() {
+  return <span aria-hidden style={{ color: 'rgba(184,174,218,0.30)' }}>·</span>;
+}
+
 function OperatorView({
   counts, rows, density, setDensity, query, setQuery,
   projectId, setProject, bucket, setBucket,
 }: OperatorProps) {
   return (
     <>
-      {/* KPI QUARTET — bright dashboard moment, same hand as /projects */}
-      <section
-        className="reveal grid gap-4"
-        style={{ animationDelay: '120ms', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}
-      >
-        <KpiCard
-          label="Needs your decision"
-          value={counts.needs.toString()}
-          delta={{ tone: 'up', pct: 50.0 }}
-          spark={[3, 2, 4, 3, 5, 4, 6, 5, 6, 7, 6, 8]}
-          accent="#C5301B"
-        />
-        <KpiCard
-          label="Ready for client"
-          value={counts.ready.toString()}
-          delta={{ tone: 'up', pct: 33.3 }}
-          spark={[2, 3, 2, 3, 4, 3, 4, 5, 4, 5, 6, 7]}
-          accent="#D49021"
-        />
-        <KpiCard
-          label="Auto-shipped this week"
-          value="9"
-          delta={{ tone: 'up', pct: 28.5 }}
-          spark={[2, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 9]}
-          accent="#A88CFF"
-        />
-        <KpiCard
-          label="Actioned this month"
-          value={counts.actioned.toString()}
-          delta={{ tone: 'up', pct: 14.2 }}
-          spark={[12, 14, 13, 15, 17, 18, 19, 22, 23, 25, 27, 28]}
-          accent="#3FB58C"
-        />
-      </section>
+      {/* Editorial dark hero — same family as the verdict card on individual
+          reports. Sandwich layout: identity + status on top, headline +
+          subline in the middle, rollup stats on the bottom. Replaces the
+          generic KPI quartet that used to sit here. */}
+      <ReportsHero counts={counts} />
 
       {/* SEARCH + FILTER CHIPS — mirrors /projects exactly.
           relative + z-40 keeps the ProjectPicker dropdown above the
@@ -329,77 +490,213 @@ function OperatorView({
         </ul>
       </section>
 
-      {/* DISCOVERIES CTA — replaces the dark "most urgent" footer.
-          Reports = the raw firehose. Discoveries = the briefing layer
-          that compiles every report into a single executive read across
-          the portfolio. The CTA lives here because once you're done
+      {/* PATTERNS CTA — slim sister-link to the cross-portfolio synthesis.
+          Reports = the raw firehose. Patterns = the synthesis layer that
+          compiles every finding across every project into the patterns
+          that span them. The banner lives here because once you're done
           triaging the inbox, the natural next step is "show me the
-          bigger picture across all projects". */}
-      <DiscoveriesCta />
+          bigger picture across the roster". */}
+      <PatternsCta />
     </>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   ROWS                                                                */
+   ROWS — expandable inbox rows
+
+   Each row is the headline finding of a report. The chevron at the
+   right toggles an inline expansion that shows the other 3 findings
+   inside the same report — bullet-dotted by impact, each a deep-link
+   into its anchor on the report's AI Summary tab. Lets the operator
+   scan a report's full slate of findings without leaving the inbox.
+
+   Anatomy:
+     [Link to report (covers main content)] [chevron button (toggles)]
+     ── expanded panel (only when open) ──
+       ● sub-finding 1
+       ● sub-finding 2
+       ● sub-finding 3
+       → Open full report                    Deep Report ↗
+
+   The Link and the chevron button are siblings so the chevron click
+   doesn't navigate. Hover treatment fires off the outer `group` so the
+   whole row reads as one hoverable unit even though it's two click
+   targets internally.                                                  */
 
 function CompactRow({ report, index }: { report: FlatReport; index: number }) {
+  const [expanded, setExpanded] = useState(false);
   return (
-    <li className="row reveal-row group" style={{ animationDelay: `${300 + index * 26}ms` }}>
-      <Link
-        to={`/reports/${report.runId}`}
-        className="grid grid-cols-[190px_1fr_148px_100px_28px] items-center gap-3 px-6 py-[18px]"
-      >
-        <ProjectTag id={report.projectId} name={report.projectName} />
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 truncate">
-            <span className="text-[16px] leading-none">{report.agentEmoji}</span>
-            <span className="truncate text-[15px] font-semibold tracking-[-0.008em] text-ppc-ink group-hover:text-ppc-purple-700">
-              {report.headline}
-            </span>
-            {report.pinned && <PushPin size={12} weight="fill" className="shrink-0 text-ppc-purple-400" />}
-          </div>
-          <div className="mt-[3px] truncate text-[12.5px] text-ppc-text-muted">
-            {report.agentName} <span className="text-ppc-text-faint/60">·</span> {report.subline}
-          </div>
+    <li className="reveal-row" style={{ animationDelay: `${300 + index * 26}ms` }}>
+      <article className={`row group ${expanded ? 'row-expanded' : ''}`}>
+        <div className="flex items-stretch">
+          <Link
+            to={`/reports/${report.runId}`}
+            className="grid min-w-0 flex-1 grid-cols-[190px_1fr_148px_100px] items-center gap-3 px-6 py-[18px]"
+          >
+            <ProjectTag id={report.projectId} name={report.projectName} />
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 truncate">
+                <span className="text-[16px] leading-none">{report.agentEmoji}</span>
+                <span className="truncate text-[15px] font-semibold tracking-[-0.008em] text-ppc-ink group-hover:text-ppc-purple-700">
+                  {report.headline}
+                </span>
+                {report.pinned && <PushPin size={12} weight="fill" className="shrink-0 text-ppc-purple-400" />}
+              </div>
+              <div className="mt-[3px] truncate text-[12.5px] text-ppc-text-muted">
+                {report.agentName} <span className="text-ppc-text-faint/60">·</span> {report.subline}
+              </div>
+            </div>
+            <BucketPill bucket={report.bucket} status={report.status} />
+            <div className="text-right">
+              <span className="text-[12.5px] tabular-nums text-ppc-text-muted">{report.finishedLabel}</span>
+            </div>
+          </Link>
+          <ExpandToggle
+            count={report.subFindings.length}
+            expanded={expanded}
+            onToggle={() => setExpanded((v) => !v)}
+          />
         </div>
-        <BucketPill bucket={report.bucket} status={report.status} />
-        <div className="text-right">
-          <span className="text-[12.5px] tabular-nums text-ppc-text-muted">{report.finishedLabel}</span>
-        </div>
-        <ArrowRight
-          size={13}
-          weight="bold"
-          className="justify-self-end text-ppc-text-faint transition-transform duration-200 group-hover:translate-x-[2px] group-hover:text-ppc-purple-500"
-        />
-      </Link>
+        {expanded && <ExpandedFindings findings={report.subFindings} runId={report.runId} />}
+      </article>
     </li>
   );
 }
 
 function ComfortableRow({ report, index }: { report: FlatReport; index: number }) {
+  const [expanded, setExpanded] = useState(false);
   return (
-    <li className="row reveal-row group" style={{ animationDelay: `${300 + index * 26}ms` }}>
-      <Link to={`/reports/${report.runId}`} className="block px-6 py-[18px]">
-        <div className="flex items-center justify-between gap-3">
-          <ProjectTag id={report.projectId} name={report.projectName} />
-          <div className="flex items-center gap-3">
-            <BucketPill bucket={report.bucket} status={report.status} />
-            <span className="text-[11.5px] tabular-nums text-ppc-text-muted">{report.finishedLabel}</span>
-          </div>
+    <li className="reveal-row" style={{ animationDelay: `${300 + index * 26}ms` }}>
+      <article className={`row group ${expanded ? 'row-expanded' : ''}`}>
+        <div className="flex items-stretch">
+          <Link to={`/reports/${report.runId}`} className="block min-w-0 flex-1 px-6 py-[18px]">
+            <div className="flex items-center justify-between gap-3">
+              <ProjectTag id={report.projectId} name={report.projectName} />
+              <div className="flex items-center gap-3">
+                <BucketPill bucket={report.bucket} status={report.status} />
+                <span className="text-[11.5px] tabular-nums text-ppc-text-muted">{report.finishedLabel}</span>
+              </div>
+            </div>
+            <div className="mt-2.5 flex items-center gap-2.5">
+              <span className="text-base leading-none">{report.agentEmoji}</span>
+              <span className="text-[15px] font-semibold tracking-[-0.008em] text-ppc-ink group-hover:text-ppc-purple-700">
+                {report.headline}
+              </span>
+              {report.pinned && <PushPin size={11} weight="fill" className="text-ppc-purple-400" />}
+            </div>
+            <div className="mt-1 text-[12px] text-ppc-text-muted">
+              {report.agentName} <span className="text-ppc-text-faint/60">·</span> {report.subline}
+            </div>
+          </Link>
+          <ExpandToggle
+            count={report.subFindings.length}
+            expanded={expanded}
+            onToggle={() => setExpanded((v) => !v)}
+          />
         </div>
-        <div className="mt-2.5 flex items-center gap-2.5">
-          <span className="text-base leading-none">{report.agentEmoji}</span>
-          <span className="text-[15px] font-semibold tracking-[-0.008em] text-ppc-ink group-hover:text-ppc-purple-700">
-            {report.headline}
-          </span>
-          {report.pinned && <PushPin size={11} weight="fill" className="text-ppc-purple-400" />}
-        </div>
-        <div className="mt-1 text-[12px] text-ppc-text-muted">
-          {report.agentName} <span className="text-ppc-text-faint/60">·</span> {report.subline}
-        </div>
-      </Link>
+        {expanded && <ExpandedFindings findings={report.subFindings} runId={report.runId} />}
+      </article>
     </li>
+  );
+}
+
+/* ExpandToggle — the chevron button on the right edge of each row.
+ * Lives outside the row's Link so clicking it doesn't navigate. Shows
+ * the count of additional findings ("+3") in a Courier mono caption
+ * so the user knows how much will reveal before they click. */
+function ExpandToggle({
+  count, expanded, onToggle,
+}: { count: number; expanded: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={expanded}
+      aria-label={expanded ? `Hide ${count} findings` : `Show ${count} more findings`}
+      title={expanded ? 'Collapse' : `${count} more findings`}
+      className="group/toggle flex shrink-0 items-center gap-1.5 self-stretch border-l border-[#ECEAFA] px-5 transition-colors hover:bg-[#F8F5FF]"
+    >
+      <span
+        className="tabular-nums text-[11px] font-semibold text-ppc-text-faint transition-colors group-hover/toggle:text-ppc-purple-700"
+        style={{
+          fontFamily: '"Courier New", ui-monospace, monospace',
+          letterSpacing: '0.04em',
+        }}
+      >
+        +{count}
+      </span>
+      <CaretRight
+        size={12}
+        weight="bold"
+        className={`text-ppc-text-faint transition-all duration-200 group-hover/toggle:text-ppc-purple-700 ${
+          expanded ? 'rotate-90' : ''
+        }`}
+      />
+    </button>
+  );
+}
+
+/* ExpandedFindings — the inline panel that appears below a row when
+ * the chevron is clicked. Indents past the project chip column so it
+ * reads as belonging to its parent row. Each sub-finding is a deep
+ * link into its anchor on the report's AI Summary tab. Footer carries
+ * the "Open full report" + "Deep Report" affordances side by side. */
+function ExpandedFindings({
+  findings, runId,
+}: { findings: SubFinding[]; runId: string }) {
+  const impactStyle: Record<SubFinding['impact'], { dot: string; halo: string }> = {
+    critical: { dot: '#E24B4A', halo: 'rgba(226,75,74,0.18)' },
+    warning:  { dot: '#D49021', halo: 'rgba(212,144,33,0.18)' },
+    healthy:  { dot: '#3FB58C', halo: 'rgba(63,181,140,0.18)' },
+  };
+  return (
+    <div
+      className="row-expansion border-t border-[#ECEAFA] bg-[#FBFAFF] px-6 py-4"
+    >
+      <ul className="flex flex-col gap-[2px] pl-[22px]">
+        {findings.map((f) => {
+          const s = impactStyle[f.impact];
+          return (
+            <li key={f.id}>
+              <Link
+                to={`/reports/${runId}#discovery-${f.id}`}
+                className="group/sub flex items-start gap-3 rounded-[8px] px-2 py-[9px] transition-colors hover:bg-white"
+              >
+                <span
+                  aria-hidden
+                  className="mt-[8px] h-[7px] w-[7px] shrink-0 rounded-full"
+                  style={{ background: s.dot, boxShadow: `0 0 0 3px ${s.halo}` }}
+                />
+                <span className="min-w-0 flex-1 text-[13.5px] leading-[1.55] text-ppc-ink/85 group-hover/sub:text-ppc-ink">
+                  {f.body}
+                </span>
+                <ArrowRight
+                  size={12}
+                  weight="bold"
+                  className="mt-[5px] shrink-0 text-ppc-text-faint opacity-0 transition-all group-hover/sub:translate-x-[2px] group-hover/sub:text-ppc-purple-500 group-hover/sub:opacity-100"
+                />
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="mt-3 flex items-center justify-between border-t border-dashed border-[#E2DCF0] pl-[22px] pt-3">
+        <Link
+          to={`/reports/${runId}`}
+          className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-ppc-purple-700 transition-colors hover:text-ppc-purple-500"
+        >
+          Open full report
+          <ArrowRight size={11} weight="bold" />
+        </Link>
+        <Link
+          to={`/reports/${runId}?tab=deep`}
+          className="inline-flex items-center gap-1 text-[11.5px] font-medium text-ppc-text-muted transition-colors hover:text-ppc-ink"
+        >
+          Deep Report
+          <ArrowUpRight size={10} weight="bold" />
+        </Link>
+      </div>
+    </div>
   );
 }
 
@@ -462,75 +759,66 @@ function Pill({ bg, fg, dot, children }: { bg: string; fg: string; dot: string; 
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   DISCOVERIES CTA — light invitation card under the inbox
+   PATTERNS BANNER — slim editorial invitation under the inbox
 
-   Reports surfaces every individual finding. Discoveries is the next
-   layer up — a weekly executive read that compiles every report into
-   one narrative across the portfolio ("here's what your AI noticed
-   this week, ranked by impact"). The CTA lives at the bottom of /reports
-   because that's where the operator finishes triage and wants the
-   bigger picture. Light card, no dark hero — Reports already has the
-   inbox card as the page's main weight; a second dark moment would
-   make the page bottom-heavy.                                          */
+   Reports surfaces every individual finding. Patterns is the next layer
+   up — io looks across every finding across every project and surfaces
+   the patterns that span them. The banner sits at the bottom of /reports
+   because that's where the operator finishes triage and wants the bigger
+   picture. Slim, single-line — the inbox is the page's weight, this
+   banner is a quiet sister-link, not a hero.                            */
 
-function DiscoveriesCta() {
+function PatternsCta() {
   return (
     <Link
-      to="/discoveries"
-      className="reveal group relative block overflow-hidden rounded-[18px] transition-all hover:-translate-y-[1px]"
+      to="/patterns"
+      className="reveal group relative block overflow-hidden rounded-[14px] transition-all hover:-translate-y-[1px]"
       style={{
         animationDelay: '320ms',
         background: 'linear-gradient(180deg, #FFFFFF 0%, #FAF7FF 100%)',
         border: '0.5px solid #d9d4ec',
-        boxShadow: '0 1px 0 rgba(255,255,255,0.7) inset, 0 10px 30px -22px rgba(127,90,240,0.25)',
+        boxShadow: '0 1px 0 rgba(255,255,255,0.7) inset, 0 6px 20px -16px rgba(127,90,240,0.18)',
       }}
     >
-      {/* Faint purple wash from the right — a whisper, not a hero */}
-      <div
+      {/* Whisper of purple from the right on hover — atmosphere, not chrome */}
+      <span
         aria-hidden
-        className="pointer-events-none absolute -right-24 -top-24 h-[360px] w-[360px] rounded-full opacity-50 transition-opacity duration-500 group-hover:opacity-90"
+        className="pointer-events-none absolute -right-16 -top-12 h-[180px] w-[260px] rounded-full opacity-40 transition-opacity duration-500 group-hover:opacity-90"
         style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.10) 0%, transparent 65%)' }}
       />
 
-      <div className="relative grid items-center gap-6 px-7 py-7 md:grid-cols-[1.4fr_auto] md:px-9 md:py-8">
-        <div>
-          <div className="inline-flex items-center gap-2">
-            <span
-              className="grid h-[28px] w-[28px] place-items-center rounded-[8px]"
-              style={{
-                background: 'linear-gradient(155deg, #E9E3FF 0%, #D3C6FF 100%)',
-                boxShadow: 'inset 0 0 0 0.5px rgba(127,90,240,0.25)',
-              }}
-            >
-              <Compass size={14} weight="duotone" className="text-ppc-purple-700" />
-            </span>
-            <span className="mono-eyebrow text-ppc-purple-700">Discoveries</span>
-            <span className="text-ppc-text-faint">·</span>
-            <span className="mono-eyebrow text-ppc-text-faint">weekly briefing across all projects</span>
-          </div>
+      <div className="relative flex items-center gap-4 px-5 py-[14px] sm:px-6">
+        {/* Compass tile */}
+        <span
+          className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-[9px]"
+          style={{
+            background: 'linear-gradient(155deg, #E9E3FF 0%, #D3C6FF 100%)',
+            boxShadow: 'inset 0 0 0 0.5px rgba(127,90,240,0.28)',
+          }}
+        >
+          <Compass size={14} weight="duotone" className="text-ppc-purple-700" />
+        </span>
 
-          <h2 className="mt-3.5 font-display text-[28px] font-extrabold leading-[1.06] tracking-[-0.022em] text-ppc-ink md:text-[32px]">
-            See the bigger picture across your roster<span className="text-ppc-purple-500">.</span>
-          </h2>
-          <p className="mt-2.5 max-w-[60ch] text-[14px] leading-[1.55] text-ppc-text-muted">
-            Discoveries compiles every report from every project into a single executive read —
-            patterns that span clients, themes your specialists are flagging, and what's worth
-            your attention this week. The forest, not the trees.
-          </p>
-        </div>
-
-        <div className="flex items-center md:justify-end">
+        {/* Copy — eyebrow + headline on one line */}
+        <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span className="mono-eyebrow text-ppc-purple-700">Step back</span>
           <span
-            className="group/cta inline-flex items-center gap-2 rounded-[12px] px-[18px] py-[12px] text-[14px] font-semibold tracking-tight text-white transition-all"
-            style={{
-              background: 'linear-gradient(180deg, #8E6BF5 0%, #7F5AF0 50%, #6E47E0 100%)',
-              boxShadow: '0 1px 0 rgba(255,255,255,0.22) inset, 0 0 0 1px rgba(127,90,240,0.55), 0 12px 28px -10px rgba(127,90,240,0.55)',
-            }}
+            className="text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink"
           >
-            Open Discoveries
-            <ArrowRight size={13} weight="bold" className="transition-transform duration-200 group-hover:translate-x-[3px]" />
+            See this week's patterns across your roster
+            <span className="ml-px font-serif italic text-ppc-purple-500">.</span>
+          </span>
+          <span className="text-[12.5px] text-ppc-text-muted">
+            The forest, not the trees.
           </span>
         </div>
+
+        {/* Arrow */}
+        <ArrowRight
+          size={13}
+          weight="bold"
+          className="shrink-0 text-ppc-purple-500 transition-transform duration-200 group-hover:translate-x-[3px]"
+        />
       </div>
     </Link>
   );
@@ -1080,12 +1368,38 @@ const PAGE_STYLES = `
   .reveal-row { opacity: 0; animation: rp-row-reveal 0.42s cubic-bezier(0.22, 0.9, 0.32, 1) forwards; }
 
   .row {
+    position: relative;
     transition: background-color 0.2s ease;
     border-bottom: 1px solid #ECEAFA;
   }
   .row:last-child { border-bottom: none; }
-  .row:hover {
+  /* Hover applies only to the top half of the row (not the expansion). The
+   * subtree selector targets the first child div, which carries the Link +
+   * chevron. Keeps the hover whisper focused on the headline area. */
+  .row > div:first-child {
+    transition: background-color 0.2s ease;
+  }
+  .row:hover > div:first-child {
     background: linear-gradient(90deg, rgba(127,90,240,0.055) 0%, rgba(127,90,240,0.018) 38%, transparent 100%);
+  }
+
+  /* Expanded state: keep the row border but make the expansion's own top
+   * border carry the seam visually. The .row-expansion class already adds
+   * its own border-top in the markup, so we just suppress the row-bottom
+   * border when expanded to avoid a double-line. */
+  .row-expanded {
+    border-bottom-color: transparent;
+  }
+  .row-expanded + .row {
+    border-top: 1px solid #ECEAFA;
+  }
+
+  @keyframes rp-expand {
+    from { opacity: 0; transform: translateY(-2px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .row-expansion {
+    animation: rp-expand 0.28s cubic-bezier(0.22, 0.9, 0.32, 1);
   }
 
   /* KPI card — gentle hover lift (matches /projects) */

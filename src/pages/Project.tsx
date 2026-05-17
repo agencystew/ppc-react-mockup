@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, Link, Navigate } from 'react-router-dom';
+import { useParams, useSearchParams, Link, Navigate } from 'react-router-dom';
 import {
   ArrowRight, ArrowUp, ArrowDown, ArrowUpRight,
   Lightning, CaretDown, CaretRight,
@@ -212,7 +212,15 @@ type ProjectTab = 'overview' | 'context' | 'memory';
 export function ProjectPage() {
   const { id } = useParams();
   const project = PROJECTS.find((p) => p.id === id);
-  const [tab, setTab] = useState<ProjectTab>('overview');
+  // Initial tab honours `?tab=memory` / `?tab=context` so deep-links from
+  // Patterns (and elsewhere) land users on the right tab. Falls back to
+  // Overview when no valid param is present.
+  const [searchParams] = useSearchParams();
+  const initialTab: ProjectTab = (() => {
+    const t = searchParams.get('tab');
+    return t === 'memory' || t === 'context' ? t : 'overview';
+  })();
+  const [tab, setTab] = useState<ProjectTab>(initialTab);
   if (!project) return <Navigate to="/projects" replace />;
   const avatar = AVATAR[project.id] ?? { bg: '#7F5AF0', fg: '#FFFFFF' };
 
@@ -508,7 +516,7 @@ function TodaysBriefCard({ findings }: { findings: Finding[] }) {
             className="mt-5 inline-flex items-center gap-2 rounded-[10px] px-4 py-2.5 text-[13.5px] font-semibold text-white shadow-[0_1px_2px_rgba(124,109,255,0.5),0_12px_28px_-10px_rgba(124,109,255,0.65)] transition-transform hover:-translate-y-px"
             style={{ background: C.purple }}
           >
-            See all discoveries
+            See all findings
             <ArrowRight size={13} weight="bold" />
           </button>
         </div>

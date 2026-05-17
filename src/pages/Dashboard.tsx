@@ -645,17 +645,17 @@ function FilterButton() {
 function BottomDuo() {
   return (
     <section className="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
-      <DiscoveriesCTA />
+      <PatternsCTA />
       <QuickActions />
     </section>
   );
 }
 
-/* DiscoveriesCTA — dark card pointing at the recommendations hub.
+/* PatternsCTA — dark card pointing at the cross-portfolio patterns hub.
  * Reference: portfolio dashboard "AI verdict" composition (mascot on
  * the right, primary purple pill on the left). Intentionally
- * stat-free — the discoveries page itself surfaces the numbers. */
-function DiscoveriesCTA() {
+ * stat-free — the patterns page itself surfaces the numbers. */
+function PatternsCTA() {
   return (
     <article
       className="relative overflow-hidden rounded-[18px] px-7 py-8 text-white sm:px-9 sm:py-9"
@@ -698,16 +698,16 @@ function DiscoveriesCTA() {
             className="text-[10.5px] uppercase tracking-[0.16em] text-white/55"
             style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
           >
-            Discoveries
+            Patterns
           </span>
           <h3 className="mt-3 font-display text-[28px] font-black leading-[1.04] tracking-[-0.022em] text-white sm:text-[34px]">
-            All discoveries, organized by project<span style={{ color: '#9F86FF' }}>.</span>
+            The patterns connecting every project<span style={{ color: '#9F86FF' }}>.</span>
           </h3>
           <p className="mt-3 max-w-[420px] text-[13.5px] leading-[1.55] text-white/60">
-            Every finding from every agent, sorted and ready to act on.
+            Cross-roster synthesis. io's read on what's worth your attention this week.
           </p>
           <Link
-            to="/reports"
+            to="/patterns"
             className="mt-6 inline-flex items-center gap-2 rounded-full px-[18px] py-[11px] text-[13.5px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
             style={{
               background:
@@ -716,7 +716,7 @@ function DiscoveriesCTA() {
                 '0 4px 18px rgba(70,49,134,0.55), 0 0 12px rgba(209,133,236,0.50) inset, 0 0 0 1px rgba(255,255,255,0.10)',
             }}
           >
-            See all recommendations
+            See this week's patterns
             <ArrowRight size={13} weight="bold" />
           </Link>
         </div>

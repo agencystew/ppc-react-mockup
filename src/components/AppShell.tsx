@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
-  House, Robot, ChartLineUp, ChatCircle,
+  House, Robot, ChartLineUp, ChatCircle, Compass,
   MagnifyingGlass, SidebarSimple, Plus, SquaresFour,
   CaretRight, DotsThree,
 } from '@phosphor-icons/react';
@@ -167,6 +167,7 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
             pages={rebindReportPages}
             collapsed={collapsed}
           />
+          <MainNavItem to="/patterns" icon={Compass} label="Patterns" collapsed={collapsed} />
           <ProjectsSection collapsed={collapsed} />
         </nav>
 
