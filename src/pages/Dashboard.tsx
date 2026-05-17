@@ -704,7 +704,7 @@ function PatternsCTA() {
             The patterns connecting every project<span style={{ color: '#9F86FF' }}>.</span>
           </h3>
           <p className="mt-3 max-w-[420px] text-[13.5px] leading-[1.55] text-white/60">
-            Cross-roster synthesis. io's read on what's worth your attention this week.
+            Cross-account synthesis. The patterns that span more than one client — your COO-level read on the week.
           </p>
           <Link
             to="/patterns"

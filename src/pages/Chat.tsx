@@ -529,10 +529,10 @@ function TrustStrip() {
 
           <div className="min-w-0">
             <div
-              className="font-mono text-[10.5px] font-semibold uppercase"
-              style={{ color: '#A89BFF', letterSpacing: '0.14em' }}
+              className="text-[11.5px] font-semibold tracking-[-0.005em]"
+              style={{ color: '#A89BFF' }}
             >
-              io has a long memory
+              A long memory
             </div>
             <h2 className="mt-2 font-display text-[26px] font-extrabold leading-[1.1] tracking-[-0.022em] text-white">
               Every chat builds on the last
@@ -542,8 +542,8 @@ function TrustStrip() {
               className="mt-2 max-w-[52ch] text-[13.5px] leading-[1.6]"
               style={{ color: 'rgba(255,255,255,0.65)' }}
             >
-              io remembers your accounts, your decisions, your brand voice, and what every agent has surfaced —
-              and pulls from it before answering. You never start from zero.
+              Your accounts, your decisions, your brand voice, every agent finding — all carried forward
+              and pulled in before any answer. You never start from zero.
             </p>
           </div>
 

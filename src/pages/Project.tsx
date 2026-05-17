@@ -301,7 +301,7 @@ interface ProjectTabDef {
 const PROJECT_TABS: ProjectTabDef[] = [
   { id: 'overview', label: 'Overview',         subtitle: 'Today\'s brief, performance, campaigns',  icon: <ChartLineUp size={22} weight="duotone" /> },
   { id: 'context',  label: 'Business Context', subtitle: 'Personas, goals, competitors, AI instructions', icon: <Briefcase  size={22} weight="duotone" /> },
-  { id: 'memory',   label: 'Memory',           subtitle: 'Everything io has learned about this account',  icon: <Brain      size={22} weight="duotone" /> },
+  { id: 'memory',   label: 'Memory',           subtitle: 'Everything learned about this account, week by week',  icon: <Brain      size={22} weight="duotone" /> },
 ];
 
 function ProjectTabBar({
@@ -1150,7 +1150,7 @@ function BusinessContextView({ projectId }: { projectId: string }) {
       </ContextSection>
 
       <ContextSection
-        eyebrow="What io read on the site"
+        eyebrow="Read from the live site"
         title="AI business intelligence"
         action={
           <span
@@ -1492,14 +1492,14 @@ function ImproveContextCta() {
             className="text-[22px] font-bold leading-[1.15] text-white"
             style={{ letterSpacing: '-0.018em' }}
           >
-            Make io smarter on Boulder Care
+            Sharpen the context on Boulder Care
             <span style={{ color: '#A89BFF', fontStyle: 'italic' }}>.</span>
           </h3>
           <p
             className="mt-2 max-w-[58ch] text-[13.5px] leading-[1.55]"
             style={{ color: 'rgba(255,255,255,0.65)' }}
           >
-            Every detail you add here gets pulled into every agent run, every chat, and every recommendation.
+            Every detail added here gets pulled into every agent run, every chat, and every recommendation.
             One paragraph here saves an hour of prompting later.
           </p>
         </div>
@@ -1641,13 +1641,13 @@ function MemoryHero({ projectName }: { projectName: string }) {
             boxShadow: '0 1px 0 rgba(255,255,255,0.22) inset, 0 0 0 1px rgba(127,90,240,0.45), 0 18px 36px -14px rgba(127,90,240,0.55)',
           }}
         >
-          <span className="text-[22px] font-bold leading-none tracking-[-0.012em]">io</span>
+          <Brain size={28} weight="duotone" />
         </span>
 
         <div className="min-w-0">
           <div
-            className="font-mono text-[10.5px] font-semibold uppercase"
-            style={{ color: '#534AB7', letterSpacing: '0.14em' }}
+            className="text-[12px] font-semibold tracking-[-0.005em]"
+            style={{ color: '#534AB7' }}
           >
             Project memory
           </div>
@@ -1655,12 +1655,12 @@ function MemoryHero({ projectName }: { projectName: string }) {
             className="mt-2 text-[28px] font-extrabold leading-[1.05]"
             style={{ color: '#1a1625', letterSpacing: '-0.022em' }}
           >
-            io has been remembering {projectName} for <span className="tabular">47</span> days
+            <span className="tabular">47</span> days of context on {projectName}
             <span style={{ color: '#7F5AF0', fontStyle: 'italic' }}>.</span>
           </h2>
           <p className="mt-2 max-w-[60ch] text-[13.5px] leading-[1.6]" style={{ color: C.neutral6 }}>
-            Every chat, every agent run, every decision you've made — io carries the context forward.
-            Ask anything from the composer at the bottom and io will draw straight from this memory.
+            Every chat, every agent run, every decision — all carried forward.
+            Ask anything from the composer below and the answer draws straight from this memory.
           </p>
         </div>
 
@@ -1801,7 +1801,7 @@ function MemoryComposer({ projectName }: { projectName: string }) {
           <div className="mt-3 flex items-start gap-3">
             <input
               type="text"
-              placeholder={`Ask io anything about ${projectName}'s history…`}
+              placeholder={`Ask anything about ${projectName}'s history…`}
               className="flex-1 bg-transparent text-[15.5px] text-white outline-none placeholder:text-white/45"
             />
             <button

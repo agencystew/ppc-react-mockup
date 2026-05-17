@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import {
   MagnifyingGlass, CaretDown, ArrowRight, ArrowUp, ArrowDown, Sparkle,
   Check, PaperPlaneTilt, PushPin, Rows, SquaresFour, Lightning,
-  Compass, CaretRight, ArrowUpRight,
+  Compass, ArrowUpRight, Plus,
 } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -602,8 +602,9 @@ function ComfortableRow({ report, index }: { report: FlatReport; index: number }
 
 /* ExpandToggle — the chevron button on the right edge of each row.
  * Lives outside the row's Link so clicking it doesn't navigate. Shows
- * the count of additional findings ("+3") in a Courier mono caption
- * so the user knows how much will reveal before they click. */
+ * a visible lavender chip with the count of additional findings, so the
+ * affordance reads as clickable at rest, not only on hover. Caret flips
+ * 180° when expanded. */
 function ExpandToggle({
   count, expanded, onToggle,
 }: { count: number; expanded: boolean; onToggle: () => void }) {
@@ -614,22 +615,27 @@ function ExpandToggle({
       aria-expanded={expanded}
       aria-label={expanded ? `Hide ${count} findings` : `Show ${count} more findings`}
       title={expanded ? 'Collapse' : `${count} more findings`}
-      className="group/toggle flex shrink-0 items-center gap-1.5 self-stretch border-l border-[#ECEAFA] px-5 transition-colors hover:bg-[#F8F5FF]"
+      className="group/toggle flex shrink-0 items-center gap-2 self-stretch border-l border-[#ECEAFA] px-4 transition-colors hover:bg-[#F3F0FF]"
     >
       <span
-        className="tabular-nums text-[11px] font-semibold text-ppc-text-faint transition-colors group-hover/toggle:text-ppc-purple-700"
+        className="inline-flex items-center gap-1 rounded-full px-2.5 py-[3px] text-[11.5px] font-semibold tabular-nums tracking-[-0.005em]"
         style={{
-          fontFamily: '"Courier New", ui-monospace, monospace',
-          letterSpacing: '0.04em',
+          background: '#F0EBFF',
+          color: '#534AB7',
+          boxShadow: 'inset 0 0 0 0.5px rgba(127,90,240,0.18)',
         }}
       >
-        +{count}
+        <Plus size={9} weight="bold" />
+        {count}
+        <span className="ml-[2px] hidden font-medium opacity-70 sm:inline">
+          more
+        </span>
       </span>
-      <CaretRight
-        size={12}
+      <CaretDown
+        size={13}
         weight="bold"
-        className={`text-ppc-text-faint transition-all duration-200 group-hover/toggle:text-ppc-purple-700 ${
-          expanded ? 'rotate-90' : ''
+        className={`text-ppc-purple-500 transition-transform duration-200 ${
+          expanded ? 'rotate-180' : ''
         }`}
       />
     </button>
@@ -762,11 +768,10 @@ function Pill({ bg, fg, dot, children }: { bg: string; fg: string; dot: string; 
    PATTERNS BANNER — slim editorial invitation under the inbox
 
    Reports surfaces every individual finding. Patterns is the next layer
-   up — io looks across every finding across every project and surfaces
-   the patterns that span them. The banner sits at the bottom of /reports
-   because that's where the operator finishes triage and wants the bigger
-   picture. Slim, single-line — the inbox is the page's weight, this
-   banner is a quiet sister-link, not a hero.                            */
+   up — synthesis across findings from every project. The banner sits at
+   the bottom of /reports because that's where the operator finishes
+   triage and wants the bigger picture. Slim, single-line — the inbox is
+   the page's weight, this banner is a quiet sister-link, not a hero.   */
 
 function PatternsCta() {
   return (

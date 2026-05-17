@@ -208,8 +208,8 @@ export const FYI_REPORTS: FyiReport[] = [
     subline: 'no anomalies detected this week',
     finishedLabel: '1 week ago',
     subFindings: [
-      { id: 'sf-7a', impact: 'healthy', body: "GA4 ↔ Google Ads link confirmed across both accounts — no drift since last verification 7 days ago." },
-      { id: 'sf-7b', impact: 'healthy', body: "Conversion attribution model is still data-driven on both — no setting changes detected. Keep monitoring?" },
+      { id: 'sf-7a', impact: 'healthy', body: "GA4 ↔ Google Ads link confirmed across both accounts · no drift in 7 days. Drop the verification cadence to monthly?" },
+      { id: 'sf-7b', impact: 'healthy', body: "Conversion attribution model is still data-driven on both · no setting changes detected. Keep on the watchlist or de-prioritise?" },
       { id: 'sf-7c', impact: 'healthy', body: "14 audience lists feeding correctly · 0 stale · oldest refresh 3 days ago. Healthy enough to skip the next manual check?" },
     ],
   },
@@ -241,7 +241,7 @@ export const FYI_REPORTS: FyiReport[] = [
     finishedLabel: '2 weeks ago',
     subFindings: [
       { id: 'sf-9a', impact: 'warning', body: "Edinburgh auction pressure rose +22% over the weekend (vs +6% London) — local tourism board ran weekend ads." },
-      { id: 'sf-9b', impact: 'healthy', body: "Cleared by Tuesday morning, no lasting impact on weekly CPA — handled by the algorithm without intervention." },
+      { id: 'sf-9b', impact: 'healthy', body: "Cleared by Tuesday morning, no lasting impact on weekly CPA — the algorithm handled it without intervention. Worth documenting as 'no action needed' so we don't reflexively daypart next time?" },
       { id: 'sf-9c', impact: 'warning', body: "Pattern likely to recur (tourism board has ~monthly weekend spikes) — daypart Edinburgh weekends or bid down -15% on Sat/Sun?" },
     ],
   },
@@ -256,9 +256,9 @@ export const FYI_REPORTS: FyiReport[] = [
     subline: 'no degradation detected',
     finishedLabel: '2 weeks ago',
     subFindings: [
-      { id: 'sf-10a', impact: 'healthy', body: "No keyword fell below QS 5 this week (previous low was 7) — landing page experience is 'Above average' across all 8 campaigns." },
+      { id: 'sf-10a', impact: 'healthy', body: "No keyword fell below QS 5 this week (previous low was 7) — landing page experience 'Above average' on all 8 campaigns. Strong enough to push more budget into the top-QS ad groups?" },
       { id: 'sf-10b', impact: 'warning', body: "Expected CTR is still 'Average' (not 'Above') on 3 ad groups — could a fresh RSA push them up, or is this the structural ceiling for the vertical?" },
-      { id: 'sf-10c', impact: 'healthy', body: "Ad relevance scored 'Above average' on every active ad — strongest signal in 6 weeks of data." },
+      { id: 'sf-10c', impact: 'healthy', body: "Ad relevance scored 'Above average' on every active ad — strongest signal in 6 weeks of data. Test pushing a bolder creative angle while QS is high, or lock in current copy?" },
     ],
   },
 ];
