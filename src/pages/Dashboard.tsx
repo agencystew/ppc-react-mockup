@@ -643,22 +643,18 @@ function FilterButton() {
 
 /* ─── 4 · Patterns live strip ───────────────────────────────────────────
  *
- * Purple billboard at the bottom of /dashboard. Owns the "experimental
- * brain" surface — the COO / data-scientist autopilot watching across
- * every account. Composition top-down:
- *
- *   - status strip (PATTERNS · EXPERIMENTAL + LIVE indicator)
- *   - hero zone: massive count (left) + network graph (right)
- *   - card shelf: 3 BLACK callout cards, one per top-3 pattern
- *   - ghost CTA into /patterns
- *
- * Network graph shows 8 project nodes around an io brain centre, with
- * colored polylines connecting the nodes affected by each of the top 3
- * patterns. That's the "brain connection" — io literally drew lines
- * between the accounts where it noticed the same thing.
- *
- * ?empty=1 flips to onboarding: 0 count, no graph lines, 4 ghost
- * "Watching for…" cards, "Launch first audit" CTA. */
+ * Editorial purple billboard. Centered vertical composition matching
+ * the v5 hero family (HoldTightBand, AgentCatalog hero):
+ *   - status strip (LIVE left, EXPERIMENTAL right)
+ *   - sparkle ornament divider
+ *   - massive headline with PF-Marlet-Display italic-serif accent
+ *   - body line
+ *   - LARGE network graph (io brain centre + 8 project nodes around,
+ *     3 colored arcs drawing this week's connections)
+ *   - stats line with bold numbers (proper text size, not tiny mono)
+ *   - 3 black callout cards, color-matched to graph arcs
+ *   - centered ghost CTA
+ * ?empty=1 flips to onboarding state. */
 
 function PatternsLiveStrip() {
   const [params] = useSearchParams();
@@ -669,120 +665,106 @@ function PatternsLiveStrip() {
 
   return (
     <section
-      className="relative overflow-hidden rounded-[24px]"
+      className="relative overflow-hidden rounded-[24px] text-center"
       style={{
         background:
-          'linear-gradient(135deg, #7F5AF0 0%, #6A45E2 70%, #5A3FE0 100%)',
+          'radial-gradient(120% 100% at 50% 0%, #8767F3 0%, #6A45E2 55%, #4D2EC9 100%)',
         boxShadow:
-          '0 0 0 1px rgba(255,255,255,0.10) inset, 0 28px 70px -30px rgba(90,63,224,0.55)',
+          '0 0 0 1px rgba(255,255,255,0.10) inset, 0 32px 80px -32px rgba(70,49,134,0.55)',
       }}
     >
-      {/* Top-right luminous bloom for depth */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -right-32 -top-32 h-[460px] w-[460px] rounded-full"
-        style={{
-          background:
-            'radial-gradient(circle, rgba(255,255,255,0.22) 0%, transparent 60%)',
-        }}
-      />
-      {/* Faint star grain */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.07]"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 25% 20%, white 1px, transparent 1px), radial-gradient(circle at 75% 70%, white 1px, transparent 1px)',
-          backgroundSize: '140px 140px, 100px 100px',
-        }}
-      />
-      {/* Bottom hairline pull for footing */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
-        style={{
-          background:
-            'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)',
-        }}
-      />
+      <span aria-hidden className="pointer-events-none absolute left-1/2 top-[-40%] h-[640px] w-[640px] -translate-x-1/2 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 60%)' }} />
+      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'radial-gradient(circle at 18% 30%, white 1px, transparent 1px), radial-gradient(circle at 78% 65%, white 1px, transparent 1px), radial-gradient(circle at 50% 90%, white 1px, transparent 1px)', backgroundSize: '160px 160px, 110px 110px, 200px 200px' }} />
 
-      <div className="relative px-7 py-8 sm:px-10 sm:py-9">
-        {/* Status strip */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <span
-            className="inline-flex items-center gap-2 rounded-full border border-white/30 px-3 py-[5px] text-[10px] uppercase tracking-[0.18em] text-white/90"
-            style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-          >
-            <Eye size={11} weight="bold" />
-            Patterns
-            <span className="text-white/45">·</span>
-            Experimental
+      <div className="relative flex items-center justify-between px-7 pt-7 sm:px-10 sm:pt-8">
+        <span className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-white/75" style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}>
+          <span className="relative inline-flex h-1.5 w-1.5">
+            <span className="absolute inset-0 animate-ping rounded-full bg-white opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
           </span>
-          <span
-            className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-white/75"
-            style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-          >
-            <span className="relative inline-flex h-1.5 w-1.5">
-              <span className="absolute inset-0 animate-ping rounded-full bg-white opacity-70" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
-            </span>
-            Live
-            <span className="text-white/40">·</span>
-            <span className="tabular-nums">{projectsTouched} projects watched</span>
-          </span>
-        </div>
+          Live
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/35 px-2.5 py-[3px] text-[10px] font-medium uppercase tracking-[0.18em] text-white/80" style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}>
+          Experimental
+        </span>
+      </div>
 
-        {/* Hero zone */}
-        <div className="mt-7 grid items-center gap-8 lg:grid-cols-[1fr_minmax(260px,320px)] lg:gap-8">
-          {/* Massive numeric hero */}
-          <div className="flex items-baseline gap-5">
-            <span className="font-display text-[110px] font-black leading-[0.88] tracking-[-0.045em] tabular-nums text-white sm:text-[140px]">
-              {isEmpty ? 0 : totalCount}
-            </span>
-            <div className="pb-3 sm:pb-4">
-              <h3 className="font-display text-[24px] font-extrabold leading-[1.05] tracking-[-0.02em] text-white sm:text-[30px]">
-                {isEmpty ? 'patterns yet' : 'patterns this week'}
-                <span className="italic" style={{ color: '#E0D4FF' }}>.</span>
-              </h3>
-              <p className="mt-1.5 max-w-[420px] text-[13px] leading-[1.5] text-white/70">
-                {isEmpty
-                  ? "io needs a few agent runs across 2+ accounts. Launch your first audit and we'll start watching."
-                  : `across ${projectsTouched} projects, refreshes whenever your agents do`}
-              </p>
-            </div>
-          </div>
-
-          {/* Network graph */}
-          <div className="flex justify-center lg:justify-end">
-            <NetworkGraph isEmpty={isEmpty} patterns={top3} />
-          </div>
-        </div>
-
-        {/* Card shelf */}
-        <div className="mt-8">
+      <div className="relative mx-auto max-w-[860px] px-7 pb-10 pt-7 sm:px-12 sm:pb-12 sm:pt-9">
+        <Ornament />
+        <h2 className="mx-auto font-display text-[44px] font-black leading-[1.0] tracking-[-0.030em] text-white sm:text-[58px]">
           {isEmpty ? (
-            <WatchingForGrid />
+            <>Listening across <SerifAccent>your accounts</SerifAccent><SerifPeriod /></>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {top3.map((p, i) => (
-                <PatternCard key={p.id} pattern={p} isFresh={i === 0} />
-              ))}
-            </div>
+            <>Patterns this <SerifAccent>week</SerifAccent><SerifPeriod /></>
           )}
+        </h2>
+        <p className="mx-auto mt-5 max-w-[560px] text-[15.5px] leading-[1.55] text-white/75">
+          {isEmpty
+            ? 'Patterns surface after a few agent runs across 2+ accounts. Launch your first audit and io starts connecting the dots.'
+            : `Across ${projectsTouched} projects this week, io surfaced ${totalCount} cross-account connections. The three worth seeing first:`}
+        </p>
+        <div className="mt-8 flex justify-center">
+          <BrainGraph isEmpty={isEmpty} patterns={top3} />
         </div>
+        <p className="mt-6 text-[13.5px] text-white/65">
+          <span className="font-display font-extrabold text-white tabular-nums">{isEmpty ? 0 : totalCount}</span> patterns
+          <span className="mx-2 text-white/30">·</span>
+          <span className="font-display font-extrabold text-white tabular-nums">{projectsTouched}</span> projects watched
+          {!isEmpty && (
+            <>
+              <span className="mx-2 text-white/30">·</span>
+              <span className="font-display font-extrabold text-white tabular-nums">{top3.length}</span> worth seeing first
+            </>
+          )}
+        </p>
+      </div>
 
-        {/* Footer CTA */}
-        <div className="mt-6 flex justify-end">
-          <Link
-            to={isEmpty ? '/agents' : '/patterns'}
-            className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/[0.08] px-[18px] py-[10px] text-[13px] font-semibold text-white backdrop-blur-sm transition-colors hover:border-white/60 hover:bg-white/[0.16]"
-          >
-            {isEmpty ? 'Launch first audit' : `See all ${totalCount} patterns`}
-            <ArrowRight size={13} weight="bold" />
-          </Link>
-        </div>
+      <div className="relative px-7 pb-8 sm:px-10 sm:pb-9">
+        {isEmpty ? (
+          <WatchingForList />
+        ) : (
+          <div className="grid gap-3 text-left sm:grid-cols-2 lg:grid-cols-3">
+            {top3.map((p, i) => (<PatternCard key={p.id} pattern={p} isFresh={i === 0} />))}
+          </div>
+        )}
+      </div>
+
+      <div className="relative flex justify-center px-7 pb-10 sm:px-10 sm:pb-12">
+        <Link
+          to={isEmpty ? '/agents' : '/patterns'}
+          className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/[0.08] px-[20px] py-[11px] text-[13.5px] font-semibold text-white backdrop-blur-sm transition-colors hover:border-white/70 hover:bg-white/[0.18]"
+        >
+          {isEmpty ? 'Launch first audit' : `See all ${totalCount} patterns`}
+          <ArrowRight size={13} weight="bold" />
+        </Link>
       </div>
     </section>
+  );
+}
+
+function SerifAccent({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="font-serif italic font-bold" style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif', color: '#E0D4FF' }}>
+      {children}
+    </span>
+  );
+}
+
+function SerifPeriod() {
+  return (
+    <span className="font-serif italic" style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif', color: '#E0D4FF' }}>.</span>
+  );
+}
+
+function Ornament() {
+  return (
+    <div className="relative mx-auto mb-6 flex items-center justify-center gap-3" aria-hidden>
+      <span className="block h-px w-[56px]" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.32) 100%)' }} />
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 0.5L8.2 5.8L13.5 7L8.2 8.2L7 13.5L5.8 8.2L0.5 7L5.8 5.8L7 0.5Z" fill="#E0D4FF" opacity="0.9" />
+      </svg>
+      <span className="block h-px w-[56px]" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.32) 0%, transparent 100%)' }} />
+    </div>
   );
 }
 
@@ -790,45 +772,26 @@ function PatternCard({ pattern, isFresh }: { pattern: Pattern; isFresh: boolean 
   const accent = categoryAccent(pattern.category);
   const firstTwo = pattern.affected.slice(0, 2);
   const overflow = pattern.affected.length - firstTwo.length;
-
   return (
     <Link
       to={`/patterns#${pattern.id}`}
-      className="group relative flex flex-col gap-3 overflow-hidden rounded-[16px] p-5 transition-transform hover:-translate-y-0.5"
-      style={{
-        background: '#0C0C0E',
-        boxShadow:
-          '0 18px 44px -22px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.05) inset',
-      }}
+      className="group relative flex flex-col gap-3 overflow-hidden rounded-[16px] p-5 text-left transition-transform hover:-translate-y-0.5"
+      style={{ background: '#0C0C0E', boxShadow: '0 20px 48px -22px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05) inset' }}
     >
-      {/* Top color bar */}
-      <span
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-[2px]"
-        style={{ background: accent }}
-      />
-
-      {/* Header row */}
+      <span aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: accent }} />
       <div className="flex items-start justify-between gap-3">
         <span
-          className="inline-flex items-center gap-1.5 rounded-full border px-2 py-[3px] text-[9.5px] uppercase tracking-[0.14em]"
-          style={{
-            borderColor: `${accent}66`,
-            color: accent,
-            fontFamily: '"Courier New", ui-monospace, monospace',
-          }}
+          className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[10.5px] font-medium uppercase tracking-[0.10em]"
+          style={{ borderColor: `${accent}66`, color: accent, fontFamily: '"Courier New", ui-monospace, monospace' }}
         >
-          <span className="h-1 w-1 rounded-full" style={{ background: accent }} />
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: accent }} />
           {shortCategory(pattern.category)}
         </span>
         {pattern.spotted && (
-          <span
-            className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.12em] text-white/55"
-            style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-          >
+          <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.08em] text-white/55" style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}>
             {isFresh && (
               <span className="relative inline-flex h-1.5 w-1.5">
-                <span className="absolute inset-0 animate-ping rounded-full bg-white opacity-70" />
+                <span className="absolute inset-0 animate-ping rounded-full bg-white opacity-75" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
               </span>
             )}
@@ -836,112 +799,65 @@ function PatternCard({ pattern, isFresh }: { pattern: Pattern; isFresh: boolean 
           </span>
         )}
       </div>
-
-      {/* Headline */}
-      <p className="line-clamp-3 text-[14px] font-semibold leading-[1.4] text-white">
-        {pattern.headline}
-      </p>
-
-      {/* Footer: projects + arrow */}
+      <p className="line-clamp-3 text-[15px] font-semibold leading-[1.4] text-white">{pattern.headline}</p>
       <div className="mt-auto flex items-center justify-between gap-3 pt-1">
-        <div className="flex min-w-0 items-center gap-1.5 text-[11px] text-white/65">
+        <div className="flex min-w-0 items-center gap-1.5 text-[12px] text-white/70">
           {firstTwo.map((p, idx) => (
             <span key={p.id} className="inline-flex min-w-0 items-center gap-1">
-              <span
-                className="h-1.5 w-1.5 shrink-0 rounded-full"
-                style={{ background: accent }}
-              />
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: accent }} />
               <span className="truncate">{p.name}</span>
-              {idx < firstTwo.length - 1 && (
-                <span className="text-white/30">·</span>
-              )}
+              {idx < firstTwo.length - 1 && <span className="text-white/30">·</span>}
             </span>
           ))}
-          {overflow > 0 && (
-            <span className="shrink-0 text-white/45">+{overflow}</span>
-          )}
+          {overflow > 0 && <span className="shrink-0 text-white/50">+{overflow}</span>}
         </div>
-        <CaretRight
-          size={11}
-          weight="bold"
-          className="shrink-0 text-white/45 transition-transform group-hover:translate-x-0.5 group-hover:text-white"
-        />
+        <CaretRight size={12} weight="bold" className="shrink-0 text-white/45 transition-transform group-hover:translate-x-0.5 group-hover:text-white" />
       </div>
     </Link>
   );
 }
 
-function WatchingForGrid() {
+function WatchingForList() {
   const items = [
     { label: 'Cross-account CPA spikes',          color: '#F87171' },
-    { label: 'Recurring negative-kw themes',      color: '#FB923C' },
+    { label: 'Recurring negative-keyword themes', color: '#FB923C' },
     { label: 'PMAX intent drift',                  color: '#A88CFF' },
     { label: 'Auction landscape shifts',           color: '#22D3EE' },
   ];
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      {items.map((it) => (
-        <div
-          key={it.label}
-          className="flex items-center gap-2.5 rounded-[16px] border border-dashed border-white/30 bg-white/[0.04] px-4 py-4 text-[12.5px] text-white/75"
-        >
-          <span
-            className="h-1.5 w-1.5 shrink-0 rounded-full"
-            style={{ background: it.color, opacity: 0.85 }}
-          />
-          {it.label}
-        </div>
-      ))}
+    <div className="mx-auto max-w-[720px]">
+      <p className="mb-3 text-center text-[10.5px] uppercase tracking-[0.18em] text-white/55" style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}>
+        Watching for
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        {items.map((it) => (
+          <span key={it.label} className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/[0.05] px-3.5 py-[7px] text-[12.5px] text-white/80">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: it.color, opacity: 0.9 }} />
+            {it.label}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
 
-/* NetworkGraph — 8 project nodes around an io centre. Pattern arcs
- * connect the nodes each top-pattern affects, in the pattern's
- * category color. Visually proves the connection. */
-function NetworkGraph({
-  isEmpty,
-  patterns,
-}: {
-  isEmpty: boolean;
-  patterns: Pattern[];
-}) {
-  // Project order is chosen so the canonical top-3 patterns form
-  // visually coherent arcs around the perimeter, not zigzags.
-  const center = { x: 140, y: 120 };
-  const radius = 86;
-  const projectOrder = [
-    'boulder-care',        // P0 — top
-    'the-hoth',            // P1 — NE   (p-01 trio)
-    'linkbuilder',         // P2 — E    (p-01 trio)
-    'authority-builders',  // P3 — SE   (p-01 trio)
-    'livingyoung',         // P4 — S    (p-02 trio)
-    'edwin-novel',         // P5 — SW   (p-02 trio)
-    'flock',               // P6 — W    (p-02 + p-03)
-    'durable',             // P7 — NW   (p-03)
-  ];
+function BrainGraph({ isEmpty, patterns }: { isEmpty: boolean; patterns: Pattern[] }) {
+  const W = 560;
+  const H = 320;
+  const center = { x: W / 2, y: H / 2 };
+  const radiusX = 230;
+  const radiusY = 130;
+  const projectOrder = ['boulder-care','the-hoth','linkbuilder','authority-builders','livingyoung','edwin-novel','flock','durable'];
   const nodes = projectOrder.map((id, i) => {
     const angle = -Math.PI / 2 + (i * (Math.PI * 2)) / 8;
-    return {
-      id,
-      x: center.x + radius * Math.cos(angle),
-      y: center.y + radius * Math.sin(angle),
-    };
+    return { id, x: center.x + radiusX * Math.cos(angle), y: center.y + radiusY * Math.sin(angle) };
   });
   const nodeById = (id: string) => nodes.find((n) => n.id === id);
-
-  // Pattern polylines (skipped in empty state).
-  const arcs = isEmpty
-    ? []
-    : patterns.map((p) => ({
-        id: p.id,
-        color: categoryAccent(p.category),
-        points: p.affected
-          .map((a) => nodeById(a.id))
-          .filter((n): n is { id: string; x: number; y: number } => Boolean(n)),
-      }));
-
-  // First-pattern-wins coloring for the node halos.
+  const arcs = isEmpty ? [] : patterns.map((p) => ({
+    id: p.id,
+    color: categoryAccent(p.category),
+    points: p.affected.map((a) => nodeById(a.id)).filter((n): n is { id: string; x: number; y: number } => Boolean(n)),
+  }));
   const nodeColor = new Map<string, string>();
   if (!isEmpty) {
     for (const p of patterns) {
@@ -951,91 +867,43 @@ function NetworkGraph({
       }
     }
   }
-
   return (
-    <svg
-      viewBox="0 0 280 240"
-      className="h-[220px] w-[280px]"
-      aria-hidden
-    >
-      {/* Base hairlines from io centre to each project */}
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full max-w-[560px]" aria-hidden>
+      <defs>
+        <radialGradient id="brainCore" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"  stopColor="white" stopOpacity="1" />
+          <stop offset="60%" stopColor="white" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#E0D4FF" stopOpacity="0.85" />
+        </radialGradient>
+        <radialGradient id="brainGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"  stopColor="white" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="white" stopOpacity="0" />
+        </radialGradient>
+      </defs>
       {nodes.map((n) => (
-        <line
-          key={n.id}
-          x1={center.x}
-          y1={center.y}
-          x2={n.x}
-          y2={n.y}
-          stroke="rgba(255,255,255,0.25)"
-          strokeWidth={0.6}
-          strokeDasharray="2 3"
-        />
+        <line key={n.id} x1={center.x} y1={center.y} x2={n.x} y2={n.y} stroke="rgba(255,255,255,0.28)" strokeWidth={0.8} strokeDasharray="3 4" />
       ))}
-
-      {/* Pattern arcs (skipped when empty) */}
       {arcs.map((arc) => (
-        <polyline
-          key={arc.id}
-          fill="none"
-          stroke={arc.color}
-          strokeWidth={1.8}
-          strokeOpacity={0.95}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          points={arc.points.map((p) => `${p.x},${p.y}`).join(' ')}
-          style={{ filter: `drop-shadow(0 0 5px ${arc.color}cc)` }}
-        />
+        <polyline key={arc.id} fill="none" stroke={arc.color} strokeWidth={3} strokeOpacity={0.96} strokeLinecap="round" strokeLinejoin="round" points={arc.points.map((p) => `${p.x},${p.y}`).join(' ')} style={{ filter: `drop-shadow(0 0 10px ${arc.color}cc)` }} />
       ))}
-
-      {/* Project nodes */}
       {nodes.map((n) => {
         const color = nodeColor.get(n.id);
         return (
           <g key={n.id}>
-            {color && (
-              <circle
-                cx={n.x}
-                cy={n.y}
-                r={7.5}
-                fill="none"
-                stroke={color}
-                strokeWidth={1}
-                opacity={0.45}
-              />
-            )}
-            <circle
-              cx={n.x}
-              cy={n.y}
-              r={color ? 4 : 3}
-              fill={color || 'rgba(255,255,255,0.85)'}
-            />
+            {color && <circle cx={n.x} cy={n.y} r={16} fill="none" stroke={color} strokeWidth={1.5} opacity={0.5} />}
+            <circle cx={n.x} cy={n.y} r={color ? 7 : 5} fill={color || 'rgba(255,255,255,0.92)'} />
           </g>
         );
       })}
-
-      {/* Centre io brain node */}
-      <circle cx={center.x} cy={center.y} r={18} fill="white" fillOpacity={0.10} />
-      <circle cx={center.x} cy={center.y} r={11} fill="white" />
-      <text
-        x={center.x}
-        y={center.y + 3.5}
-        textAnchor="middle"
-        fontSize="10"
-        fontFamily="Figtree, system-ui, sans-serif"
-        fontWeight={900}
-        fill="#6A45E2"
-        letterSpacing="-0.5"
-      >
-        io
-      </text>
+      <circle cx={center.x} cy={center.y} r={56} fill="url(#brainGlow)" />
+      <circle cx={center.x} cy={center.y} r={32} fill="url(#brainCore)" />
+      <text x={center.x} y={center.y + 7} textAnchor="middle" fontSize="24" fontFamily="Figtree, system-ui, sans-serif" fontWeight={900} fill="#5A3FE0" letterSpacing="-1.2">io</text>
     </svg>
   );
 }
 
 function shortCategory(category: string): string {
-  // Tighten long labels for the card chip.
-  return category
-    .toUpperCase()
+  return category.toUpperCase()
     .replace('AUCTION INSIGHTS — NEW ENTRANT', 'NEW ENTRANT')
     .replace('AUDIENCE SIGNAL OPPORTUNITY',    'AUDIENCE SIGNAL')
     .replace('VERTICAL-WIDE BRAND EROSION',    'BRAND EROSION')
@@ -1043,8 +911,6 @@ function shortCategory(category: string): string {
 }
 
 function categoryAccent(category: string): string {
-  // Brighter palette so accents pop on the saturated purple BG
-  // and inside the black cards.
   const c = category.toLowerCase();
   if (c.includes('pmax') || c.includes('audience') || c.includes('asset'))   return '#A88CFF';
   if (c.includes('budget') || c.includes('pacing') || c.includes('bid'))     return '#FBBF24';
