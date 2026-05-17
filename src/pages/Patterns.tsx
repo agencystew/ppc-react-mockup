@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, ArrowUpRight, Compass, Sparkle,
@@ -217,6 +217,51 @@ const STATS_OBSERVATIONS: string[] = [
   "Most patterns this week cluster around the SEO-software vertical.",
 ];
 
+// ─── Constellation geometry (Phase 2) ──────────────────────────────────
+// Hand-laid coordinates for the 8 roster nodes in the hero centerpiece.
+// Plotted against a 1200x360 viewBox so the layout reads at any width.
+const NODE_COORDS: Record<string, { x: number; y: number }> = {
+  'boulder-care':       { x: 220,  y: 110 },
+  'the-hoth':           { x: 430,  y: 280 },
+  'durable':            { x: 640,  y: 60  },
+  'linkbuilder':        { x: 980,  y: 200 },
+  'livingyoung':        { x: 350,  y: 340 },
+  'authority-builders': { x: 1080, y: 90  },
+  'edwin-novel':        { x: 760,  y: 320 },
+  'flock':              { x: 820,  y: 160 },
+};
+
+interface ConstellationEdge {
+  from: string;
+  to: string;
+  sharedCount: number;
+  pulsing: boolean; // true if this edge is part of any top-3 pattern's affected set
+}
+
+function computeConstellationEdges(patterns: EnrichedPattern[]): ConstellationEdge[] {
+  const pairMap = new Map<string, { count: number; topRank: number }>();
+  const key = (a: string, b: string) => [a, b].sort().join('|');
+  patterns.forEach((p) => {
+    const ids = p.affected.map(a => a.id);
+    for (let i = 0; i < ids.length; i++) {
+      for (let j = i + 1; j < ids.length; j++) {
+        const k = key(ids[i], ids[j]);
+        const existing = pairMap.get(k);
+        if (existing) {
+          existing.count += 1;
+          existing.topRank = Math.min(existing.topRank, p.rank);
+        } else {
+          pairMap.set(k, { count: 1, topRank: p.rank });
+        }
+      }
+    }
+  });
+  return Array.from(pairMap.entries()).map(([k, v]) => {
+    const [from, to] = k.split('|');
+    return { from, to, sharedCount: v.count, pulsing: v.topRank <= 3 };
+  });
+}
+
 type EnrichedPattern = Pattern & PatternEnrichment & {
   confidence: number;
   confidenceBasis: string;
@@ -251,28 +296,40 @@ export function Patterns() {
   // keeps the eye moving down the page cleanly.
   const [openId, setOpenId] = useState<string | null>(null);
   const [featured, ...rest] = PATTERNS;
-  const totalProjects = countUniqueProjects(PATTERNS);
-  const totalFindings = PATTERNS.reduce(
-    (sum, p) => sum + p.drivenBy.reduce((s, d) => s + d.findingsCount, 0),
-    0,
-  );
   return (
     <div className="space-y-8 pb-8">
       <style>{PAGE_STYLES}</style>
 
-      {/* Page header — LIGHT surface, deliberately different from /reports'
-          dark editorial hero. Patterns is a synthesis read; the surface
-          stays clean and explanatory rather than dramatic. */}
-      <PatternsPageHeader
-        patternCount={PATTERNS.length}
-        projectCount={totalProjects}
-        findingCount={totalFindings}
+      {/* Dark cinematic hero — full-bleed, 560px tall, replaces the older
+          PatternsPageHeader + PatternsExplainer pair. Centerpiece is the
+          roster constellation; cycling thesis line below it. */}
+      <PatternsHero
+        patternCount={ENRICHED_PATTERNS.length}
+        projectCount={PROJECT_COUNT}
+        findingCount={TOTAL_FINDINGS}
+        runCount={TOTAL_RUNS}
+        patterns={ENRICHED_PATTERNS}
       />
 
-      {/* Explainer — what this view is + dual-persona breakdown. Sits
-          immediately under the H1 so first-time users have context before
-          the patterns themselves start. */}
-      <PatternsExplainer />
+      {/* Experimental flag relocated to a small chip below the hero.
+          Synthesis logic is still being tuned. */}
+      <div className="reveal flex items-center gap-2" style={{ animationDelay: '180ms' }}>
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-[5px] text-[11.5px] font-semibold"
+          style={{
+            background: 'linear-gradient(155deg, #FDF4D2 0%, #F8E5A0 100%)',
+            color: '#7A4E12',
+            boxShadow: 'inset 0 0 0 1px rgba(168,120,38,0.25)',
+            letterSpacing: '-0.005em',
+          }}
+        >
+          <span aria-hidden>🧪</span>
+          Experimental
+        </span>
+        <span className="text-[12.5px]" style={{ color: '#85819a' }}>
+          This surface is in beta. Synthesis logic still being tuned.
+        </span>
+      </div>
 
       {/* THE FEATURED PATTERN — full editorial spread, the spotlight */}
       <FeaturedPatternCard pattern={featured} />
@@ -299,139 +356,299 @@ export function Patterns() {
   );
 }
 
-// ─── Page header (LIGHT surface, distinct from /reports' dark hero) ───
+// ─── Cinematic dark hero (Phase 2) ─────────────────────────────────────
 //
-// Plain H1 + Experimental flag + live-state caption + at-a-glance stats.
-// No dark gradient card here on purpose — the page family Patterns
-// belongs to is "synthesis + explanation," not "moment of arrival" like
-// the verdict card on individual reports. Visually distinct so users
-// can feel the surface-type shift.
+// Replaces the older light PatternsPageHeader + PatternsExplainer pair.
+// One 560px black-led card with a purple bloom, a roster constellation
+// centerpiece, a typewriter that cycles pattern headlines, drifting
+// particles for atmosphere, and a mono Courier stats strip at the foot.
 
-function PatternsPageHeader({
-  patternCount, projectCount, findingCount,
-}: { patternCount: number; projectCount: number; findingCount: number }) {
+function PatternsHero({
+  patternCount, projectCount, findingCount, runCount, patterns,
+}: {
+  patternCount: number;
+  projectCount: number;
+  findingCount: number;
+  runCount: number;
+  patterns: EnrichedPattern[];
+}) {
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
+  const [typewriterPaused, setTypewriterPaused] = useState(false);
+
   return (
-    <header className="reveal" style={{ animationDelay: '0ms' }}>
-      <div className="flex flex-wrap items-baseline gap-3">
-        <h1 className="font-display text-[46px] font-extrabold leading-[0.96] tracking-[-0.030em] text-ppc-ink">
-          Patterns<span className="text-ppc-purple-500">.</span>
-        </h1>
-        <span
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-[5px] text-[11.5px] font-semibold"
-          style={{
-            background: 'linear-gradient(155deg, #FDF4D2 0%, #F8E5A0 100%)',
-            color: '#7A4E12',
-            boxShadow: 'inset 0 0 0 1px rgba(168,120,38,0.25)',
-            letterSpacing: '-0.005em',
-          }}
-        >
-          <span aria-hidden>🧪</span>
-          Experimental
-        </span>
+    <section
+      className="reveal relative overflow-hidden rounded-[20px]"
+      style={{
+        animationDelay: '0ms',
+        minHeight: '560px',
+        background:
+          'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(127,90,240,0.18) 0%, transparent 60%), linear-gradient(180deg, #0F0A1E 0%, #07050D 100%)',
+        boxShadow: '0 0 0 1px rgba(127,90,240,0.20), 0 24px 48px -32px rgba(15,10,30,0.50)',
+      }}
+    >
+      {/* Atmosphere layer — drifting particles, mounted first so it paints behind */}
+      <div className="absolute inset-0">
+        <ParticleField />
       </div>
-      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px]" style={{ color: '#6b6480' }}>
-        <span className="inline-flex items-center gap-1.5">
+
+      {/* Top strip — eyebrow + last-sweep meta */}
+      <div className="relative flex items-start justify-between px-8 pt-7 sm:px-10 sm:pt-8">
+        <div>
+          <div
+            className="text-[10.5px] font-bold uppercase tabular-nums tracking-[0.18em]"
+            style={{ fontFamily: '"Courier New", ui-monospace, monospace', color: 'rgba(255,255,255,0.55)' }}
+          >
+            PATTERNS
+          </div>
+          <h1
+            className="mt-2 font-display font-black text-white"
+            style={{
+              fontSize: 'clamp(36px, 4.2vw, 52px)',
+              lineHeight: 0.98,
+              letterSpacing: '-0.030em',
+            }}
+          >
+            Cross-account synthesis<span className="font-serif italic" style={{ color: '#A88CFF' }}>.</span>
+          </h1>
+        </div>
+        <div className="hidden items-center gap-2 sm:flex" style={{ color: 'rgba(255,255,255,0.55)' }}>
           <span
             aria-hidden
             className="live-pulse h-[6px] w-[6px] rounded-full"
             style={{ background: '#5DCAA5' }}
           />
-          <span style={{ color: '#1F8458', fontWeight: 600 }}>Live</span>
-        </span>
-        <span aria-hidden style={{ color: '#d9d4ec' }}>·</span>
-        <span><span className="tabular-nums font-semibold text-ppc-ink">{patternCount}</span> active patterns</span>
-        <span aria-hidden style={{ color: '#d9d4ec' }}>·</span>
-        <span><span className="tabular-nums font-semibold text-ppc-ink">{projectCount}</span> projects touched</span>
-        <span aria-hidden style={{ color: '#d9d4ec' }}>·</span>
-        <span><span className="tabular-nums font-semibold text-ppc-ink">{findingCount}</span> source findings</span>
-        <span aria-hidden style={{ color: '#d9d4ec' }}>·</span>
-        <span>Updated 2h ago</span>
-      </div>
-    </header>
-  );
-}
-
-// ─── Explainer / dual-persona note ─────────────────────────────────────
-//
-// Plain editorial card on the lavender canvas. Explains what this view
-// is and who it's for — agency vs in-house. Deliberately light-weight
-// (no fancy gradient, no oversized illustration) so it reads as "a note
-// from the team," not as the page's main visual moment.
-
-function PatternsExplainer() {
-  return (
-    <article
-      className="reveal relative overflow-hidden rounded-[16px]"
-      style={{
-        animationDelay: '80ms',
-        background: 'linear-gradient(180deg, #FFFFFF 0%, #FBFAFF 100%)',
-        boxShadow: '0 0 0 1px #e8e2f0, 0 1px 0 rgba(255,255,255,0.7) inset',
-      }}
-    >
-      {/* Quiet purple accent strip on the left — signals this is editorial
-          guidance, not a finding to act on. Whisper, not chrome. */}
-      <span
-        aria-hidden
-        className="absolute inset-y-0 left-0 w-[3px]"
-        style={{ background: 'linear-gradient(180deg, #7F5AF0 0%, #A88CFF 100%)' }}
-      />
-
-      <div className="relative px-7 py-6 sm:px-8 sm:py-7">
-        <div className="flex items-baseline gap-2">
-          <span
-            className="text-[11.5px] font-semibold tracking-[-0.005em]"
-            style={{ color: '#534AB7' }}
-          >
-            What this is
-          </span>
-        </div>
-        <h2
-          className="mt-1.5 font-display text-[20px] font-bold leading-[1.2] tracking-[-0.012em] text-ppc-ink sm:text-[22px]"
-        >
-          Cross-account synthesis. When the same problem shows up in more than one place at once, it surfaces here
-          <span className="font-serif italic text-ppc-purple-500">.</span>
-        </h2>
-        <p className="mt-2.5 max-w-[68ch] text-[14px] leading-[1.6]" style={{ color: '#52525b' }}>
-          Patterns reads across every Finding produced by every agent run, plus the per-project weekly briefings,
-          and surfaces what connects them. It refreshes whenever the underlying briefings update — not a strict
-          weekly snapshot.
-        </p>
-
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 sm:gap-6">
-          <PersonaNote
-            label="For agency teams"
-            body="A single view onto the trends spanning your whole client roster — competitive moves, vertical-wide auction shifts, repeated audit findings. Read it like a COO briefing across the book."
-          />
-          <PersonaNote
-            label="For in-house teams"
-            body="The recurring themes showing up across your campaigns or over time — the same problem appearing in three ad groups, the same auction shift across your accounts. A sanity check on the patterns in your data."
-          />
+          <span className="text-[12px]" style={{ color: 'rgba(255,255,255,0.75)' }}>Last sweep · 2h ago</span>
         </div>
       </div>
-    </article>
-  );
-}
 
-function PersonaNote({ label, body }: { label: string; body: string }) {
-  return (
-    <div>
+      {/* Centerpiece — roster constellation */}
+      <div className="relative mt-4 h-[300px] px-4">
+        <RosterConstellation
+          patterns={patterns}
+          hoveredNodeId={hoveredNodeId}
+          onNodeHover={setHoveredNodeId}
+          onNodeClick={() => { /* wired up in Phase 4 */ }}
+        />
+      </div>
+
+      {/* Cycling thesis line — pauses on hover */}
       <div
-        className="text-[12.5px] font-bold tracking-[-0.005em]"
-        style={{ color: '#3C3489' }}
+        className="relative px-8 pb-6 sm:px-10"
+        onMouseEnter={() => setTypewriterPaused(true)}
+        onMouseLeave={() => setTypewriterPaused(false)}
       >
-        {label}
+        <HeadlineTypewriter
+          headlines={patterns.map(p => p.headline)}
+          paused={typewriterPaused}
+        />
       </div>
-      <p className="mt-1.5 text-[13px] leading-[1.6]" style={{ color: '#52525b' }}>
-        {body}
+
+      {/* Stats strip — mono Courier, four counts */}
+      <div
+        className="relative flex flex-wrap items-center justify-center gap-x-5 gap-y-1 border-t px-8 py-4 text-[11.5px] tabular-nums sm:px-10"
+        style={{
+          borderColor: 'rgba(168,140,255,0.18)',
+          fontFamily: '"Courier New", ui-monospace, monospace',
+          color: 'rgba(255,255,255,0.70)',
+          letterSpacing: '0.04em',
+        }}
+      >
+        <span><span className="font-bold text-white">{findingCount}</span> findings</span>
+        <span aria-hidden style={{ color: 'rgba(255,255,255,0.20)' }}>·</span>
+        <span><span className="font-bold text-white">{runCount}</span> runs</span>
+        <span aria-hidden style={{ color: 'rgba(255,255,255,0.20)' }}>·</span>
+        <span><span className="font-bold text-white">{projectCount}</span> projects</span>
+        <span aria-hidden style={{ color: 'rgba(255,255,255,0.20)' }}>·</span>
+        <span><span className="font-bold text-white">{patternCount}</span> patterns surfaced</span>
+      </div>
+    </section>
+  );
+}
+
+// ─── Roster constellation ──────────────────────────────────────────────
+//
+// SVG centerpiece. 8 project nodes connected by edges weighted by how
+// many patterns share them. Top-3 edges pulse softly; hovering a node
+// highlights its threads and dims the rest.
+
+function RosterConstellation({
+  patterns, hoveredNodeId, onNodeHover, onNodeClick,
+}: {
+  patterns: EnrichedPattern[];
+  hoveredNodeId: string | null;
+  onNodeHover: (id: string | null) => void;
+  onNodeClick: (id: string) => void;
+}) {
+  const edges = computeConstellationEdges(patterns);
+  return (
+    <svg
+      viewBox="0 0 1200 360"
+      preserveAspectRatio="xMidYMid meet"
+      className="h-full w-full"
+      role="img"
+      aria-label="Project constellation showing connections between accounts sharing patterns"
+    >
+      <g>
+        {edges.map((edge) => {
+          const a = NODE_COORDS[edge.from];
+          const b = NODE_COORDS[edge.to];
+          if (!a || !b) return null;
+          const opacity = Math.min(0.7, 0.15 + edge.sharedCount * 0.12);
+          const isHighlighted = hoveredNodeId && (edge.from === hoveredNodeId || edge.to === hoveredNodeId);
+          return (
+            <line
+              key={`${edge.from}-${edge.to}`}
+              x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+              stroke={isHighlighted ? '#FFFFFF' : '#A88CFF'}
+              strokeOpacity={isHighlighted ? 0.85 : (hoveredNodeId ? opacity * 0.35 : opacity)}
+              strokeWidth={isHighlighted ? 1.4 : 1}
+              className={edge.pulsing ? 'constellation-pulse' : ''}
+              style={{ transition: 'stroke-opacity 240ms ease, stroke 240ms ease, stroke-width 240ms ease' }}
+            />
+          );
+        })}
+      </g>
+      <g>
+        {Object.entries(NODE_COORDS).map(([id, pos]) => {
+          const project = PROJECTS.find(p => p.id === id);
+          if (!project) return null;
+          const chip = projectChipColor(id);
+          const isHovered = hoveredNodeId === id;
+          return (
+            <g
+              key={id}
+              transform={`translate(${pos.x}, ${pos.y})`}
+              style={{ cursor: 'pointer' }}
+              onMouseEnter={() => onNodeHover(id)}
+              onMouseLeave={() => onNodeHover(null)}
+              onClick={() => onNodeClick(id)}
+            >
+              <circle r={isHovered ? 22 : 0} fill="#A88CFF" opacity={isHovered ? 0.20 : 0} style={{ transition: 'r 200ms ease, opacity 200ms ease' }} />
+              <circle r={isHovered ? 11 : 9} fill={chip.fg} stroke="#FFFFFF" strokeOpacity={0.85} strokeWidth={isHovered ? 1.5 : 1} style={{ transition: 'r 200ms ease' }} />
+              <text y={26} textAnchor="middle" fontSize="11" fontWeight="600" fill={isHovered ? '#FFFFFF' : 'rgba(255,255,255,0.70)'} fontFamily="Figtree, system-ui, sans-serif" style={{ pointerEvents: 'none', transition: 'fill 200ms ease' }}>
+                {project.name}
+              </text>
+            </g>
+          );
+        })}
+      </g>
+    </svg>
+  );
+}
+
+// ─── Typewriter that cycles pattern headlines ──────────────────────────
+//
+// Types each headline at 38ms/char, holds 1.5s, deletes at 18ms/char,
+// pauses 250ms, then advances. Honours prefers-reduced-motion by
+// freezing on the first headline. Pauses while the user hovers the
+// container in PatternsHero.
+
+function HeadlineTypewriter({ headlines, paused }: { headlines: string[]; paused: boolean }) {
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const [idx, setIdx] = useState(0);
+  const [displayed, setDisplayed] = useState('');
+  const [phase, setPhase] = useState<'typing' | 'holding' | 'deleting'>('typing');
+
+  // Reduced-motion: lock to first headline, no animation
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setDisplayed((headlines[0] ?? '').replace(/[.!?]+$/, ''));
+    }
+  }, [headlines, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (paused || prefersReducedMotion) return;
+    const current = headlines[idx];
+    if (!current) return;
+    let t: ReturnType<typeof setTimeout>;
+    if (phase === 'typing') {
+      if (displayed.length < current.length) {
+        t = setTimeout(() => setDisplayed(current.slice(0, displayed.length + 1)), 38);
+      } else {
+        t = setTimeout(() => setPhase('holding'), 1500);
+      }
+    } else if (phase === 'holding') {
+      t = setTimeout(() => setPhase('deleting'), 1500);
+    } else {
+      if (displayed.length > 0) {
+        t = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 18);
+      } else {
+        t = setTimeout(() => {
+          setIdx((idx + 1) % headlines.length);
+          setPhase('typing');
+        }, 250);
+      }
+    }
+    return () => clearTimeout(t);
+  }, [displayed, phase, idx, headlines, paused, prefersReducedMotion]);
+
+  const visible = displayed.replace(/[.!?]+$/, '');
+  const hasContent = visible.length > 0;
+
+  return (
+    <div className="relative mx-auto max-w-[820px] text-center" style={{ minHeight: '88px' }} aria-live="polite">
+      <p
+        className="font-display font-black text-white"
+        style={{
+          fontSize: 'clamp(22px, 2.4vw, 32px)',
+          lineHeight: 1.18,
+          letterSpacing: '-0.022em',
+          minHeight: '1.18em',
+        }}
+      >
+        {visible}
+        {hasContent && <span className="font-serif italic" style={{ color: '#A88CFF' }}>.</span>}
+        <span
+          aria-hidden
+          className="ml-[2px] inline-block w-[2px] align-middle"
+          style={{
+            height: '0.85em',
+            background: 'rgba(255,255,255,0.65)',
+            animation: 'dp-cursor-blink 1s steps(2) infinite',
+          }}
+        />
       </p>
     </div>
   );
 }
 
-function countUniqueProjects(patterns: Pattern[]): number {
-  const set = new Set<string>();
-  patterns.forEach((p) => p.affected.forEach((a) => set.add(a.id)));
-  return set.size;
+// ─── Particle field ────────────────────────────────────────────────────
+//
+// 50 deterministic purple motes drifting behind the constellation.
+// Coordinates and timings are i-derived so the field looks organic but
+// stays identical across renders.
+
+function ParticleField() {
+  const particles = Array.from({ length: 50 }, (_, i) => {
+    const x = (i * 37) % 100;
+    const y = (i * 73) % 100;
+    const r = 1.5 + ((i * 13) % 20) / 10;
+    const delay = -((i * 0.7) % 14);
+    const duration = 12 + ((i * 11) % 10);
+    const opacity = 0.06 + ((i * 17) % 10) / 100;
+    return { x, y, r, delay, duration, opacity };
+  });
+  return (
+    <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+      {particles.map((p, i) => (
+        <circle
+          key={i}
+          cx={p.x}
+          cy={p.y}
+          r={p.r / 4}
+          fill="#C7B0FF"
+          opacity={p.opacity}
+          style={{
+            animation: `dp-particle-drift ${p.duration}s linear ${p.delay}s infinite`,
+            transformOrigin: `${p.x}% ${p.y}%`,
+          }}
+        />
+      ))}
+    </svg>
+  );
 }
 
 // ─── Section divider between featured and shelf ───────────────────────
@@ -1096,5 +1313,34 @@ const PAGE_STYLES = `
   }
   .compact-pattern-open > button {
     background: linear-gradient(180deg, #FBFAFF 0%, #FFFFFF 100%);
+  }
+
+  /* Constellation edge — soft, slow pulse used on top-3 patterns' edges */
+  @keyframes dp-constellation-pulse {
+    0%, 100% { stroke-opacity: 0.6; }
+    50%      { stroke-opacity: 0.95; }
+  }
+  .constellation-pulse {
+    animation: dp-constellation-pulse 4s ease-in-out infinite;
+  }
+
+  /* Typewriter caret blink */
+  @keyframes dp-cursor-blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0; }
+  }
+
+  /* Drifting purple motes behind the constellation — coffee-ad atmosphere */
+  @keyframes dp-particle-drift {
+    0%   { transform: translateY(8%) translateX(0) scale(0.8); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { transform: translateY(-8%) translateX(3%) scale(1.2); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .constellation-pulse { animation: none !important; }
+    .live-pulse { animation: none !important; }
+    svg circle[style*="dp-particle-drift"] { animation: none !important; opacity: 0.10 !important; }
   }
 `;
