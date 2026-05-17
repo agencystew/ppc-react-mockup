@@ -132,43 +132,21 @@ function StrategyVerdictCard({
         }}
       />
 
-      {/* Centered arrival moment.
+      {/* Centered arrival moment — sandwich layout.
           Top → bottom, all centered:
-            1. ◆ Competitor Spy (prominent kicker, larger than the prior tiny
-               top-left tuck)
+            1. TopMetaRow — ◆ Competitor Spy · ✓ Completed pill · 7m 12s run time
             2. Sparkle decoration with thin flanking lines
             3. "Explore your findings." mega headline
             4. Sub-line counting the findings
-            5. Completion shelf — Completed pill + duration + receipts-derived
-               stats + window — neatly dot-separated, centered, generous.
+            5. ReceiptsRow — 161 reasoning steps · 84 SERPs analysed · 6 phases · 7-day window
             6. Playful down arrow as the scroll cue.
 
-          The header row that used to live at the very top (kicker on the left,
-          completion meta on the right) is gone — both are now anchored in the
-          centred arrival so the card reads as one balanced moment. */}
+          The two meta rows (what happened, then what it took) sandwich the
+          headline so the eye lands on the moment first and finds the proof
+          on either side. */}
       <div className="relative flex flex-col items-center text-center">
-        {/* ◆ Competitor Spy — agent byline, larger and centered */}
-        <p
-          className="flex items-baseline gap-[12px]"
-          style={{
-            fontSize: '20px',
-            letterSpacing: '-0.012em',
-            color: 'rgba(214,200,255,0.95)',
-            fontWeight: 600,
-          }}
-        >
-          <span
-            aria-hidden
-            style={{
-              color: '#A88CFF',
-              fontSize: '16px',
-              textShadow: '0 0 14px rgba(168,140,255,0.65)',
-            }}
-          >
-            ◆
-          </span>
-          {data.agentName}
-        </p>
+        {/* Top meta row — what happened */}
+        <TopMetaRow agentName={data.agentName} duration={duration} />
 
         {/* Decorative sparkle with thin flanking lines */}
         <div
@@ -227,21 +205,14 @@ function StrategyVerdictCard({
           {discoveries.length} high-impact moves waiting below.
         </p>
 
-        {/* Completion shelf — Completed pill anchors the row, then duration
-            + receipts-derived stats + the time window all run as bold-tabular
-            value + lavender-muted noun pairs. Dot separators at 0.30 alpha
-            keep the row breathing. */}
-        <CompletionShelf
-          duration={duration}
-          window={timeWindow}
-          stats={stats}
-        />
+        {/* Bottom meta row — what it took (the receipts) */}
+        <ReceiptsRow stats={stats} window={timeWindow} />
 
         {/* Playful downward arrow — sinuous S-curve, clickable scroll-jump */}
         <a
           href={`#discovery-${discoveries[0]?.id ?? ''}`}
           aria-label="Scroll to findings"
-          className="mt-8 inline-block transition-transform hover:translate-y-[3px]"
+          className="mt-7 inline-block transition-transform hover:translate-y-[3px]"
         >
           <PlayfulDownArrow />
         </a>
@@ -250,27 +221,38 @@ function StrategyVerdictCard({
   );
 }
 
-/* CompletionShelf — the single tidy row that sits under the headline.
- * Left: green ✓ Completed pill. Then dot-separated stat slots running
- * value(bold-tabular-white) + noun(muted-lavender). Window slot has no
- * leading number so it just renders the phrase. Dots are interspersed
- * between siblings so the last item carries no trailing dot. */
-function CompletionShelf({
-  duration,
-  window: timeWindow,
-  stats,
-}: {
-  duration: string;
-  window: string;
-  stats: Array<{ value: string; label: string }>;
-}) {
-  const slots: Array<{ value: string; label: string }> = [
-    { value: duration, label: 'run time' },
-    ...stats,
-    { value: '', label: timeWindow },
-  ];
+/* TopMetaRow — first half of the sandwich. Sits ABOVE the headline.
+ * Carries: ◆ Competitor Spy · ✓ Completed · 7m 12s run time. The
+ * agent byline and the completion pill flank the run time so the user
+ * lands on what happened before reading the moment. */
+function TopMetaRow({ agentName, duration }: { agentName: string; duration: string }) {
   return (
-    <div className="mt-7 flex flex-wrap items-center justify-center gap-x-[14px] gap-y-3 text-[14.5px]">
+    <div className="flex flex-wrap items-center justify-center gap-x-[14px] gap-y-3 text-[15px]">
+      {/* ◆ Competitor Spy */}
+      <span
+        className="inline-flex items-baseline gap-[10px]"
+        style={{
+          letterSpacing: '-0.008em',
+          color: 'rgba(214,200,255,0.95)',
+          fontWeight: 600,
+        }}
+      >
+        <span
+          aria-hidden
+          style={{
+            color: '#A88CFF',
+            fontSize: '13px',
+            textShadow: '0 0 14px rgba(168,140,255,0.65)',
+          }}
+        >
+          ◆
+        </span>
+        {agentName}
+      </span>
+
+      <span aria-hidden style={{ color: 'rgba(184,174,218,0.30)' }}>·</span>
+
+      {/* ✓ Completed pill */}
       <span
         className="inline-flex items-center gap-[8px] rounded-full px-[14px] py-[6px] font-semibold"
         style={{
@@ -278,6 +260,7 @@ function CompletionShelf({
           color: '#9CE5C5',
           boxShadow: 'inset 0 0 0 1px rgba(93,202,165,0.32)',
           letterSpacing: '-0.005em',
+          fontSize: '14px',
         }}
       >
         <span
@@ -289,6 +272,43 @@ function CompletionShelf({
         </span>
         Completed
       </span>
+
+      <span aria-hidden style={{ color: 'rgba(184,174,218,0.30)' }}>·</span>
+
+      {/* Run time */}
+      <span
+        className="inline-flex items-baseline gap-[6px]"
+        style={{ color: 'rgba(184,174,218,0.85)' }}
+      >
+        <span
+          className="tabular-nums font-bold"
+          style={{ color: 'rgba(255,255,255,0.94)', letterSpacing: '-0.005em' }}
+        >
+          {duration}
+        </span>
+        <span>run time</span>
+      </span>
+    </div>
+  );
+}
+
+/* ReceiptsRow — second half of the sandwich. Sits BELOW the headline.
+ * Carries the proof of work: reasoning steps · datasets analysed · phases
+ * · the time window. Same value(bold-tabular-white) + noun(muted-lavender)
+ * pattern as the top row, dots interspersed at 0.30 alpha. */
+function ReceiptsRow({
+  stats,
+  window: timeWindow,
+}: {
+  stats: Array<{ value: string; label: string }>;
+  window: string;
+}) {
+  const slots: Array<{ value: string; label: string }> = [
+    ...stats,
+    { value: '', label: timeWindow },
+  ];
+  return (
+    <div className="mt-7 flex flex-wrap items-center justify-center gap-x-[14px] gap-y-3 text-[14.5px]">
       {slots.map((s, i) => (
         <span key={i} className="inline-flex items-baseline gap-[8px]">
           <span
