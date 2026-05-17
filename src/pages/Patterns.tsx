@@ -39,6 +39,209 @@ import { PATTERNS, type Pattern, type AffectedProject, type PatternDriver } from
 // PATTERNS, Pattern, AffectedProject, PatternDriver imported from ../mock/patterns.
 // The strip on /dashboard reads from the same source, so the two surfaces stay in sync.
 
+// ─── Enrichment layer (Phase 1) ────────────────────────────────────────
+// Editorial overlay on top of the raw PATTERNS array. Classifies each
+// pattern into one of 4 lenses, attaches a hand-written move tag, a
+// surfaced timestamp, a Recommended flag (with caption), an optional
+// dollar suffix (only where the source prose quotes a real figure), and
+// a category-group for the "All 30" fallback view.
+//
+// Kept here (page-local) intentionally — `../mock/patterns` is shared
+// with the dashboard strip, which doesn't need this surface's editorial
+// classification. When the rewrite stabilises this may graduate to a
+// dedicated mock file, but during the cinematic rebuild the data + the
+// surface that consumes it stay co-located.
+
+type Lens = 'win' | 'defend' | 'shift' | 'infrastructure';
+
+interface PatternEnrichment {
+  /** Categorical lens. Drives the left-edge color and the lens-filter pill. */
+  lens: Lens;
+  /** Short move label rendered on the right side of each row. Lifted from
+   *  recommendedActionCta. ~4 words max so it fits next to the chevron. */
+  moveTag: string;
+  /** ISO timestamp of first surfacing. Mock value. Used for 'new this week'
+   *  signals on Recommended captions. */
+  surfacedAt: string;
+  /** True for the 6 patterns shown by default in the Recommended lens. */
+  recommended: boolean;
+  /** Italic caption shown beneath the headline ONLY when this pattern appears
+   *  in the Recommended lens. Explains the pick: '3 projects · new this
+   *  week · single decisive move'. Null otherwise. */
+  recommendedReason: string | null;
+  /** Optional real dollar suffix — ONLY when the source prose (whatWeFound
+   *  or whyItMatters) quotes a figure. Never fabricated. */
+  dollarSuffix: string | null;
+  /** Categorical theme group for the 'All 30' fallback view. */
+  categoryGroup: CategoryGroup;
+}
+
+type CategoryGroup =
+  | 'AUCTION & COMPETITION'
+  | 'ATTRIBUTION & TRACKING'
+  | 'SPEND EFFICIENCY'
+  | 'KEYWORDS & MATCH'
+  | 'BID STRATEGY'
+  | 'CREATIVE & LP'
+  | 'AUDIENCE & DEMAND'
+  | 'FEED & COHORT';
+
+const LENS_COLOR: Record<Lens, string> = {
+  win:            '#16A34A', // green
+  defend:         '#DC2626', // red
+  shift:          '#D97706', // amber
+  infrastructure: '#534AB7', // indigo
+};
+
+const LENS_LABEL: Record<Lens, string> = {
+  win:            'Wins',
+  defend:         'Defend',
+  shift:          'Shifts',
+  infrastructure: 'Infrastructure',
+};
+
+const ENRICHMENT: Record<string, PatternEnrichment> = {
+  // ── WINS (6) ──────────────────────────────────────────────────────
+  'p-01': { lens: 'win',            moveTag: 'Lift non-brand bids',     surfacedAt: '2026-05-16T08:00:00Z', recommended: true,  recommendedReason: '3 projects · new this week · 14-day window',  dollarSuffix: null,         categoryGroup: 'AUCTION & COMPETITION' },
+  'p-02': { lens: 'win',            moveTag: 'Set up daypart test',     surfacedAt: '2026-05-15T14:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: '~$1.2K/mo',  categoryGroup: 'SPEND EFFICIENCY' },
+  'p-06': { lens: 'win',            moveTag: 'Set up daypart test',     surfacedAt: '2026-05-14T11:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: '~$1.2K/mo',  categoryGroup: 'SPEND EFFICIENCY' },
+  'p-13': { lens: 'win',            moveTag: 'Attach audience signals', surfacedAt: '2026-05-16T10:00:00Z', recommended: true,  recommendedReason: '3 PMAX campaigns · 10-min fix · pure upside', dollarSuffix: null,         categoryGroup: 'AUDIENCE & DEMAND' },
+  'p-17': { lens: 'win',            moveTag: 'Apply geo bid adj',       surfacedAt: '2026-05-13T09:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'SPEND EFFICIENCY' },
+  'p-27': { lens: 'win',            moveTag: 'Test Max Conv Value',     surfacedAt: '2026-05-12T16:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'BID STRATEGY' },
+
+  // ── DEFEND (10) ───────────────────────────────────────────────────
+  'p-04': { lens: 'defend',         moveTag: 'Cross-account audit',     surfacedAt: '2026-05-16T07:00:00Z', recommended: true,  recommendedReason: 'Same vertical · same week · investigate before acting', dollarSuffix: null, categoryGroup: 'AUCTION & COMPETITION' },
+  'p-08': { lens: 'defend',         moveTag: 'Revert bid strategy',     surfacedAt: '2026-05-12T08:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'BID STRATEGY' },
+  'p-10': { lens: 'defend',         moveTag: 'Defensive brand bids',    surfacedAt: '2026-05-16T12:00:00Z', recommended: true,  recommendedReason: '3 brand auctions · new entrant · defensive move clear', dollarSuffix: null,    categoryGroup: 'AUCTION & COMPETITION' },
+  'p-14': { lens: 'defend',         moveTag: 'Adjust daily caps',       surfacedAt: '2026-05-16T15:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'SPEND EFFICIENCY' },
+  'p-20': { lens: 'defend',         moveTag: 'Add to watchlist',        surfacedAt: '2026-05-13T13:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'AUCTION & COMPETITION' },
+  'p-21': { lens: 'defend',         moveTag: 'Refresh PMAX assets',     surfacedAt: '2026-05-14T10:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'CREATIVE & LP' },
+  'p-22': { lens: 'defend',         moveTag: 'Defensive brand bids',    surfacedAt: '2026-05-12T11:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'AUCTION & COMPETITION' },
+  'p-24': { lens: 'defend',         moveTag: 'Re-feed Merchant',        surfacedAt: '2026-05-15T08:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'FEED & COHORT' },
+  'p-25': { lens: 'defend',         moveTag: 'Add IP exclusions',       surfacedAt: '2026-05-13T17:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'SPEND EFFICIENCY' },
+  'p-26': { lens: 'defend',         moveTag: 'Lower tCPA',              surfacedAt: '2026-05-10T14:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'FEED & COHORT' },
+
+  // ── SHIFTS (4) ────────────────────────────────────────────────────
+  'p-09': { lens: 'shift',          moveTag: 'Pull auction insights',   surfacedAt: '2026-05-15T16:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'KEYWORDS & MATCH' },
+  'p-15': { lens: 'shift',          moveTag: 'Pull CPC trends',         surfacedAt: '2026-05-14T15:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'SPEND EFFICIENCY' },
+  'p-19': { lens: 'shift',          moveTag: 'Spot-check SERPs',        surfacedAt: '2026-05-13T18:00:00Z', recommended: true,  recommendedReason: 'No internal cause · names the market shift · hold actions', dollarSuffix: null, categoryGroup: 'CREATIVE & LP' },
+  'p-29': { lens: 'shift',          moveTag: 'Hold LP changes',         surfacedAt: '2026-05-11T12:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'CREATIVE & LP' },
+
+  // ── INFRASTRUCTURE (10) ───────────────────────────────────────────
+  'p-03': { lens: 'infrastructure', moveTag: 'Shared negatives list',   surfacedAt: '2026-05-16T09:00:00Z', recommended: true,  recommendedReason: '2 PMAX campaigns · one fix lands on both', dollarSuffix: null,         categoryGroup: 'KEYWORDS & MATCH' },
+  'p-05': { lens: 'infrastructure', moveTag: 'Shared negatives list',   surfacedAt: '2026-05-14T13:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'KEYWORDS & MATCH' },
+  'p-07': { lens: 'infrastructure', moveTag: 'Audit shared GTM',        surfacedAt: '2026-05-16T11:00:00Z', recommended: true,  recommendedReason: '5 accounts · one tag template · single fix',  dollarSuffix: null,         categoryGroup: 'ATTRIBUTION & TRACKING' },
+  'p-11': { lens: 'infrastructure', moveTag: 'Build cross-acct negs',   surfacedAt: '2026-05-13T15:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'KEYWORDS & MATCH' },
+  'p-12': { lens: 'infrastructure', moveTag: 'Refresh RSAs on five',    surfacedAt: '2026-05-12T10:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'CREATIVE & LP' },
+  'p-16': { lens: 'infrastructure', moveTag: 'Audit mobile LPs',        surfacedAt: '2026-05-11T14:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'CREATIVE & LP' },
+  'p-18': { lens: 'infrastructure', moveTag: 'Baseline negatives list', surfacedAt: '2026-05-14T08:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: '~$4K/mo combined', categoryGroup: 'KEYWORDS & MATCH' },
+  'p-23': { lens: 'infrastructure', moveTag: 'Extend conv windows',     surfacedAt: '2026-05-13T11:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'ATTRIBUTION & TRACKING' },
+  'p-28': { lens: 'infrastructure', moveTag: 'Exclude brand from PMAX', surfacedAt: '2026-05-12T13:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'ATTRIBUTION & TRACKING' },
+  'p-30': { lens: 'infrastructure', moveTag: 'Cross-account exclusions',surfacedAt: '2026-05-11T16:00:00Z', recommended: false, recommendedReason: null,                                          dollarSuffix: null,         categoryGroup: 'AUDIENCE & DEMAND' },
+};
+
+// Confidence values per pattern. Hand-authored from signal density.
+// Format: [confidencePercent, oneLineBasis]
+const CONFIDENCE: Record<string, [number, string]> = {
+  'p-01': [88, '3 Competitor Spy runs + 1 Google Ads Context finding all confirm'],
+  'p-02': [76, '1 confirmed via Change Impact, 2 inferred from spend-curve shape'],
+  'p-03': [82, '2 Deep Account Audit findings + 1 Spend Leak cross-reference'],
+  'p-04': [71, '2 Weekly Audit findings, same vertical, same week'],
+  'p-05': [68, 'Same finding pattern as p-03 - duplicate signal'],
+  'p-06': [76, 'Same evidence chain as p-02 - duplicate signal'],
+  'p-07': [91, '5 Google Ads Context findings - GCLID loss at same rate across 5 accounts'],
+  'p-08': [85, '2 Change Impact findings, identical timing + outcome'],
+  'p-09': [62, 'Inferred from QS drop window; no direct auction confirmation'],
+  'p-10': [89, 'Direct auction-insights data confirms on all 3 accounts'],
+  'p-11': [73, '4 Negative Keyword findings + 2 Spend Leak cross-references'],
+  'p-12': [80, '5 Ad Copy findings, identical CTR-decay shape'],
+  'p-13': [94, 'Direct config check - audiences exist but unattached'],
+  'p-14': [85, '2 Budget Pacer findings, same overshoot pace'],
+  'p-15': [70, '4 Weekly Audit findings on Search IS Lost - 12-week-first occurrence'],
+  'p-16': [66, '3 Landing Page findings, same direction but different LP frameworks'],
+  'p-17': [78, '3 Spend Leak findings on geo CPA divergence'],
+  'p-18': [92, '5 Negative Keyword findings - same 6 terms, 0% conv across all'],
+  'p-19': [54, 'Same-day CTR drop on 2 accounts, no internal cause confirmed'],
+  'p-20': [86, '3 Competitor Spy findings - direct auction insights data'],
+  'p-21': [74, '3 PMAX findings - asset rotations on accounts we did not touch'],
+  'p-22': [90, '2 Competitor Spy findings - direct auction insights, same launch day'],
+  'p-23': [69, '3 Change Impact findings, conversion-lag drift confirmed'],
+  'p-24': [83, 'Direct feed health check on Edwin Novel - single account but high signal'],
+  'p-25': [77, '3 Spend Leak findings - same IP ranges flagged across accounts'],
+  'p-26': [65, '2 Profit Tracker findings, LTV vs Q1 cohort comparison'],
+  'p-27': [72, '3 Deep Account Audit backtests, revenue lift consistent'],
+  'p-28': [81, '2 PMAX findings - same Search-to-PMAX attribution overlap'],
+  'p-29': [58, '3 Weekly Audit findings - LP-experience tier change, no internal cause'],
+  'p-30': [87, '2 Buyer Journey findings - direct audience composition overlap'],
+};
+
+interface CandidateSignal {
+  id: string;
+  affected: AffectedProject[];
+  observation: string;
+  whyNotPromoted: string;
+}
+
+const CANDIDATE_SIGNALS: CandidateSignal[] = [
+  {
+    id: 'cs-01',
+    affected: [{ id: 'the-hoth', name: 'The HOTH' }, { id: 'linkbuilder', name: 'LinkBuilder.io' }],
+    observation: 'Both have CTR slipping ~0.3pp over the last 5 days.',
+    whyNotPromoted: 'Could be a SERP layout test or slow QS drift - too early to tell. Watching for another week.',
+  },
+  {
+    id: 'cs-02',
+    affected: [{ id: 'durable', name: 'Durable' }, { id: 'flock', name: 'Flock' }, { id: 'edwin-novel', name: 'Edwin Novel Jewelry' }],
+    observation: 'Shopping/PMAX impression share is up 8-12% week-over-week without budget changes.',
+    whyNotPromoted: 'Could be a Google holiday-window expansion or a genuine seasonal lift. Need 7 more days of CPC data.',
+  },
+  {
+    id: 'cs-03',
+    affected: [{ id: 'authority-builders', name: 'Authority Builders' }],
+    observation: 'Single-account observation: average position on non-brand keywords moved 1.2 spots without bid changes.',
+    whyNotPromoted: 'No corroborating signal on other accounts yet. If it repeats on a sister account next week we promote it.',
+  },
+  {
+    id: 'cs-04',
+    affected: [{ id: 'boulder-care', name: 'Boulder Care' }, { id: 'livingyoung', name: 'LivingYoung Center' }],
+    observation: 'Mobile vs desktop conversion gap is widening but only on weekends.',
+    whyNotPromoted: 'Sample size too small (8 weekends of data). Recheck once we hit 16.',
+  },
+];
+
+const STATS_OBSERVATIONS: string[] = [
+  "Edwin Novel's data is the thinnest this week - one new run.",
+  "No new runs on Authority Builders in the last 7 days.",
+  "PMAX patterns are the densest cluster this week - 4 of 30.",
+  "We haven't seen Boulder Care for 3 days.",
+  "Most patterns this week cluster around the SEO-software vertical.",
+];
+
+type EnrichedPattern = Pattern & PatternEnrichment & {
+  confidence: number;
+  confidenceBasis: string;
+};
+
+function enrich(pattern: Pattern): EnrichedPattern {
+  const e = ENRICHMENT[pattern.id];
+  const c = CONFIDENCE[pattern.id];
+  if (!e) throw new Error(`Pattern ${pattern.id} missing ENRICHMENT entry`);
+  if (!c) throw new Error(`Pattern ${pattern.id} missing CONFIDENCE entry`);
+  return { ...pattern, ...e, confidence: c[0], confidenceBasis: c[1] };
+}
+
+const ENRICHED_PATTERNS: EnrichedPattern[] = PATTERNS.map(enrich);
+
+const TOTAL_FINDINGS = ENRICHED_PATTERNS.reduce(
+  (sum, p) => sum + p.drivenBy.reduce((s, d) => s + d.findingsCount, 0),
+  0,
+);
+const TOTAL_RUNS = new Set(
+  ENRICHED_PATTERNS.flatMap(p => p.drivenBy.map(d => d.agentName))
+).size * 4; // mocked: assume ~4 runs per agent across the book
+
+const PROJECT_COUNT = 8;
+
 
 // ─── Page ──────────────────────────────────────────────────────────────
 
