@@ -643,289 +643,425 @@ function FilterButton() {
 
 /* ─── 4 · Patterns live strip ───────────────────────────────────────────
  *
- * Full-width lavender card that replaces the old Patterns CTA + Quick
- * Actions duo. Two intents on one surface: (LEFT) editorial teaser for
- * the cross-portfolio brain, (RIGHT) live preview of the top 3 patterns
- * io spotted this week. Same data source as /patterns so the two stay
- * in sync. ?empty=1 flips to the new-user state.
+ * Purple billboard at the bottom of /dashboard. Owns the "experimental
+ * brain" surface — the COO / data-scientist autopilot watching across
+ * every account. Composition top-down:
  *
- * Design language sits on the lavender canvas family from /patterns
- * (the destination page), not the dark hero family from above. The
- * bottom of the dashboard wants to feel like a different beat. */
+ *   - status strip (PATTERNS · EXPERIMENTAL + LIVE indicator)
+ *   - hero zone: massive count (left) + network graph (right)
+ *   - card shelf: 3 BLACK callout cards, one per top-3 pattern
+ *   - ghost CTA into /patterns
+ *
+ * Network graph shows 8 project nodes around an io brain centre, with
+ * colored polylines connecting the nodes affected by each of the top 3
+ * patterns. That's the "brain connection" — io literally drew lines
+ * between the accounts where it noticed the same thing.
+ *
+ * ?empty=1 flips to onboarding: 0 count, no graph lines, 4 ghost
+ * "Watching for…" cards, "Launch first audit" CTA. */
 
 function PatternsLiveStrip() {
   const [params] = useSearchParams();
   const isEmpty = params.get('empty') === '1';
   const top3 = PATTERNS.slice(0, 3);
-  const moreCount = Math.max(0, PATTERNS.length - 3);
+  const totalCount = PATTERNS.length;
+  const projectsTouched = countUniqueProjects(PATTERNS);
 
   return (
     <section
       className="relative overflow-hidden rounded-[24px]"
       style={{
         background:
-          'linear-gradient(135deg, #F5F2FF 0%, #ECEAFA 55%, #F5F2FF 100%)',
+          'linear-gradient(135deg, #7F5AF0 0%, #6A45E2 70%, #5A3FE0 100%)',
         boxShadow:
-          '0 0 0 1px #d9d4ec, 0 24px 60px -28px rgba(127,90,240,0.22)',
+          '0 0 0 1px rgba(255,255,255,0.10) inset, 0 28px 70px -30px rgba(90,63,224,0.55)',
       }}
     >
-      {/* Hairline gradient stroke along the top edge */}
+      {/* Top-right luminous bloom for depth */}
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        className="pointer-events-none absolute -right-32 -top-32 h-[460px] w-[460px] rounded-full"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, #7F5AF0 28%, #A88CFF 50%, #7F5AF0 72%, transparent 100%)',
+            'radial-gradient(circle, rgba(255,255,255,0.22) 0%, transparent 60%)',
+        }}
+      />
+      {/* Faint star grain */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.07]"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle at 25% 20%, white 1px, transparent 1px), radial-gradient(circle at 75% 70%, white 1px, transparent 1px)',
+          backgroundSize: '140px 140px, 100px 100px',
+        }}
+      />
+      {/* Bottom hairline pull for footing */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)',
         }}
       />
 
-      <ScanMotif />
+      <div className="relative px-7 py-8 sm:px-10 sm:py-9">
+        {/* Status strip */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span
+            className="inline-flex items-center gap-2 rounded-full border border-white/30 px-3 py-[5px] text-[10px] uppercase tracking-[0.18em] text-white/90"
+            style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+          >
+            <Eye size={11} weight="bold" />
+            Patterns
+            <span className="text-white/45">·</span>
+            Experimental
+          </span>
+          <span
+            className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-white/75"
+            style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+          >
+            <span className="relative inline-flex h-1.5 w-1.5">
+              <span className="absolute inset-0 animate-ping rounded-full bg-white opacity-70" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+            </span>
+            Live
+            <span className="text-white/40">·</span>
+            <span className="tabular-nums">{projectsTouched} projects watched</span>
+          </span>
+        </div>
 
-      <div className="relative grid gap-10 px-8 py-9 sm:px-10 sm:py-10 lg:grid-cols-[minmax(320px,38%)_1fr] lg:gap-12">
-        <PatternsLiveStripLeft isEmpty={isEmpty} />
-        {isEmpty ? (
-          <PatternsLiveStripEmpty />
-        ) : (
-          <PatternsLiveStripLive
-            patterns={top3}
-            totalCount={PATTERNS.length}
-            moreCount={moreCount}
-          />
-        )}
+        {/* Hero zone */}
+        <div className="mt-7 grid items-center gap-8 lg:grid-cols-[1fr_minmax(260px,320px)] lg:gap-8">
+          {/* Massive numeric hero */}
+          <div className="flex items-baseline gap-5">
+            <span className="font-display text-[110px] font-black leading-[0.88] tracking-[-0.045em] tabular-nums text-white sm:text-[140px]">
+              {isEmpty ? 0 : totalCount}
+            </span>
+            <div className="pb-3 sm:pb-4">
+              <h3 className="font-display text-[24px] font-extrabold leading-[1.05] tracking-[-0.02em] text-white sm:text-[30px]">
+                {isEmpty ? 'patterns yet' : 'patterns this week'}
+                <span className="italic" style={{ color: '#E0D4FF' }}>.</span>
+              </h3>
+              <p className="mt-1.5 max-w-[420px] text-[13px] leading-[1.5] text-white/70">
+                {isEmpty
+                  ? "io needs a few agent runs across 2+ accounts. Launch your first audit and we'll start watching."
+                  : `across ${projectsTouched} projects, refreshes whenever your agents do`}
+              </p>
+            </div>
+          </div>
+
+          {/* Network graph */}
+          <div className="flex justify-center lg:justify-end">
+            <NetworkGraph isEmpty={isEmpty} patterns={top3} />
+          </div>
+        </div>
+
+        {/* Card shelf */}
+        <div className="mt-8">
+          {isEmpty ? (
+            <WatchingForGrid />
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {top3.map((p, i) => (
+                <PatternCard key={p.id} pattern={p} isFresh={i === 0} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer CTA */}
+        <div className="mt-6 flex justify-end">
+          <Link
+            to={isEmpty ? '/agents' : '/patterns'}
+            className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/[0.08] px-[18px] py-[10px] text-[13px] font-semibold text-white backdrop-blur-sm transition-colors hover:border-white/60 hover:bg-white/[0.16]"
+          >
+            {isEmpty ? 'Launch first audit' : `See all ${totalCount} patterns`}
+            <ArrowRight size={13} weight="bold" />
+          </Link>
+        </div>
       </div>
     </section>
   );
 }
 
-function PatternsLiveStripLeft({ isEmpty }: { isEmpty: boolean }) {
-  return (
-    <div className="relative flex flex-col">
-      <span
-        className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.18em] text-ppc-purple-700"
-        style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-      >
-        <Eye size={12} weight="bold" />
-        Patterns
-      </span>
-      <h3 className="mt-3 font-display text-[30px] font-black leading-[1.04] tracking-[-0.022em] text-ppc-ink sm:text-[34px]">
-        The patterns connecting every project
-        <span className="italic" style={{ color: '#7F5AF0' }}>.</span>
-      </h3>
-      <p className="mt-3 max-w-[380px] text-[13.5px] leading-[1.55] text-ppc-text-muted">
-        {isEmpty
-          ? "Patterns need a few agent runs across 2+ accounts before io can start surfacing them. Launch your first audit and we'll start watching."
-          : "io reads every account, every agent run, every week, and surfaces what's actually moving."}
-      </p>
-      <div className="mt-auto pt-6">
-        <Link
-          to={isEmpty ? '/agents' : '/patterns'}
-          className="inline-flex items-center gap-2 rounded-full px-[18px] py-[11px] text-[13.5px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
-          style={{
-            background:
-              'linear-gradient(135deg, #9F86FF 0%, #7F5AF0 50%, #6A45E2 100%)',
-            boxShadow:
-              '0 4px 18px rgba(70,49,134,0.45), 0 0 0 1px rgba(255,255,255,0.10) inset',
-          }}
-        >
-          {isEmpty ? 'Launch your first audit' : "See this week's patterns"}
-          <ArrowRight size={13} weight="bold" />
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function PatternsLiveStripLive({
-  patterns,
-  totalCount,
-  moreCount,
-}: {
-  patterns: Pattern[];
-  totalCount: number;
-  moreCount: number;
-}) {
-  return (
-    <div className="flex min-w-0 flex-col">
-      <div className="mb-3 flex items-center justify-between">
-        <span
-          className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-ppc-text-muted"
-          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-        >
-          <span className="relative inline-flex h-1.5 w-1.5">
-            <span
-              className="absolute inset-0 animate-ping rounded-full opacity-60"
-              style={{ background: '#7F5AF0' }}
-            />
-            <span
-              className="relative inline-flex h-1.5 w-1.5 rounded-full"
-              style={{ background: '#7F5AF0' }}
-            />
-          </span>
-          This week
-          <span className="tabular-nums font-semibold text-ppc-ink">
-            · {totalCount} spotted
-          </span>
-        </span>
-      </div>
-
-      <ul className="flex flex-col gap-1">
-        {patterns.map((p, i) => (
-          <li key={p.id}>
-            <PatternRow pattern={p} isFresh={i === 0} />
-          </li>
-        ))}
-      </ul>
-
-      {moreCount > 0 && (
-        <Link
-          to="/patterns"
-          className="mt-3 inline-flex items-center gap-1.5 self-end text-[12.5px] font-semibold text-ppc-purple-600 transition-colors hover:text-ppc-purple-700"
-        >
-          + {moreCount} more this week
-          <ArrowRight size={11} weight="bold" />
-        </Link>
-      )}
-    </div>
-  );
-}
-
-function PatternRow({ pattern, isFresh }: { pattern: Pattern; isFresh: boolean }) {
+function PatternCard({ pattern, isFresh }: { pattern: Pattern; isFresh: boolean }) {
   const accent = categoryAccent(pattern.category);
-  const projectsLine =
-    pattern.affected.length === 1
-      ? pattern.affected[0].name
-      : `${pattern.affected.length} projects · ${pattern.affected.map((a) => a.name).join(', ')}`;
+  const firstTwo = pattern.affected.slice(0, 2);
+  const overflow = pattern.affected.length - firstTwo.length;
+
   return (
     <Link
       to={`/patterns#${pattern.id}`}
-      className="group flex items-start gap-3.5 rounded-[14px] px-3.5 py-3 transition-colors hover:bg-white/70"
+      className="group relative flex flex-col gap-3 overflow-hidden rounded-[16px] p-5 transition-transform hover:-translate-y-0.5"
+      style={{
+        background: '#0C0C0E',
+        boxShadow:
+          '0 18px 44px -22px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.05) inset',
+      }}
     >
-      <span className="relative mt-[7px] inline-flex h-2 w-2 shrink-0">
-        {isFresh && (
-          <span
-            className="absolute inset-0 animate-ping rounded-full opacity-70"
-            style={{ background: accent }}
-          />
-        )}
+      {/* Top color bar */}
+      <span
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-[2px]"
+        style={{ background: accent }}
+      />
+
+      {/* Header row */}
+      <div className="flex items-start justify-between gap-3">
         <span
-          className="relative inline-flex h-2 w-2 rounded-full"
-          style={{ background: accent, boxShadow: `0 0 0 3px ${accent}1f` }}
-        />
-      </span>
-
-      <div className="min-w-0 flex-1">
-        <p className="line-clamp-2 text-[13.5px] font-semibold leading-[1.35] text-ppc-ink">
-          {pattern.headline}
-        </p>
-        <p className="mt-1 truncate text-[11.5px] text-ppc-text-muted">
-          {projectsLine}
-        </p>
-      </div>
-
-      <div className="flex shrink-0 items-center gap-2 pt-[2px]">
+          className="inline-flex items-center gap-1.5 rounded-full border px-2 py-[3px] text-[9.5px] uppercase tracking-[0.14em]"
+          style={{
+            borderColor: `${accent}66`,
+            color: accent,
+            fontFamily: '"Courier New", ui-monospace, monospace',
+          }}
+        >
+          <span className="h-1 w-1 rounded-full" style={{ background: accent }} />
+          {shortCategory(pattern.category)}
+        </span>
         {pattern.spotted && (
           <span
-            className="text-[10.5px] uppercase tracking-[0.10em] text-ppc-text-faint"
+            className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.12em] text-white/55"
             style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
           >
+            {isFresh && (
+              <span className="relative inline-flex h-1.5 w-1.5">
+                <span className="absolute inset-0 animate-ping rounded-full bg-white opacity-70" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+              </span>
+            )}
             {pattern.spotted}
           </span>
         )}
+      </div>
+
+      {/* Headline */}
+      <p className="line-clamp-3 text-[14px] font-semibold leading-[1.4] text-white">
+        {pattern.headline}
+      </p>
+
+      {/* Footer: projects + arrow */}
+      <div className="mt-auto flex items-center justify-between gap-3 pt-1">
+        <div className="flex min-w-0 items-center gap-1.5 text-[11px] text-white/65">
+          {firstTwo.map((p, idx) => (
+            <span key={p.id} className="inline-flex min-w-0 items-center gap-1">
+              <span
+                className="h-1.5 w-1.5 shrink-0 rounded-full"
+                style={{ background: accent }}
+              />
+              <span className="truncate">{p.name}</span>
+              {idx < firstTwo.length - 1 && (
+                <span className="text-white/30">·</span>
+              )}
+            </span>
+          ))}
+          {overflow > 0 && (
+            <span className="shrink-0 text-white/45">+{overflow}</span>
+          )}
+        </div>
         <CaretRight
           size={11}
           weight="bold"
-          className="text-ppc-text-faint transition-transform group-hover:translate-x-0.5 group-hover:text-ppc-purple-500"
+          className="shrink-0 text-white/45 transition-transform group-hover:translate-x-0.5 group-hover:text-white"
         />
       </div>
     </Link>
   );
 }
 
-function PatternsLiveStripEmpty() {
-  const watchingFor = [
-    { label: 'Cross-account CPA spikes',            color: '#DC2626' },
-    { label: 'Recurring negative-keyword themes',   color: '#FB923C' },
-    { label: 'PMAX intent drift across accounts',   color: '#7F5AF0' },
-    { label: 'Auction landscape shifts',            color: '#06B6D4' },
+function WatchingForGrid() {
+  const items = [
+    { label: 'Cross-account CPA spikes',          color: '#F87171' },
+    { label: 'Recurring negative-kw themes',      color: '#FB923C' },
+    { label: 'PMAX intent drift',                  color: '#A88CFF' },
+    { label: 'Auction landscape shifts',           color: '#22D3EE' },
   ];
   return (
-    <div className="flex min-w-0 flex-col">
-      <div className="mb-3 flex items-center justify-between">
-        <span
-          className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-ppc-text-muted"
-          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {items.map((it) => (
+        <div
+          key={it.label}
+          className="flex items-center gap-2.5 rounded-[16px] border border-dashed border-white/30 bg-white/[0.04] px-4 py-4 text-[12.5px] text-white/75"
         >
-          <Eye size={12} weight="bold" />
-          Watching for…
-        </span>
-      </div>
-      <ul className="flex flex-col gap-1.5">
-        {watchingFor.map((w) => (
-          <li
-            key={w.label}
-            className="flex items-center gap-3.5 rounded-[14px] px-3.5 py-3"
-            style={{ boxShadow: 'inset 0 0 0 1px #e4dffa', background: 'rgba(255,255,255,0.35)' }}
-          >
-            <span
-              className="inline-block h-2 w-2 shrink-0 rounded-full border border-dashed"
-              style={{ borderColor: w.color, opacity: 0.75 }}
-            />
-            <span className="text-[13px] text-ppc-text-muted">{w.label}</span>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-3 text-[11.5px] italic text-ppc-text-faint">
-        First patterns usually surface within 24h of your second agent run.
-      </p>
+          <span
+            className="h-1.5 w-1.5 shrink-0 rounded-full"
+            style={{ background: it.color, opacity: 0.85 }}
+          />
+          {it.label}
+        </div>
+      ))}
     </div>
   );
 }
 
-/* ScanMotif. Faint concentric rings anchored to the left edge — a
- * radar-listening visual under the identity column. Decorative, not
- * load-bearing; sits behind text at low opacity so it never competes. */
-function ScanMotif() {
+/* NetworkGraph — 8 project nodes around an io centre. Pattern arcs
+ * connect the nodes each top-pattern affects, in the pattern's
+ * category color. Visually proves the connection. */
+function NetworkGraph({
+  isEmpty,
+  patterns,
+}: {
+  isEmpty: boolean;
+  patterns: Pattern[];
+}) {
+  // Project order is chosen so the canonical top-3 patterns form
+  // visually coherent arcs around the perimeter, not zigzags.
+  const center = { x: 140, y: 120 };
+  const radius = 86;
+  const projectOrder = [
+    'boulder-care',        // P0 — top
+    'the-hoth',            // P1 — NE   (p-01 trio)
+    'linkbuilder',         // P2 — E    (p-01 trio)
+    'authority-builders',  // P3 — SE   (p-01 trio)
+    'livingyoung',         // P4 — S    (p-02 trio)
+    'edwin-novel',         // P5 — SW   (p-02 trio)
+    'flock',               // P6 — W    (p-02 + p-03)
+    'durable',             // P7 — NW   (p-03)
+  ];
+  const nodes = projectOrder.map((id, i) => {
+    const angle = -Math.PI / 2 + (i * (Math.PI * 2)) / 8;
+    return {
+      id,
+      x: center.x + radius * Math.cos(angle),
+      y: center.y + radius * Math.sin(angle),
+    };
+  });
+  const nodeById = (id: string) => nodes.find((n) => n.id === id);
+
+  // Pattern polylines (skipped in empty state).
+  const arcs = isEmpty
+    ? []
+    : patterns.map((p) => ({
+        id: p.id,
+        color: categoryAccent(p.category),
+        points: p.affected
+          .map((a) => nodeById(a.id))
+          .filter((n): n is { id: string; x: number; y: number } => Boolean(n)),
+      }));
+
+  // First-pattern-wins coloring for the node halos.
+  const nodeColor = new Map<string, string>();
+  if (!isEmpty) {
+    for (const p of patterns) {
+      const color = categoryAccent(p.category);
+      for (const a of p.affected) {
+        if (!nodeColor.has(a.id)) nodeColor.set(a.id, color);
+      }
+    }
+  }
+
   return (
     <svg
+      viewBox="0 0 280 240"
+      className="h-[220px] w-[280px]"
       aria-hidden
-      className="pointer-events-none absolute -left-32 top-1/2 h-[480px] w-[480px] -translate-y-1/2 opacity-[0.16]"
-      viewBox="0 0 480 480"
-      fill="none"
     >
-      <defs>
-        <radialGradient id="patternsScanFade" cx="0%" cy="50%" r="80%">
-          <stop offset="0%"  stopColor="#7F5AF0" stopOpacity="0.55" />
-          <stop offset="65%" stopColor="#7F5AF0" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <rect width="480" height="480" fill="url(#patternsScanFade)" />
-      {[90, 160, 230, 300, 370].map((r) => (
-        <circle
-          key={r}
-          cx="80"
-          cy="240"
-          r={r}
-          stroke="#7F5AF0"
-          strokeWidth="0.6"
-          strokeDasharray="2 5"
+      {/* Base hairlines from io centre to each project */}
+      {nodes.map((n) => (
+        <line
+          key={n.id}
+          x1={center.x}
+          y1={center.y}
+          x2={n.x}
+          y2={n.y}
+          stroke="rgba(255,255,255,0.25)"
+          strokeWidth={0.6}
+          strokeDasharray="2 3"
         />
       ))}
+
+      {/* Pattern arcs (skipped when empty) */}
+      {arcs.map((arc) => (
+        <polyline
+          key={arc.id}
+          fill="none"
+          stroke={arc.color}
+          strokeWidth={1.8}
+          strokeOpacity={0.95}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          points={arc.points.map((p) => `${p.x},${p.y}`).join(' ')}
+          style={{ filter: `drop-shadow(0 0 5px ${arc.color}cc)` }}
+        />
+      ))}
+
+      {/* Project nodes */}
+      {nodes.map((n) => {
+        const color = nodeColor.get(n.id);
+        return (
+          <g key={n.id}>
+            {color && (
+              <circle
+                cx={n.x}
+                cy={n.y}
+                r={7.5}
+                fill="none"
+                stroke={color}
+                strokeWidth={1}
+                opacity={0.45}
+              />
+            )}
+            <circle
+              cx={n.x}
+              cy={n.y}
+              r={color ? 4 : 3}
+              fill={color || 'rgba(255,255,255,0.85)'}
+            />
+          </g>
+        );
+      })}
+
+      {/* Centre io brain node */}
+      <circle cx={center.x} cy={center.y} r={18} fill="white" fillOpacity={0.10} />
+      <circle cx={center.x} cy={center.y} r={11} fill="white" />
+      <text
+        x={center.x}
+        y={center.y + 3.5}
+        textAnchor="middle"
+        fontSize="10"
+        fontFamily="Figtree, system-ui, sans-serif"
+        fontWeight={900}
+        fill="#6A45E2"
+        letterSpacing="-0.5"
+      >
+        io
+      </text>
     </svg>
   );
 }
 
+function shortCategory(category: string): string {
+  // Tighten long labels for the card chip.
+  return category
+    .toUpperCase()
+    .replace('AUCTION INSIGHTS — NEW ENTRANT', 'NEW ENTRANT')
+    .replace('AUDIENCE SIGNAL OPPORTUNITY',    'AUDIENCE SIGNAL')
+    .replace('VERTICAL-WIDE BRAND EROSION',    'BRAND EROSION')
+    .replace('SEARCH LOST IMPRESSION SHARE',   'LOST IMPR. SHARE');
+}
+
 function categoryAccent(category: string): string {
+  // Brighter palette so accents pop on the saturated purple BG
+  // and inside the black cards.
   const c = category.toLowerCase();
-  if (c.includes('pmax') || c.includes('audience') || c.includes('asset')) return '#7F5AF0';
-  if (c.includes('budget') || c.includes('pacing') || c.includes('bid'))    return '#F59E0B';
+  if (c.includes('pmax') || c.includes('audience') || c.includes('asset'))   return '#A88CFF';
+  if (c.includes('budget') || c.includes('pacing') || c.includes('bid'))     return '#FBBF24';
   if (c.includes('daypart') || c.includes('leak') || c.includes('spend') ||
-      c.includes('fraud')   || c.includes('geo'))                            return '#FB923C';
+      c.includes('fraud')   || c.includes('geo'))                              return '#FB923C';
   if (c.includes('tracking') || c.includes('attribution') ||
-      c.includes('conversion'))                                              return '#06B6D4';
-  if (c.includes('brand') || c.includes('competitor') || c.includes('entry')) return '#EC4899';
+      c.includes('conversion'))                                                return '#22D3EE';
+  if (c.includes('brand') || c.includes('competitor') || c.includes('entry')) return '#F472B6';
   if (c.includes('auction') || c.includes('quality') || c.includes('ctr') ||
-      c.includes('erosion'))                                                 return '#DC2626';
-  return '#7F5AF0';
+      c.includes('erosion'))                                                   return '#F87171';
+  return '#A88CFF';
+}
+
+function countUniqueProjects(patterns: Pattern[]): number {
+  const set = new Set<string>();
+  patterns.forEach((p) => p.affected.forEach((a) => set.add(a.id)));
+  return set.size;
 }
 
 /* ─── Helpers ────────────────────────────────────────────────────────── */
