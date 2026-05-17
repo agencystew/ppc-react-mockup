@@ -10,6 +10,8 @@ import {
   ShoppingCart, Binoculars, Lightning, MagnifyingGlass,
   Compass, MapTrifold, Gauge, ChartBar, Flask,
   FileText, Briefcase, Rocket, ShieldCheck, Books,
+  // Expedition-map per-territory icons.
+  Funnel, Lock, BatteryLow, ChartLine, ClockCountdown,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
@@ -380,7 +382,7 @@ function EditorialHero({ agent }: { agent: AgentDefinition }) {
         </p>
       </div>
 
-      <ReportPeek slug={agent.slug} />
+      <IconSpotlight Icon={SLUG_TO_ICON[agent.slug] ?? Sparkle} />
     </section>
   );
 }
@@ -400,196 +402,37 @@ function CategoryChip({ label }: { label: string }) {
   );
 }
 
-// ─── Report peek — visual pre-payoff ─────────────────────────────────────
-//
-// Three real-feeling cards from a finished run, stacked with slight offset
-// to create a "deck of pages" depth. Each card shows actual report content
-// (a delta callout, a finding with status strip, a pacing chart), not
-// decoration. The goal: by the time the user looks at the launch panel,
-// they already know what the deliverable looks like.
-//
-// Only weekly-audit is populated. Other agents fall back to the icon
-// spotlight until per-agent peeks ship.
-
-function ReportPeek({ slug }: { slug: string }) {
-  if (slug !== 'weekly-audit') {
-    const Icon = SLUG_TO_ICON[slug] ?? Sparkle;
-    return <IconSpotlight Icon={Icon} />;
-  }
-
-  return (
-    <div className="relative hidden w-full lg:block">
-      {/* Stronger lavender bloom — visible on a lavender canvas. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -inset-12"
-        style={{
-          background:
-            'radial-gradient(55% 55% at 50% 50%, rgba(127,90,240,0.28) 0%, rgba(127,90,240,0.10) 48%, transparent 78%)',
-        }}
-      />
-
-      {/* Layered deck — back card peeks above + behind the front card, so
-          the right side reads as "a peek at the deliverable" instead of
-          two stacked launch-rail widgets. */}
-      <div className="relative">
-        <div className="relative z-0 -mr-6 translate-y-0">
-          <PeekDeltaCard
-            variant="win"
-            delta="−22%"
-            label="CPA dropped this week"
-            where="Brand · Recovery Centers"
-            footer="$2,140 saved · driven by tCPA tuning"
-          />
-        </div>
-        <div className="relative z-10 -mt-3 ml-6">
-          <PeekHighlightCard
-            variant="win"
-            eyebrow="Top win"
-            campaign="Non-Brand · Drug Rehab"
-            term="addiction treatment near me"
-            stats={[
-              { label: 'CTR',    value: '4.2%' },
-              { label: 'Convs.', value: '18'   },
-              { label: 'CPA',    value: '$42'  },
-            ]}
-            action="Scale: raise budget"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PeekCardShell({ children, accent }: { children: React.ReactNode; accent?: string }) {
-  return (
-    <article
-      className="relative overflow-hidden rounded-[14px] bg-white"
-      style={{
-        boxShadow:
-          '0 0 0 1px #e8e2f0, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.14)',
-      }}
-    >
-      {accent && (
-        <span
-          aria-hidden
-          className="absolute inset-y-0 left-0 w-[3px]"
-          style={{ background: accent }}
-        />
-      )}
-      {children}
-    </article>
-  );
-}
-
-// Wins lead by default. Findings use variant='finding' (red).
-type PeekVariant = 'win' | 'finding';
-
-const PEEK_COLOR: Record<PeekVariant, { strip: string; eyebrow: string; dot: string; delta: string }> = {
-  win:     { strip: '#5DCAA5', eyebrow: '#2F8F6E', dot: '#5DCAA5', delta: '#2F8F6E' },
-  finding: { strip: '#E24B4A', eyebrow: '#B2403F', dot: '#E24B4A', delta: '#E24B4A' },
-};
-
-function PeekDeltaCard({
-  variant, delta, label, where, footer,
-}: {
-  variant: PeekVariant;
-  delta: string; label: string; where: string; footer: string;
-}) {
-  const c = PEEK_COLOR[variant];
-  return (
-    <PeekCardShell>
-      <div className="flex items-start justify-between gap-5 px-5 py-5">
-        <div className="min-w-0">
-          <p className="text-[12.5px] font-semibold text-ppc-text-muted">{label}</p>
-          <p className="mt-1 text-[13.5px] font-bold text-ppc-ink">{where}</p>
-          <div className="mt-3 flex items-center gap-2">
-            <span
-              aria-hidden
-              className="h-[6px] w-[6px] shrink-0 rounded-full"
-              style={{ background: c.dot }}
-            />
-            <p className="text-[12px] text-ppc-text-muted">{footer}</p>
-          </div>
-        </div>
-        <div
-          className="shrink-0 font-display text-[40px] font-black leading-none tracking-[-0.035em]"
-          style={{ color: c.delta }}
-        >
-          {delta}
-        </div>
-      </div>
-    </PeekCardShell>
-  );
-}
-
-function PeekHighlightCard({
-  variant, eyebrow, campaign, term, stats, action,
-}: {
-  variant: PeekVariant;
-  eyebrow: string;
-  campaign: string;
-  term: string;
-  stats: { label: string; value: string }[];
-  action: string;
-}) {
-  const c = PEEK_COLOR[variant];
-  return (
-    <PeekCardShell accent={c.strip}>
-      <div className="px-5 py-5 pl-6">
-        <div className="flex items-baseline justify-between gap-3">
-          <p
-            className="text-[12.5px] font-bold uppercase tracking-[0.04em]"
-            style={{ color: c.eyebrow }}
-          >
-            {eyebrow}
-          </p>
-          <p className="truncate text-[12px] text-ppc-text-muted">{campaign}</p>
-        </div>
-
-        <p
-          className="mt-3 text-[18px] font-semibold tracking-[-0.012em] text-ppc-ink"
-          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-        >
-          "{term}"
-        </p>
-
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className="rounded-[8px] bg-ppc-canvas px-2.5 py-2"
-              style={{ boxShadow: 'inset 0 0 0 1px #e2dcef' }}
-            >
-              <p className="text-[10.5px] font-semibold text-ppc-text-muted">{s.label}</p>
-              <p className="mt-0.5 text-[14px] font-bold tracking-[-0.01em] text-ppc-ink">
-                {s.value}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          className="mt-4 inline-flex items-center gap-1.5 self-start rounded-full bg-ppc-ink px-3 py-1.5 text-[12px] font-semibold text-white"
-        >
-          {action}
-          <ArrowRight size={11} weight="bold" />
-        </button>
-      </div>
-    </PeekCardShell>
-  );
-}
+// ─── (Report peek + Peek card components removed 2026-05-17.)
+// Stewart's call: weekly-audit's preview deck was too busy. budget-pacer's
+// simpler IconSpotlight pattern is the one he loves — use it for every
+// agent. If/when we want a real "what came back" peek, build it as a
+// dedicated post-hero section, not crammed beside the H1.
 
 function IconSpotlight({ Icon }: { Icon: PhosphorIcon }) {
   return (
     <div className="relative hidden aspect-square w-full max-w-[360px] place-self-center lg:block">
+      {/* Inline keyframes for the bloom breathing — ambient, very gentle.
+          7s cycle, scales 0.96→1.05 and opacity 0.75→1, so the eye reads
+          it as life, not motion. */}
+      <style>{`
+        @keyframes spotlight-bloom-pulse {
+          0%, 100% { opacity: 0.78; transform: scale(0.97); }
+          50%      { opacity: 1;    transform: scale(1.05); }
+        }
+        @keyframes spotlight-icon-float {
+          0%, 100% { transform: translateY(0); }
+          50%      { transform: translateY(-4px); }
+        }
+      `}</style>
+
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
             'radial-gradient(55% 60% at 50% 52%, rgba(127,90,240,0.30) 0%, rgba(127,90,240,0.10) 45%, transparent 75%)',
+          animation: 'spotlight-bloom-pulse 7s ease-in-out infinite',
+          transformOrigin: '50% 52%',
         }}
       />
       <span
@@ -603,12 +446,29 @@ function IconSpotlight({ Icon }: { Icon: PhosphorIcon }) {
           WebkitMask: 'radial-gradient(circle at 50% 50%, black 40%, transparent 75%)',
         }}
       />
-      <div className="relative grid h-full place-items-center">
+      <div
+        className="relative grid h-full place-items-center"
+        style={{ animation: 'spotlight-icon-float 7s ease-in-out infinite' }}
+      >
         <Icon size={220} weight="duotone" className="text-ppc-purple-500" />
       </div>
     </div>
   );
 }
+
+// Per-territory icons for the expedition map. Keys match the inspect
+// `title` strings in mock/agents.ts. Falls back to Sparkle if a title
+// hasn't been mapped yet.
+const INSPECT_ICONS: Record<string, PhosphorIcon> = {
+  'Spend leaks':            Drop,
+  'Negative gaps':          Funnel,
+  'Search term drift':      Compass,
+  'Quality score outliers': Gauge,
+  'Bid cap interference':   Lock,
+  'Ad copy fatigue':        BatteryLow,
+  'Auction shifts':         ChartLine,
+  'Pacing risk':            ClockCountdown,
+};
 
 // ─── Expedition map (the territory the agent inspects) ──────────────────
 //
@@ -668,26 +528,39 @@ function ExpeditionMap({ agent }: { agent: AgentDefinition }) {
         </p>
 
         <ol className="mt-10 grid gap-x-12 gap-y-8 sm:grid-cols-2">
-          {items.map((it, i) => (
-            <li key={i} className="flex items-start gap-5">
-              <span
-                aria-hidden
-                className="font-display text-[44px] font-black leading-[0.85] tracking-[-0.045em] text-ppc-purple-400"
-              >
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <div className="min-w-0 pt-[6px]">
-                <p className="text-[17px] font-bold leading-[1.25] tracking-[-0.012em] text-white">
-                  {it.title}
-                </p>
-                {it.desc && (
-                  <p className="mt-1.5 text-[13.5px] leading-[1.6] text-white/60">
-                    {it.desc}
+          {items.map((it, i) => {
+            const Icon = INSPECT_ICONS[it.title] ?? Sparkle;
+            return (
+              <li key={i} className="flex items-start gap-5">
+                <span
+                  aria-hidden
+                  className="grid h-[52px] w-[52px] shrink-0 place-items-center rounded-[14px]"
+                  style={{
+                    background:
+                      'linear-gradient(155deg, rgba(168,140,255,0.18) 0%, rgba(127,90,240,0.10) 60%, rgba(90,63,224,0.06) 100%)',
+                    boxShadow:
+                      '0 0 0 1px rgba(168,140,255,0.18) inset, 0 8px 18px -10px rgba(127,90,240,0.45)',
+                  }}
+                >
+                  <Icon
+                    size={26}
+                    weight="duotone"
+                    className="text-ppc-purple-300"
+                  />
+                </span>
+                <div className="min-w-0 pt-[4px]">
+                  <p className="text-[17px] font-bold leading-[1.25] tracking-[-0.012em] text-white">
+                    {it.title}
                   </p>
-                )}
-              </div>
-            </li>
-          ))}
+                  {it.desc && (
+                    <p className="mt-1.5 text-[13.5px] leading-[1.6] text-white/60">
+                      {it.desc}
+                    </p>
+                  )}
+                </div>
+              </li>
+            );
+          })}
         </ol>
       </div>
     </section>
