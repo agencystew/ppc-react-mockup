@@ -359,7 +359,7 @@ function EditorialHero({ agent }: { agent: AgentDefinition }) {
   const headlineBody = hasPeriod ? agent.headline.slice(0, -1) : agent.headline;
 
   return (
-    <section className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(420px,520px)] lg:gap-16">
+    <section className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(420px,520px)] lg:gap-16">
       <div className="flex flex-col">
         <CategoryChip label={CATEGORY_LABEL[agent.category] ?? agent.category} />
 
@@ -419,41 +419,43 @@ function ReportPeek({ slug }: { slug: string }) {
 
   return (
     <div className="relative hidden w-full lg:block">
-      {/* Soft lavender bloom behind the stack — same recipe as MascotBench. */}
+      {/* Stronger lavender bloom — visible on a lavender canvas. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -inset-8"
+        className="pointer-events-none absolute -inset-12"
         style={{
           background:
-            'radial-gradient(55% 55% at 50% 50%, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.06) 50%, transparent 78%)',
+            'radial-gradient(55% 55% at 50% 50%, rgba(127,90,240,0.28) 0%, rgba(127,90,240,0.10) 48%, transparent 78%)',
         }}
       />
 
-      <div className="relative flex flex-col gap-3.5">
-        <PeekDeltaCard
-          variant="win"
-          delta="−22%"
-          label="CPA dropped this week"
-          where="Brand · Recovery Centers"
-          footer="$2,140 saved · driven by tCPA tuning"
-        />
-        <PeekHighlightCard
-          variant="win"
-          eyebrow="Top win"
-          campaign="Non-Brand · Drug Rehab"
-          term="addiction treatment near me"
-          stats={[
-            { label: 'CTR',    value: '4.2%' },
-            { label: 'Convs.', value: '18'   },
-            { label: 'CPA',    value: '$42'  },
-          ]}
-          action="Scale: raise budget"
-        />
-        <PeekPacingCard
-          percent={67}
-          aheadBy={4}
-          remaining="$12,400"
-        />
+      {/* Layered deck — back card peeks above + behind the front card, so
+          the right side reads as "a peek at the deliverable" instead of
+          two stacked launch-rail widgets. */}
+      <div className="relative">
+        <div className="relative z-0 -mr-6 translate-y-0">
+          <PeekDeltaCard
+            variant="win"
+            delta="−22%"
+            label="CPA dropped this week"
+            where="Brand · Recovery Centers"
+            footer="$2,140 saved · driven by tCPA tuning"
+          />
+        </div>
+        <div className="relative z-10 -mt-3 ml-6">
+          <PeekHighlightCard
+            variant="win"
+            eyebrow="Top win"
+            campaign="Non-Brand · Drug Rehab"
+            term="addiction treatment near me"
+            stats={[
+              { label: 'CTR',    value: '4.2%' },
+              { label: 'Convs.', value: '18'   },
+              { label: 'CPA',    value: '$42'  },
+            ]}
+            action="Scale: raise budget"
+          />
+        </div>
       </div>
     </div>
   );
@@ -574,49 +576,6 @@ function PeekHighlightCard({
           {action}
           <ArrowRight size={11} weight="bold" />
         </button>
-      </div>
-    </PeekCardShell>
-  );
-}
-
-function PeekPacingCard({
-  percent, aheadBy, remaining,
-}: {
-  percent: number; aheadBy: number; remaining: string;
-}) {
-  return (
-    <PeekCardShell>
-      <div className="px-5 py-5">
-        <div className="flex items-baseline justify-between gap-3">
-          <p className="text-[13px] font-bold text-ppc-ink">Pacing</p>
-          <p className="text-[11.5px] text-ppc-text-muted">Month-to-date</p>
-        </div>
-
-        <div className="mt-3 flex items-end justify-between gap-3">
-          <p className="font-display text-[34px] font-black leading-none tracking-[-0.03em] text-ppc-ink">
-            {percent}%
-          </p>
-          <p className="pb-1 text-[12px] font-semibold text-ppc-status-healthy">
-            Ahead by {aheadBy}%
-          </p>
-        </div>
-
-        {/* Pacing bar — purple fill against lavender track */}
-        <div className="mt-3 h-[10px] w-full overflow-hidden rounded-full bg-ppc-canvas"
-             style={{ boxShadow: 'inset 0 0 0 1px #e2dcef' }}>
-          <div
-            className="h-full rounded-full"
-            style={{
-              width: `${percent}%`,
-              background: 'linear-gradient(90deg, #A88CFF 0%, #7F5AF0 100%)',
-            }}
-          />
-        </div>
-
-        <div className="mt-3 flex items-center justify-between text-[11.5px] text-ppc-text-muted">
-          <span>Remaining demand</span>
-          <span className="font-semibold text-ppc-ink">{remaining}</span>
-        </div>
       </div>
     </PeekCardShell>
   );
