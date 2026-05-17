@@ -6,14 +6,41 @@
 
 ---
 
+## The posture (read this first)
+
+Patterns is the **flagging surface**, not the verdict surface. The honest frame is: *"We don't always have full context. We can't always tell what's causing things. But here's some stuff we noticed showing up across your work that looks like it might matter, and a few signals we're still watching but can't promote yet."*
+
+This vulnerability **is the differentiation**. Every AI dashboard pretends omniscience. We don't. Same posture as the rest of the reports.
+
+**Important: this rule is not delivered through paragraph-length hero subtitles** (boring, skippable). It's encoded in the design choices themselves:
+- Confidence indicators visible on every pattern card at rest
+- A dedicated "Still watching" zone for tentative signals that aren't ready to be patterns yet
+- Pattern card labels say "What we noticed" / "What we'd try", not "What we found" / "Recommended action"
+- The empty-state when filters yield zero reads "Nothing here yet - we're still reading" not "No results"
+- Stats strip occasionally swaps the count for a self-observation ("Edwin Novel's data is thin this week - one new run")
+- A quiet footer line invites correction: "Spotted something we missed? Tell us at feedback@ppc.io"
+
+The user picks up the posture over multiple visits. Telling them once in a subtitle does nothing.
+
+## Audience
+
+The page is one surface for two audiences:
+
+- **Agency owners / COOs** opening their book in the morning - read the hero + featured triplet in 30 seconds, close the laptop, know what's going on.
+- **In-house marketers** managing campaigns inside a single advertiser - scroll past the hero, hit the lens pills, filter to Wins, dispatch specific moves.
+
+The "node" in the constellation isn't an "account" or a "client" - it's just whatever the user has named as a `project` in their workspace. Could be a client (agency), a brand (parent advertiser), a campaign group (in-house). The component is data-agnostic. All chrome avoids "roster"/"client" framing - we use "projects" or "across your work."
+
+---
+
 ## Why we're re-thinking
 
-Patterns is the flagship cross-account synthesis surface  -  the place where the app reads across the whole book of business and surfaces threads that span clients. Today it isn't earning that promise:
+Patterns is the flagship cross-account synthesis surface  -  the place where the app reads across all of a user's projects (clients, brands, or campaigns) and surfaces threads that span them. Today it isn't earning that promise:
 
-1. **Hero apologises for itself.** Plain "Patterns. Experimental" on lavender, then a "What this is" explainer card. The original spec deliberately avoided a dark editorial hero. That decision is being reversed  -  this should feel like the operator's strategic briefing surface, not a list view.
+1. **Hero apologises for itself.** Plain "Patterns. Experimental" on lavender, then a "What this is" explainer card. The original spec deliberately avoided a dark editorial hero. That decision is being reversed  -  this should feel like the strategic briefing surface, not a list view.
 2. **The shelf is 29 identical rows.** Same black mono badge, same purple eyebrow, same headline weight, same chevron. No severity, no dollar impact, no grouping. By PATTERN 08 the eye has nowhere to land.
-3. **No headline thesis.** The page just lists outputs. There's no single sentence at the top that captures what's actually happening across the roster this week.
-4. **No roster map.** Patterns is about *connections* across clients  -  the page never visualises the roster as a connected system.
+3. **No headline thesis.** The page just lists outputs. There's no single sentence at the top that captures what's actually happening across the work this week.
+4. **No project map.** Patterns is about *connections* across projects  -  the page never visualises them as a connected system.
 5. **No triage.** "Here's 30 patterns, scroll for yourself" is the opposite of a world-class AI app. The default view should BE the recommendation, not the full database.
 
 ---
@@ -26,8 +53,9 @@ Full-bleed, black-led gradient (`#07050D → #0F0A1E` vertical) with a soft purp
 
 **Anatomy, top to bottom:**
 
-- **Top strip.** Mono Courier eyebrow `PATTERNS` top-left. Right side: `Last sweep · 2h ago` with the live-pulse mint dot. Below the eyebrow, the page H1: `Cross-account synthesis.` in Figtree 900 white with italic-purple period.
-- **Centerpiece: roster constellation.** 8 project nodes (Boulder Care, The HOTH, Durable, LinkBuilder, LivingYoung, Authority Builders, Edwin Novel, Flock) arranged organically across the canvas  -  not a grid, more like a star map. Each node uses the project's existing chip color from `projectChipColor()`. Lines drawn between projects that share patterns; opacity scales to the count of shared patterns between that pair. Top 3 edges (representing the top 3 patterns) pulse softly every 4s. Hovering a node lights its threads brighter and dims others.
+- **Top strip.** Mono Courier eyebrow `PATTERNS` top-left. Right side: `Last sweep · 2h ago` with the live-pulse mint dot. Below the eyebrow, the page H1: `Cross-account synthesis.` in Figtree 900 white with italic-purple period. **No prose subtitle.** The vulnerability isn't introduced here - it lives in design micro-choices below (confidence badges, "Still watching" zone, label vocabulary). The hero stays clean.
+- **Atmosphere layer (behind the constellation).** 40-60 slow-drifting purple particles, very low opacity (0.05-0.12), pure CSS via a single SVG layer with a `dp-drift` keyframe animation. Each particle is a 2-3px circle with a slow upward translate over ~14-20s, randomised stagger. Coffee-ad afternoon-light feel. Disabled under `prefers-reduced-motion`. Cost: ~6kb of SVG, no JS.
+- **Centerpiece: project constellation.** 8 project nodes (Boulder Care, The HOTH, Durable, LinkBuilder, LivingYoung, Authority Builders, Edwin Novel, Flock) arranged organically across the canvas  -  not a grid, more like a star map. Each node uses the project's existing chip color from `projectChipColor()`. Lines drawn between projects that share patterns; opacity scales to the count of shared patterns between that pair. Top 3 edges (representing the top 3 patterns) pulse softly every 4s. Hovering a node lights its threads brighter and dims others.
 - **Thesis line overlay (lower-third, centered).** White Figtree 900, ~38px, with italic-purple period. Typewriter-and-backspace cycle through the existing `pattern.headline` strings (30 of them, already authored in clean declarative voice). Pace: ~50ms/char typing, 25ms/char backspace, 1.5s pause at full string, ~5s per full cycle. **Pauses on hover** so people can read what catches their eye. Sample headlines from the data:
   > *"Three SEO-tool accounts hit by the same paid-auction shift."*
   > *"Five accounts have GCLID drop-off above 14%  -  attribution is leaking."*
@@ -43,7 +71,24 @@ Full-bleed, black-led gradient (`#07050D → #0F0A1E` vertical) with a soft purp
 - Typewriter cycle: ~5s per thesis, infinite, pauses on hover.
 - All CSS + SVG. No canvas, no D3.
 
-**Constellation interaction:** Clicking a node filters the shelf below to only patterns that touch that project. State is held in the page's `selectedProjectId` (already need it for the "By project" pill below  -  same state).
+**Constellation interaction (reactive mode):** Hovering a node lights its threads (current spec). **Clicking a node does more than filter** - the constellation REFLOWS:
+- The clicked node animates to the canvas center (200ms ease-out).
+- Its connected edges thicken to 1.8px and brighten to ~0.85 opacity.
+- Unconnected nodes fade to ~0.30 opacity and shrink by 25%.
+- Patterns touching that node fly into the shelf below with a stagger (40ms between rows).
+- Clicking the same node again, clicking empty canvas, or pressing Esc returns the constellation to its star-map position with a spring-ease (300ms).
+
+This is the moment that makes someone show their friend the page. CSS transforms + a single `transform: translate()` per node, all driven by the same `selectedProjectId` state already used by the lens "By project" pill.
+
+**Stats strip mode rotation:** Every ~12s the strip swaps between two modes (no announcement, no fade-out chrome - just a 400ms crossfade):
+- Mode A (default): `92 findings · 31 runs · 8 projects · 30 patterns surfaced`
+- Mode B (self-observation): A short string sampled from a list of 4-5 honest observations about THIS week's data. Examples:
+  > "Edwin Novel's data is the thinnest this week - one new run."
+  > "No new runs on Authority Builders in the last 7 days."
+  > "PMAX patterns are the densest cluster this week - 4 of 30."
+  > "We haven't seen Boulder Care for 3 days."
+
+  These read as the app owning the gaps. Authored by hand alongside the patterns, sampled in rotation. Computed from the data at module load time when possible (e.g., "no new runs in X days" can be derived from `surfacedAt`).
 
 ### 2. Featured triplet (replaces single featured card)
 
@@ -115,6 +160,75 @@ Each group: mono Courier header (`AUCTION & COMPETITION`, ink at 60%), thin grad
 
 **Accordion behavior preserved.** Click a row to expand inline (current `pattern-expansion` body).
 
+**Confidence indicator on every row, visible at rest.** A tiny 3-dot scale rendered next to the moveTag:
+
+```
+●●○  78% conf
+```
+
+Three dots: filled count = confidence tier (1/3 low, 2/3 medium, 3/3 high). A subtle `XX% conf` label in mono Courier next to it. Hovering shows a tooltip explaining the basis: *"Based on 4 corroborating signals across 3 runs."* On dark surfaces and on light, the dots use slate ink at 78% / 40% opacity. This is the vulnerability surfaced everywhere, not just in the explainer.
+
+**Pattern card section label vocabulary** (inside the expansion):
+- `What we found` → `What we noticed`
+- `Why it matters across your roster` → `Why it matters`
+- `Recommended action` → `What we'd try`
+
+These read as observation and suggestion, not as verdict. Subtle but cumulative.
+
+---
+
+### 4b. "Still watching" zone (the vulnerability layer made concrete)
+
+Below the main shelf, a dedicated section for tentative observations that aren't ready to be patterns yet. The whole point of this surface is that the AI admits uncertainty - this is where that admission lives.
+
+**Header:** Mono Courier `STILL WATCHING · 4` followed by a thin gradient rule. No explanation paragraph - the title and the cards inside speak for themselves.
+
+**Cards (~4 candidates, hand-authored):**
+
+Each candidate card is visually distinct from a Pattern card:
+- Dashed border (1px, `#cdc6dd`), no shadow, white background at 60% opacity.
+- Smaller padding than pattern cards (px-5 py-4 vs px-6 py-5).
+- Compact: project chips, a one-line observation, a "needs more data" caption.
+
+Example candidate:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  [the-hoth] [linkbuilder]                                       │
+│  Both have CTR slipping ~0.3pp over the last 5 days.           │
+│  Could be a SERP layout test or a slow QS drift - too early     │
+│  to tell. Watching for another week.                            │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+These are mock-authored as a separate `CANDIDATE_SIGNALS` array alongside `PATTERNS`. Same data shape as Pattern minus `recommendedAction` / `recommendedActionCta` (because we don't recommend anything yet).
+
+No CTAs. The point is to acknowledge, not to act.
+
+### 4c. Empty-state + correction footer
+
+When filters yield zero results:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  Nothing here yet  -  we're still reading.                      │
+│                                                                 │
+│            [ Clear filters ]                                    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+Soft language ("still reading") over "no results." Reinforces posture.
+
+**Footer correction invite.** The existing `PatternsReturnBanner` (link back to /reports) gets a sibling line above it:
+
+> *"Spotted something we missed? Tell us at feedback@ppc.io"*
+
+Quiet 12.5px slate ink. The invitation is the entire mechanism by which the page admits it's flawed and asks for help. CEO and in-house user both see it.
+
+---
+
 ### 5. What we don't touch
 
 - The `PATTERNS` data shape (we add derived fields: `severity`, `impact`, `surfacedAt`, `firstSeenAt`, `categoryGroup`  -  all mocked alongside the array).
@@ -161,6 +275,8 @@ Each pattern gets these additional fields (mock-authored alongside existing ones
 | `recommended` | boolean | True for the ~6 patterns selected for the default tab. |
 | `recommendedReason` | string \| null | The italic caption explaining the pick ("3 projects · new this week · single decisive move"). |
 | `dollarSuffix` | string \| null | OPTIONAL real dollar quote ONLY when the pattern's own `whatWeFound` or `whyItMatters` prose explicitly states a figure. Default `null`. The render layer surfaces it as a small `~$1.2K` suffix on the moveTag. Never fabricated. |
+| `confidence` | `number` (0-100) | Honest confidence percentage. Hand-authored per pattern based on signal density (number of findings × number of corroborating agents). Surfaced as a 3-dot scale + `XX% conf` label on every card. |
+| `confidenceBasis` | string | Short tooltip string explaining the confidence: e.g., `"4 corroborating signals across 3 runs"`, `"2 agents agree, 1 inferred"`, `"single account, single agent - low confidence"`. |
 
 These are authored once at the top of `Patterns.tsx` alongside the existing PATTERNS array as a parallel enrichment object  -  kept separate so the existing pattern prose stays the source of truth and the derived classification stays editable.
 
