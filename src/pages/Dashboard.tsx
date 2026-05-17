@@ -1,12 +1,12 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   ArrowRight, ArrowUp, ArrowDown, CaretRight, Sparkle,
-  MagnifyingGlass, Funnel, ChartBar, ShieldCheck, Target, Megaphone,
+  MagnifyingGlass, Funnel, Eye,
 } from '@phosphor-icons/react';
 import { PROJECTS, ACCOUNTS } from '../mock/projects';
 import { RECENT_RUNS_SUMMARY } from '../mock/runs';
-import { AGENTS } from '../mock/agents';
 import { AgentMascot } from '../components/AgentMascot';
+import { PATTERNS, type Pattern } from '../mock/patterns';
 
 /* Dashboard · /
  *
@@ -156,7 +156,7 @@ export function Dashboard() {
       <GreetingStrip />
       <ActivityHero />
       <PortfolioTable />
-      <BottomDuo />
+      <PatternsLiveStrip />
     </div>
   );
 }
@@ -640,204 +640,292 @@ function FilterButton() {
   );
 }
 
-/* ─── 4 · Bottom duo ─────────────────────────────────────────────────── */
 
-function BottomDuo() {
+/* ─── 4 · Patterns live strip ───────────────────────────────────────────
+ *
+ * Full-width lavender card that replaces the old Patterns CTA + Quick
+ * Actions duo. Two intents on one surface: (LEFT) editorial teaser for
+ * the cross-portfolio brain, (RIGHT) live preview of the top 3 patterns
+ * io spotted this week. Same data source as /patterns so the two stay
+ * in sync. ?empty=1 flips to the new-user state.
+ *
+ * Design language sits on the lavender canvas family from /patterns
+ * (the destination page), not the dark hero family from above. The
+ * bottom of the dashboard wants to feel like a different beat. */
+
+function PatternsLiveStrip() {
+  const [params] = useSearchParams();
+  const isEmpty = params.get('empty') === '1';
+  const top3 = PATTERNS.slice(0, 3);
+  const moreCount = Math.max(0, PATTERNS.length - 3);
+
   return (
-    <section className="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
-      <PatternsCTA />
-      <QuickActions />
+    <section
+      className="relative overflow-hidden rounded-[24px]"
+      style={{
+        background:
+          'linear-gradient(135deg, #F5F2FF 0%, #ECEAFA 55%, #F5F2FF 100%)',
+        boxShadow:
+          '0 0 0 1px #d9d4ec, 0 24px 60px -28px rgba(127,90,240,0.22)',
+      }}
+    >
+      {/* Hairline gradient stroke along the top edge */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, #7F5AF0 28%, #A88CFF 50%, #7F5AF0 72%, transparent 100%)',
+        }}
+      />
+
+      <ScanMotif />
+
+      <div className="relative grid gap-10 px-8 py-9 sm:px-10 sm:py-10 lg:grid-cols-[minmax(320px,38%)_1fr] lg:gap-12">
+        <PatternsLiveStripLeft isEmpty={isEmpty} />
+        {isEmpty ? (
+          <PatternsLiveStripEmpty />
+        ) : (
+          <PatternsLiveStripLive
+            patterns={top3}
+            totalCount={PATTERNS.length}
+            moreCount={moreCount}
+          />
+        )}
+      </div>
     </section>
   );
 }
 
-/* PatternsCTA — dark card pointing at the cross-portfolio patterns hub.
- * Reference: portfolio dashboard "AI verdict" composition (mascot on
- * the right, primary purple pill on the left). Intentionally
- * stat-free — the patterns page itself surfaces the numbers. */
-function PatternsCTA() {
+function PatternsLiveStripLeft({ isEmpty }: { isEmpty: boolean }) {
   return (
-    <article
-      className="relative overflow-hidden rounded-[18px] px-7 py-8 text-white sm:px-9 sm:py-9"
-      style={{
-        background: '#08060F',
-        boxShadow:
-          '0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(15,10,30,0.55)',
-      }}
-    >
-      {/* Perspective grid */}
+    <div className="relative flex flex-col">
       <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
-          `,
-          backgroundSize: '48px 48px',
-          maskImage:
-            'radial-gradient(ellipse 90% 80% at 50% 0%, black 20%, transparent 80%)',
-          WebkitMaskImage:
-            'radial-gradient(ellipse 90% 80% at 50% 0%, black 20%, transparent 80%)',
-        }}
-      />
-      {/* Top-right purple bloom */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -right-16 -top-16 h-[280px] w-[280px] rounded-full"
-        style={{
-          background:
-            'radial-gradient(circle, rgba(127,90,240,0.26) 0%, transparent 65%)',
-        }}
-      />
-
-      <div className="relative grid items-center gap-6 sm:grid-cols-[1fr_minmax(140px,180px)] sm:gap-8">
-        {/* LEFT — copy + CTA */}
-        <div className="min-w-0">
-          <span
-            className="text-[10.5px] uppercase tracking-[0.16em] text-white/55"
-            style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-          >
-            Patterns
-          </span>
-          <h3 className="mt-3 font-display text-[28px] font-black leading-[1.04] tracking-[-0.022em] text-white sm:text-[34px]">
-            The patterns connecting every project<span style={{ color: '#9F86FF' }}>.</span>
-          </h3>
-          <p className="mt-3 max-w-[420px] text-[13.5px] leading-[1.55] text-white/60">
-            Cross-account synthesis. The patterns that span more than one client — your COO-level read on the week.
-          </p>
-          <Link
-            to="/patterns"
-            className="mt-6 inline-flex items-center gap-2 rounded-full px-[18px] py-[11px] text-[13.5px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
-            style={{
-              background:
-                'linear-gradient(135deg, #9F86FF 0%, #7F5AF0 50%, #6A45E2 100%)',
-              boxShadow:
-                '0 4px 18px rgba(70,49,134,0.55), 0 0 12px rgba(209,133,236,0.50) inset, 0 0 0 1px rgba(255,255,255,0.10)',
-            }}
-          >
-            See this week's patterns
-            <ArrowRight size={13} weight="bold" />
-          </Link>
-        </div>
-
-        {/* RIGHT — mascot */}
-        <div className="relative flex items-center justify-center sm:justify-end">
-          <AgentMascot size={150} />
-        </div>
+        className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.18em] text-ppc-purple-700"
+        style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+      >
+        <Eye size={12} weight="bold" />
+        Patterns
+      </span>
+      <h3 className="mt-3 font-display text-[30px] font-black leading-[1.04] tracking-[-0.022em] text-ppc-ink sm:text-[34px]">
+        The patterns connecting every project
+        <span className="italic" style={{ color: '#7F5AF0' }}>.</span>
+      </h3>
+      <p className="mt-3 max-w-[380px] text-[13.5px] leading-[1.55] text-ppc-text-muted">
+        {isEmpty
+          ? "Patterns need a few agent runs across 2+ accounts before io can start surfacing them. Launch your first audit and we'll start watching."
+          : "io reads every account, every agent run, every week, and surfaces what's actually moving."}
+      </p>
+      <div className="mt-auto pt-6">
+        <Link
+          to={isEmpty ? '/agents' : '/patterns'}
+          className="inline-flex items-center gap-2 rounded-full px-[18px] py-[11px] text-[13.5px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
+          style={{
+            background:
+              'linear-gradient(135deg, #9F86FF 0%, #7F5AF0 50%, #6A45E2 100%)',
+            boxShadow:
+              '0 4px 18px rgba(70,49,134,0.45), 0 0 0 1px rgba(255,255,255,0.10) inset',
+          }}
+        >
+          {isEmpty ? 'Launch your first audit' : "See this week's patterns"}
+          <ArrowRight size={13} weight="bold" />
+        </Link>
       </div>
-    </article>
+    </div>
   );
 }
 
-/* Quick actions. Light card, mirrors the reference's right column. */
-
-interface ActionRow {
-  icon: typeof Sparkle;
-  iconBg: string;
-  title: string;
-  context: string;
-  to: string;
-}
-
-const ACTIONS: ActionRow[] = [
-  {
-    icon: ShieldCheck,
-    iconBg: 'linear-gradient(155deg, #F87171 0%, #DC2626 100%)',
-    title: 'Review critical issue',
-    context: "The HOTH's CPA spike",
-    to: '/projects/the-hoth',
-  },
-  {
-    icon: ChartBar,
-    iconBg: 'linear-gradient(155deg, #2DD4BF 0%, #0E9488 100%)',
-    title: 'Run deep account audit',
-    context: 'Durable, due this week',
-    to: '/agents/deep-account-audit',
-  },
-  {
-    icon: Target,
-    iconBg: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 60%, #5A3FE0 100%)',
-    title: 'Tune PMAX',
-    context: 'LinkBuilder.io',
-    to: '/agents/pmax',
-  },
-  {
-    icon: Megaphone,
-    iconBg: 'linear-gradient(155deg, #34D399 0%, #10A36C 100%)',
-    title: 'Write new ad copy',
-    context: 'Boulder Care · 8 ad groups',
-    to: '/agents/ad-copy',
-  },
-];
-
-function QuickActions() {
+function PatternsLiveStripLive({
+  patterns,
+  totalCount,
+  moreCount,
+}: {
+  patterns: Pattern[];
+  totalCount: number;
+  moreCount: number;
+}) {
   return (
-    <article
-      className="rounded-[18px] bg-white px-6 py-6"
-      style={{ boxShadow: '0 0 0 1px #e7e2ef' }}
-    >
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-[16px] font-semibold tracking-[-0.005em] text-ppc-ink">
-          Quick actions<span className="text-ppc-purple-500">.</span>
-        </h3>
+    <div className="flex min-w-0 flex-col">
+      <div className="mb-3 flex items-center justify-between">
         <span
-          className="rounded-full bg-[#EEEDFE] px-2 py-[2px] font-mono text-[10px] font-semibold uppercase tracking-[0.10em] text-ppc-purple-700"
+          className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-ppc-text-muted"
+          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
         >
-          {ACTIONS.length} suggested
+          <span className="relative inline-flex h-1.5 w-1.5">
+            <span
+              className="absolute inset-0 animate-ping rounded-full opacity-60"
+              style={{ background: '#7F5AF0' }}
+            />
+            <span
+              className="relative inline-flex h-1.5 w-1.5 rounded-full"
+              style={{ background: '#7F5AF0' }}
+            />
+          </span>
+          This week
+          <span className="tabular-nums font-semibold text-ppc-ink">
+            · {totalCount} spotted
+          </span>
         </span>
       </div>
 
-      <ul className="flex flex-col gap-1.5">
-        {ACTIONS.map((a) => (
-          <li key={a.title}>
-            <ActionRowItem action={a} />
+      <ul className="flex flex-col gap-1">
+        {patterns.map((p, i) => (
+          <li key={p.id}>
+            <PatternRow pattern={p} isFresh={i === 0} />
           </li>
         ))}
       </ul>
 
-      <Link
-        to="/agents"
-        className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-ppc-purple-500 transition-colors hover:text-ppc-purple-600"
-      >
-        Browse all {AGENTS.length} agents
-        <ArrowRight size={12} weight="bold" />
-      </Link>
-    </article>
+      {moreCount > 0 && (
+        <Link
+          to="/patterns"
+          className="mt-3 inline-flex items-center gap-1.5 self-end text-[12.5px] font-semibold text-ppc-purple-600 transition-colors hover:text-ppc-purple-700"
+        >
+          + {moreCount} more this week
+          <ArrowRight size={11} weight="bold" />
+        </Link>
+      )}
+    </div>
   );
 }
 
-function ActionRowItem({ action }: { action: ActionRow }) {
-  const Icon = action.icon;
+function PatternRow({ pattern, isFresh }: { pattern: Pattern; isFresh: boolean }) {
+  const accent = categoryAccent(pattern.category);
+  const projectsLine =
+    pattern.affected.length === 1
+      ? pattern.affected[0].name
+      : `${pattern.affected.length} projects · ${pattern.affected.map((a) => a.name).join(', ')}`;
   return (
     <Link
-      to={action.to}
-      className="group flex items-center gap-3 rounded-[10px] px-2.5 py-2.5 transition-colors hover:bg-[#FBF9FD]"
+      to={`/patterns#${pattern.id}`}
+      className="group flex items-start gap-3.5 rounded-[14px] px-3.5 py-3 transition-colors hover:bg-white/70"
     >
-      <span
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-[9px]"
-        style={{
-          background: action.iconBg,
-          boxShadow: '0 1px 0 rgba(255,255,255,0.30) inset',
-        }}
-      >
-        <Icon size={15} weight="bold" className="text-white" />
+      <span className="relative mt-[7px] inline-flex h-2 w-2 shrink-0">
+        {isFresh && (
+          <span
+            className="absolute inset-0 animate-ping rounded-full opacity-70"
+            style={{ background: accent }}
+          />
+        )}
+        <span
+          className="relative inline-flex h-2 w-2 rounded-full"
+          style={{ background: accent, boxShadow: `0 0 0 3px ${accent}1f` }}
+        />
       </span>
+
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[13.5px] font-semibold text-ppc-ink">
-          {action.title}
+        <p className="line-clamp-2 text-[13.5px] font-semibold leading-[1.35] text-ppc-ink">
+          {pattern.headline}
         </p>
-        <p className="mt-0.5 truncate text-[12px] text-ppc-text-muted">
-          {action.context}
+        <p className="mt-1 truncate text-[11.5px] text-ppc-text-muted">
+          {projectsLine}
         </p>
       </div>
-      <CaretRight
-        size={12}
-        weight="bold"
-        className="shrink-0 text-ppc-text-faint transition-transform group-hover:translate-x-0.5 group-hover:text-ppc-purple-500"
-      />
+
+      <div className="flex shrink-0 items-center gap-2 pt-[2px]">
+        {pattern.spotted && (
+          <span
+            className="text-[10.5px] uppercase tracking-[0.10em] text-ppc-text-faint"
+            style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+          >
+            {pattern.spotted}
+          </span>
+        )}
+        <CaretRight
+          size={11}
+          weight="bold"
+          className="text-ppc-text-faint transition-transform group-hover:translate-x-0.5 group-hover:text-ppc-purple-500"
+        />
+      </div>
     </Link>
   );
+}
+
+function PatternsLiveStripEmpty() {
+  const watchingFor = [
+    { label: 'Cross-account CPA spikes',            color: '#DC2626' },
+    { label: 'Recurring negative-keyword themes',   color: '#FB923C' },
+    { label: 'PMAX intent drift across accounts',   color: '#7F5AF0' },
+    { label: 'Auction landscape shifts',            color: '#06B6D4' },
+  ];
+  return (
+    <div className="flex min-w-0 flex-col">
+      <div className="mb-3 flex items-center justify-between">
+        <span
+          className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-ppc-text-muted"
+          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+        >
+          <Eye size={12} weight="bold" />
+          Watching for…
+        </span>
+      </div>
+      <ul className="flex flex-col gap-1.5">
+        {watchingFor.map((w) => (
+          <li
+            key={w.label}
+            className="flex items-center gap-3.5 rounded-[14px] px-3.5 py-3"
+            style={{ boxShadow: 'inset 0 0 0 1px #e4dffa', background: 'rgba(255,255,255,0.35)' }}
+          >
+            <span
+              className="inline-block h-2 w-2 shrink-0 rounded-full border border-dashed"
+              style={{ borderColor: w.color, opacity: 0.75 }}
+            />
+            <span className="text-[13px] text-ppc-text-muted">{w.label}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-[11.5px] italic text-ppc-text-faint">
+        First patterns usually surface within 24h of your second agent run.
+      </p>
+    </div>
+  );
+}
+
+/* ScanMotif. Faint concentric rings anchored to the left edge — a
+ * radar-listening visual under the identity column. Decorative, not
+ * load-bearing; sits behind text at low opacity so it never competes. */
+function ScanMotif() {
+  return (
+    <svg
+      aria-hidden
+      className="pointer-events-none absolute -left-32 top-1/2 h-[480px] w-[480px] -translate-y-1/2 opacity-[0.16]"
+      viewBox="0 0 480 480"
+      fill="none"
+    >
+      <defs>
+        <radialGradient id="patternsScanFade" cx="0%" cy="50%" r="80%">
+          <stop offset="0%"  stopColor="#7F5AF0" stopOpacity="0.55" />
+          <stop offset="65%" stopColor="#7F5AF0" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="480" height="480" fill="url(#patternsScanFade)" />
+      {[90, 160, 230, 300, 370].map((r) => (
+        <circle
+          key={r}
+          cx="80"
+          cy="240"
+          r={r}
+          stroke="#7F5AF0"
+          strokeWidth="0.6"
+          strokeDasharray="2 5"
+        />
+      ))}
+    </svg>
+  );
+}
+
+function categoryAccent(category: string): string {
+  const c = category.toLowerCase();
+  if (c.includes('pmax') || c.includes('audience') || c.includes('asset')) return '#7F5AF0';
+  if (c.includes('budget') || c.includes('pacing') || c.includes('bid'))    return '#F59E0B';
+  if (c.includes('daypart') || c.includes('leak') || c.includes('spend') ||
+      c.includes('fraud')   || c.includes('geo'))                            return '#FB923C';
+  if (c.includes('tracking') || c.includes('attribution') ||
+      c.includes('conversion'))                                              return '#06B6D4';
+  if (c.includes('brand') || c.includes('competitor') || c.includes('entry')) return '#EC4899';
+  if (c.includes('auction') || c.includes('quality') || c.includes('ctr') ||
+      c.includes('erosion'))                                                 return '#DC2626';
+  return '#7F5AF0';
 }
 
 /* ─── Helpers ────────────────────────────────────────────────────────── */
@@ -859,4 +947,3 @@ function formatMoney(n: number): string {
 
 /* Suppress unused warnings on the shared mock. */
 void RECENT_RUNS_SUMMARY;
-void Sparkle;
