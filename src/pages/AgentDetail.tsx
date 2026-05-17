@@ -1,15 +1,49 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  CaretRight, CaretDown, ArrowRight, Sparkle,
-  MapTrifold, Path, Flag, Check, ShieldCheck, EnvelopeSimple,
-  PaperPlaneTilt, Coffee, Tag, CurrencyDollar,
+  CaretRight, CaretDown, ArrowRight, Sparkle, Check,
+  Coffee, Tag, CurrencyDollar,
   Clock, CalendarBlank, Minus, Plus,
+  // Per-agent hero icons — Phosphor duotone, one per slug.
+  ChartLineUp, MagnifyingGlassPlus, Shield, ClockClockwise,
+  Drop, TrendUp, PencilLine, Browser, PaintBrushBroad,
+  ShoppingCart, Binoculars, Lightning, MagnifyingGlass,
+  Compass, MapTrifold, Gauge, ChartBar, Flask,
+  FileText, Briefcase, Rocket, ShieldCheck, Books,
+  type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
 import { PROJECTS, ACCOUNTS, CURRENT_PROJECT_ID } from '../mock/projects';
-import { SpyMascot } from '../components/SpyMascot';
-import type { AgentDefinition } from '../types/agent';
+import type { AgentDefinition, InspectionItem } from '../types/agent';
+
+// One Phosphor icon per agent slug — used in the hero spotlight.
+// Add new agents here as they ship.
+const SLUG_TO_ICON: Record<string, PhosphorIcon> = {
+  'weekly-audit':          ChartLineUp,
+  'deep-account-audit':    MagnifyingGlassPlus,
+  'negative-keyword':      Shield,
+  'budget-pacer':          ClockClockwise,
+  'spend-leak':            Drop,
+  'profit-tracker':        TrendUp,
+  'ad-copy':               PencilLine,
+  'landing-page':          Browser,
+  'landing-page-designer': PaintBrushBroad,
+  'shopping-feed':         ShoppingCart,
+  'competitor-spy':        Binoculars,
+  'pmax':                  Lightning,
+  'keyword':               Books,
+  'keyword-auditor':       MagnifyingGlass,
+  'campaign-architect':    Compass,
+  'buyer-journey':         MapTrifold,
+  'readiness':             Gauge,
+  'demand-ceiling':        ChartBar,
+  'test-recommender':      Flask,
+  'client-reporting':      FileText,
+  'sales-intelligence':    Briefcase,
+  'new-client-autopilot':  Rocket,
+  'change-impact':         Lightning,
+  'brand-safety':          ShieldCheck,
+};
 
 // Agent Detail · /agents/:slug
 //
@@ -232,14 +266,14 @@ export function AgentDetail() {
   return (
     <div className="font-sans text-ppc-ink">
       <Breadcrumbs trail={['Agents', agent.name]} />
-      <TitleRow agent={agent} />
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start">
+      {/* HERO — full width so the H1 has room to breathe. */}
+      <EditorialHero agent={agent} />
+
+      <div className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start">
         {/* ═══ LEFT — editorial story ═══════════════════════════════════════ */}
-        <div className="min-w-0 space-y-12">
-          <HeroCard agent={agent} />
-          <HowItThinks steps={agent.thinkingSteps} />
-          <WhatYouGet />
+        <div className="min-w-0">
+          <ExpeditionMap agent={agent} />
         </div>
 
         {/* ═══ RIGHT — sticky launch rail ═══════════════════════════════════ */}
@@ -303,7 +337,12 @@ function Breadcrumbs({ trail }: { trail: string[] }) {
   );
 }
 
-// ─── Title row ───────────────────────────────────────────────────────────
+// ─── Editorial hero ──────────────────────────────────────────────────────
+//
+// Classic v5 hero: huge Figtree 900 H1 + italic PF-Marlet-Display subhead
+// in purple, body prose underneath, big duotone Phosphor icon on the right
+// haloed by a soft lavender bloom (mirrors the AgentCatalog MascotBench
+// composition — same hand, single icon instead of mascot photo).
 
 const CATEGORY_LABEL: Record<string, string> = {
   operations:  'Operations',
@@ -315,21 +354,41 @@ const CATEGORY_LABEL: Record<string, string> = {
   context:     'Context',
 };
 
-function TitleRow({ agent }: { agent: AgentDefinition }) {
+function EditorialHero({ agent }: { agent: AgentDefinition }) {
+  const hasPeriod = agent.headline.endsWith('.');
+  const headlineBody = hasPeriod ? agent.headline.slice(0, -1) : agent.headline;
+
   return (
-    <div className="mb-7 flex flex-wrap items-center gap-3">
-      <h1 className="font-display text-[40px] font-extrabold leading-none tracking-[-0.025em] text-ppc-ink">
-        {agent.name}
-      </h1>
-      <CategoryChip label={CATEGORY_LABEL[agent.category] ?? agent.category} />
-    </div>
+    <section className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(420px,520px)] lg:gap-16">
+      <div className="flex flex-col">
+        <CategoryChip label={CATEGORY_LABEL[agent.category] ?? agent.category} />
+
+        <h1 className="mt-5 font-display font-black leading-[0.94] tracking-[-0.038em] text-ppc-ink text-[52px] sm:text-[64px] lg:text-[80px]">
+          {agent.name}
+        </h1>
+
+        <p
+          className="mt-3 font-serif font-bold italic leading-[1.05] tracking-[-0.025em] text-ppc-purple-500 text-[28px] sm:text-[34px] lg:text-[42px]"
+          style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
+        >
+          {headlineBody}
+          {hasPeriod && <span className="text-ppc-purple-700">.</span>}
+        </p>
+
+        <p className="mt-7 max-w-[520px] text-[16px] leading-[1.65] text-ppc-text-muted">
+          {agent.outcomeDescription}
+        </p>
+      </div>
+
+      <ReportPeek slug={agent.slug} />
+    </section>
   );
 }
 
 function CategoryChip({ label }: { label: string }) {
   return (
     <span
-      className="inline-flex items-center rounded-full px-[11px] py-[5px] text-[12px] font-semibold"
+      className="inline-flex w-fit items-center rounded-full px-[11px] py-[5px] text-[12px] font-semibold"
       style={{
         background: '#EFEAFB',
         color: '#534AB7',
@@ -341,18 +400,276 @@ function CategoryChip({ label }: { label: string }) {
   );
 }
 
-// ─── Dark hero card with mascot ──────────────────────────────────────────
+// ─── Report peek — visual pre-payoff ─────────────────────────────────────
+//
+// Three real-feeling cards from a finished run, stacked with slight offset
+// to create a "deck of pages" depth. Each card shows actual report content
+// (a delta callout, a finding with status strip, a pacing chart), not
+// decoration. The goal: by the time the user looks at the launch panel,
+// they already know what the deliverable looks like.
+//
+// Only weekly-audit is populated. Other agents fall back to the icon
+// spotlight until per-agent peeks ship.
 
-function HeroCard({ agent }: { agent: AgentDefinition }) {
-  const hasPeriod = agent.headline.endsWith('.');
-  const body = hasPeriod ? agent.headline.slice(0, -1) : agent.headline;
+function ReportPeek({ slug }: { slug: string }) {
+  if (slug !== 'weekly-audit') {
+    const Icon = SLUG_TO_ICON[slug] ?? Sparkle;
+    return <IconSpotlight Icon={Icon} />;
+  }
+
+  return (
+    <div className="relative hidden w-full lg:block">
+      {/* Soft lavender bloom behind the stack — same recipe as MascotBench. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -inset-8"
+        style={{
+          background:
+            'radial-gradient(55% 55% at 50% 50%, rgba(127,90,240,0.18) 0%, rgba(127,90,240,0.06) 50%, transparent 78%)',
+        }}
+      />
+
+      <div className="relative flex flex-col gap-3.5">
+        <PeekDeltaCard
+          variant="win"
+          delta="−22%"
+          label="CPA dropped this week"
+          where="Brand · Recovery Centers"
+          footer="$2,140 saved · driven by tCPA tuning"
+        />
+        <PeekHighlightCard
+          variant="win"
+          eyebrow="Top win"
+          campaign="Non-Brand · Drug Rehab"
+          term="addiction treatment near me"
+          stats={[
+            { label: 'CTR',    value: '4.2%' },
+            { label: 'Convs.', value: '18'   },
+            { label: 'CPA',    value: '$42'  },
+          ]}
+          action="Scale: raise budget"
+        />
+        <PeekPacingCard
+          percent={67}
+          aheadBy={4}
+          remaining="$12,400"
+        />
+      </div>
+    </div>
+  );
+}
+
+function PeekCardShell({ children, accent }: { children: React.ReactNode; accent?: string }) {
+  return (
+    <article
+      className="relative overflow-hidden rounded-[14px] bg-white"
+      style={{
+        boxShadow:
+          '0 0 0 1px #e8e2f0, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.14)',
+      }}
+    >
+      {accent && (
+        <span
+          aria-hidden
+          className="absolute inset-y-0 left-0 w-[3px]"
+          style={{ background: accent }}
+        />
+      )}
+      {children}
+    </article>
+  );
+}
+
+// Wins lead by default. Findings use variant='finding' (red).
+type PeekVariant = 'win' | 'finding';
+
+const PEEK_COLOR: Record<PeekVariant, { strip: string; eyebrow: string; dot: string; delta: string }> = {
+  win:     { strip: '#5DCAA5', eyebrow: '#2F8F6E', dot: '#5DCAA5', delta: '#2F8F6E' },
+  finding: { strip: '#E24B4A', eyebrow: '#B2403F', dot: '#E24B4A', delta: '#E24B4A' },
+};
+
+function PeekDeltaCard({
+  variant, delta, label, where, footer,
+}: {
+  variant: PeekVariant;
+  delta: string; label: string; where: string; footer: string;
+}) {
+  const c = PEEK_COLOR[variant];
+  return (
+    <PeekCardShell>
+      <div className="flex items-start justify-between gap-5 px-5 py-5">
+        <div className="min-w-0">
+          <p className="text-[12.5px] font-semibold text-ppc-text-muted">{label}</p>
+          <p className="mt-1 text-[13.5px] font-bold text-ppc-ink">{where}</p>
+          <div className="mt-3 flex items-center gap-2">
+            <span
+              aria-hidden
+              className="h-[6px] w-[6px] shrink-0 rounded-full"
+              style={{ background: c.dot }}
+            />
+            <p className="text-[12px] text-ppc-text-muted">{footer}</p>
+          </div>
+        </div>
+        <div
+          className="shrink-0 font-display text-[40px] font-black leading-none tracking-[-0.035em]"
+          style={{ color: c.delta }}
+        >
+          {delta}
+        </div>
+      </div>
+    </PeekCardShell>
+  );
+}
+
+function PeekHighlightCard({
+  variant, eyebrow, campaign, term, stats, action,
+}: {
+  variant: PeekVariant;
+  eyebrow: string;
+  campaign: string;
+  term: string;
+  stats: { label: string; value: string }[];
+  action: string;
+}) {
+  const c = PEEK_COLOR[variant];
+  return (
+    <PeekCardShell accent={c.strip}>
+      <div className="px-5 py-5 pl-6">
+        <div className="flex items-baseline justify-between gap-3">
+          <p
+            className="text-[12.5px] font-bold uppercase tracking-[0.04em]"
+            style={{ color: c.eyebrow }}
+          >
+            {eyebrow}
+          </p>
+          <p className="truncate text-[12px] text-ppc-text-muted">{campaign}</p>
+        </div>
+
+        <p
+          className="mt-3 text-[18px] font-semibold tracking-[-0.012em] text-ppc-ink"
+          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
+        >
+          "{term}"
+        </p>
+
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {stats.map((s) => (
+            <div
+              key={s.label}
+              className="rounded-[8px] bg-ppc-canvas px-2.5 py-2"
+              style={{ boxShadow: 'inset 0 0 0 1px #e2dcef' }}
+            >
+              <p className="text-[10.5px] font-semibold text-ppc-text-muted">{s.label}</p>
+              <p className="mt-0.5 text-[14px] font-bold tracking-[-0.01em] text-ppc-ink">
+                {s.value}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          className="mt-4 inline-flex items-center gap-1.5 self-start rounded-full bg-ppc-ink px-3 py-1.5 text-[12px] font-semibold text-white"
+        >
+          {action}
+          <ArrowRight size={11} weight="bold" />
+        </button>
+      </div>
+    </PeekCardShell>
+  );
+}
+
+function PeekPacingCard({
+  percent, aheadBy, remaining,
+}: {
+  percent: number; aheadBy: number; remaining: string;
+}) {
+  return (
+    <PeekCardShell>
+      <div className="px-5 py-5">
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="text-[13px] font-bold text-ppc-ink">Pacing</p>
+          <p className="text-[11.5px] text-ppc-text-muted">Month-to-date</p>
+        </div>
+
+        <div className="mt-3 flex items-end justify-between gap-3">
+          <p className="font-display text-[34px] font-black leading-none tracking-[-0.03em] text-ppc-ink">
+            {percent}%
+          </p>
+          <p className="pb-1 text-[12px] font-semibold text-ppc-status-healthy">
+            Ahead by {aheadBy}%
+          </p>
+        </div>
+
+        {/* Pacing bar — purple fill against lavender track */}
+        <div className="mt-3 h-[10px] w-full overflow-hidden rounded-full bg-ppc-canvas"
+             style={{ boxShadow: 'inset 0 0 0 1px #e2dcef' }}>
+          <div
+            className="h-full rounded-full"
+            style={{
+              width: `${percent}%`,
+              background: 'linear-gradient(90deg, #A88CFF 0%, #7F5AF0 100%)',
+            }}
+          />
+        </div>
+
+        <div className="mt-3 flex items-center justify-between text-[11.5px] text-ppc-text-muted">
+          <span>Remaining demand</span>
+          <span className="font-semibold text-ppc-ink">{remaining}</span>
+        </div>
+      </div>
+    </PeekCardShell>
+  );
+}
+
+function IconSpotlight({ Icon }: { Icon: PhosphorIcon }) {
+  return (
+    <div className="relative hidden aspect-square w-full max-w-[360px] place-self-center lg:block">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(55% 60% at 50% 52%, rgba(127,90,240,0.30) 0%, rgba(127,90,240,0.10) 45%, transparent 75%)',
+        }}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-[12%] rounded-full opacity-[0.35]"
+        style={{
+          backgroundImage:
+            'radial-gradient(rgba(127,90,240,0.30) 1px, transparent 1px)',
+          backgroundSize: '14px 14px',
+          mask: 'radial-gradient(circle at 50% 50%, black 40%, transparent 75%)',
+          WebkitMask: 'radial-gradient(circle at 50% 50%, black 40%, transparent 75%)',
+        }}
+      />
+      <div className="relative grid h-full place-items-center">
+        <Icon size={220} weight="duotone" className="text-ppc-purple-500" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Expedition map (the territory the agent inspects) ──────────────────
+//
+// Dark surface (Surface 03), full-width inside the editorial column.
+// Numbered list of the places this agent looks — works for single-prompt
+// agents (dimensions) and multi-stage agents (stages) without changing
+// shape. Falls back to thinkingSteps if `inspects` isn't populated yet.
+
+function ExpeditionMap({ agent }: { agent: AgentDefinition }) {
+  const items: InspectionItem[] =
+    agent.inspects && agent.inspects.length > 0
+      ? agent.inspects
+      : agent.thinkingSteps.map((s) => ({ title: s, desc: '' }));
 
   return (
     <section
-      className="relative overflow-hidden rounded-[20px] text-white"
+      className="relative overflow-hidden rounded-[24px] text-white"
       style={{
         background:
-          'radial-gradient(120% 90% at 88% -10%, #1B0F39 0%, #0A0814 55%, #050310 100%)',
+          'radial-gradient(120% 80% at 50% 0%, #1A1030 0%, #0F0A1E 60%, #0A0814 100%)',
         boxShadow:
           '0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(15,10,30,0.55)',
       }}
@@ -362,20 +679,12 @@ function HeroCard({ agent }: { agent: AgentDefinition }) {
         className="pointer-events-none absolute -right-32 -top-32 h-[460px] w-[460px] rounded-full"
         style={{
           background:
-            'radial-gradient(circle, rgba(127,90,240,0.30) 0%, rgba(127,90,240,0.10) 35%, transparent 65%)',
+            'radial-gradient(circle, rgba(127,90,240,0.22) 0%, rgba(127,90,240,0.08) 35%, transparent 65%)',
         }}
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute -bottom-24 left-[8%] h-[280px] w-[280px] rounded-full"
-        style={{
-          background:
-            'radial-gradient(circle, rgba(127,90,240,0.10) 0%, transparent 65%)',
-        }}
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        className="pointer-events-none absolute inset-0 opacity-[0.05]"
         style={{
           backgroundImage:
             'radial-gradient(rgba(255,255,255,0.55) 1px, transparent 1px)',
@@ -384,291 +693,43 @@ function HeroCard({ agent }: { agent: AgentDefinition }) {
         }}
       />
 
-      <div className="relative grid gap-8 px-9 py-11 sm:grid-cols-[1fr_minmax(180px,240px)] sm:gap-8 sm:px-10 sm:py-12">
-        <div className="min-w-0">
-          <h2 className="font-display text-[40px] font-extrabold leading-[1.04] tracking-[-0.025em] text-white sm:text-[46px]">
-            {body}
-            {hasPeriod && <span style={{ color: '#9F86FF' }}>.</span>}
-          </h2>
-          <p className="mt-5 max-w-[500px] text-[15px] leading-[1.6] text-white/65">
-            {agent.outcomeDescription}
-          </p>
-
-          <HeroMeta />
-        </div>
-
-        <div className="relative flex items-end justify-end sm:items-center">
-          <SpyMascot size={220} />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HeroMeta() {
-  return (
-    <div className="mt-7 flex flex-wrap items-center gap-2.5">
-      <MetaPill icon={<Coffee size={13} weight="bold" />}>
-        Make a coffee, come back to the report
-      </MetaPill>
-      <MetaPill icon={<EnvelopeSimple size={13} weight="bold" />}>
-        Email when ready
-      </MetaPill>
-      <MetaPill icon={<ShieldCheck size={13} weight="bold" />}>
-        Client-ready output
-      </MetaPill>
-    </div>
-  );
-}
-
-function MetaPill({
-  icon,
-  children,
-}: {
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <span
-      className="inline-flex items-center gap-[7px] rounded-full px-[11px] py-[6px] text-[12.5px] font-medium text-white/80"
-      style={{
-        background: 'rgba(255,255,255,0.04)',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-      }}
-    >
-      <span className="text-white/75">{icon}</span>
-      {children}
-    </span>
-  );
-}
-
-// ─── How this agent thinks ───────────────────────────────────────────────
-
-const THINKING_KICKERS = ['Context', 'Alignment', 'Recommendation'];
-const THINKING_ICONS = [MapTrifold, Path, Flag];
-
-function HowItThinks({ steps }: { steps: [string, string, string] }) {
-  return (
-    <section>
-      <div className="mb-6">
-        <h3 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ppc-ink">
-          How this agent thinks<span style={{ color: '#7F5AF0' }}>.</span>
-        </h3>
-        <p className="mt-2 text-[14px] text-ppc-text-muted">
-          Three moves, in order. A senior strategist on tap.
+      <div className="relative px-9 py-11 sm:px-11 sm:py-12">
+        <h2 className="font-display text-[34px] font-black leading-[0.98] tracking-[-0.028em] text-white sm:text-[42px]">
+          The territory
+          <span
+            className="ml-2 font-serif font-bold italic text-ppc-purple-400"
+            style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
+          >
+            it covers.
+          </span>
+        </h2>
+        <p className="mt-4 max-w-[560px] text-[15px] leading-[1.65] text-white/65">
+          Every place this agent looks. Read it once and you'll know
+          exactly what's coming back in the report.
         </p>
-      </div>
 
-      <div className="relative grid gap-4 sm:grid-cols-3">
-        {steps.map((label, i) => (
-          <div key={i} className="relative">
-            <ThinkingCard
-              index={i + 1}
-              kicker={THINKING_KICKERS[i]}
-              label={label}
-              Icon={THINKING_ICONS[i]}
-            />
-            {i < steps.length - 1 && (
+        <ol className="mt-10 grid gap-x-12 gap-y-8 sm:grid-cols-2">
+          {items.map((it, i) => (
+            <li key={i} className="flex items-start gap-5">
               <span
                 aria-hidden
-                className="pointer-events-none absolute right-[-22px] top-1/2 hidden -translate-y-1/2 items-center sm:flex"
-                style={{ color: '#B6A8DC' }}
+                className="font-display text-[44px] font-black leading-[0.85] tracking-[-0.045em] text-ppc-purple-400"
               >
-                <span
-                  className="mr-[3px] h-px w-[10px]"
-                  style={{
-                    background:
-                      'repeating-linear-gradient(to right, currentColor 0, currentColor 2px, transparent 2px, transparent 4px)',
-                  }}
-                />
-                <ArrowRight size={11} weight="bold" />
+                {String(i + 1).padStart(2, '0')}
               </span>
-            )}
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function ThinkingCard({
-  index,
-  kicker,
-  label,
-  Icon,
-}: {
-  index: number;
-  kicker: string;
-  label: string;
-  Icon: typeof MapTrifold;
-}) {
-  return (
-    <div
-      className="group relative flex h-full flex-col gap-5 overflow-hidden rounded-[16px] bg-white px-6 pb-6 pt-7 transition-transform hover:-translate-y-[2px]"
-      style={{
-        boxShadow:
-          '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.12)',
-      }}
-    >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute right-5 top-3 font-display text-[60px] font-extrabold leading-none tracking-[-0.04em]"
-        style={{ color: 'rgba(127,90,240,0.08)' }}
-      >
-        0{index}
-      </span>
-
-      <div className="flex items-center gap-3">
-        <span
-          className="grid h-[42px] w-[42px] place-items-center rounded-[10px]"
-          style={{
-            background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 60%, #5A3FE0 100%)',
-            boxShadow:
-              '0 1px 0 rgba(255,255,255,0.35) inset, 0 6px 14px -6px rgba(127,90,240,0.45)',
-          }}
-        >
-          <Icon size={20} weight="bold" className="text-white" />
-        </span>
-        <p
-          className="font-mono text-[11px] font-bold uppercase tracking-[0.14em]"
-          style={{ color: '#7C45CB' }}
-        >
-          {kicker}
-        </p>
-      </div>
-
-      <p className="text-[15.5px] font-semibold leading-[1.4] tracking-[-0.005em] text-ppc-ink">
-        {label}
-      </p>
-    </div>
-  );
-}
-
-// ─── What you walk away with ─────────────────────────────────────────────
-// Pixel-matched to Stewart's reference (2026-05-15):
-//   2-column layout — DARK editorial card LEFT + LIGHT 2x2 grid RIGHT.
-
-interface Deliverable {
-  title: string;
-  sub: string;
-}
-
-function WhatYouGet() {
-  const items: Deliverable[] = [
-    {
-      title: 'Coffee-break delivery',
-      sub: "Runs in the background. We email you when the report's ready.",
-    },
-    {
-      title: 'Prioritized findings with impact',
-      sub: 'Every finding is ranked, reasoned, and sized by opportunity.',
-    },
-    {
-      title: 'Client-ready report',
-      sub: 'Polished, structured, and branded. Zero re-editing required.',
-    },
-    {
-      title: 'Full audit trail',
-      sub: 'Every source, screenshot, and tool call logged for full transparency.',
-    },
-  ];
-
-  return (
-    <section className="grid gap-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-      {/* LEFT — dark editorial */}
-      <div
-        className="relative overflow-hidden rounded-[16px] px-7 py-7 text-white"
-        style={{
-          background:
-            'radial-gradient(120% 90% at 88% -10%, #1B0F39 0%, #0A0814 55%, #050310 100%)',
-          boxShadow:
-            '0 1px 0 rgba(255,255,255,0.04) inset, 0 18px 32px -24px rgba(15,10,30,0.4)',
-        }}
-      >
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -right-20 -top-20 h-[260px] w-[260px] rounded-full"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(127,90,240,0.22) 0%, rgba(127,90,240,0.06) 40%, transparent 70%)',
-          }}
-        />
-
-        <div className="relative flex items-center gap-3">
-          <span
-            className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[12px]"
-            style={{
-              background: 'linear-gradient(155deg, #C9B5FF 0%, #8B6CF5 60%, #5A3FE0 100%)',
-              boxShadow:
-                '0 1px 0 rgba(255,255,255,0.35) inset, 0 6px 14px -6px rgba(127,90,240,0.45)',
-            }}
-          >
-            <PaperPlaneTilt size={20} weight="fill" className="text-white" />
-          </span>
-          <div className="min-w-0">
-            <h3 className="text-[18px] font-semibold leading-tight tracking-[-0.01em] text-white">
-              What you walk away with<span style={{ color: '#9F86FF' }}>.</span>
-            </h3>
-            <p className="mt-[3px] text-[13px] leading-snug text-white/55">
-              What lands in your inbox. Every time.
-            </p>
-          </div>
-        </div>
-
-        <div
-          aria-hidden
-          className="relative mt-6 h-px w-full"
-          style={{ background: 'rgba(255,255,255,0.08)' }}
-        />
-
-        <p className="relative mt-5 text-[14px] leading-[1.6] text-white/75">
-          We handle the heavy lifting end-to-end&mdash;so you get sharp, client-ready insights without lifting a finger.
-        </p>
-
-        <div className="relative mt-7 flex items-center gap-2">
-          <Sparkle size={14} weight="fill" style={{ color: '#9F86FF' }} />
-          <span
-            className="text-[13px] font-semibold tracking-[-0.005em]"
-            style={{ color: '#B6A0FF' }}
-          >
-            Runs while you focus on what matters.
-          </span>
-        </div>
-      </div>
-
-      {/* RIGHT — 2x2 check grid */}
-      <div
-        className="rounded-[16px] px-6 py-6"
-        style={{
-          background: '#FFFFFF',
-          boxShadow:
-            '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.12)',
-        }}
-      >
-        <ul className="grid h-full gap-x-6 gap-y-5 sm:grid-cols-2">
-          {items.map((it, i) => (
-            <li key={i} className="flex items-start gap-3">
-              <span
-                className="mt-[2px] grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full"
-                style={{
-                  background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 60%, #5A3FE0 100%)',
-                  boxShadow:
-                    '0 1px 0 rgba(255,255,255,0.45) inset, 0 3px 8px -4px rgba(127,90,240,0.45)',
-                }}
-              >
-                <Check size={12} weight="bold" className="text-white" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink">
+              <div className="min-w-0 pt-[6px]">
+                <p className="text-[17px] font-bold leading-[1.25] tracking-[-0.012em] text-white">
                   {it.title}
                 </p>
-                <p className="mt-1 text-[12.5px] leading-[1.55] text-ppc-text-muted">
-                  {it.sub}
-                </p>
+                {it.desc && (
+                  <p className="mt-1.5 text-[13.5px] leading-[1.6] text-white/60">
+                    {it.desc}
+                  </p>
+                )}
               </div>
             </li>
           ))}
-        </ul>
+        </ol>
       </div>
     </section>
   );

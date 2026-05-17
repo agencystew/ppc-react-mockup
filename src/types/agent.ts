@@ -18,6 +18,14 @@ export type FindingPriority = 'high' | 'medium' | 'low';
 
 export type RunStatus = 'idle' | 'running' | 'completed' | 'failed';
 
+// One row in an agent's "territory" map — the named places it looks.
+// Single-prompt agents have these too; the items map to dimensions the
+// prompt covers, not to multi-stage steps.
+export interface InspectionItem {
+  title: string;
+  desc: string;
+}
+
 export interface AgentDefinition {
   slug: string;
   name: string;
@@ -32,6 +40,10 @@ export interface AgentDefinition {
   expectedDuration: string;
   // How the agent thinks (3 steps: context → alignment → recommendation).
   thinkingSteps: [string, string, string];
+  // The territory this agent inspects. Renders as the numbered expedition
+  // map on AgentDetail. Optional during rollout — falls back gracefully
+  // if absent.
+  inspects?: InspectionItem[];
 }
 
 export interface Project {

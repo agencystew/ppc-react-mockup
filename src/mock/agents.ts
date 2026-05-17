@@ -24,6 +24,16 @@ export const AGENTS: AgentDefinition[] = [
       'Checks alignment before performance',
       'Surfaces what actually matters, not noise',
     ],
+    inspects: [
+      { title: 'Spend leaks',           desc: 'Reads cost against converted revenue across every keyword and ad group.' },
+      { title: 'Negative gaps',         desc: 'Stress-tests every search term against twelve months of converting intent.' },
+      { title: 'Search term drift',     desc: 'Flags terms that converted last quarter but stopped this one.' },
+      { title: 'Quality score outliers',desc: 'Surfaces ad relevance and landing experience gaps inflating CPC.' },
+      { title: 'Bid cap interference',  desc: 'Detects budgets and tCPA settings throttling profitable campaigns.' },
+      { title: 'Ad copy fatigue',       desc: 'Identifies headlines whose CTR has slipped since the last refresh.' },
+      { title: 'Auction shifts',        desc: 'Catches new competitor entries and lost-impression-share movements.' },
+      { title: 'Pacing risk',           desc: 'Reads month-to-date burn against historical pace and remaining demand.' },
+    ],
   },
   {
     slug: 'deep-account-audit',

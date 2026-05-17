@@ -62,6 +62,31 @@ export interface StrategyVerdictData {
   secondaryCta: string;
 }
 
+// A win mirrors a finding's depth but reports an observed advantage instead
+// of a gap. Context-led: every win names a specific entity, cites real
+// business context, and proposes a concrete way to amplify or protect it.
+// No "Risk" field — wins are reality, not predictions.
+export interface WinV5 {
+  id: string;
+  rank: number;
+
+  headline: string;                // names the win, cites a measured number
+
+  // Left column — what's working
+  whatsWorking: string;
+  whyItMatters: string;
+  businessContextUsed: string;
+  contextStatus: ContextStatus;
+
+  // Right column — how to amplify
+  howToScale: string;
+  expectedOutcome: string;
+
+  toolCalls: number;
+  dataPoints: string;
+  primaryCta: string;              // e.g. "Set up watchlist", "Draft variant"
+}
+
 export interface DiscoveryV5 {
   id: string;
   rank: number;                    // 01, 02, etc.
@@ -105,6 +130,8 @@ export interface AskTheAgentData {
 export interface AgentResultsV5Data {
   hero: ReportOpenerData;
   verdict: StrategyVerdictData;
+  // Wins lead — the strengths the agent verified before getting into gaps.
+  wins: WinV5[];
   discoveries: DiscoveryV5[];
   checks: CheckItem[];
   ask: AskTheAgentData;
@@ -252,6 +279,80 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
     primaryCta: 'Review the 3 ready-to-act moves',
     secondaryCta: 'Ask the agent',
   },
+
+  wins: [
+    // ─── 01 · Brand defensibility — Aspen has stopped contesting your name
+    {
+      id: 'w-1',
+      rank: 1,
+      headline: "Brand defensibility intact — Aspen can't displace you on direct intent.",
+
+      whatsWorking:
+        "Boulder Care holds 96% Search Impression Share on direct brand queries. Aspen's brand-bid coverage sits at 4%, and their ad-day count on Boulder branded terms dropped 32% quarter-over-quarter.",
+      whyItMatters:
+        "Direct brand intent converts at 4.2x non-brand rates in your account. Aspen has effectively stopped pushing on your name — which means the budget you'd otherwise be spending to defend brand is freed up for non-brand contests where the actual fight is happening.",
+      businessContextUsed:
+        "Brand-vs-non-brand conversion ratios from Boulder Care's Google Ads account. Aspen brand-bid history pulled across the 30-day window.",
+      contextStatus: 'complete',
+
+      howToScale:
+        "Stand up a watchlist alert: notify if any rival's brand IS rises above 5%. Don't relax this — formalise the moat so any encroachment surfaces within 24 hours instead of at month-end review.",
+      expectedOutcome:
+        "Defensive posture maintained without ongoing manual monitoring. Brand campaign budget can be reduced 15–20% and reallocated to non-brand contests.",
+
+      toolCalls: 7,
+      dataPoints: '30-day brand IS · 8 rivals × brand keyword set',
+      primaryCta: 'Set up watchlist',
+    },
+
+    // ─── 02 · Telehealth-first copy — the only rival promising evenings ──
+    {
+      id: 'w-2',
+      rank: 2,
+      headline: "You're the only rival promising evening intake — and 41% of converters search after 5pm.",
+
+      whatsWorking:
+        "Across 84 SERPs analysed, Boulder Care is the only advertiser in the recovery space leading with 'evening appointments' and 'same-week availability'. 7 of 8 rivals — including Aspen — advertise weekday hours only.",
+      whyItMatters:
+        "Your ICP notes 64% of intake calls happen outside business hours; 41% of paid-search converters click after 5pm. Your copy aligns with the moment of decision while rivals advertise to who's free during the day, which isn't who's actually searching.",
+      businessContextUsed:
+        "Boulder Care intake-time data (64% off-hours) and paid-search hourly conversion breakdown. SERP scrape across 12 keywords.",
+      contextStatus: 'upgraded',
+
+      howToScale:
+        "Lean harder on the evening hook. Test 'Same-week intake — evenings and weekends' as a pinned headline 1 against current control across your top 3 ad groups. Match landing-page hero copy.",
+      expectedOutcome:
+        "5–12% CTR lift on after-hours-weighted impressions. Read results in 10–14 days.",
+
+      toolCalls: 12,
+      dataPoints: '84 SERPs · 8 rivals × 12 keywords · hour-of-day conversion data',
+      primaryCta: 'Draft pinned headline variant',
+    },
+
+    // ─── 03 · Zero-paywall funnel — the friction advantage ────────────────
+    {
+      id: 'w-3',
+      rank: 3,
+      headline: "Boulder Care is the only player offering a no-card initial assessment.",
+
+      whatsWorking:
+        "5 of 8 mapped rivals — including Aspen and Recovery Direct — require credit-card details before the first appointment. Boulder Care's funnel offers a free assessment with zero commitment.",
+      whyItMatters:
+        "High-intent searchers in addiction recovery skew evidence-first; they evaluate before they commit. Your ICP confirms 'low-friction first step' as the highest-rated funnel attribute. Aspen's paywall is leaving the early-stage evaluation segment uncontested.",
+      businessContextUsed:
+        "Funnel mapping across 8 rival domains. Boulder Care ICP attribute ranking.",
+      contextStatus: 'complete',
+
+      howToScale:
+        "Make this concrete on the LP hero. A/B test 'No credit card — assessment is free' against the current 'Book a free assessment' control. Mirror the no-commitment line into your ad copy A/B candidate list too.",
+      expectedOutcome:
+        "3–8% lift in LP conversion on cold non-brand traffic. Aspen comparison ad-copy candidate validated.",
+
+      toolCalls: 9,
+      dataPoints: '8 rival funnel maps · ICP attribute weights',
+      primaryCta: 'Set up LP A/B test',
+    },
+  ],
 
   discoveries: [
     // ─── 01 · READY · GAP · the unclaimed angle ──────────────────────────
