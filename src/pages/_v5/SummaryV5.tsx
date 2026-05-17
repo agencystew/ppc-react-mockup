@@ -46,6 +46,7 @@ export function SummaryV5({ data }: { data: AgentResultsV5Data }) {
           discoveries={data.discoveries}
           duration={data.hero.duration}
           window={data.hero.window}
+          receipts={data.hero.receipts}
         />
         <DiscoverySection
           discoveries={data.discoveries}
@@ -87,12 +88,26 @@ function StrategyVerdictCard({
   discoveries,
   duration,
   window: timeWindow,
+  receipts,
 }: {
   data: StrategyVerdictData;
   discoveries: DiscoveryV5[];
   duration: string;
   window: string;
+  receipts: string;
 }) {
+  // Parse "161 reasoning steps · 84 SERPs analysed · 6 phases" into chips.
+  // Each chip splits the first numeric prefix from the label so the value
+  // can be rendered bold-tabular and the noun whispered next to it.
+  const stats = receipts
+    .split('·')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const m = entry.match(/^([\d,.]+)\s+(.*)$/);
+      return m ? { value: m[1], label: m[2] } : { value: '', label: entry };
+    });
+
   return (
     <section
       className="relative overflow-hidden rounded-[24px] text-white"
@@ -100,7 +115,7 @@ function StrategyVerdictCard({
         background: 'linear-gradient(180deg, #0F0A1E 0%, #07050D 100%)',
         boxShadow:
           'inset 0 1px 0 rgba(255,255,255,0.05), 0 30px 60px -28px rgba(15,10,30,0.55)',
-        padding: 'clamp(28px, 3.4vw, 44px) clamp(28px, 3.6vw, 48px)',
+        padding: 'clamp(32px, 3.6vw, 52px) clamp(28px, 3.6vw, 48px)',
       }}
     >
       {/* Top-right purple bloom */}
@@ -117,14 +132,28 @@ function StrategyVerdictCard({
         }}
       />
 
-      {/* Header row — kicker + completion meta on one tight line */}
-      <div className="relative flex flex-wrap items-baseline justify-between gap-x-6 gap-y-3">
+      {/* Centered arrival moment.
+          Top → bottom, all centered:
+            1. ◆ Competitor Spy (prominent kicker, larger than the prior tiny
+               top-left tuck)
+            2. Sparkle decoration with thin flanking lines
+            3. "Explore your findings." mega headline
+            4. Sub-line counting the findings
+            5. Completion shelf — Completed pill + duration + receipts-derived
+               stats + window — neatly dot-separated, centered, generous.
+            6. Playful down arrow as the scroll cue.
+
+          The header row that used to live at the very top (kicker on the left,
+          completion meta on the right) is gone — both are now anchored in the
+          centred arrival so the card reads as one balanced moment. */}
+      <div className="relative flex flex-col items-center text-center">
+        {/* ◆ Competitor Spy — agent byline, larger and centered */}
         <p
-          className="flex items-baseline gap-[10px]"
+          className="flex items-baseline gap-[12px]"
           style={{
-            fontSize: '16px',
-            letterSpacing: '-0.005em',
-            color: 'rgba(201,181,255,0.90)',
+            fontSize: '20px',
+            letterSpacing: '-0.012em',
+            color: 'rgba(214,200,255,0.95)',
             fontWeight: 600,
           }}
         >
@@ -132,8 +161,8 @@ function StrategyVerdictCard({
             aria-hidden
             style={{
               color: '#A88CFF',
-              fontSize: '14px',
-              textShadow: '0 0 12px rgba(168,140,255,0.55)',
+              fontSize: '16px',
+              textShadow: '0 0 14px rgba(168,140,255,0.65)',
             }}
           >
             ◆
@@ -141,52 +170,10 @@ function StrategyVerdictCard({
           {data.agentName}
         </p>
 
-        <div className="flex flex-wrap items-center gap-[12px] text-[14px]">
-          <span
-            className="inline-flex items-center gap-[8px] rounded-full px-[12px] py-[5px] font-semibold"
-            style={{
-              background: 'rgba(93,202,165,0.14)',
-              color: '#9CE5C5',
-              boxShadow: 'inset 0 0 0 1px rgba(93,202,165,0.32)',
-              letterSpacing: '-0.005em',
-            }}
-          >
-            <span
-              aria-hidden
-              className="inline-flex h-[14px] w-[14px] items-center justify-center rounded-full"
-              style={{ background: '#5DCAA5' }}
-            >
-              <Check size={9} weight="bold" style={{ color: '#0F0A1E' }} />
-            </span>
-            Completed
-          </span>
-          <span style={{ color: 'rgba(184,174,218,0.85)' }}>
-            <span
-              className="tabular-nums font-bold"
-              style={{ color: 'rgba(255,255,255,0.92)' }}
-            >
-              {duration}
-            </span>
-            <span style={{ margin: '0 8px', color: 'rgba(184,174,218,0.40)' }}>
-              ·
-            </span>
-            {timeWindow}
-          </span>
-        </div>
-      </div>
-
-      {/* Centered "Explore your findings" hero moment.
-          Replaces the previous 4 preview cards (which duplicated the
-          headlines of the discoveries directly below — the same line
-          appeared twice on screen). Now the verdict card is a tight
-          arrival + an elevated invitation to scroll, in the spirit of
-          the AgentRunning "Hold tight" page: bold sans + serif italic
-          + decorative sparkle + a playful downward arrow. */}
-      <div className="relative mt-7 flex flex-col items-center text-center">
         {/* Decorative sparkle with thin flanking lines */}
         <div
           aria-hidden
-          className="mb-6 flex items-center gap-[14px]"
+          className="mb-5 mt-5 flex items-center gap-[14px]"
         >
           <span
             style={{
@@ -240,6 +227,16 @@ function StrategyVerdictCard({
           {discoveries.length} high-impact moves waiting below.
         </p>
 
+        {/* Completion shelf — Completed pill anchors the row, then duration
+            + receipts-derived stats + the time window all run as bold-tabular
+            value + lavender-muted noun pairs. Dot separators at 0.30 alpha
+            keep the row breathing. */}
+        <CompletionShelf
+          duration={duration}
+          window={timeWindow}
+          stats={stats}
+        />
+
         {/* Playful downward arrow — sinuous S-curve, clickable scroll-jump */}
         <a
           href={`#discovery-${discoveries[0]?.id ?? ''}`}
@@ -250,6 +247,70 @@ function StrategyVerdictCard({
         </a>
       </div>
     </section>
+  );
+}
+
+/* CompletionShelf — the single tidy row that sits under the headline.
+ * Left: green ✓ Completed pill. Then dot-separated stat slots running
+ * value(bold-tabular-white) + noun(muted-lavender). Window slot has no
+ * leading number so it just renders the phrase. Dots are interspersed
+ * between siblings so the last item carries no trailing dot. */
+function CompletionShelf({
+  duration,
+  window: timeWindow,
+  stats,
+}: {
+  duration: string;
+  window: string;
+  stats: Array<{ value: string; label: string }>;
+}) {
+  const slots: Array<{ value: string; label: string }> = [
+    { value: duration, label: 'run time' },
+    ...stats,
+    { value: '', label: timeWindow },
+  ];
+  return (
+    <div className="mt-7 flex flex-wrap items-center justify-center gap-x-[14px] gap-y-3 text-[14.5px]">
+      <span
+        className="inline-flex items-center gap-[8px] rounded-full px-[14px] py-[6px] font-semibold"
+        style={{
+          background: 'rgba(93,202,165,0.14)',
+          color: '#9CE5C5',
+          boxShadow: 'inset 0 0 0 1px rgba(93,202,165,0.32)',
+          letterSpacing: '-0.005em',
+        }}
+      >
+        <span
+          aria-hidden
+          className="inline-flex h-[15px] w-[15px] items-center justify-center rounded-full"
+          style={{ background: '#5DCAA5' }}
+        >
+          <Check size={10} weight="bold" style={{ color: '#0F0A1E' }} />
+        </span>
+        Completed
+      </span>
+      {slots.map((s, i) => (
+        <span key={i} className="inline-flex items-baseline gap-[8px]">
+          <span
+            className="inline-flex items-baseline gap-[6px]"
+            style={{ color: 'rgba(184,174,218,0.85)' }}
+          >
+            {s.value && (
+              <span
+                className="tabular-nums font-bold"
+                style={{ color: 'rgba(255,255,255,0.94)', letterSpacing: '-0.005em' }}
+              >
+                {s.value}
+              </span>
+            )}
+            <span>{s.label}</span>
+          </span>
+          {i < slots.length - 1 && (
+            <span aria-hidden style={{ color: 'rgba(184,174,218,0.30)' }}>·</span>
+          )}
+        </span>
+      ))}
+    </div>
   );
 }
 
@@ -301,47 +362,14 @@ function DiscoverySection({
   onAction: (d: DiscoveryV5) => void;
 }) {
   return (
-    <section className="mb-14 mt-16">
-      {/* The findings. — aesthetic moment */}
-      <header className="mb-10">
-        <h3
-          className="font-display font-black text-ppc-ink"
-          style={{
-            fontSize: 'clamp(56px, 7vw, 88px)',
-            letterSpacing: '-0.038em',
-            lineHeight: '0.95',
-          }}
-        >
-          The{' '}
-          <span
-            style={{
-              position: 'relative',
-              display: 'inline-block',
-              transform: 'rotate(-2deg)',
-              padding: '0 18px 4px 18px',
-            }}
-          >
-            <span
-              aria-hidden
-              className="absolute inset-0 rounded-[14px]"
-              style={{
-                background:
-                  'linear-gradient(135deg, #7F5AF0 0%, #6A45E2 100%)',
-                boxShadow: '0 16px 30px -16px rgba(127,90,240,0.55)',
-                zIndex: 0,
-              }}
-            />
-            <span style={{ position: 'relative', color: 'white', zIndex: 1 }}>
-              findings
-            </span>
-          </span>
-          <span style={{ color: '#3C3489' }}>.</span>
-        </h3>
-        <p className="mt-5 text-[17px] leading-[1.55] text-ppc-text-muted">
-          {discoveries.length} in priority order — pick one to act on, or scan
-          the lot.
-        </p>
-      </header>
+    <section className="mb-14 mt-12">
+      {/* Findings header retired 2026-05-17.
+          Previously a maximalist "The findings." H3 + "{n} in priority order
+          — pick one to act on, or scan the lot." subtitle. With the verdict
+          card above already saying "Explore your findings." + "{n} high-impact
+          moves waiting below.", the second framing on the same screen read
+          as the same beat twice. The FindingsRail on the left of the grid
+          carries enough structural cueing (numbered, anchored). */}
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[220px_1fr]">
         <FindingsRail discoveries={discoveries} />

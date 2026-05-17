@@ -212,7 +212,7 @@ export const COMPETITOR_SPY_V5: AgentResultsV5Data = {
     projectAvatarBg: '#3FB985',
     duration: '7m 12s',
     window: '7-day window',
-    receipts: '161 tool calls · 84 SERPs · 6 phases',
+    receipts: '161 reasoning steps · 84 SERPs analysed · 6 phases',
   },
 
   verdict: {
