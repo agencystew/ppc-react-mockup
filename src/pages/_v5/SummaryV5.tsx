@@ -378,9 +378,9 @@ function PlayfulDownArrow() {
 // ═════════════════════════════════════════════════════════════════════════
 
 // ═════════════════════════════════════════════════════════════════════════
-// DISCOVERY SECTION — one shared rail. Wins lead at top of the rail and
-// the content column as a single compact callout. Findings follow below,
-// keeping the existing card anatomy.
+// DISCOVERY SECTION — single list. The first "finding" is the Wins card.
+// Same rail, same flow, no separate group. Start with what's working,
+// then move into what needs thought.
 // ═════════════════════════════════════════════════════════════════════════
 
 const WIN_GREEN_INK = '#2F8F6E';
@@ -400,10 +400,10 @@ function DiscoverySection({
   return (
     <section className="mb-14 mt-12">
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[220px_1fr]">
-        <SummaryRail wins={wins} discoveries={discoveries} />
+        <FindingsRail discoveries={discoveries} />
 
         <div className="flex min-w-0 flex-col gap-10">
-          <WinsCallout wins={wins} />
+          <WinsCard wins={wins} />
           {discoveries.map((d) => (
             <DiscoveryCardV5
               key={d.id}
@@ -418,69 +418,40 @@ function DiscoverySection({
   );
 }
 
-// One shared rail: a Wins cluster (green checks) above the existing
-// Findings cluster (purple numbers). Same structure, same spacing — the
-// page reads as a single thread.
-function SummaryRail({
-  wins,
-  discoveries,
-}: {
-  wins: WinV5[];
-  discoveries: DiscoveryV5[];
-}) {
+// One rail, one list. Wins is the first entry (green check, no number),
+// then findings 01–N follow. Reads as one thread, not two.
+function FindingsRail({ discoveries }: { discoveries: DiscoveryV5[] }) {
   return (
     <aside className="hidden lg:sticky lg:top-[200px] lg:block lg:self-start">
-      <p
-        className="mb-4 text-[13px] font-bold uppercase"
-        style={{ letterSpacing: '0.08em', color: WIN_GREEN_INK }}
-      >
-        Wins
-      </p>
-      <ol className="relative mb-6 flex flex-col gap-1">
-        <span
-          aria-hidden
-          className="absolute left-[15px] top-3 bottom-3 w-[1.5px]"
-          style={{ background: WIN_GREEN_LINE }}
-        />
-        {wins.map((w) => (
-          <li key={w.id}>
-            <a
-              href="#wins-callout"
-              className="relative flex items-start gap-3 rounded-[10px] px-2 py-2.5 text-left transition-colors hover:bg-white/60"
-            >
-              <span
-                aria-hidden
-                className="relative z-10 inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full"
-                style={{
-                  background: '#FFFFFF',
-                  boxShadow: `0 0 0 2px #ECEAFA, inset 0 0 0 1.5px ${WIN_GREEN_LINE}`,
-                }}
-              >
-                <Check size={13} weight="bold" style={{ color: WIN_GREEN_INK }} />
-              </span>
-              <span
-                className="text-[14px] font-medium leading-[1.4] text-ppc-ink"
-                style={{ letterSpacing: '-0.005em' }}
-              >
-                {shortenHeadline(w.headline)}
-              </span>
-            </a>
-          </li>
-        ))}
-      </ol>
-
-      <p
-        className="mb-4 text-[13px] font-bold uppercase"
-        style={{ letterSpacing: '0.08em', color: '#85819a' }}
-      >
-        Findings
-      </p>
       <ol className="relative flex flex-col gap-1">
         <span
           aria-hidden
           className="absolute left-[15px] top-3 bottom-3 w-[1.5px]"
           style={{ background: '#e0dbed' }}
         />
+        <li>
+          <a
+            href="#wins-card"
+            className="relative flex items-start gap-3 rounded-[10px] px-2 py-2.5 text-left transition-colors hover:bg-white/60"
+          >
+            <span
+              aria-hidden
+              className="relative z-10 inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full"
+              style={{
+                background: '#FFFFFF',
+                boxShadow: `0 0 0 2px #ECEAFA, inset 0 0 0 1.5px ${WIN_GREEN_LINE}`,
+              }}
+            >
+              <Check size={13} weight="bold" style={{ color: WIN_GREEN_INK }} />
+            </span>
+            <span
+              className="text-[14px] font-semibold leading-[1.4] text-ppc-ink"
+              style={{ letterSpacing: '-0.005em' }}
+            >
+              What's working
+            </span>
+          </a>
+        </li>
         {discoveries.map((d) => (
           <li key={d.id}>
             <a
@@ -516,13 +487,13 @@ function SummaryRail({
   );
 }
 
-// Compact wins box — sits at the top of the content column inside the
-// findings section. "Start with what's working before we get into the
-// findings you need to think about."
-function WinsCallout({ wins }: { wins: WinV5[] }) {
+// Wins card — sits as the FIRST card in the findings list. Same card
+// chrome as a DiscoveryCardV5 so it reads as one entry in the same flow.
+// Green left accent + TrendUp glyph distinguishes it as the positive lead.
+function WinsCard({ wins }: { wins: WinV5[] }) {
   return (
     <article
-      id="wins-callout"
+      id="wins-card"
       className="relative overflow-hidden rounded-[24px] bg-white"
       style={{
         boxShadow:
