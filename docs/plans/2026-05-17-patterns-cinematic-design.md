@@ -278,6 +278,78 @@ Each pattern gets these additional fields (mock-authored alongside existing ones
 | `confidence` | `number` (0-100) | Honest confidence percentage. Hand-authored per pattern based on signal density (number of findings × number of corroborating agents). Surfaced as a 3-dot scale + `XX% conf` label on every card. |
 | `confidenceBasis` | string | Short tooltip string explaining the confidence: e.g., `"4 corroborating signals across 3 runs"`, `"2 agents agree, 1 inferred"`, `"single account, single agent - low confidence"`. |
 
+---
+
+## Future backend contract (when the AI pattern-generator agent ships)
+
+Today every value in `ENRICHMENT`, `CONFIDENCE`, `CANDIDATE_SIGNALS`, and `STATS_OBSERVATIONS` is mocked alongside `PATTERNS`. In production these are the **output of a single AI agent** - the Pattern Generator - that runs against the user's data on a daily/weekly cadence.
+
+### What the agent reads (its inputs)
+
+- Every `Finding` record produced by every agent run across every project in the workspace (existing data model).
+- Every per-project weekly briefing (the rollup document each project gets when its weekly cadence fires).
+- Project metadata (the workspace's roster of `Project` records, with id/name/industry).
+- Optionally: prior `Pattern` history so the agent can identify which patterns are *new this week* vs *persistent* and which have been actioned vs not.
+
+### What the agent emits (its output)
+
+A single JSON response shaped exactly like the local consts the UI already reads. This is the seam: the UI doesn't change when the backend lands - it just reads from the API instead of the static arrays.
+
+```typescript
+// Endpoint: POST /api/patterns/generate  (idempotent on a per-workspace per-window basis)
+// Triggered by: cron, manual refresh, or webhook on briefing completion
+
+interface PatternsGenerateResponse {
+  /** When the agent last ran. Drives "Last sweep · 2h ago" in the hero. */
+  generatedAt: string;
+  /** Honest counts of what the agent considered. Drives the hero's stats strip. */
+  source: {
+    findingsConsidered: number;     // → TOTAL_FINDINGS
+    runsConsidered: number;          // → TOTAL_RUNS
+    briefingsConsidered: number;     // new, not on UI yet
+    projectsConsidered: number;      // → PROJECT_COUNT
+  };
+  /** Promoted patterns. Each one was corroborated above the agent's confidence
+   *  threshold (~50%) and has a clear move to recommend. */
+  patterns: EnrichedPattern[];
+  /** Candidate signals - things the agent NOTICED but won't promote yet.
+   *  Below the confidence threshold OR not enough corroborating evidence.
+   *  This is the vulnerability layer. */
+  candidateSignals: CandidateSignal[];
+  /** Self-observations - honest one-liners about the data the agent read,
+   *  including gaps. ("Edwin Novel's data is the thinnest this week.")
+   *  Drives the hero's stats-strip mode B rotation. */
+  selfObservations: string[];
+}
+```
+
+### How the agent populates each field
+
+The agent's prompt asks it to, for each Finding cluster:
+
+1. **Decide if it's a Pattern or a Candidate.** Pattern if: ≥2 corroborating signals, ≥1 actionable move suggested, confidence ≥50%. Otherwise Candidate.
+2. **Classify the lens.** Win (opportunity to ship) / Defend (threat or risk) / Shift (market/Google-side change) / Infrastructure (one fix lands on N accounts). The agent gets the 4-bucket taxonomy in its prompt; it picks one.
+3. **Author the move tag.** A 3-5 word imperative phrase. The agent has examples in its prompt.
+4. **Compute confidence + basis.** Confidence is a function of corroborating finding count, agent diversity (how many different agent types flagged the same thing), and recency. The basis is a one-line natural-language summary the agent writes.
+5. **Decide if Recommended.** Top ~6 patterns by composite score (breadth × novelty × decidability) get `recommended: true` plus a one-line caption.
+6. **Identify dollar quotes.** Only if the source Finding prose explicitly states a figure. Never fabricated. The agent is instructed: "If no dollar value appears in the source findings, set `dollarSuffix` to null."
+7. **Author self-observations.** Reflect on the data the agent itself read. Includes gaps ("no new runs on X in 7 days"), cluster densities, signal asymmetries.
+
+### What stays on the UI side
+
+- All visual decisions: colors, typography, constellation coordinates, animation timing.
+- The constellation `NODE_COORDS` map. (Future enhancement: agent could suggest optimal node positions based on shared-pattern density - but not for v1.)
+- The lens color and label maps (`LENS_COLOR`, `LENS_LABEL`).
+
+### Migration path (when the agent ships)
+
+1. Replace `ENRICHED_PATTERNS` initialization with a `useQuery({ queryKey: ['patterns'] })` hook calling `POST /api/patterns/generate`.
+2. Replace `CANDIDATE_SIGNALS` and `STATS_OBSERVATIONS` with the same response's `candidateSignals` and `selfObservations` arrays.
+3. Add a loading skeleton for the hero (the constellation can render with `0` patterns and zero edges - it degrades gracefully).
+4. Add an error state ("We couldn't synthesise this week's patterns. Last known: <date>.") - this is itself a posture moment, very on-brand.
+
+The design exists today on mocked data; the API shape it implies is exactly what the agent should emit. **Build the agent against this contract.**
+
 These are authored once at the top of `Patterns.tsx` alongside the existing PATTERNS array as a parallel enrichment object  -  kept separate so the existing pattern prose stays the source of truth and the derived classification stays editable.
 
 ---
