@@ -295,7 +295,8 @@ export function Patterns() {
   // an independent-state shelf becomes a chaotic checkerboard; accordion
   // keeps the eye moving down the page cleanly.
   const [openId, setOpenId] = useState<string | null>(null);
-  const [featured, ...rest] = PATTERNS;
+  const [lead, flank1, flank2, ...rest] = ENRICHED_PATTERNS;
+  const featuredTrio = [lead, flank1, flank2].filter(Boolean) as EnrichedPattern[];
   return (
     <div className="space-y-8 pb-8">
       <style>{PAGE_STYLES}</style>
@@ -331,8 +332,8 @@ export function Patterns() {
         </span>
       </div>
 
-      {/* THE FEATURED PATTERN — full editorial spread, the spotlight */}
-      <FeaturedPatternCard pattern={featured} />
+      {/* THE FEATURED TRIPLET — lead spread + 2 flank cards (top 3 patterns) */}
+      <FeaturedTriplet patterns={featuredTrio} />
 
       {/* Section divider — quiet shift from spotlight to shelf */}
       <ShelfDivider count={rest.length} />
@@ -681,13 +682,105 @@ function ShelfDivider({ count }: { count: number }) {
   );
 }
 
+// ─── Featured triplet (Phase 3) ────────────────────────────────────────
+//
+// The top 3 patterns live at full visibility instead of just one. Lead
+// card (2x wider) on the left, two compressed flank cards stacked on
+// the right. Sourced from ENRICHED_PATTERNS[0..2].
+
+function FeaturedTriplet({ patterns }: { patterns: EnrichedPattern[] }) {
+  const [lead, flank1, flank2] = patterns;
+  if (!lead) return null;
+  return (
+    <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+      <FeaturedPatternCard pattern={lead} />
+      <div className="grid gap-4 lg:grid-rows-2">
+        {flank1 && <FlankCard pattern={flank1} />}
+        {flank2 && <FlankCard pattern={flank2} />}
+      </div>
+    </div>
+  );
+}
+
+// ─── Flank card ────────────────────────────────────────────────────────
+//
+// Compressed pattern card used in the flank slots of the FeaturedTriplet.
+// Lens-color left edge + rank badge + lens chip + headline with italic
+// purple period + count + moveTag (+ optional dollar suffix) + single CTA.
+
+function FlankCard({ pattern }: { pattern: EnrichedPattern }) {
+  return (
+    <article
+      className="relative overflow-hidden rounded-[16px] bg-white"
+      style={{
+        boxShadow:
+          '0 0 0 1px #e8e2f0, 0 1px 0 rgba(15,10,30,0.02), 0 14px 28px -22px rgba(15,10,30,0.12)',
+      }}
+    >
+      {/* Lens color strip — vertical, left edge */}
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-[4px]"
+        style={{ background: LENS_COLOR[pattern.lens] }}
+      />
+
+      <div className="relative px-5 py-5 pl-6">
+        <div className="flex items-center gap-2">
+          <PatternRankBadge rank={pattern.rank} />
+          <span
+            className="text-[10.5px] font-bold uppercase tracking-[0.10em]"
+            style={{ fontFamily: '"Courier New", ui-monospace, monospace', color: LENS_COLOR[pattern.lens] }}
+          >
+            {LENS_LABEL[pattern.lens]}
+          </span>
+        </div>
+
+        <h4
+          className="mt-3 font-display font-bold text-ppc-ink"
+          style={{ fontSize: '17px', letterSpacing: '-0.015em', lineHeight: 1.25 }}
+        >
+          {pattern.headline.replace(/[.!?]$/, '')}
+          <span className="font-serif italic" style={{ color: '#7F5AF0' }}>.</span>
+        </h4>
+
+        <div className="mt-3 flex items-center gap-2 text-[12px]" style={{ color: '#85819a' }}>
+          <span><span className="font-semibold text-ppc-ink">{pattern.affected.length}</span> projects</span>
+          <span aria-hidden style={{ color: '#cdc6dd' }}>·</span>
+          <span
+            className="font-semibold"
+            style={{ fontFamily: '"Courier New", ui-monospace, monospace', color: '#534AB7', fontSize: '11.5px' }}
+          >
+            {pattern.moveTag}
+            {pattern.dollarSuffix && (
+              <span className="ml-1.5 font-normal" style={{ color: '#1F8458' }}>{pattern.dollarSuffix}</span>
+            )}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-[10px] px-4 py-[9px] text-[12.5px] font-bold text-white transition-transform hover:-translate-y-[1px]"
+          style={{
+            background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
+            boxShadow: '0 1px 0 rgba(255,255,255,0.22) inset, 0 8px 16px -8px rgba(127,90,240,0.55)',
+            letterSpacing: '-0.005em',
+          }}
+        >
+          {pattern.recommendedActionCta}
+          <ArrowRight size={11} weight="bold" />
+        </button>
+      </div>
+    </article>
+  );
+}
+
 // ─── Featured pattern card ─────────────────────────────────────────────
 //
 // The headline story of the week. One per page. Full editorial spread —
 // generous padding, big headline, labelled fields, affected/drivers
 // soft-panel, dual CTA. This is the JOY moment of the page.
 
-function FeaturedPatternCard({ pattern }: { pattern: Pattern }) {
+function FeaturedPatternCard({ pattern }: { pattern: EnrichedPattern }) {
   return (
     <article
       id={`pattern-${pattern.id}`}
