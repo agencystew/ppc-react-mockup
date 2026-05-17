@@ -50,12 +50,10 @@ export function SummaryV5({ data }: { data: AgentResultsV5Data }) {
           window={data.hero.window}
           receipts={data.hero.receipts}
         />
-        {/* Wins lead — verified strengths before we get into gaps. */}
-        <WinsSection
-          wins={data.wins}
-          projectName={data.hero.projectName}
-        />
+        {/* Wins lead, then findings — one shared rail, one section.
+            Start with what's working, then move into what needs thought. */}
         <DiscoverySection
+          wins={data.wins}
           discoveries={data.discoveries}
           projectName={data.hero.projectName}
           onAction={setActiveAction}
@@ -380,207 +378,32 @@ function PlayfulDownArrow() {
 // ═════════════════════════════════════════════════════════════════════════
 
 // ═════════════════════════════════════════════════════════════════════════
-// WINS SECTION — leads before findings. Same depth, opposite framing.
+// DISCOVERY SECTION — one shared rail. Wins lead at top of the rail and
+// the content column as a single compact callout. Findings follow below,
+// keeping the existing card anatomy.
 // ═════════════════════════════════════════════════════════════════════════
-//
-// "We surface wins first because they tell you what to protect and scale,
-// not just what to fix." Mirrors DiscoverySection's anatomy (rail + cards)
-// so the page reads as a single editorial flow. Green is reserved here:
-// only the top glyph and the rail accent. CTAs stay purple — one brand
-// accent across the page.
 
 const WIN_GREEN_INK = '#2F8F6E';
 const WIN_GREEN_LINE = '#cce8d7';
 
-function WinsSection({
-  wins,
-  projectName,
-}: {
-  wins: WinV5[];
-  projectName: string;
-}) {
-  return (
-    <section className="mb-14 mt-12">
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[220px_1fr]">
-        <WinsRail wins={wins} />
-
-        <div className="flex min-w-0 flex-col gap-10">
-          {wins.map((w) => (
-            <WinCardV5 key={w.id} win={w} projectName={projectName} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function WinsRail({ wins }: { wins: WinV5[] }) {
-  return (
-    <aside className="hidden lg:sticky lg:top-[200px] lg:block lg:self-start">
-      <p
-        className="mb-4 text-[13px] font-bold uppercase"
-        style={{ letterSpacing: '0.08em', color: WIN_GREEN_INK }}
-      >
-        Wins
-      </p>
-      <ol className="relative flex flex-col gap-1">
-        <span
-          aria-hidden
-          className="absolute left-[15px] top-3 bottom-3 w-[1.5px]"
-          style={{ background: WIN_GREEN_LINE }}
-        />
-        {wins.map((w) => (
-          <li key={w.id}>
-            <a
-              href={`#win-${w.id}`}
-              className="relative flex items-start gap-3 rounded-[10px] px-2 py-2.5 text-left transition-colors hover:bg-white/60"
-            >
-              <span
-                aria-hidden
-                className="relative z-10 inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full"
-                style={{
-                  background: '#FFFFFF',
-                  boxShadow: `0 0 0 2px #ECEAFA, inset 0 0 0 1px ${WIN_GREEN_LINE}`,
-                }}
-              >
-                <span
-                  className="text-[11.5px] font-bold tabular-nums"
-                  style={{ color: WIN_GREEN_INK }}
-                >
-                  {String(w.rank).padStart(2, '0')}
-                </span>
-              </span>
-              <span
-                className="text-[14px] font-medium leading-[1.4] text-ppc-ink"
-                style={{ letterSpacing: '-0.005em' }}
-              >
-                {shortenHeadline(w.headline)}
-              </span>
-            </a>
-          </li>
-        ))}
-      </ol>
-    </aside>
-  );
-}
-
-function WinCardV5({
-  win,
-  projectName,
-}: {
-  win: WinV5;
-  projectName: string;
-}) {
-  return (
-    <article
-      id={`win-${win.id}`}
-      className="relative overflow-hidden rounded-[24px] bg-white"
-      style={{
-        boxShadow:
-          '0 0 0 1px #e8e2f0, 0 1px 0 rgba(15,10,30,0.02), 0 24px 40px -28px rgba(15,10,30,0.14)',
-      }}
-    >
-      <div className="relative px-10 py-10 sm:px-14 sm:py-12">
-        {/* Universal win marker — TrendUp in green, single accent per card */}
-        <div className="mb-5" aria-hidden>
-          <TrendUp
-            size={28}
-            weight="duotone"
-            style={{
-              color: WIN_GREEN_INK,
-              filter: 'drop-shadow(0 0 14px rgba(93,202,165,0.42))',
-            }}
-          />
-        </div>
-
-        <h4
-          className="font-display text-[30px] font-extrabold text-ppc-ink sm:text-[34px]"
-          style={{
-            letterSpacing: '-0.026em',
-            lineHeight: 1.12,
-            maxWidth: '900px',
-          }}
-        >
-          {win.headline}
-        </h4>
-
-        <DiscoverySectionField
-          label="What's working"
-          body={win.whatsWorking}
-          icon={<Check size={17} weight="regular" />}
-        />
-        <DiscoverySectionField
-          label={`Why it matters for ${projectName}`}
-          body={win.whyItMatters}
-          icon={<Lightbulb size={17} weight="regular" />}
-        />
-        <DiscoverySectionField
-          label="How to scale"
-          body={win.howToScale}
-          icon={<TrendUp size={17} weight="regular" />}
-        />
-        <DiscoverySectionField
-          label="Expected outcome"
-          body={win.expectedOutcome}
-          icon={<Sparkle size={17} weight="regular" />}
-        />
-
-        {/* CTAs match the Discovery card so wins and findings read as one rhythm. */}
-        <div className="mt-10 flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            className="inline-flex items-center justify-center gap-2 rounded-[14px] px-7 py-4 text-[16px] font-bold text-white transition-transform hover:-translate-y-[1px]"
-            style={{
-              background: 'linear-gradient(180deg, #8767F3 0%, #6A45E2 100%)',
-              boxShadow:
-                '0 1px 0 rgba(255,255,255,0.22) inset, 0 12px 24px -10px rgba(127,90,240,0.65)',
-              letterSpacing: '-0.012em',
-            }}
-          >
-            {win.primaryCta}
-            <ArrowRight size={16} weight="bold" />
-          </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-[14px] px-[18px] py-[14px] text-[15px] font-semibold text-ppc-text-muted transition-colors hover:bg-ppc-panel-soft hover:text-ppc-ink"
-            style={{ boxShadow: 'inset 0 0 0 1px #d9d4ec' }}
-          >
-            <ChatCircle size={15} weight="bold" />
-            Ask the agent
-          </button>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-// ═════════════════════════════════════════════════════════════════════════
-// DISCOVERY SECTION
-// ═════════════════════════════════════════════════════════════════════════
-
 function DiscoverySection({
+  wins,
   discoveries,
   projectName,
   onAction,
 }: {
+  wins: WinV5[];
   discoveries: DiscoveryV5[];
   projectName: string;
   onAction: (d: DiscoveryV5) => void;
 }) {
   return (
     <section className="mb-14 mt-12">
-      {/* Findings header retired 2026-05-17.
-          Previously a maximalist "The findings." H3 + "{n} in priority order
-          — pick one to act on, or scan the lot." subtitle. With the verdict
-          card above already saying "Explore your findings." + "{n} high-impact
-          moves waiting below.", the second framing on the same screen read
-          as the same beat twice. The FindingsRail on the left of the grid
-          carries enough structural cueing (numbered, anchored). */}
-
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[220px_1fr]">
-        <FindingsRail discoveries={discoveries} />
+        <SummaryRail wins={wins} discoveries={discoveries} />
 
         <div className="flex min-w-0 flex-col gap-10">
+          <WinsCallout wins={wins} />
           {discoveries.map((d) => (
             <DiscoveryCardV5
               key={d.id}
@@ -595,9 +418,57 @@ function DiscoverySection({
   );
 }
 
-function FindingsRail({ discoveries }: { discoveries: DiscoveryV5[] }) {
+// One shared rail: a Wins cluster (green checks) above the existing
+// Findings cluster (purple numbers). Same structure, same spacing — the
+// page reads as a single thread.
+function SummaryRail({
+  wins,
+  discoveries,
+}: {
+  wins: WinV5[];
+  discoveries: DiscoveryV5[];
+}) {
   return (
     <aside className="hidden lg:sticky lg:top-[200px] lg:block lg:self-start">
+      <p
+        className="mb-4 text-[13px] font-bold uppercase"
+        style={{ letterSpacing: '0.08em', color: WIN_GREEN_INK }}
+      >
+        Wins
+      </p>
+      <ol className="relative mb-6 flex flex-col gap-1">
+        <span
+          aria-hidden
+          className="absolute left-[15px] top-3 bottom-3 w-[1.5px]"
+          style={{ background: WIN_GREEN_LINE }}
+        />
+        {wins.map((w) => (
+          <li key={w.id}>
+            <a
+              href="#wins-callout"
+              className="relative flex items-start gap-3 rounded-[10px] px-2 py-2.5 text-left transition-colors hover:bg-white/60"
+            >
+              <span
+                aria-hidden
+                className="relative z-10 inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full"
+                style={{
+                  background: '#FFFFFF',
+                  boxShadow: `0 0 0 2px #ECEAFA, inset 0 0 0 1.5px ${WIN_GREEN_LINE}`,
+                }}
+              >
+                <Check size={13} weight="bold" style={{ color: WIN_GREEN_INK }} />
+              </span>
+              <span
+                className="text-[14px] font-medium leading-[1.4] text-ppc-ink"
+                style={{ letterSpacing: '-0.005em' }}
+              >
+                {shortenHeadline(w.headline)}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+
       <p
         className="mb-4 text-[13px] font-bold uppercase"
         style={{ letterSpacing: '0.08em', color: '#85819a' }}
@@ -642,6 +513,74 @@ function FindingsRail({ discoveries }: { discoveries: DiscoveryV5[] }) {
         ))}
       </ol>
     </aside>
+  );
+}
+
+// Compact wins box — sits at the top of the content column inside the
+// findings section. "Start with what's working before we get into the
+// findings you need to think about."
+function WinsCallout({ wins }: { wins: WinV5[] }) {
+  return (
+    <article
+      id="wins-callout"
+      className="relative overflow-hidden rounded-[24px] bg-white"
+      style={{
+        boxShadow:
+          '0 0 0 1px #e8e2f0, 0 1px 0 rgba(15,10,30,0.02), 0 24px 40px -28px rgba(15,10,30,0.14)',
+      }}
+    >
+      <span
+        aria-hidden
+        className="absolute left-0 top-0 h-full w-[3px]"
+        style={{ background: WIN_GREEN_INK }}
+      />
+      <div className="px-10 py-9 sm:px-14 sm:py-10">
+        <div className="mb-7 flex items-center gap-3">
+          <TrendUp
+            size={22}
+            weight="duotone"
+            style={{
+              color: WIN_GREEN_INK,
+              filter: 'drop-shadow(0 0 12px rgba(93,202,165,0.32))',
+            }}
+          />
+          <h3
+            className="font-display text-[22px] font-extrabold text-ppc-ink"
+            style={{ letterSpacing: '-0.02em' }}
+          >
+            What's working
+          </h3>
+        </div>
+
+        <ol className="flex flex-col gap-5">
+          {wins.map((w) => (
+            <li key={w.id} className="flex gap-4">
+              <span
+                aria-hidden
+                className="mt-[3px] inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full"
+                style={{
+                  background: '#FFFFFF',
+                  boxShadow: `inset 0 0 0 1.5px ${WIN_GREEN_LINE}`,
+                }}
+              >
+                <Check size={13} weight="bold" style={{ color: WIN_GREEN_INK }} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p
+                  className="text-[16.5px] font-bold leading-[1.35] text-ppc-ink"
+                  style={{ letterSpacing: '-0.012em' }}
+                >
+                  {w.headline}
+                </p>
+                <p className="mt-1.5 text-[14.5px] leading-[1.55] text-ppc-text-muted">
+                  {w.whatsWorking}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </article>
   );
 }
 
