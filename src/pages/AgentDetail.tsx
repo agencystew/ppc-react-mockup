@@ -333,7 +333,7 @@ export function AgentDetail() {
 function NotFound() {
   return (
     <div className="rounded-2xl border border-ppc-neutral-100 bg-white p-12 text-center">
-      <div className="font-display text-[24px] font-bold tracking-tight">Agent not found.</div>
+      <div className="ppc-h2">Agent not found<span className="ppc-period">.</span></div>
       <Link to="/agents" className="mt-3 inline-flex items-center gap-1 text-ppc-purple-500 hover:underline">
         Back to library
       </Link>
@@ -378,7 +378,7 @@ function EditorialHero({ agent }: { agent: AgentDefinition }) {
       <div className="flex flex-col">
         <CategoryChip label={CATEGORY_LABEL[agent.category] ?? agent.category} />
 
-        <h1 className="mt-5 font-display font-black leading-[0.95] tracking-[-0.038em] text-ppc-ink text-[48px] sm:text-[58px] lg:text-[68px]">
+        <h1 className="ppc-h1 mt-5 text-ppc-ink">
           {agent.name}
         </h1>
 
@@ -518,7 +518,7 @@ function ExpeditionMap({ agent }: { agent: AgentDefinition }) {
       />
 
       <div className="relative px-9 py-11 sm:px-11 sm:py-12">
-        <h2 className="font-display text-[34px] font-black leading-[0.98] tracking-[-0.028em] text-white sm:text-[42px]">
+        <h2 className="ppc-h2 text-white">
           Specific Agent Focus<span className="text-ppc-purple-400">.</span>
         </h2>
 
@@ -637,7 +637,7 @@ function LiveInvestigationLog({ slug }: { slug: string }) {
       />
 
       <div className="relative px-9 py-9 sm:px-11 sm:py-10">
-        <h3 className="flex items-center gap-3 font-display text-[28px] font-black leading-[1.05] tracking-[-0.025em] text-ppc-ink sm:text-[32px]">
+        <h3 className="ppc-h2 flex items-center gap-3 text-ppc-ink">
           <span>We're about to get to work</span>
           <span aria-hidden className="text-[28px] sm:text-[30px]">👀</span>
         </h3>
@@ -778,8 +778,8 @@ function LaunchPanel(props: LaunchPanelProps) {
       }}
     >
       <div className="border-b border-[#efeaf4] px-7 pb-5 pt-7">
-        <h3 className="font-display text-[22px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ppc-ink">
-          Configure &amp; launch<span style={{ color: '#7F5AF0' }}>.</span>
+        <h3 className="ppc-h3 text-ppc-ink">
+          Configure &amp; launch<span className="ppc-period">.</span>
         </h3>
         <p className="mt-1.5 text-[13px] text-ppc-text-muted">
           Defaults are tuned. Override only what you want different.
@@ -831,7 +831,7 @@ function LaunchPanel(props: LaunchPanelProps) {
                       {c.labels?.map((label) => (
                         <LabelChip key={label}>{label}</LabelChip>
                       ))}
-                      <span className="inline-flex items-center gap-[3px] font-mono text-[10.5px] text-ppc-text-muted">
+                      <span className="inline-flex items-center gap-[3px] text-[11px] font-medium tabular-nums text-ppc-text-muted">
                         <CurrencyDollar size={9} weight="bold" />
                         {formatSpend(c.monthlySpend)}/mo
                       </span>
@@ -919,7 +919,7 @@ function LaunchPanel(props: LaunchPanelProps) {
                           <span className="truncate text-[12.5px] font-medium text-ppc-ink">
                             {ag.name}
                           </span>
-                          <span className="inline-flex items-center gap-[3px] font-mono text-[10.5px] text-ppc-text-muted">
+                          <span className="inline-flex items-center gap-[3px] text-[11px] font-medium tabular-nums text-ppc-text-muted">
                             <CurrencyDollar size={9} weight="bold" />
                             {formatSpend(ag.monthlySpend)}/mo
                           </span>
@@ -1074,7 +1074,7 @@ function CampaignTypeChip({ type }: { type: MockCampaign['type'] }) {
   const s = CAMPAIGN_TYPE_STYLES[type];
   return (
     <span
-      className="inline-flex items-center rounded-[4px] px-[5px] py-[1px] font-mono text-[9.5px] font-bold uppercase tracking-[0.06em]"
+      className="inline-flex items-center rounded-[4px] px-[5px] py-[1px] text-[10px] font-bold"
       style={{ background: s.bg, color: s.fg }}
     >
       {type}
@@ -1195,10 +1195,7 @@ function SchedulePanel({
       }}
     >
       <div className="mb-3 flex items-baseline justify-between gap-3">
-        <p
-          className="font-mono text-[10px] font-bold uppercase tracking-[0.12em]"
-          style={{ color: '#7C45CB' }}
-        >
+        <p className="text-[11px] font-semibold" style={{ color: '#7C45CB' }}>
           Schedule
         </p>
         <p className="text-[11px] text-ppc-text-muted">{summary}</p>
@@ -1409,7 +1406,7 @@ function MonthDayPicker({
   return (
     <div>
       <p className="mb-2 text-[11.5px] font-semibold text-ppc-ink">
-        On day <span className="font-mono text-[11px] text-ppc-text-muted">of the month</span>
+        On day <span className="text-[11px] font-normal text-ppc-text-muted">of the month</span>
       </p>
       <div className="grid grid-cols-7 gap-[5px]">
         {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => {

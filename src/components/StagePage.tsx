@@ -72,7 +72,7 @@ function CompletedHeader({ run }: { run: AgentRun }) {
         <span className="grid h-[18px] w-[18px] place-items-center rounded-full border border-ppc-status-healthy/50 bg-ppc-status-healthy/20">
           <Check size={11} weight="bold" className="text-ppc-status-healthy" />
         </span>
-        <span className="font-mono text-[12px] uppercase tracking-[0.10em] text-ppc-text-on-dark">
+        <span className="text-[12px] font-semibold text-ppc-text-on-dark tabular-nums">
           Completed · {run.totalDuration}
         </span>
       </div>
@@ -85,8 +85,8 @@ function CompletedHero({ headline, description }: { headline: string; descriptio
   const body = hasPeriod ? headline.slice(0, -1) : headline;
   return (
     <div className="relative mb-10">
-      <h1 className="font-display text-[48px] font-extrabold leading-[1.0] tracking-[-0.03em] text-white sm:text-[64px]">
-        {body}{hasPeriod && <span className="text-ppc-purple-500">.</span>}
+      <h1 className="ppc-h1 text-white">
+        {body}{hasPeriod && <span className="ppc-period">.</span>}
       </h1>
       <p className="mt-5 max-w-[88%] text-[16px] leading-[1.5] text-ppc-text-on-dark">
         {description}
@@ -142,7 +142,7 @@ function FindingCardNew({ agent, finding, priority, impact, action }: Finding) {
       style={{ borderLeft: '3px solid #7F5AF0' }}
     >
       <div className="mb-3 flex items-center justify-between gap-3">
-        <p className="font-mono text-[11px] uppercase tracking-[0.10em] text-[#c4b5fd]">{agent}</p>
+        <p className="text-[11px] font-semibold text-[#c4b5fd]">{agent}</p>
         {priority && <PriorityChip priority={priority} />}
       </div>
       <p className="text-[14px] leading-[1.65] text-white">{finding}</p>
@@ -199,7 +199,7 @@ function AuditTheWork({ dataSources }: { dataSources: DataSource[] }) {
       style={{ background: '#1F1342', borderColor: 'rgba(127,90,240,0.28)' }}
     >
       <div className="mb-3.5 flex items-center justify-between gap-3">
-        <h3 className="text-[18px] font-medium text-white">Audit the work</h3>
+        <h3 className="ppc-h3 text-white">Audit the work</h3>
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -248,7 +248,7 @@ function AuditTheWork({ dataSources }: { dataSources: DataSource[] }) {
 function ToolPillNew({ children }: { children: React.ReactNode }) {
   return (
     <span
-      className="inline-flex items-center rounded-[6px] border px-2.5 py-[5px] font-mono text-[11px] text-[#c4b5fd]"
+      className="inline-flex items-center rounded-[6px] border px-2.5 py-[5px] text-[11px] font-medium text-[#c4b5fd]"
       style={{ background: 'rgba(127,90,240,0.12)', borderColor: 'rgba(127,90,240,0.28)' }}
     >
       {children}
@@ -297,7 +297,7 @@ function DataPreviewNew({ headers, rows, moreCount, moreLabel }: DataPreviewTabl
         {headers.map((h, i) => (
           <p
             key={i}
-            className="font-mono text-[10px] uppercase tracking-[0.08em] text-ppc-text-on-dark"
+            className="text-[11px] font-semibold text-ppc-text-on-dark"
           >
             {h}
           </p>
@@ -318,7 +318,7 @@ function DataPreviewNew({ headers, rows, moreCount, moreLabel }: DataPreviewTabl
               className={
                 j === 0
                   ? 'text-[13px] font-medium text-white'
-                  : 'font-mono text-[12px] text-ppc-text-on-dark'
+                  : 'text-[12px] text-ppc-text-on-dark tabular-nums'
               }
             >
               {cell}
@@ -443,7 +443,7 @@ function HoldTightBand() {
 
       <Ornament />
 
-      <h2 className="relative mx-auto font-display text-[68px] font-extrabold leading-[0.98] tracking-[-0.035em] text-ppc-ink sm:text-[88px]">
+      <h2 className="ppc-h1 relative mx-auto text-ppc-ink">
         Hold{' '}
         <span
           className="italic"
@@ -542,10 +542,10 @@ function RunningHero({ headline }: { headline: string }) {
   const body = hasPeriod ? headline.slice(0, -1) : headline;
   return (
     <div>
-      <h1 className="font-display text-[72px] font-extrabold leading-[1.02] tracking-[-0.035em] text-ppc-ink sm:text-[84px]">
+      <h1 className="ppc-h1 text-ppc-ink">
         {body}
         {hasPeriod && (
-          <span className="ppcio-period-pulse" style={{ color: '#7F5AF0' }}>
+          <span className="ppcio-period-pulse ppc-period">
             .
           </span>
         )}
@@ -560,7 +560,7 @@ function RunningHero({ headline }: { headline: string }) {
 // the dark "Spotify radio" panel with an editorial white card in keeping
 // with PPC.io's lavender + white app system. Active operation sits in a
 // soft lavender wash at the top (where the live work happens); the
-// receipts trail flows below on white. ONE Courier-mono Running pulse —
+// receipts trail flows below on white. ONE Figtree Running pulse —
 // no NOW/ACTIVE chips, no waveform mascot, no "in progress" label, no
 // orbital sparkle. Calm and high-signal: a live document, not a player.
 
@@ -732,11 +732,8 @@ function StepRow({ step, isLast }: { step: MissionFeedStep; isLast: boolean }) {
             <WinTitle text={step.title} />
           </p>
           <span
-            className="tabular-nums shrink-0 text-[11.5px] font-semibold uppercase tracking-[0.06em]"
-            style={{
-              color: 'rgba(255,255,255,0.42)',
-              fontFamily: '"Courier New", ui-monospace, Menlo, monospace',
-            }}
+            className="tabular-nums shrink-0 text-[11.5px] font-semibold"
+            style={{ color: 'rgba(255,255,255,0.42)' }}
           >
             {step.time}
           </span>

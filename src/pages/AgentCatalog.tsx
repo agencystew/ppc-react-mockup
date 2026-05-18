@@ -256,19 +256,19 @@ function HeroBlock({ readyCount }: { readyCount: number }) {
       {/* Headline + illustration */}
       <div className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_460px] lg:gap-12">
         <div className="flex flex-col">
-          <h1 className="font-display font-black leading-[0.96] tracking-[-0.028em] text-ppc-ink text-[44px] sm:text-[54px] lg:text-[62px]">
+          <h1 className="ppc-h1 text-ppc-ink">
             Meet Your PPC Agents
           </h1>
-          <h1
-            className="mt-1 leading-[1.04] tracking-[-0.016em] text-ppc-purple-500 text-[40px] sm:text-[50px] lg:text-[58px]"
+          <p
+            className="ppc-h1 mt-1 text-ppc-purple-500"
             style={{
               fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif',
               fontStyle: 'italic',
               fontWeight: 700,
             }}
           >
-            Specialists on standby<span className="text-ppc-purple-500">.</span>
-          </h1>
+            Specialists on standby<span className="ppc-period">.</span>
+          </p>
 
           <p className="mt-5 max-w-[540px] text-[15px] leading-[1.55] text-ppc-text-muted">
             Your AI bench of PPC experts. Run audits, uncover insights,
@@ -403,7 +403,7 @@ function CategoriesSidebar({
   return (
     <aside className="space-y-3 lg:sticky lg:top-6">
       <div className="rounded-[18px] border-[0.5px] border-ppc-card-border bg-white p-4 shadow-[0_2px_12px_-8px_rgba(15,10,30,0.05)]">
-        <h3 className="px-2 pb-3 text-[14.5px] font-bold tracking-[-0.012em] text-ppc-ink">
+        <h3 className="ppc-h4 px-2 pb-3 text-ppc-ink">
           Categories
         </h3>
         <ul className="flex flex-col gap-[2px]">
@@ -502,7 +502,7 @@ function AgentsPanel({
   return (
     <div className="rounded-[20px] border-[0.5px] border-ppc-card-border bg-white p-5 shadow-[0_2px_12px_-8px_rgba(15,10,30,0.05)] lg:p-6">
       <div className="mb-5 flex items-baseline justify-between gap-3">
-        <h2 className="inline-flex items-center gap-2 font-display text-[20px] font-bold tracking-[-0.012em] text-ppc-ink">
+        <h2 className="ppc-h3 inline-flex items-center gap-2 text-ppc-ink">
           <span>{header}</span>
           {isRecommended && (
             <Sparkle size={16} weight="fill" className="-mt-0.5 text-ppc-purple-500" />
@@ -615,7 +615,7 @@ function AgentGridCard({
         </button>
       </div>
 
-      <h3 className="mt-3.5 font-display text-[16.5px] font-bold leading-[1.2] tracking-[-0.012em] text-ppc-ink">
+      <h3 className="ppc-h4 mt-3.5 text-ppc-ink">
         {cardName}<P />
       </h3>
 

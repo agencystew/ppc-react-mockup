@@ -6,8 +6,8 @@ import {
   CurrencyDollar, ChartLineUp, Browser,
 } from '@phosphor-icons/react';
 import { PROJECTS, ACCOUNTS } from '../mock/projects';
-import { AgentMascot } from '../components/AgentMascot';
 import { PATTERNS, type Pattern } from '../mock/patterns';
+import homeHero from '../assets/mascots/home-hero.png';
 
 /* Dashboard · /
  *
