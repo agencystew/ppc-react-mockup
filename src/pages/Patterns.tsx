@@ -365,21 +365,21 @@ function InfoPopover({ onClose }: { onClose: () => void }) {
 interface SignalSource {
   icon: typeof MagnifyingGlass;
   label: string;
-  age: string;
-  tint: string;        // text-color class for the icon
+  iconColor: string;   // hex string for the icon glyph
+  iconBg: string;      // subtle tinted bg behind the icon
 }
 
 const SOURCES: SignalSource[] = [
-  { icon: Briefcase,             label: 'Business Context',    age: '2h ago',  tint: 'text-[#7BD6A8]' },
-  { icon: Brain,                 label: 'Agent Memory',        age: '1h ago',  tint: 'text-[#B7A8EC]' },
-  { icon: ClockCounterClockwise, label: 'History',             age: '45m ago', tint: 'text-[#93C2F8]' },
-  { icon: Plugs,                 label: 'Connected Accounts',  age: '30m ago', tint: 'text-[#F4A871]' },
+  { icon: Briefcase,             label: 'Business Context',   iconColor: '#7BD6A8', iconBg: 'rgba(123,214,168,0.12)' },
+  { icon: Brain,                 label: 'Agent Memory',       iconColor: '#B7A8EC', iconBg: 'rgba(183,168,236,0.14)' },
+  { icon: ClockCounterClockwise, label: 'History',            iconColor: '#93C2F8', iconBg: 'rgba(147,194,248,0.12)' },
+  { icon: Plugs,                 label: 'Connected Accounts', iconColor: '#F4A871', iconBg: 'rgba(244,168,113,0.14)' },
 ];
 
 function SignalFlowPanel() {
   return (
-    <div className="mt-9 overflow-hidden rounded-[18px] border border-white/[0.07] bg-white/[0.025] p-5 backdrop-blur-sm lg:mt-10 lg:p-6">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,200px)_minmax(0,1fr)_minmax(0,300px)] lg:items-stretch lg:gap-6">
+    <div className="mt-9 overflow-hidden rounded-[22px] border border-white/[0.07] bg-white/[0.025] p-6 backdrop-blur-sm lg:mt-10 lg:p-8">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)_minmax(0,400px)] lg:items-center lg:gap-10">
         <SourceColumn />
         <FlowCanvas />
         <OutputColumn />
@@ -390,15 +390,20 @@ function SignalFlowPanel() {
 
 function SourceColumn() {
   return (
-    <ul className="flex flex-col justify-between gap-2.5 self-stretch py-1">
-      {SOURCES.map(({ icon: Icon, label, age, tint }) => (
-        <li key={label} className="flex items-center gap-2.5">
-          <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.04] ring-1 ring-white/10 ${tint}`}>
-            <Icon size={13} weight="duotone" />
+    <ul className="flex flex-col gap-2.5 self-stretch">
+      {SOURCES.map(({ icon: Icon, label, iconColor, iconBg }) => (
+        <li
+          key={label}
+          className="flex items-center gap-3.5 rounded-[14px] border border-white/[0.10] bg-white/[0.045] px-4 py-3 backdrop-blur-sm transition-colors hover:border-white/[0.18] hover:bg-white/[0.07]"
+        >
+          <span
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full ring-1 ring-white/15"
+            style={{ background: iconBg, color: iconColor }}
+          >
+            <Icon size={20} weight="duotone" />
           </span>
-          <div className="min-w-0 leading-tight">
-            <div className="text-[12.5px] font-semibold text-white">{label}</div>
-            <div className="text-[10.5px] text-white/40">· {age}</div>
+          <div className="text-[14.5px] font-bold leading-tight text-white">
+            {label}
           </div>
         </li>
       ))}
@@ -416,29 +421,36 @@ function OutputColumn() {
 
 function StrategicPatternCard() {
   return (
-    <div className="relative w-full overflow-hidden rounded-[18px] border border-white/[0.12] bg-white/[0.05] p-5 backdrop-blur-sm">
-      {/* corner bloom */}
-      <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-ppc-purple-500/20 blur-3xl" />
+    <div
+      className="relative w-full overflow-hidden rounded-[22px] bg-white p-6 lg:p-7"
+      style={{
+        boxShadow:
+          '0 30px 80px -20px rgba(127,90,240,0.45), 0 4px 18px -4px rgba(0,0,0,0.35)',
+      }}
+    >
+      {/* faint corner bloom inside the card so it doesn't feel flat */}
+      <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-ppc-purple-500/10 blur-3xl" />
 
       <div className="relative flex flex-wrap items-center gap-1.5">
-        <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] font-medium text-white/80 ring-1 ring-white/10">
+        <span className="inline-flex items-center gap-1 rounded-full bg-[#F4F1FA] px-2.5 py-1 text-[11.5px] font-semibold text-ppc-purple-800">
           <span aria-hidden>💡</span> Insight
         </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] font-medium text-white/80 ring-1 ring-white/10">
+        <span className="inline-flex items-center gap-1 rounded-full bg-[#E7F5EA] px-2.5 py-1 text-[11.5px] font-semibold text-[#1F6E3D]">
           <span aria-hidden>💲</span> Revenue lift
         </span>
       </div>
 
-      <div className="relative mt-3 flex items-start gap-3">
-        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-500/35 to-ppc-purple-500/[0.06] text-white shadow-[inset_0_0_0_1px_rgba(168,140,255,0.40)]">
-          <Lightbulb size={20} weight="duotone" />
+      <div className="relative mt-4 flex items-start gap-3.5">
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#F4F0FB] text-ppc-purple-700">
+          <Lightbulb size={22} weight="duotone" />
         </span>
         <div className="min-w-0">
-          <h4 className="text-[19px] font-bold leading-tight text-white">
+          <h4 className="text-[22px] font-bold leading-tight tracking-h2 text-ppc-ink">
             Strategic Pattern
           </h4>
-          <p className="mt-1.5 text-[12.5px] leading-[1.5] text-white/55">
-            The dot-connecting moment — where account-level signals add up to one move worth making.
+          <p className="mt-1.5 text-[13.5px] leading-[1.55] text-ppc-text-muted">
+            The dot-connecting moment — where signals across accounts, agents,
+            and history line up into one move worth making.
           </p>
         </div>
       </div>
