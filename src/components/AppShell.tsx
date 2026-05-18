@@ -252,7 +252,12 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
           ref={navRef}
           className="relative flex flex-1 flex-col gap-[2px] overflow-y-auto px-2 pb-3"
         >
-          {/* Sliding active indicator — bg pill + left-edge accent bar. */}
+          {/* Sliding active indicator — bg pill + left-edge accent bar.
+           *  Base pill is NOT keyed so the `top`/`height` CSS transitions
+           *  fire as it glides between rows. A separate `<FlashOverlay>` is
+           *  rendered above when justActivatedKey is set; it's keyed by the
+           *  key so React remounts it on each activation and the
+           *  sidebar-pill-flash keyframe re-fires. */}
           {indicator && !collapsed && (
             <>
               <span
@@ -267,6 +272,19 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
                   transition: `top 280ms ${SLIDE_EASE}, height 220ms ${SLIDE_EASE}`,
                 }}
               />
+              {justActivatedKey && (
+                <span
+                  key={`flash-${justActivatedKey}`}
+                  aria-hidden
+                  className="pointer-events-none absolute rounded-[11px] sidebar-pill-flash"
+                  style={{
+                    left: 8,
+                    right: 8,
+                    top: indicator.top,
+                    height: indicator.height,
+                  }}
+                />
+              )}
               <span
                 aria-hidden
                 className="pointer-events-none absolute"
@@ -449,21 +467,27 @@ function NavIcon({
       }`}
       style={{ width: size, height: size }}
     >
+      {/* Halo ring — conditionally mounted so the keyframe re-fires every
+       *  activation. Sibling element (not ::before) so its scale animation
+       *  is independent of the wrapper's punch transform. */}
+      {justActivated && !collapsed && (
+        <span aria-hidden className="sidebar-halo-ring" />
+      )}
       <Icon
         size={size}
         weight="duotone"
-        className={`absolute inset-0 transition-opacity duration-[250ms] ${
+        className={`absolute inset-0 transition-opacity duration-[180ms] ${
           isActive ? 'opacity-0' : 'opacity-100 text-white/[0.78]'
         }`}
       />
       <Icon
         size={size}
         weight="fill"
-        className={`absolute inset-0 transition-opacity duration-[250ms] ${
+        className={`absolute inset-0 transition-opacity duration-[180ms] ${
           isActive
             ? 'opacity-100 text-white drop-shadow-[0_0_8px_rgba(127,90,240,0.45)]'
             : 'opacity-0'
-        }`}
+        } ${justActivated && isActive ? 'sidebar-icon-flash' : ''}`}
       />
     </span>
   );
