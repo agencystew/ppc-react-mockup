@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom';
 import {
   Sparkle, Cube, Stack, ArrowsClockwise,
   MagnifyingGlass, ArrowRight, X, Info,
-  ClockCounterClockwise, BookmarkSimple, Archive,
-  SlidersHorizontal, Waveform, DotsNine, ChartBar,
-  TrendUp, WaveTriangle,
+  ClockCounterClockwise, Funnel, CaretDown,
+  TrendUp, Wrench, CalendarBlank, UsersThree, Target,
 } from '@phosphor-icons/react';
 import { PATTERNS, type Pattern } from '../mock/patterns';
 
@@ -382,27 +381,30 @@ function LightTable() {
         <FilterBar filter={filter} onChange={setFilter} query={query} onQuery={setQuery} />
 
         <div className="mt-10">
-          <h2 className="font-display text-[24px] font-bold leading-none tracking-h2 text-ppc-ink">
-            Patterns Surfaced
-          </h2>
-
-          <div className="mt-6 overflow-hidden rounded-[16px] border border-ppc-card-border bg-white">
-            <ul className="divide-y divide-[#EDE8F5]">
-              {rows.map((pattern, idx) => (
-                <PatternRow
-                  key={pattern.id}
-                  pattern={pattern}
-                  index={idx + 1}
-                  expanded={expandedId === pattern.id}
-                  onToggle={() =>
-                    setExpandedId(expandedId === pattern.id ? null : pattern.id)
-                  }
-                />
-              ))}
-            </ul>
+          <div className="flex items-center gap-2.5">
+            <h2 className="font-display text-[24px] font-bold leading-none tracking-h2 text-ppc-ink">
+              Patterns Surfaced
+            </h2>
+            <span className="inline-flex h-6 min-w-[24px] items-center justify-center rounded-full bg-[#EFE9FB] px-2 text-[12px] font-semibold text-ppc-purple-700">
+              {rows.length}
+            </span>
           </div>
 
-          <p className="mt-5 text-center text-[12.5px] text-ppc-text-faint">
+          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {rows.map((pattern, idx) => (
+              <PatternCard
+                key={pattern.id}
+                pattern={pattern}
+                index={idx + 1}
+                expanded={expandedId === pattern.id}
+                onToggle={() =>
+                  setExpandedId(expandedId === pattern.id ? null : pattern.id)
+                }
+              />
+            ))}
+          </div>
+
+          <p className="mt-6 text-center text-[12.5px] text-ppc-text-faint">
             Showing {rows.length} of {PATTERNS.length} patterns
           </p>
         </div>
@@ -419,10 +421,10 @@ interface FilterBarProps {
 }
 
 function FilterBar({ filter, onChange, query, onQuery }: FilterBarProps) {
-  const pills: Array<{ key: FilterKey; label: string; icon: ReactNode }> = [
-    { key: 'new',      label: 'New',      icon: <Sparkle size={14} weight="fill" /> },
-    { key: 'saved',    label: 'Saved',    icon: <BookmarkSimple size={14} weight="fill" /> },
-    { key: 'archived', label: 'Archived', icon: <Archive size={14} weight="fill" /> },
+  const pills: Array<{ key: FilterKey; label: string }> = [
+    { key: 'new',      label: 'New'      },
+    { key: 'saved',    label: 'Saved'    },
+    { key: 'archived', label: 'Archived' },
   ];
 
   return (
@@ -435,44 +437,50 @@ function FilterBar({ filter, onChange, query, onQuery }: FilterBarProps) {
               key={p.key}
               type="button"
               onClick={() => onChange(p.key)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
+              className={`inline-flex items-center rounded-full px-4 py-2 text-[13.5px] font-semibold transition-colors ${
                 active
-                  ? 'bg-white text-ppc-purple-700 shadow-[0_1px_3px_rgba(15,10,30,0.05)]'
+                  ? 'bg-white text-ppc-purple-700 shadow-[0_1px_3px_rgba(15,10,30,0.06)]'
                   : 'text-ppc-text-muted hover:text-ppc-ink'
               }`}
             >
-              <span className={active ? 'text-ppc-purple-500' : 'text-ppc-text-faint'}>
-                {p.icon}
-              </span>
               {p.label}
             </button>
           );
         })}
       </div>
 
-      <div className="flex w-full max-w-[360px] items-center gap-2 rounded-full border border-ppc-card-border bg-white px-3.5 py-2">
-        <MagnifyingGlass size={15} weight="bold" className="text-ppc-text-faint" />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => onQuery(e.target.value)}
-          placeholder="Filter patterns"
-          className="min-w-0 flex-1 bg-transparent text-[13px] text-ppc-ink placeholder:text-ppc-text-faint focus:outline-none"
-        />
+      <div className="flex items-center gap-3">
+        <div className="flex w-[280px] items-center gap-2 rounded-full border border-ppc-card-border bg-white px-3.5 py-2 lg:w-[340px]">
+          <MagnifyingGlass size={15} weight="bold" className="text-ppc-text-faint" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => onQuery(e.target.value)}
+            placeholder="Search patterns..."
+            className="min-w-0 flex-1 bg-transparent text-[13.5px] text-ppc-ink placeholder:text-ppc-text-faint focus:outline-none"
+          />
+        </div>
         <button
           type="button"
-          aria-label="More filters"
-          className="grid h-7 w-7 place-items-center rounded-full text-ppc-text-muted hover:bg-[#F4F1FA] hover:text-ppc-ink"
+          className="inline-flex items-center gap-1.5 rounded-full border border-ppc-card-border bg-white px-4 py-2 text-[13.5px] font-medium text-ppc-ink hover:bg-[#FAF8FE]"
         >
-          <SlidersHorizontal size={14} weight="bold" />
+          <Funnel size={14} weight="bold" className="text-ppc-text-muted" />
+          Filters
+          <CaretDown size={12} weight="bold" className="text-ppc-text-faint" />
         </button>
       </div>
     </div>
   );
 }
 
-// Glyph picker — gives each row its own little fingerprint.
-const ROW_GLYPHS = [Waveform, DotsNine, WaveTriangle, ChartBar, TrendUp];
+// Topic icon per pattern — matches the editorial intent of each row.
+const PATTERN_ICONS: Record<string, typeof MagnifyingGlass> = {
+  'p-01': MagnifyingGlass,
+  'p-02': CalendarBlank,
+  'p-03': Wrench,
+  'p-04': UsersThree,
+  'p-05': TrendUp,
+};
 
 type RowStatus = 'New' | 'Needs review';
 
@@ -489,79 +497,88 @@ const STATUS_STYLES: Record<RowStatus, string> = {
   'Needs review': 'text-[#A06B19]',
 };
 
-interface PatternRowProps {
+interface PatternCardProps {
   pattern: Pattern;
   index: number;
   expanded: boolean;
   onToggle: () => void;
 }
 
-function PatternRow({ pattern, index, expanded, onToggle }: PatternRowProps) {
-  const Glyph = ROW_GLYPHS[(index - 1) % ROW_GLYPHS.length];
+function PatternCard({ pattern, index, expanded, onToggle }: PatternCardProps) {
+  const Icon = PATTERN_ICONS[pattern.id] ?? Target;
   const status = ROW_STATUS[pattern.id] ?? 'New';
   const receipts =
     pattern.drivenBy.reduce((sum, d) => sum + d.findingsCount, 0) + 1;
 
   return (
-    <li>
-      <button
-        type="button"
-        onClick={onToggle}
-        className={`group flex w-full items-center gap-5 px-5 py-5 text-left transition-colors hover:bg-[#FAF8FE] ${
-          expanded ? 'bg-[#FAF8FE]' : ''
-        }`}
-      >
-        <span className="w-[28px] text-[13px] font-semibold tabular-nums text-ppc-text-faint">
+    <article
+      onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      className={`group cursor-pointer rounded-[18px] border bg-white p-6 transition-all hover:border-ppc-purple-300 ${
+        expanded
+          ? 'border-ppc-purple-400 shadow-[0_2px_28px_rgba(127,90,240,0.10)] lg:col-span-2'
+          : 'border-ppc-card-border'
+      }`}
+    >
+      <div className="flex items-start gap-5">
+        <span className="w-[34px] shrink-0 pt-1.5 text-[28px] font-medium leading-none tabular-nums text-ppc-text-faint">
           {String(index).padStart(2, '0')}
         </span>
 
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px] bg-[#F4F0FB] text-ppc-purple-700">
-          <Glyph size={20} weight="duotone" />
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#F4F0FB] text-ppc-purple-700">
+          <Icon size={22} weight="duotone" />
         </span>
 
-        <span className="min-w-0 flex-1">
-          <span className="block text-[15.5px] font-semibold leading-snug text-ppc-ink">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-[16.5px] font-bold leading-snug text-ppc-ink">
             {pattern.headline}
-          </span>
-          <span className="mt-0.5 line-clamp-1 block text-[13px] leading-snug text-ppc-text-muted">
+          </h3>
+          <p className="mt-1.5 line-clamp-2 text-[13.5px] leading-[1.5] text-ppc-text-muted">
             {pattern.whatWeFound}
-          </span>
-        </span>
+          </p>
 
-        <span className="hidden shrink-0 text-right text-[12.5px] text-ppc-text-muted md:block">
-          <span className="font-medium text-ppc-ink">
-            {pattern.affected.length}
-          </span>{' '}
-          accounts
-          <span className="mx-1 text-ppc-text-faint">·</span>
-          <span className="font-medium text-ppc-ink">{receipts}</span> receipts
-        </span>
-
-        <span
-          className={`hidden w-[88px] shrink-0 text-[13px] font-medium md:inline-block ${STATUS_STYLES[status]}`}
-        >
-          {status}
-        </span>
-
-        <span className="inline-flex shrink-0 items-center gap-1 text-[13px] font-medium text-ppc-purple-700 transition-transform group-hover:translate-x-0.5">
-          {expanded ? (
-            <>
-              Close <X size={13} weight="bold" />
-            </>
-          ) : (
-            <>
-              Open <ArrowRight size={13} weight="bold" />
-            </>
-          )}
-        </span>
-      </button>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="text-[13px] text-ppc-text-muted">
+              <span className="font-semibold text-ppc-ink">
+                {pattern.affected.length}
+              </span>{' '}
+              accounts
+              <span className="mx-1.5 text-ppc-text-faint">·</span>
+              <span className="font-semibold text-ppc-ink">{receipts}</span>{' '}
+              receipts
+              <span className="mx-1.5 text-ppc-text-faint">·</span>
+              <span className={`font-semibold ${STATUS_STYLES[status]}`}>
+                {status}
+              </span>
+            </div>
+            <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-ppc-purple-700 transition-transform group-hover:translate-x-0.5">
+              {expanded ? (
+                <>
+                  Close <X size={13} weight="bold" />
+                </>
+              ) : (
+                <>
+                  Open <ArrowRight size={13} weight="bold" />
+                </>
+              )}
+            </span>
+          </div>
+        </div>
+      </div>
 
       {expanded && (
-        <div className="border-t border-[#EDE8F5] bg-[#FBFAFE] px-5 py-6 lg:px-12">
+        <div className="mt-5 border-t border-[#EDE8F5] pt-5">
           <ExpandedDetail pattern={pattern} />
         </div>
       )}
-    </li>
+    </article>
   );
 }
 
