@@ -25,7 +25,7 @@ import { PATTERNS, type Pattern } from '../mock/patterns';
 
 export function Patterns() {
   return (
-    <div className="space-y-14 pb-6">
+    <div className="space-y-10 pb-6">
       <HeaderStrip />
       <Hero />
       <HowItWorks />
@@ -138,17 +138,18 @@ const OUTPUTS: OutputCard[] = [
 ];
 
 function LensDiagram() {
-  // SVG viewBox coordinates that match the chip layout (24 → 568 horizontal).
-  // Inputs sit at x=20…220, lens at ~340, outputs at 460…720. Y values chosen
-  // to align with each chip's vertical center inside the flex columns below.
-  const inputY = [56, 132, 208, 284, 360, 436]; // 6 inputs
-  const outputY = [120, 248, 376];              // 3 outputs
+  // SVG viewBox is 720×380. Y values match each chip's vertical center inside
+  // the flex columns below (calibrated against the chip heights + py-0.5 col).
+  const LENS_CX = 340;
+  const LENS_CY = 190;
+  const inputY = [40, 102, 164, 226, 288, 350];   // 6 inputs evenly spread
+  const outputY = [78, 190, 302];                  // 3 outputs
 
   return (
-    <div className="relative mx-auto h-[500px] w-full max-w-[600px] justify-self-end">
+    <div className="relative mx-auto h-[380px] w-full max-w-[600px] justify-self-end">
       {/* connecting lines + lens — SVG sits underneath the chips */}
       <svg
-        viewBox="0 0 720 500"
+        viewBox="0 0 720 380"
         preserveAspectRatio="none"
         className="pointer-events-none absolute inset-0 h-full w-full"
         aria-hidden
@@ -172,11 +173,11 @@ function LensDiagram() {
           </linearGradient>
         </defs>
 
-        {/* input → lens lines (curve toward 340,250) */}
+        {/* input → lens lines */}
         {inputY.map((y, i) => (
           <path
             key={`in-${i}`}
-            d={`M 230 ${y} C 290 ${y}, 300 250, 340 250`}
+            d={`M 230 ${y} C 290 ${y}, 300 ${LENS_CY}, ${LENS_CX} ${LENS_CY}`}
             stroke="url(#lineIn)"
             strokeWidth="1"
             fill="none"
@@ -187,7 +188,7 @@ function LensDiagram() {
         {outputY.map((y, i) => (
           <path
             key={`out-${i}`}
-            d={`M 340 250 C 400 250, 410 ${y}, 460 ${y}`}
+            d={`M ${LENS_CX} ${LENS_CY} C 400 ${LENS_CY}, 410 ${y}, 460 ${y}`}
             stroke="url(#lineOut)"
             strokeWidth="1"
             fill="none"
@@ -195,17 +196,17 @@ function LensDiagram() {
         ))}
 
         {/* the lens — concentric soft ring with central glow */}
-        <circle cx="340" cy="250" r="62" fill="url(#lensGlow)" />
-        <circle cx="340" cy="250" r="44" fill="none" stroke="#A88CFF" strokeOpacity="0.55" strokeWidth="1" />
-        <circle cx="340" cy="250" r="30" fill="none" stroke="#A88CFF" strokeOpacity="0.35" strokeWidth="1" />
+        <circle cx={LENS_CX} cy={LENS_CY} r="52" fill="url(#lensGlow)" />
+        <circle cx={LENS_CX} cy={LENS_CY} r="38" fill="none" stroke="#A88CFF" strokeOpacity="0.55" strokeWidth="1" />
+        <circle cx={LENS_CX} cy={LENS_CY} r="26" fill="none" stroke="#A88CFF" strokeOpacity="0.35" strokeWidth="1" />
 
         {/* sparkles scattered around the lens */}
-        <Spark x={300} y={208} size={5} />
-        <Spark x={384} y={216} size={4} />
-        <Spark x={302} y={300} size={4} />
-        <Spark x={376} y={296} size={6} />
-        <Spark x={344} y={186} size={3} />
-        <Spark x={400} y={258} size={3} />
+        <Spark x={304} y={156} size={4} />
+        <Spark x={378} y={160} size={3} />
+        <Spark x={306} y={228} size={4} />
+        <Spark x={376} y={224} size={5} />
+        <Spark x={344} y={134} size={3} />
+        <Spark x={394} y={196} size={3} />
       </svg>
 
       {/* center sparkle glyph — sits on top of the SVG */}
@@ -243,13 +244,13 @@ function Spark({ x, y, size }: { x: number; y: number; size: number }) {
 
 function SourceChipRow({ icon: Icon, label, caption }: SourceChip) {
   return (
-    <div className="flex items-center gap-3 rounded-[10px] border border-ppc-card-border bg-white px-3 py-2.5 shadow-[0_1px_0_rgba(15,10,30,0.02)]">
-      <span className="grid h-8 w-8 place-items-center rounded-[8px] bg-[#F1ECFD] text-ppc-purple-700">
-        <Icon size={16} weight="duotone" />
+    <div className="flex items-center gap-2.5 rounded-[10px] border border-ppc-card-border bg-white px-2.5 py-2 shadow-[0_1px_0_rgba(15,10,30,0.02)]">
+      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-[7px] bg-[#F1ECFD] text-ppc-purple-700">
+        <Icon size={14} weight="duotone" />
       </span>
       <div className="min-w-0">
-        <div className="truncate text-[13px] font-semibold leading-tight text-ppc-ink">{label}</div>
-        <div className="truncate text-[11.5px] leading-tight text-ppc-text-muted">{caption}</div>
+        <div className="truncate text-[12.5px] font-semibold leading-tight text-ppc-ink">{label}</div>
+        <div className="truncate text-[11px] leading-tight text-ppc-text-muted">{caption}</div>
       </div>
     </div>
   );
@@ -262,15 +263,15 @@ function OutputCardRow({ tag, icon: Icon, title }: OutputCard) {
     Operator:  'bg-[#FBEAD0] text-[#A06B19]',
   };
   return (
-    <div className="rounded-[12px] border border-ppc-card-border bg-white px-3.5 py-3 shadow-[0_1px_0_rgba(15,10,30,0.02)]">
-      <span className={`mb-1.5 inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-medium ${tagStyles[tag]}`}>
+    <div className="rounded-[12px] border border-ppc-card-border bg-white px-3 py-2.5 shadow-[0_1px_0_rgba(15,10,30,0.02)]">
+      <span className={`mb-1 inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-medium ${tagStyles[tag]}`}>
         {tag}
       </span>
-      <div className="flex items-start gap-2.5">
-        <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-[8px] bg-[#F1ECFD] text-ppc-purple-700">
-          <Icon size={16} weight="duotone" />
+      <div className="flex items-start gap-2">
+        <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-[7px] bg-[#F1ECFD] text-ppc-purple-700">
+          <Icon size={14} weight="duotone" />
         </span>
-        <div className="text-[13px] font-semibold leading-snug text-ppc-ink">
+        <div className="text-[12.5px] font-semibold leading-snug text-ppc-ink">
           {title}
         </div>
       </div>
