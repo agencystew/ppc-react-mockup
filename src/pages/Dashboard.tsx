@@ -1,7 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   ArrowRight, ArrowUp, ArrowDown, CaretRight, Sparkle,
-  MagnifyingGlass, Funnel, Eye,
+  MagnifyingGlass, Funnel,
 } from '@phosphor-icons/react';
 import { PROJECTS, ACCOUNTS } from '../mock/projects';
 import { RECENT_RUNS_SUMMARY } from '../mock/runs';

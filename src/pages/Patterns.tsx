@@ -20,9 +20,14 @@ import { PATTERNS, type Pattern, type AffectedProject, type PatternDriver } from
  *    Patterns  = synthesis across many findings + many briefings (this page)
  *
  * Page anatomy, top → bottom:
- *    1. PatternsHero          — dark editorial card, sandwich layout
- *    2. FeaturedPatternCard   — the spotlight pattern, full editorial spread
- *    3. ShelfDivider          — quiet transition from spotlight to shelf
+ *    1. PatternsHero          — dark editorial card with clickable
+ *                                constellation that filters the shelf below
+ *    2. FeaturedTriplet       — lead spread + 2 flank cards (top 3 patterns)
+ *    3. LensTriageBar         — categorical filters (Recommended default +
+ *                                Wins/Defend/Shifts/Infrastructure/All) plus
+ *                                a By-project dropdown. Replaced the older
+ *                                ShelfDivider — same section-break role,
+ *                                just functional.
  *    4. CompactPatternCard×N  — scannable shelf, click-to-expand inline.
  *                                Scales to 40+ patterns when the agency book
  *                                gets big — flat list, no pagination needed
@@ -182,7 +187,7 @@ interface CandidateSignal {
   whyNotPromoted: string;
 }
 
-const CANDIDATE_SIGNALS: CandidateSignal[] = [
+export const CANDIDATE_SIGNALS: CandidateSignal[] = [
   {
     id: 'cs-01',
     affected: [{ id: 'the-hoth', name: 'The HOTH' }, { id: 'linkbuilder', name: 'LinkBuilder.io' }],
@@ -209,7 +214,7 @@ const CANDIDATE_SIGNALS: CandidateSignal[] = [
   },
 ];
 
-const STATS_OBSERVATIONS: string[] = [
+export const STATS_OBSERVATIONS: string[] = [
   "Edwin Novel's data is the thinnest this week - one new run.",
   "No new runs on Authority Builders in the last 7 days.",
   "PMAX patterns are the densest cluster this week - 4 of 30.",
