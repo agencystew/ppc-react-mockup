@@ -226,16 +226,19 @@
   line-height: 1.55;
 }
 
-/* Eyebrow — small uppercase mono label above a section title.
+/* Eyebrow — overridden 2026-05-18 sweep. Mono retired; eyebrows now use
+ * Figtree at 11px mixed case, no tracking. Most callers should DELETE the
+ * eyebrow rather than restyle it (see feedback_mono_eyebrow_tic). This rule
+ * exists for legacy markup; new code should prefer no eyebrow, or .ppc-meta.
  *   <div class="ppc-eyebrow">Industry Intelligence</div>
  */
 .ppc-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-fg-2);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ppc-text-muted);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -250,10 +253,14 @@
   border: 1px solid rgba(255,255,255,0.08);
 }
 
-/* Mono data — stat numbers, URLs, small ticks. Kill slashed zero. */
-.ppc-mono {
-  font-family: var(--font-mono);
+/* Tabular numerals — stat numbers, URLs, small ticks (e.g. 47:21 elapsed,
+ * $1,247 figure). Formerly .ppc-mono; renamed to .ppc-tab so the visual cue
+ * is clearly "aligned figures" not "monospace font." Stays Figtree, just
+ * locks tabular-nums + slashed-zero off. Old .ppc-mono kept as an alias. */
+.ppc-tab, .ppc-mono {
+  font-family: var(--font-sans);
   font-weight: 400;
+  font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum", "zero" 0;
   letter-spacing: 0;
 }

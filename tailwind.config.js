@@ -80,8 +80,10 @@ export default {
       },
       fontFamily: {
         sans:    ['Figtree', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['Figtree', 'ui-sans-serif', 'system-ui', 'sans-serif'],  /* v5: display = Figtree 800/900, not Outfit */
-        mono:    ['"Courier New"', 'ui-monospace', 'Menlo', 'Consolas', 'monospace'],  /* v5: eyebrows + timing */
+        display: ['Figtree', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        /* Mono retired 2026-05-18. font-mono now resolves to Figtree (same as
+         * font-sans) so any stragglers don't fall back to system Courier. */
+        mono:    ['Figtree', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         serif:   ['PF-Marlet-Display', 'Playfair Display', 'Figtree', 'Georgia', 'serif'],
         hand:    ['Caveat', 'cursive'],  /* v2 — red-orange handwritten annotation */
       },

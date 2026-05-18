@@ -49,7 +49,6 @@
   --ivory: #FAF7F0;
   --font-display: 'Figtree', system-ui, sans-serif;
   --font-hand: 'Caveat', cursive;
-  --font-mono: 'Courier New', ui-monospace, monospace;
 
   /* ====================================================================
    * COLOR TOKENS
@@ -173,8 +172,10 @@
    */
   --font-sans:    'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-ui:      'Figtree', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Figtree', ui-sans-serif, system-ui, -apple-system, sans-serif;  /* v5: Figtree 800/900 for display, not Outfit */
-  --font-mono:    'Courier New', ui-monospace, Menlo, Consolas, monospace;          /* v5: eyebrows + timing use Courier New */
+  --font-display: 'Figtree', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* No --font-mono. Mono retired across the app — every eyebrow / timing label
+   * uses Figtree. If you reach for monospace, you're probably reaching for an
+   * eyebrow tic; delete the label instead. (See feedback_mono_eyebrow_tic.) */
 
   /* --font-serif: hero H1 only.
    *   Production: load PF-Marlet-Display via Typekit (use.typekit.net/<kit>.css)
@@ -240,25 +241,35 @@
   --display-2xl-tracking: var(--tracking-display);
   --display-2xl-leading: var(--leading-display);
 
-  /* H1 — e.g. "Colors" page title at 98px */
-  --h1-size: clamp(44px, 6vw, 84px);
-  --h1-weight: 700;
-  --h1-tracking: var(--tracking-display-xl);
-  --h1-leading: var(--leading-display);
+  /* Canonical app-surface scale (2026-05-18 sweep).
+   *
+   * Locked single 44px H1 across every page. Section H2s at 28px. Sub-section
+   * H3s at 20px. Small card labels at 16px. These are the CHASSIS — color
+   * accents, italic spans, the signature purple full-stop, and per-page hero
+   * treatments still ride on top of these classes (see PageHeader primitive
+   * + .ppc-accent helpers).
+   *
+   * For the marketing pseudo-display sizes (homepage hero, ads-intel reports),
+   * use .ppc-display-2xl directly — that still scales to a clamp.
+   */
+  --h1-size: 44px;
+  --h1-weight: 800;
+  --h1-tracking: -0.025em;
+  --h1-leading: 1.02;
 
-  --h2-size: 48px;
-  --h2-weight: 700;
-  --h2-tracking: var(--tracking-display);
-  --h2-leading: 1.08;
+  --h2-size: 28px;
+  --h2-weight: 800;
+  --h2-tracking: -0.020em;
+  --h2-leading: 1.05;
 
-  --h3-size: 32px;
+  --h3-size: 20px;
   --h3-weight: 700;
-  --h3-tracking: -0.020em;
+  --h3-tracking: -0.012em;
   --h3-leading: 1.15;
 
-  --h4-size: 24px;
+  --h4-size: 16px;
   --h4-weight: 700;
-  --h4-tracking: -0.020em;
+  --h4-tracking: -0.008em;
   --h4-leading: 1.25;
 
   --h5-size: 20px;
@@ -266,15 +277,17 @@
   --h5-tracking: -0.010em;
   --h5-leading: 1.30;
 
-  /* Body — default reading size */
+  /* Body — default reading size.
+   * Keep --body-size at 16px so Tailwind's rem-based text-sm/text-base scale
+   * stays correct. .ppc-body explicitly overrides to 14px when applied. */
   --body-lg-size: 18px;
   --body-lg-leading: 1.55;
 
   --body-size: 16px;
   --body-leading: 1.50;
 
-  --body-sm-size: 14px;
-  --body-sm-leading: 1.45;
+  --body-sm-size: 13px;
+  --body-sm-leading: 1.50;
 
   /* UI label — used for buttons, menu items, pills */
   --label-size: 14px;
@@ -282,15 +295,13 @@
   --label-leading: 1.23;
   --label-tracking: -0.010em;
 
-  /* Micro / eyebrow */
-  --eyebrow-size: 12px;
-  --eyebrow-weight: 700;
-  --eyebrow-tracking: 0.06em;
-  --eyebrow-transform: uppercase;
-
-  /* Mono / data */
-  --mono-size: 12px;
-  --mono-weight: 500;
+  /* Survivor eyebrow (rare). Most eyebrows should be DELETED, not redesigned.
+   * When one earns its place, use .ppc-meta or Tailwind inline; this token
+   * is here for legacy callers and defaults to mixed-case (no tracking). */
+  --eyebrow-size: 11px;
+  --eyebrow-weight: 600;
+  --eyebrow-tracking: 0;
+  --eyebrow-transform: none;
 }
 
 /* ======================================================================
@@ -348,9 +359,31 @@ h5, .ppc-h5 {
   margin: 0;
 }
 
-p, .ppc-body { margin: 0 0 1em; text-wrap: pretty; }
-.ppc-body-lg { font-size: var(--body-lg-size); line-height: var(--body-lg-leading); }
-.ppc-body-sm { font-size: var(--body-sm-size); line-height: var(--body-sm-leading); }
+/* Body — explicit font properties so applying .ppc-body locks 14px Figtree
+ * regardless of what Tailwind class the element also carries. */
+p { margin: 0 0 1em; text-wrap: pretty; }
+.ppc-body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ppc-ink);
+  text-wrap: pretty;
+}
+.ppc-body-lg {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--body-lg-size);
+  line-height: var(--body-lg-leading);
+  color: var(--ppc-ink);
+}
+.ppc-body-sm {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--body-sm-size);
+  line-height: var(--body-sm-leading);
+  color: var(--ppc-text-muted);
+}
 
 .ppc-display-2xl {
   font-weight: var(--display-2xl-weight);
@@ -359,12 +392,25 @@ p, .ppc-body { margin: 0 0 1em; text-wrap: pretty; }
   letter-spacing: var(--display-2xl-tracking);
 }
 
+/* Eyebrow + meta — most eyebrows should be DELETED. When one survives, use
+ * .ppc-meta (small Figtree, mixed case, no tracking). .ppc-eyebrow remains
+ * for legacy callers but now defaults to mixed case via the var update above. */
 .ppc-eyebrow {
+  font-family: var(--font-sans);
   font-size: var(--eyebrow-size);
   font-weight: var(--eyebrow-weight);
   letter-spacing: var(--eyebrow-tracking);
   text-transform: var(--eyebrow-transform);
-  color: var(--color-fg-2);
+  color: var(--ppc-text-muted);
+}
+
+.ppc-meta {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--ppc-text-muted);
 }
 
 .ppc-label {
@@ -374,11 +420,14 @@ p, .ppc-body { margin: 0 0 1em; text-wrap: pretty; }
   letter-spacing: var(--label-tracking);
 }
 
-code, .ppc-mono {
-  font-family: var(--font-mono);
-  font-size: var(--mono-size);
-  font-weight: var(--mono-weight);
-}
+/* Signature playful overlay — the colored full-stop motif. Use as the trailing
+ * character on a headline:  <h1>Headline<span class="ppc-period">.</span></h1>
+ * Color defaults to v5 primary purple; override inline with text-redorange etc.
+ * for per-page riffs. */
+.ppc-period { color: var(--ppc-purple-500); }
+
+/* code element: inherit Figtree like everything else. No mono. */
+code { font-family: inherit; }
 
 a { color: var(--color-fg-accent); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 3px; }
