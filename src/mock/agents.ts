@@ -17,7 +17,7 @@ export const AGENTS: AgentDefinition[] = [
     category: 'operations',
     headline: 'Find what changed this week.',
     outcomeDescription:
-      "A senior-strategist-grade rundown of every meaningful shift across your accounts. Surface the wins, flag the leaks, and queue next week's plays.",
+      "Surface the wins, flag the leaks, and queue next week's plays.",
     expectedDuration: '~12 min',
     thinkingSteps: [
       'Reads the week against business context',

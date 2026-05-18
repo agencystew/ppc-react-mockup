@@ -58,9 +58,6 @@ const LIVE_TRACES: Record<string, string[]> = {
     'Detecting lost-impression-share movements over 12 months',
     'Scanning bid cap interference on profitable campaigns',
     'Checking landing-page experience signals on 8 LPs',
-    'Comparing this week vs the 4-week converting-intent baseline',
-    'Stress-testing ad copy fatigue across 47 keywords',
-    'Compiling priority-ranked findings with evidence',
   ],
 };
 
@@ -293,8 +290,8 @@ export function AgentDetail() {
         {/* ═══ LEFT — editorial story ═══════════════════════════════════════ */}
         <div className="min-w-0 space-y-10">
           <EditorialHero agent={agent} />
-          <ExpeditionMap agent={agent} />
           <LiveInvestigationLog slug={agent.slug} />
+          <ExpeditionMap agent={agent} />
         </div>
 
         {/* ═══ RIGHT — sticky launch rail ═══════════════════════════════════ */}
@@ -376,11 +373,8 @@ const CATEGORY_LABEL: Record<string, string> = {
 };
 
 function EditorialHero({ agent }: { agent: AgentDefinition }) {
-  const hasPeriod = agent.headline.endsWith('.');
-  const headlineBody = hasPeriod ? agent.headline.slice(0, -1) : agent.headline;
-
   return (
-    <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(200px,260px)] lg:gap-10">
+    <section className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(200px,260px)] lg:gap-10">
       <div className="flex flex-col">
         <CategoryChip label={CATEGORY_LABEL[agent.category] ?? agent.category} />
 
@@ -388,15 +382,7 @@ function EditorialHero({ agent }: { agent: AgentDefinition }) {
           {agent.name}
         </h1>
 
-        <p
-          className="mt-3 font-serif font-bold italic leading-[1.05] tracking-[-0.025em] text-ppc-purple-500 text-[24px] sm:text-[30px] lg:text-[36px]"
-          style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-        >
-          {headlineBody}
-          {hasPeriod && <span className="text-ppc-purple-700">.</span>}
-        </p>
-
-        <p className="mt-6 max-w-[520px] text-[16px] leading-[1.65] text-ppc-text-muted">
+        <p className="mt-5 max-w-[560px] text-[18px] leading-[1.55] text-ppc-text-muted">
           {agent.outcomeDescription}
         </p>
       </div>
@@ -542,8 +528,7 @@ function ExpeditionMap({ agent }: { agent: AgentDefinition }) {
           </span>
         </h2>
         <p className="mt-4 max-w-[560px] text-[15px] leading-[1.65] text-white/65">
-          Every place this agent looks. Read it once and you'll know
-          exactly what's coming back in the report.
+          Specific Agent Focus
         </p>
 
         <ol className="mt-10 grid gap-x-12 gap-y-8 sm:grid-cols-2">
