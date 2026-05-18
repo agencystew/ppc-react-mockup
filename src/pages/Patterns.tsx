@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
 import {
   Sparkle, Cube, Stack, ArrowsClockwise,
   MagnifyingGlass, ArrowRight, X, Info,
