@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   House, Robot, ChartLineUp, ChatCircle, Compass,
@@ -20,19 +20,24 @@ function getScopedProjectId(pathname: string): string | null {
   return PROJECTS.some((p) => p.id === id) ? id : null;
 }
 
-/* AppShell — "Inhabited Dark" sidebar, v2 confident-scale.
+/* AppShell — "Inhabited Dark" sidebar, v3 (slide-indicator + tightened scale).
  *
- *  - 17px Figtree bold nav items (was 14px / mostly mono eyebrows).
- *  - No "WORKSPACE" / "PROJECTS" Courier eyebrows — direct hierarchy by
- *    spacing and a single hairline.
- *  - Active = soft white/[0.06] tint + a 2.5px purple gradient bar bleeding
- *    in from the rail's left edge, with a faint purple glow. No chunky
- *    purple fill blocks.
- *  - Projects collapse to a single `All projects · 8` row that opens a
- *    380px slide-over switcher (search, pinned, filter chips, status dots).
+ *  - 17px Figtree bold nav items, no mono Courier eyebrows.
+ *  - 240px wide (was 280) — tighter, Linear-aligned.
+ *  - No numeric badges in the rail (Chat unread count, Agents running
+ *    count, All projects total — all gone). Agents keeps a pure green
+ *    pulse when something's running, no digit.
+ *  - 24px Phosphor icons with a duotone weight that springs on press
+ *    (300ms cubic-bezier overshoot), lifts on hover, and picks up a soft
+ *    purple drop-shadow when its row goes active.
+ *  - Active state is a SHARED pill+bar at the <nav> level that slides
+ *    between rows over 280ms when you navigate. Manual refs + CSS
+ *    transition — no animation library. Pre-paint measurement via
+ *    useLayoutEffect so the first paint never animates.
+ *  - Projects collapse to a single `All projects ›` row that opens a
+ *    380px slide-over switcher.
  *  - When inside a project route, a quiet bordered "current project" chip
  *    anchors above the All Projects row so context isn't lost.
- *  - Width 280px (was 264).
  *
  * Layout posture per route family is unchanged: /chat*, /v2/chat*, /v2/* are
  * full-bleed; everything else uses the centered max-w-[1240px] wrapper. */
@@ -62,6 +67,9 @@ const PINNED_KEY = 'ppcio-projects-pinned-v2';
 const SIDEBAR_FONT = 'Figtree, ui-sans-serif, system-ui, sans-serif';
 const ACCENT_GRAD = 'linear-gradient(180deg, #B8A0FF 0%, #7F5AF0 55%, #5742C7 100%)';
 const ACCENT_GLOW = '0 0 12px rgba(127,90,240,0.40)';
+const ICON_TRANSITION =
+  'transition-[transform,filter,color] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]';
+const SLIDE_EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
 
 export function AppShell() {
   const [collapsed, setCollapsed] = useState(false);
@@ -73,10 +81,8 @@ export function AppShell() {
     if (saved !== null) setCollapsed(saved === 'true');
   }, []);
 
-  // Close switcher when the route changes (covers row clicks + back/forward).
   useEffect(() => { setSwitcherOpen(false); }, [pathname]);
 
-  // ESC closes the switcher.
   useEffect(() => {
     if (!switcherOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -120,6 +126,8 @@ export function AppShell() {
 
 /* ─── Sidebar shell ─────────────────────────────────────────────────────── */
 
+type NavKey = 'dashboard' | 'chat' | 'agents' | 'reports' | 'patterns' | 'all-projects';
+
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
@@ -128,8 +136,6 @@ interface SidebarProps {
 
 function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
   const { pathname } = useLocation();
-  // Inside a project, Agents + Reports rebind to project-scoped equivalents
-  // so clicking them stays in the project. Dashboard + Chat stay global.
   const scopedId = getScopedProjectId(pathname);
   const projectPrefix = scopedId ? `/projects/${scopedId}` : '';
   const rebindAgentPages = scopedId
@@ -139,13 +145,73 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
     ? REPORT_PAGES.map((p) => ({ ...p, to: p.to.replace(/^\/reports/, `${projectPrefix}/reports`) }))
     : REPORT_PAGES;
 
+  const agentsBase = scopedId ? `${projectPrefix}/agents` : '/agents';
+  const reportsBase = scopedId ? `${projectPrefix}/reports` : '/reports';
   const projectsActive = pathname === '/projects' || pathname.startsWith('/projects/');
   const currentProject = scopedId ? PROJECTS.find((p) => p.id === scopedId) ?? null : null;
+
+  // Which top-level row owns the slide indicator right now.
+  const activeKey: NavKey | null = useMemo(() => {
+    if (pathname === '/') return 'dashboard';
+    if (pathname === '/chat' || pathname.startsWith('/chat/')) return 'chat';
+    if (pathname.startsWith(agentsBase)) return 'agents';
+    if (pathname.startsWith(reportsBase)) return 'reports';
+    if (pathname === '/patterns') return 'patterns';
+    if (projectsActive) return 'all-projects';
+    return null;
+  }, [pathname, agentsBase, reportsBase, projectsActive]);
+
+  // Refs for each measurable row (the visible button/anchor itself).
+  const navRef = useRef<HTMLElement>(null);
+  const itemRefs = useRef<Record<NavKey, HTMLElement | null>>({
+    dashboard: null,
+    chat: null,
+    agents: null,
+    reports: null,
+    patterns: null,
+    'all-projects': null,
+  });
+  const [indicator, setIndicator] = useState<{ top: number; height: number } | null>(null);
+
+  const measure = () => {
+    if (collapsed || !activeKey || !navRef.current) {
+      setIndicator(null);
+      return;
+    }
+    const el = itemRefs.current[activeKey];
+    if (!el) {
+      setIndicator(null);
+      return;
+    }
+    const navRect = navRef.current.getBoundingClientRect();
+    const itemRect = el.getBoundingClientRect();
+    setIndicator({
+      top: itemRect.top - navRect.top + navRef.current.scrollTop,
+      height: itemRect.height,
+    });
+  };
+
+  // Measure pre-paint on route/collapse change so the first paint sits at the
+  // right position with no flash; subsequent changes animate via CSS transition.
+  useLayoutEffect(measure, [activeKey, collapsed]);
+
+  // Remeasure when the surrounding layout might have reflowed (window resize,
+  // ItemGroup expand/collapse below the active row, etc.).
+  useEffect(() => {
+    const handler = () => measure();
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeKey, collapsed]);
+
+  const setItemRef = (key: NavKey) => (el: HTMLElement | null) => {
+    itemRefs.current[key] = el;
+  };
 
   return (
     <aside
       className={`relative sticky top-0 flex h-screen shrink-0 flex-col transition-[width] duration-200 ${
-        collapsed ? 'w-[72px]' : 'w-[280px]'
+        collapsed ? 'w-[72px]' : 'w-[240px]'
       }`}
       style={{
         background:
@@ -153,7 +219,6 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
         boxShadow: 'inset -1px 0 0 rgba(255,255,255,0.05)',
       }}
     >
-      {/* Subtle purple bloom only at the very top */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[240px]"
@@ -167,25 +232,81 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
         <BrandRow collapsed={collapsed} onToggle={onToggle} />
         <SearchRow collapsed={collapsed} />
 
-        <nav className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-2 pb-3">
-          <MainNavItem to="/" icon={House} label="Dashboard" collapsed={collapsed} end />
-          <MainNavItem to="/chat" icon={ChatCircle} label="Chat" collapsed={collapsed} badge="2" />
+        <nav
+          ref={navRef}
+          className="relative flex flex-1 flex-col gap-[2px] overflow-y-auto px-2 pb-3"
+        >
+          {/* Sliding active indicator — bg pill + left-edge accent bar. */}
+          {indicator && !collapsed && (
+            <>
+              <span
+                aria-hidden
+                className="pointer-events-none absolute rounded-[11px]"
+                style={{
+                  left: 8,
+                  right: 8,
+                  top: indicator.top,
+                  height: indicator.height,
+                  background: 'rgba(255,255,255,0.06)',
+                  transition: `top 280ms ${SLIDE_EASE}, height 220ms ${SLIDE_EASE}`,
+                }}
+              />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute"
+                style={{
+                  left: 0,
+                  top: indicator.top + 8,
+                  height: Math.max(0, indicator.height - 16),
+                  width: 2.5,
+                  background: ACCENT_GRAD,
+                  borderRadius: '0 4px 4px 0',
+                  boxShadow: ACCENT_GLOW,
+                  transition: `top 280ms ${SLIDE_EASE}, height 220ms ${SLIDE_EASE}`,
+                }}
+              />
+            </>
+          )}
+
+          <MainNavItem
+            to="/"
+            icon={House}
+            label="Dashboard"
+            collapsed={collapsed}
+            end
+            itemRef={setItemRef('dashboard')}
+          />
+          <MainNavItem
+            to="/chat"
+            icon={ChatCircle}
+            label="Chat"
+            collapsed={collapsed}
+            itemRef={setItemRef('chat')}
+          />
           <ItemGroup
             icon={Robot}
             label="Agents"
-            basePath={scopedId ? `${projectPrefix}/agents` : '/agents'}
+            basePath={agentsBase}
             pages={rebindAgentPages}
             collapsed={collapsed}
-            runningCount={4}
+            running
+            itemRef={setItemRef('agents')}
           />
           <ItemGroup
             icon={ChartLineUp}
             label="Reports"
-            basePath={scopedId ? `${projectPrefix}/reports` : '/reports'}
+            basePath={reportsBase}
             pages={rebindReportPages}
             collapsed={collapsed}
+            itemRef={setItemRef('reports')}
           />
-          <MainNavItem to="/patterns" icon={Compass} label="Patterns" collapsed={collapsed} />
+          <MainNavItem
+            to="/patterns"
+            icon={Compass}
+            label="Patterns"
+            collapsed={collapsed}
+            itemRef={setItemRef('patterns')}
+          />
 
           <div className={`my-3 h-px ${collapsed ? 'mx-3' : 'mx-2'} bg-white/[0.06]`} />
 
@@ -195,6 +316,7 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
             collapsed={collapsed}
             active={projectsActive}
             onClick={onOpenSwitcher}
+            itemRef={setItemRef('all-projects')}
           />
 
           {collapsed && <CollapsedProjectStrip scopedId={scopedId} />}
@@ -292,18 +414,21 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-/* ─── Active bar (left-edge gradient indicator) ─────────────────────────── */
+/* ─── Nav icon (animated) ───────────────────────────────────────────────── */
 
-function ActiveBar() {
+function NavIcon({
+  Icon, isActive, collapsed,
+}: { Icon: typeof House; isActive: boolean; collapsed: boolean }) {
+  const size = collapsed ? 20 : 24;
   return (
-    <span
-      aria-hidden
-      className="absolute left-0 top-[8px] bottom-[8px] w-[2.5px]"
-      style={{
-        background: ACCENT_GRAD,
-        borderRadius: '0 4px 4px 0',
-        boxShadow: ACCENT_GLOW,
-      }}
+    <Icon
+      size={size}
+      weight={isActive ? 'fill' : 'duotone'}
+      className={`shrink-0 ${ICON_TRANSITION} ${
+        isActive
+          ? 'text-white drop-shadow-[0_0_8px_rgba(127,90,240,0.45)]'
+          : 'text-white/[0.78]'
+      } group-hover:scale-[1.08] group-active:scale-90`}
     />
   );
 }
@@ -311,66 +436,51 @@ function ActiveBar() {
 /* ─── Main nav item ─────────────────────────────────────────────────────── */
 
 function MainNavItem({
-  to, icon: Icon, label, collapsed, end, badge,
+  to, icon: Icon, label, collapsed, end, itemRef,
 }: {
   to: string;
   icon: typeof House;
   label: string;
   collapsed: boolean;
   end?: boolean;
-  badge?: string;
+  itemRef?: (el: HTMLAnchorElement | null) => void;
 }) {
   return (
     <NavLink
       to={to}
       end={end}
+      ref={itemRef}
       title={collapsed ? label : undefined}
       className={({ isActive }) =>
-        `group relative flex items-center rounded-[11px] transition-colors duration-150 ${
+        `group relative z-[1] flex items-center rounded-[11px] transition-colors duration-200 ${
           collapsed ? 'justify-center px-2 py-[11px]' : 'gap-3 pl-[14px] pr-[12px] py-[12px]'
         } ${
-          isActive
-            ? 'bg-white/[0.06] text-white'
-            : 'text-white/[0.82] hover:bg-white/[0.035] hover:text-white'
+          collapsed
+            ? isActive
+              ? 'bg-white/[0.06] text-white'
+              : 'text-white/[0.82] hover:bg-white/[0.035] hover:text-white'
+            : isActive
+              ? 'text-white'
+              : 'text-white/[0.82] hover:bg-white/[0.025] hover:text-white'
         }`
       }
     >
       {({ isActive }) => (
         <>
-          {isActive && !collapsed && <ActiveBar />}
-          <Icon
-            size={collapsed ? 20 : 22}
-            weight={isActive ? 'fill' : 'duotone'}
-            className={`shrink-0 ${isActive ? 'text-white' : 'text-white/[0.78]'}`}
-          />
+          <NavIcon Icon={Icon} isActive={isActive} collapsed={collapsed} />
           {!collapsed && (
-            <>
-              <span
-                className={`flex-1 text-[17px] leading-none tracking-[-0.012em] ${
-                  isActive ? 'font-extrabold' : 'font-bold'
-                }`}
-                style={{ fontFamily: SIDEBAR_FONT }}
-              >
-                {label}
-              </span>
-              {badge && <NavBadge active={isActive}>{badge}</NavBadge>}
-            </>
+            <span
+              className={`flex-1 text-[17px] leading-none tracking-[-0.012em] transition-[font-weight] duration-200 ${
+                isActive ? 'font-extrabold' : 'font-bold'
+              }`}
+              style={{ fontFamily: SIDEBAR_FONT }}
+            >
+              {label}
+            </span>
           )}
         </>
       )}
     </NavLink>
-  );
-}
-
-function NavBadge({ children, active }: { children: React.ReactNode; active: boolean }) {
-  return (
-    <span
-      className={`inline-flex h-[21px] min-w-[24px] items-center justify-center rounded-[6px] px-[7px] text-[11.5px] font-bold leading-none tabular-nums ${
-        active ? 'bg-white/15 text-white' : 'bg-white/[0.07] text-white/70'
-      }`}
-    >
-      {children}
-    </span>
   );
 }
 
@@ -382,14 +492,16 @@ function ItemGroup({
   basePath,
   pages,
   collapsed,
-  runningCount,
+  running,
+  itemRef,
 }: {
   icon: typeof House;
   label: string;
   basePath: string;
   pages: SubPage[];
   collapsed: boolean;
-  runningCount?: number;
+  running?: boolean;
+  itemRef?: (el: HTMLButtonElement | null) => void;
 }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -400,19 +512,16 @@ function ItemGroup({
   if (collapsed) {
     return (
       <button
+        ref={itemRef}
         onClick={() => navigate(pages[0].to)}
         title={label}
-        className={`group relative flex w-full items-center justify-center rounded-[11px] px-2 py-[11px] transition-colors ${
+        className={`group relative z-[1] flex w-full items-center justify-center rounded-[11px] px-2 py-[11px] transition-colors ${
           inSection
             ? 'bg-white/[0.06] text-white'
             : 'text-white/[0.82] hover:bg-white/[0.035] hover:text-white'
         }`}
       >
-        <Icon
-          size={20}
-          weight={inSection ? 'fill' : 'duotone'}
-          className={inSection ? 'text-white' : 'text-white/[0.78]'}
-        />
+        <NavIcon Icon={Icon} isActive={inSection} collapsed />
       </button>
     );
   }
@@ -420,29 +529,25 @@ function ItemGroup({
   return (
     <div>
       <button
+        ref={itemRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`group relative flex w-full items-center gap-3 rounded-[11px] pl-[14px] pr-[12px] py-[12px] text-left transition-colors duration-150 ${
+        className={`group relative z-[1] flex w-full items-center gap-3 rounded-[11px] pl-[14px] pr-[12px] py-[12px] text-left transition-colors duration-200 ${
           inSection
-            ? 'bg-white/[0.06] text-white'
-            : 'text-white/[0.82] hover:bg-white/[0.035] hover:text-white'
+            ? 'text-white'
+            : 'text-white/[0.82] hover:bg-white/[0.025] hover:text-white'
         }`}
       >
-        {inSection && <ActiveBar />}
-        <Icon
-          size={22}
-          weight={inSection ? 'fill' : 'duotone'}
-          className={`shrink-0 ${inSection ? 'text-white' : 'text-white/[0.78]'}`}
-        />
+        <NavIcon Icon={Icon} isActive={inSection} collapsed={false} />
         <span
-          className={`flex-1 text-[17px] leading-none tracking-[-0.012em] ${
+          className={`flex-1 text-[17px] leading-none tracking-[-0.012em] transition-[font-weight] duration-200 ${
             inSection ? 'font-extrabold' : 'font-bold'
           }`}
           style={{ fontFamily: SIDEBAR_FONT }}
         >
           {label}
         </span>
-        {runningCount !== undefined && <RunningIndicator count={runningCount} />}
+        {running && <RunningPulse />}
         <CaretRight
           size={12}
           weight="bold"
@@ -488,51 +593,48 @@ function ItemGroup({
 /* ─── All projects row (slide-over trigger) ─────────────────────────────── */
 
 function AllProjectsRow({
-  collapsed, active, onClick,
-}: { collapsed: boolean; active: boolean; onClick: () => void }) {
+  collapsed, active, onClick, itemRef,
+}: {
+  collapsed: boolean;
+  active: boolean;
+  onClick: () => void;
+  itemRef?: (el: HTMLButtonElement | null) => void;
+}) {
   if (collapsed) {
     return (
       <button
+        ref={itemRef}
         onClick={onClick}
         title="All projects"
-        className={`group relative flex w-full items-center justify-center rounded-[11px] px-2 py-[11px] transition-colors ${
+        className={`group relative z-[1] flex w-full items-center justify-center rounded-[11px] px-2 py-[11px] transition-colors ${
           active
             ? 'bg-white/[0.06] text-white'
             : 'text-white/[0.82] hover:bg-white/[0.035] hover:text-white'
         }`}
       >
-        <SquaresFour
-          size={20}
-          weight={active ? 'fill' : 'duotone'}
-          className={active ? 'text-white' : 'text-white/[0.78]'}
-        />
+        <NavIcon Icon={SquaresFour} isActive={active} collapsed />
       </button>
     );
   }
   return (
     <button
+      ref={itemRef}
       onClick={onClick}
-      className={`group relative flex w-full items-center gap-3 rounded-[11px] pl-[14px] pr-[12px] py-[12px] text-left transition-colors duration-150 ${
+      className={`group relative z-[1] flex w-full items-center gap-3 rounded-[11px] pl-[14px] pr-[12px] py-[12px] text-left transition-colors duration-200 ${
         active
-          ? 'bg-white/[0.06] text-white'
-          : 'text-white/[0.82] hover:bg-white/[0.035] hover:text-white'
+          ? 'text-white'
+          : 'text-white/[0.82] hover:bg-white/[0.025] hover:text-white'
       }`}
     >
-      {active && <ActiveBar />}
-      <SquaresFour
-        size={22}
-        weight={active ? 'fill' : 'duotone'}
-        className={`shrink-0 ${active ? 'text-white' : 'text-white/[0.78]'}`}
-      />
+      <NavIcon Icon={SquaresFour} isActive={active} collapsed={false} />
       <span
-        className={`flex-1 text-[17px] leading-none tracking-[-0.012em] ${
+        className={`flex-1 text-[17px] leading-none tracking-[-0.012em] transition-[font-weight] duration-200 ${
           active ? 'font-extrabold' : 'font-bold'
         }`}
         style={{ fontFamily: SIDEBAR_FONT }}
       >
         All projects
       </span>
-      <NavBadge active={active}>{PROJECTS.length.toString()}</NavBadge>
       <CaretRight
         size={12}
         weight="bold"
@@ -552,7 +654,7 @@ function CurrentProjectChip({ project }: { project: Project }) {
     <NavLink
       to={`/projects/${project.id}`}
       end
-      className="group relative mx-[2px] mb-1 flex items-center gap-3 rounded-[10px] border border-white/[0.07] bg-white/[0.022] pl-[10px] pr-[12px] py-[9px] transition-all hover:border-white/[0.15] hover:bg-white/[0.04]"
+      className="group relative z-[1] mx-[2px] mb-1 flex items-center gap-3 rounded-[10px] border border-white/[0.07] bg-white/[0.022] pl-[10px] pr-[12px] py-[9px] transition-all hover:border-white/[0.15] hover:bg-white/[0.04]"
     >
       <span
         className="relative grid h-[28px] w-[28px] shrink-0 place-items-center rounded-[7px] text-[12px] font-bold leading-none text-white/90"
@@ -679,19 +781,13 @@ function ProjectSwitcher({ open, onClose }: { open: boolean; onClose: () => void
         />
 
         <div className="relative flex h-full flex-col">
-          {/* Header */}
           <div className="flex items-center justify-between px-5 pt-[22px] pb-3">
-            <div className="flex items-baseline gap-[7px]">
-              <h2
-                className="text-[22px] font-extrabold leading-none tracking-[-0.022em] text-white"
-                style={{ fontFamily: SIDEBAR_FONT }}
-              >
-                Projects
-              </h2>
-              <span className="text-[14px] font-bold leading-none text-white/40 tabular-nums">
-                {PROJECTS.length}
-              </span>
-            </div>
+            <h2
+              className="text-[22px] font-extrabold leading-none tracking-[-0.022em] text-white"
+              style={{ fontFamily: SIDEBAR_FONT }}
+            >
+              Projects
+            </h2>
             <button
               onClick={onClose}
               className="grid h-8 w-8 place-items-center rounded-md text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white"
@@ -701,7 +797,6 @@ function ProjectSwitcher({ open, onClose }: { open: boolean; onClose: () => void
             </button>
           </div>
 
-          {/* Search */}
           <div className="px-5 pb-3">
             <div className="relative">
               <MagnifyingGlass
@@ -719,7 +814,6 @@ function ProjectSwitcher({ open, onClose }: { open: boolean; onClose: () => void
             </div>
           </div>
 
-          {/* Filter chips */}
           <div className="flex gap-1.5 px-5 pb-4">
             {([
               { key: 'all', label: 'All' },
@@ -741,7 +835,6 @@ function ProjectSwitcher({ open, onClose }: { open: boolean; onClose: () => void
             ))}
           </div>
 
-          {/* List */}
           <div className="relative flex-1 overflow-y-auto px-2 pb-3">
             {showSections && (
               <>
@@ -799,7 +892,6 @@ function ProjectSwitcher({ open, onClose }: { open: boolean; onClose: () => void
             )}
           </div>
 
-          {/* Footer */}
           <div className="flex items-center justify-between border-t border-white/[0.06] px-4 py-3">
             <button
               className="inline-flex items-center gap-1.5 rounded-[8px] px-2 py-[6px] text-[13px] font-bold text-white/85 transition-colors hover:bg-white/[0.05] hover:text-white"
@@ -946,23 +1038,25 @@ function StatusOrb({ tone }: { tone: 'red' | 'yellow' | 'green' }) {
   );
 }
 
-function RunningIndicator({ count }: { count: number }) {
+/* "Running" indicator pulse — no number, just a green halo'd dot. */
+function RunningPulse() {
   return (
-    <span
-      className="inline-flex items-center gap-[5px] text-[10.5px] font-bold leading-none text-[#A6E3C6]"
-      style={{
-        fontFamily: '"Courier New", ui-monospace, monospace',
-        letterSpacing: '0.04em',
-      }}
-    >
+    <span className="relative inline-flex shrink-0 items-center" aria-label="agents running">
       <span
-        className="relative h-[5px] w-[5px] rounded-full"
+        className="relative h-[6px] w-[6px] rounded-full"
         style={{
           background: '#5DC2A2',
-          boxShadow: '0 0 0 2px rgba(93,194,162,0.24), 0 0 8px rgba(93,194,162,0.55)',
+          boxShadow: '0 0 0 2px rgba(93,194,162,0.22), 0 0 10px rgba(93,194,162,0.55)',
         }}
       />
-      <span className="tabular-nums">{count}</span>
+      <span
+        aria-hidden
+        className="absolute inset-0 m-auto h-[6px] w-[6px] rounded-full"
+        style={{
+          background: '#5DC2A2',
+          animation: 'sidebar-pulse 1.8s ease-out infinite',
+        }}
+      />
     </span>
   );
 }
