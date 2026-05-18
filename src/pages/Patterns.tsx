@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Sparkle,
   MagnifyingGlass, ArrowRight, X, Info,
-  ClockCounterClockwise, Funnel, CaretDown,
+  ClockCounterClockwise, Funnel,
+  ArrowsClockwise, BookmarkSimple, Archive,
   TrendUp, Wrench, CalendarBlank, UsersThree, Target,
 } from '@phosphor-icons/react';
 import { PATTERNS, type Pattern } from '../mock/patterns';
@@ -318,67 +320,23 @@ function ProcessCard({ num, title, body, icon: Icon }: ProcessStep) {
 }
 
 function HeroIllustration() {
-  const [imgOk, setImgOk] = useState(true);
   return (
-    <div className="relative mx-auto h-[380px] w-full max-w-[600px] lg:h-[420px]">
-      {imgOk ? (
-        <img
-          src="/patterns-hero.png"
-          alt="PPC.io's pattern machine printing surfaced themes"
-          onError={() => setImgOk(false)}
-          className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_30px_60px_rgba(127,90,240,0.35)]"
-        />
-      ) : (
-        <FallbackOrb />
-      )}
-    </div>
-  );
-}
-
-function FallbackOrb() {
-  // Until /patterns-hero.png is dropped into public/, this CSS-art stands in.
-  // It hints at the printer + brain + cards composition without trying to be
-  // a literal copy of the 3D render.
-  return (
-    <div className="relative h-full w-full">
-      {/* glow */}
-      <div
-        className="absolute left-1/2 top-1/2 h-[260px] w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{
-          background:
-            'radial-gradient(circle, rgba(192,162,255,0.55) 0%, rgba(127,90,240,0.35) 35%, transparent 70%)',
-        }}
+    <div className="relative mx-auto w-full max-w-[760px]">
+      <img
+        src="/patterns-hero.png"
+        alt="A purple brain mascot at the PPC.io pattern desk, with New, Seen again, and Saved trays of cards on the left and Leaky landing pages, Budget drift, and Tracking gaps patterns surfacing on the right."
+        width={1819}
+        height={865}
+        className="h-auto w-full select-none drop-shadow-[0_36px_60px_rgba(127,90,240,0.38)]"
+        draggable={false}
       />
-      {/* orb */}
-      <div
-        className="absolute left-1/2 top-1/2 h-[180px] w-[180px] -translate-x-1/2 -translate-y-1/2 rounded-full ring-1 ring-white/20"
-        style={{
-          background:
-            'radial-gradient(circle at 35% 30%, #C5A8FF 0%, #7F5AF0 45%, #281A57 100%)',
-        }}
-      />
-      {/* faux cards stack */}
-      <div className="absolute bottom-12 right-8 flex flex-col items-end gap-2">
-        {['Research intent leakage', 'Trust proof gap', 'Tracking fix recurrence'].map((t, i) => (
-          <div
-            key={t}
-            className="rounded-[10px] border border-white/10 bg-white/[0.08] px-3 py-1.5 text-[11.5px] font-medium text-white/85 backdrop-blur-md"
-            style={{ transform: `translateX(${i * -8}px)` }}
-          >
-            {t}
-          </div>
-        ))}
-      </div>
-      <p className="absolute bottom-2 left-2 text-[10px] uppercase tracking-wide text-white/30">
-        Drop public/patterns-hero.png to swap this in
-      </p>
     </div>
   );
 }
 
 // ─── Light table section ─────────────────────────────────────────────────
 
-type FilterKey = 'new' | 'saved' | 'archived';
+type FilterKey = 'new' | 'seen-again' | 'saved' | 'archived';
 
 function LightTable() {
   const [filter, setFilter] = useState<FilterKey>('new');
@@ -397,19 +355,10 @@ function LightTable() {
       <div className="mx-auto w-full max-w-[1480px] px-6 pb-16 pt-10 lg:px-12 lg:pb-20 lg:pt-12">
         <FilterBar filter={filter} onChange={setFilter} query={query} onQuery={setQuery} />
 
-        <div className="mt-10">
-          <div className="flex items-center gap-2.5">
-            <h2 className="font-display text-[24px] font-bold leading-none tracking-h2 text-ppc-ink">
-              Patterns Surfaced
-            </h2>
-            <span className="inline-flex h-6 min-w-[24px] items-center justify-center rounded-full bg-[#EFE9FB] px-2 text-[12px] font-semibold text-ppc-purple-700">
-              {rows.length}
-            </span>
-          </div>
-
-          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="mt-8 overflow-hidden rounded-[18px] border border-ppc-card-border bg-white">
+          <ul className="divide-y divide-[#EDE8F5]">
             {rows.map((pattern, idx) => (
-              <PatternCard
+              <PatternRow
                 key={pattern.id}
                 pattern={pattern}
                 index={idx + 1}
@@ -419,11 +368,21 @@ function LightTable() {
                 }
               />
             ))}
-          </div>
+          </ul>
+        </div>
 
-          <p className="mt-6 text-center text-[12.5px] text-ppc-text-faint">
-            Showing {rows.length} of {PATTERNS.length} patterns
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+          <p className="inline-flex items-center gap-2 text-[12.5px] text-ppc-text-muted">
+            <Info size={14} weight="duotone" className="text-ppc-text-faint" />
+            Patterns are experimental. Validate before acting.
           </p>
+          <Link
+            to="#"
+            className="inline-flex items-center gap-1 text-[13px] font-semibold text-ppc-purple-700 hover:text-ppc-purple-500"
+          >
+            View all patterns
+            <ArrowRight size={13} weight="bold" />
+          </Link>
         </div>
       </div>
     </section>
@@ -438,29 +397,39 @@ interface FilterBarProps {
 }
 
 function FilterBar({ filter, onChange, query, onQuery }: FilterBarProps) {
-  const pills: Array<{ key: FilterKey; label: string }> = [
-    { key: 'new',      label: 'New'      },
-    { key: 'saved',    label: 'Saved'    },
-    { key: 'archived', label: 'Archived' },
+  const pills: Array<{ key: FilterKey; label: string; icon: typeof Sparkle }> = [
+    { key: 'new',        label: 'New',        icon: Sparkle },
+    { key: 'seen-again', label: 'Seen again', icon: ArrowsClockwise },
+    { key: 'saved',      label: 'Saved',      icon: BookmarkSimple },
+    { key: 'archived',   label: 'Archived',   icon: Archive },
   ];
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="inline-flex items-center gap-1 rounded-full bg-[#F4F1FA] p-1">
+      <div className="flex flex-wrap items-center gap-2.5">
         {pills.map((p) => {
           const active = filter === p.key;
+          const Icon = p.icon;
           return (
             <button
               key={p.key}
               type="button"
               onClick={() => onChange(p.key)}
-              className={`inline-flex items-center rounded-full px-4 py-2 text-[13.5px] font-semibold transition-colors ${
+              className={`inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-[13.5px] font-semibold transition-colors ${
                 active
-                  ? 'bg-white text-ppc-purple-700 shadow-[0_1px_3px_rgba(15,10,30,0.06)]'
-                  : 'text-ppc-text-muted hover:text-ppc-ink'
+                  ? 'border-ppc-purple-400 text-ppc-purple-700 shadow-[0_0_0_1px_rgba(127,90,240,0.18)]'
+                  : 'border-ppc-card-border text-ppc-ink hover:border-ppc-purple-300'
               }`}
             >
+              <Icon
+                size={14}
+                weight={active ? 'fill' : 'regular'}
+                className={active ? 'text-ppc-purple-500' : 'text-ppc-text-muted'}
+              />
               {p.label}
+              {active && (
+                <span className="h-1.5 w-1.5 rounded-full bg-ppc-purple-500" />
+              )}
             </button>
           );
         })}
@@ -483,7 +452,6 @@ function FilterBar({ filter, onChange, query, onQuery }: FilterBarProps) {
         >
           <Funnel size={14} weight="bold" className="text-ppc-text-muted" />
           Filters
-          <CaretDown size={12} weight="bold" className="text-ppc-text-faint" />
         </button>
       </div>
     </div>
@@ -499,103 +467,100 @@ const PATTERN_ICONS: Record<string, typeof MagnifyingGlass> = {
   'p-05': TrendUp,
 };
 
-type RowStatus = 'New' | 'Needs review';
+type RowStatus = 'New' | 'Seen again';
 
 const ROW_STATUS: Record<string, RowStatus> = {
   'p-01': 'New',
   'p-02': 'New',
   'p-03': 'New',
-  'p-04': 'Needs review',
+  'p-04': 'Seen again',
   'p-05': 'New',
 };
 
-const STATUS_STYLES: Record<RowStatus, string> = {
-  'New':          'text-ppc-purple-700',
-  'Needs review': 'text-[#A06B19]',
-};
-
-interface PatternCardProps {
+interface PatternRowProps {
   pattern: Pattern;
   index: number;
   expanded: boolean;
   onToggle: () => void;
 }
 
-function PatternCard({ pattern, index, expanded, onToggle }: PatternCardProps) {
+function PatternRow({ pattern, index, expanded, onToggle }: PatternRowProps) {
   const Icon = PATTERN_ICONS[pattern.id] ?? Target;
   const status = ROW_STATUS[pattern.id] ?? 'New';
   const receipts =
     pattern.drivenBy.reduce((sum, d) => sum + d.findingsCount, 0) + 1;
 
   return (
-    <article
-      onClick={onToggle}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onToggle();
-        }
-      }}
-      role="button"
-      tabIndex={0}
-      className={`group cursor-pointer rounded-[18px] border bg-white p-6 transition-all hover:border-ppc-purple-300 ${
-        expanded
-          ? 'border-ppc-purple-400 shadow-[0_2px_28px_rgba(127,90,240,0.10)] lg:col-span-2'
-          : 'border-ppc-card-border'
-      }`}
-    >
-      <div className="flex items-start gap-5">
-        <span className="w-[34px] shrink-0 pt-1.5 text-[28px] font-medium leading-none tabular-nums text-ppc-text-faint">
+    <li>
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`group flex w-full items-center gap-5 px-6 py-5 text-left transition-colors hover:bg-[#FAF8FE] ${
+          expanded ? 'bg-[#FAF8FE]' : ''
+        }`}
+      >
+        <span className="w-[28px] shrink-0 text-[14px] font-medium tabular-nums text-ppc-text-faint">
           {String(index).padStart(2, '0')}
         </span>
 
-        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#F4F0FB] text-ppc-purple-700">
-          <Icon size={22} weight="duotone" />
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#F4F0FB] text-ppc-purple-700">
+          <Icon size={20} weight="duotone" />
         </span>
 
-        <div className="min-w-0 flex-1">
-          <h3 className="text-[16.5px] font-bold leading-snug text-ppc-ink">
+        <span className="min-w-0 flex-1">
+          <span className="block text-[15.5px] font-semibold leading-snug text-ppc-ink">
             {pattern.headline}
-          </h3>
-          <p className="mt-1.5 line-clamp-2 text-[13.5px] leading-[1.5] text-ppc-text-muted">
+          </span>
+          <span className="mt-0.5 line-clamp-1 block text-[13px] leading-snug text-ppc-text-muted">
             {pattern.whatWeFound}
-          </p>
+          </span>
+        </span>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="text-[13px] text-ppc-text-muted">
-              <span className="font-semibold text-ppc-ink">
-                {pattern.affected.length}
-              </span>{' '}
-              accounts
-              <span className="mx-1.5 text-ppc-text-faint">·</span>
-              <span className="font-semibold text-ppc-ink">{receipts}</span>{' '}
-              receipts
-              <span className="mx-1.5 text-ppc-text-faint">·</span>
-              <span className={`font-semibold ${STATUS_STYLES[status]}`}>
-                {status}
-              </span>
-            </div>
-            <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-ppc-purple-700 transition-transform group-hover:translate-x-0.5">
-              {expanded ? (
-                <>
-                  Close <X size={13} weight="bold" />
-                </>
-              ) : (
-                <>
-                  Open <ArrowRight size={13} weight="bold" />
-                </>
-              )}
-            </span>
-          </div>
-        </div>
-      </div>
+        <span className="hidden shrink-0 items-center gap-3 text-[13px] text-ppc-text-muted md:flex">
+          <span>
+            <span className="font-semibold text-ppc-ink">
+              {pattern.affected.length}
+            </span>{' '}
+            accounts
+          </span>
+          <span className="text-ppc-text-faint">·</span>
+          <span>
+            <span className="font-semibold text-ppc-ink">{receipts}</span>{' '}
+            receipts
+          </span>
+        </span>
+
+        <span className="hidden w-[90px] shrink-0 justify-center md:flex">
+          <StatusPill status={status} />
+        </span>
+
+        <span className="inline-flex shrink-0 items-center gap-1 text-[13px] font-semibold text-ppc-purple-700 transition-transform group-hover:translate-x-0.5">
+          {expanded ? (
+            <>
+              Close <X size={13} weight="bold" />
+            </>
+          ) : (
+            <>
+              Open <ArrowRight size={13} weight="bold" />
+            </>
+          )}
+        </span>
+      </button>
 
       {expanded && (
-        <div className="mt-5 border-t border-[#EDE8F5] pt-5">
+        <div className="border-t border-[#EDE8F5] bg-[#FBFAFE] px-6 py-6 lg:px-12">
           <ExpandedDetail pattern={pattern} />
         </div>
       )}
-    </article>
+    </li>
+  );
+}
+
+function StatusPill({ status }: { status: RowStatus }) {
+  return (
+    <span className="inline-flex items-center rounded-md bg-[#EFE9FB] px-2 py-1 text-[11.5px] font-semibold text-ppc-purple-700">
+      {status}
+    </span>
   );
 }
 
