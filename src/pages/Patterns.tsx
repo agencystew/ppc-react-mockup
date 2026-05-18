@@ -26,7 +26,7 @@ import { PATTERNS, type Pattern } from '../mock/patterns';
 
 export function Patterns() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="min-h-screen bg-ppc-canvas px-3 pb-6 pt-3 lg:px-5 lg:pb-8 lg:pt-5">
       <DarkHero />
       <LightTable />
     </div>
@@ -37,17 +37,18 @@ export function Patterns() {
 
 function DarkHero() {
   return (
-    <section className="relative isolate overflow-hidden bg-[#070512] text-white">
+    <section className="relative isolate overflow-hidden rounded-[28px] border border-white/[0.06] bg-[#070512] text-white shadow-[0_30px_80px_-32px_rgba(15,10,30,0.45)]">
       <StarField />
       <PerspectiveGrid />
       <BloomGlow />
 
-      <div className="relative z-[2] mx-auto w-full max-w-[1480px] px-6 pb-12 pt-5 lg:px-12 lg:pb-14 lg:pt-6">
+      <div className="relative z-[2] px-6 pb-7 pt-5 lg:px-12 lg:pb-9 lg:pt-6">
         <UtilityStrip />
         <div className="mt-7 grid grid-cols-1 items-center gap-8 lg:mt-9 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-12">
           <HeroCopy />
           <HeroIllustration />
         </div>
+        <ProcessCardsRow />
       </div>
     </section>
   );
@@ -238,7 +239,6 @@ function HeroCopy() {
         </div>
       </div>
 
-      <ProcessCardsRow />
     </div>
   );
 }
@@ -294,7 +294,7 @@ const PROCESS_STEPS: ProcessStep[] = [
 
 function ProcessCardsRow() {
   return (
-    <div className="mt-7 grid max-w-[620px] grid-cols-1 gap-2.5 sm:grid-cols-3">
+    <div className="mt-9 grid grid-cols-1 gap-4 sm:grid-cols-3 lg:mt-10">
       {PROCESS_STEPS.map((s) => (
         <ProcessCard key={s.num} {...s} />
       ))}
@@ -304,16 +304,28 @@ function ProcessCardsRow() {
 
 function ProcessCard({ num, title, body, icon: Icon }: ProcessStep) {
   return (
-    <div className="flex items-center gap-3 rounded-[14px] border border-white/8 bg-white px-3.5 py-3 shadow-[0_8px_24px_rgba(7,5,18,0.35)]">
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#F4F0FB] text-ppc-purple-700">
-        <Icon size={18} weight="duotone" />
-      </span>
-      <div className="min-w-0">
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-[11px] font-semibold leading-none text-ppc-text-faint">{num}</span>
-          <span className="text-[14px] font-bold leading-none text-ppc-ink">{title}</span>
+    <div className="group relative overflow-hidden rounded-[18px] border border-white/[0.08] bg-white/[0.03] p-5 backdrop-blur-sm transition-all hover:border-white/[0.18] hover:bg-white/[0.06]">
+      {/* purple bloom inside the card — corner glow */}
+      <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-ppc-purple-500/15 blur-3xl transition-opacity group-hover:bg-ppc-purple-500/25" />
+
+      <div className="relative">
+        <span className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-500/30 to-ppc-purple-500/[0.06] text-white shadow-[inset_0_0_0_1px_rgba(168,140,255,0.35)]">
+          <Icon size={20} weight="duotone" />
+        </span>
+      </div>
+
+      <div className="relative mt-5">
+        <div className="flex items-baseline gap-2">
+          <span className="text-[15px] font-medium leading-none text-white/35">
+            {num}
+          </span>
+          <h4 className="text-[18px] font-bold leading-none text-white">
+            {title}
+          </h4>
         </div>
-        <p className="mt-1 text-[11.5px] leading-[1.4] text-ppc-text-muted">{body}</p>
+        <p className="mt-2 text-[13px] leading-[1.5] text-white/55">
+          {body}
+        </p>
       </div>
     </div>
   );
@@ -351,8 +363,8 @@ function LightTable() {
   );
 
   return (
-    <section className="relative -mt-3 flex-1 rounded-t-[32px] bg-white">
-      <div className="mx-auto w-full max-w-[1480px] px-6 pb-16 pt-10 lg:px-12 lg:pb-20 lg:pt-12">
+    <section className="relative mt-5 rounded-[28px] border border-ppc-card-border bg-white">
+      <div className="px-6 pb-10 pt-9 lg:px-10 lg:pb-12 lg:pt-10">
         <FilterBar filter={filter} onChange={setFilter} query={query} onQuery={setQuery} />
 
         <div className="mt-8 overflow-hidden rounded-[18px] border border-ppc-card-border bg-white">
