@@ -1,423 +1,649 @@
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Sparkle, Bookmark, ArrowRight, ArrowsClockwise,
-  MagnifyingGlass, Briefcase, ShieldCheck,
-  FileText, ClockCounterClockwise, Target, UsersThree,
-  Wrench, CalendarBlank, Flask, FolderSimple, Info,
-  GoogleLogo, CheckCircle, HandPalm, X,
+  Sparkle, Cube, Stack, ArrowsClockwise,
+  MagnifyingGlass, ArrowRight, X, Info,
+  ClockCounterClockwise, BookmarkSimple, Archive,
+  SlidersHorizontal, Waveform, DotsNine, ChartBar,
+  TrendUp, WaveTriangle,
 } from '@phosphor-icons/react';
 import { PATTERNS, type Pattern } from '../mock/patterns';
 
-/* /patterns — pixel-rebuilt 2026-05-18 to match Stewart's screenshot reference.
+/* /patterns — dark editorial hero + light "Patterns Surfaced" table.
  *
- * Editorial in posture, calm in palette. The page reads top-to-bottom:
- *   1. Header strip  — title + experimental pill + sweep meta + Run-sweep
- *   2. Hero          — italic-accent headline + lens diagram (inputs → lens → outputs)
- *   3. How it works  — three dark step cards + one white stats panel
- *   4. Top patterns  — 2×2 grid of pattern cards with sources + linked-by tags
- *   5. Footer row    — curation context + experimental marker
+ * Page anatomy:
+ *   1. DarkHero        — full-bleed black canvas, starfield + perspective
+ *                        grid, utility strip at top, big headline + gradient
+ *                        italic accent, stats row, hero illustration on right
+ *   2. LightTable      — rounded-top white panel sitting under the hero with
+ *                        filter pills, search, and the "Patterns Surfaced"
+ *                        row list — click any row to expand inline detail
  *
- * No mono eyebrows. No bullet-listicle "what you walk away with" panels.
- * Lavender canvas inherits from body bg (#ECEAFA, set in styles/index.css). */
+ * Hero illustration loads from /patterns-hero.png (drop the file in /public).
+ * If absent, a CSS-only glowing-orb fallback renders in the same slot. */
 
 // ─── Page ────────────────────────────────────────────────────────────────
 
 export function Patterns() {
   return (
-    <div className="space-y-10 pb-6">
-      <HeaderStrip />
-      <Hero />
-      <HowItWorks />
-      <TopPatterns />
-      <FooterRow />
+    <div className="flex min-h-screen flex-col">
+      <DarkHero />
+      <LightTable />
     </div>
   );
 }
 
-// ─── Header strip ────────────────────────────────────────────────────────
+// ─── Dark hero ───────────────────────────────────────────────────────────
 
-function HeaderStrip() {
+function DarkHero() {
   return (
-    <header className="flex flex-wrap items-center justify-between gap-6">
-      <div className="flex items-center gap-3">
-        <h1 className="font-display text-[28px] font-bold leading-none tracking-h2 text-ppc-ink">
-          Patterns
-        </h1>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E3F4E0] px-2.5 py-1 text-[12px] font-medium text-[#2F7C49]">
-          <Flask size={13} weight="fill" />
-          Experimental
-        </span>
-      </div>
+    <section className="relative isolate overflow-hidden bg-[#070512] text-white">
+      <StarField />
+      <PerspectiveGrid />
+      <BloomGlow />
 
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] text-ppc-text-muted">
-        <span className="inline-flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#5DCAA5]" />
-          Last sweep <span className="text-ppc-text-faint">·</span> 2h ago
-        </span>
-        <span>
-          Next sweep <span className="text-ppc-text-faint">·</span> Monday
-        </span>
-        <Link to="#" className="text-ppc-text-muted underline-offset-4 hover:text-ppc-ink hover:underline">
-          Sweep history
-        </Link>
-        <button
-          type="button"
-          className="inline-flex items-center gap-1.5 rounded-full border border-ppc-purple-500/40 bg-white px-3.5 py-2 text-[13px] font-medium text-ppc-purple-700 transition-colors hover:border-ppc-purple-500 hover:text-ppc-purple-500"
-        >
-          <ArrowsClockwise size={14} weight="bold" />
-          Run sweep
-        </button>
+      <div className="relative z-[2] mx-auto w-full max-w-[1480px] px-6 pb-16 pt-6 lg:px-12 lg:pb-20 lg:pt-7">
+        <UtilityStrip />
+        <div className="mt-10 grid grid-cols-1 items-center gap-10 lg:mt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
+          <HeroCopy />
+          <HeroIllustration />
+        </div>
       </div>
-    </header>
+    </section>
   );
 }
 
-// ─── Hero ────────────────────────────────────────────────────────────────
-
-function Hero() {
+function StarField() {
+  // Hand-placed dots — deterministic, varied opacities + sizes. Avoids
+  // generative randomness so layout is stable across re-renders.
+  const stars: Array<[number, number, number, number]> = [
+    [4, 12, 1, 0.45], [12, 28, 1, 0.35], [22, 8, 1.5, 0.6],
+    [33, 22, 1, 0.4], [40, 6, 1, 0.5], [48, 18, 1, 0.35],
+    [58, 12, 1.5, 0.55], [66, 30, 1, 0.4], [74, 6, 1, 0.45],
+    [82, 22, 1, 0.5], [88, 14, 1.5, 0.6], [94, 28, 1, 0.4],
+    [16, 42, 1, 0.3], [28, 50, 1, 0.35], [44, 44, 1, 0.4],
+    [62, 48, 1.5, 0.5], [78, 40, 1, 0.35], [90, 52, 1, 0.45],
+    [6, 64, 1, 0.3], [20, 70, 1, 0.4], [36, 62, 1, 0.35],
+    [54, 70, 1.5, 0.5], [70, 64, 1, 0.4], [86, 72, 1, 0.45],
+  ];
   return (
-    <section className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-10">
-      <HeroCopy />
-      <LensDiagram />
-    </section>
+    <div className="pointer-events-none absolute inset-0 z-[1]">
+      {stars.map(([x, y, r, o], i) => (
+        <span
+          key={i}
+          className="absolute rounded-full bg-white"
+          style={{
+            left: `${x}%`,
+            top: `${y}%`,
+            width: `${r}px`,
+            height: `${r}px`,
+            opacity: o,
+            boxShadow: r > 1 ? '0 0 6px rgba(255,255,255,0.4)' : undefined,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function PerspectiveGrid() {
+  // Perspective floor at the bottom of the hero — purple grid lines
+  // fading upward via a mask gradient. Pure SVG for crispness at retina.
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 1480 480"
+      preserveAspectRatio="none"
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[60%] w-full"
+      style={{
+        maskImage: 'linear-gradient(to top, black 0%, black 30%, transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(to top, black 0%, black 30%, transparent 100%)',
+      }}
+    >
+      {/* horizontal grid lines (converging slightly toward horizon) */}
+      {Array.from({ length: 10 }, (_, i) => {
+        const y = 480 - i * (480 / 9);
+        const opacity = 0.06 + (i / 10) * 0.05;
+        return (
+          <line
+            key={`h-${i}`}
+            x1="0" y1={y} x2="1480" y2={y}
+            stroke="#7F5AF0" strokeOpacity={opacity} strokeWidth="1"
+          />
+        );
+      })}
+      {/* vertical perspective lines converging at center horizon */}
+      {Array.from({ length: 21 }, (_, i) => {
+        const xBottom = (i / 20) * 1480;
+        const xTop = 740 + (xBottom - 740) * 0.15;
+        return (
+          <line
+            key={`v-${i}`}
+            x1={xBottom} y1="480" x2={xTop} y2="60"
+            stroke="#7F5AF0" strokeOpacity="0.08" strokeWidth="1"
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+function BloomGlow() {
+  // Soft purple bloom in upper-right behind the hero illustration.
+  return (
+    <div
+      className="pointer-events-none absolute right-[-10%] top-[-30%] z-[1] h-[700px] w-[700px] rounded-full opacity-70"
+      style={{
+        background: 'radial-gradient(circle, rgba(127,90,240,0.45) 0%, rgba(127,90,240,0.15) 30%, transparent 70%)',
+      }}
+    />
+  );
+}
+
+function UtilityStrip() {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-full border border-white/10 bg-white/[0.03] px-5 py-2.5 backdrop-blur-sm">
+      <div className="inline-flex items-center gap-3 text-[13px] text-white/80">
+        <span className="grid h-5 w-5 place-items-center text-ppc-purple-400">
+          <Sparkle size={14} weight="fill" />
+        </span>
+        <span className="font-medium text-white">Sweep complete</span>
+        <span className="text-white/30">·</span>
+        <span>5 ideas ready</span>
+        <span className="text-white/30">·</span>
+        <span className="text-white/55">2h ago</span>
+      </div>
+      <div className="inline-flex items-center gap-3">
+        <button
+          type="button"
+          className="inline-flex items-center gap-1.5 rounded-full bg-ppc-purple-500 px-4 py-1.5 text-[13px] font-medium text-white shadow-[0_6px_22px_rgba(127,90,240,0.45)] transition-shadow hover:shadow-[0_8px_28px_rgba(127,90,240,0.6)]"
+        >
+          <Lightning size={13} weight="fill" />
+          Run sweep
+        </button>
+        <button
+          type="button"
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] text-white/80 transition-colors hover:bg-white/[0.06] hover:text-white"
+        >
+          <ClockCounterClockwise size={13} weight="bold" />
+          Sweep history
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Lightning(props: { size: number; weight: 'fill' | 'bold' }) {
+  // Inline mini bolt — kept self-contained so the utility strip doesn't
+  // reach for another phosphor icon for a single 13px glyph.
+  return (
+    <svg viewBox="0 0 24 24" width={props.size} height={props.size} fill="currentColor">
+      <path d="M13 2L4.5 13.5h6L9 22l9.5-12.5h-6L13 2z" />
+    </svg>
   );
 }
 
 function HeroCopy() {
+  const [infoOpen, setInfoOpen] = useState(false);
+  const popRef = useRef<HTMLDivElement | null>(null);
+
+  // Click-outside close.
+  useEffect(() => {
+    if (!infoOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (popRef.current && !popRef.current.contains(e.target as Node)) {
+        setInfoOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setInfoOpen(false); };
+    window.addEventListener('mousedown', onClick);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('mousedown', onClick);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [infoOpen]);
+
   return (
-    <div className="flex flex-col justify-center">
-      <h2 className="font-display text-[60px] font-black leading-[0.97] -tracking-[0.025em] text-ppc-ink xl:text-[68px]">
-        Your Agency Has{' '}
-        <span className="italic font-medium text-ppc-purple-500">
-          Patterns
+    <div>
+      <h1 className="font-display text-[72px] font-black leading-[0.96] -tracking-[0.03em] text-white xl:text-[88px]">
+        Patterns
+        <br />
+        <span
+          className="bg-clip-text font-medium italic text-transparent"
+          style={{
+            backgroundImage:
+              'linear-gradient(92deg, #FF9A52 0%, #EC5BB7 38%, #B987F7 72%, #8B6BF0 100%)',
+          }}
+        >
+          Across Your Agency.
         </span>
-        .
-      </h2>
-      <p className="mt-8 inline-flex max-w-[520px] items-start gap-3 text-[19px] leading-[1.4] text-ppc-ink/80">
-        <span className="mt-[3px] grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#FBE9C9] text-[#8B6312]">
-          <HandPalm size={15} weight="fill" />
-        </span>
-        <span>
-          This is an{' '}
-          <span className="font-semibold text-ppc-ink">experimental feature</span>
-          {' '}— strong human judgement required.
-        </span>
+      </h1>
+
+      <div className="mt-7 flex max-w-[540px] items-start gap-2.5">
+        <p className="text-[16.5px] leading-[1.5] text-white/65">
+          Experimental reads PPC.io found across accounts, agents, and source data.
+        </p>
+        <div ref={popRef} className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setInfoOpen((v) => !v)}
+            className="grid h-7 w-7 place-items-center rounded-full bg-white/[0.06] text-ppc-purple-400 ring-1 ring-white/10 transition hover:bg-white/[0.10] hover:text-ppc-purple-300"
+            aria-label="What is Patterns?"
+            aria-expanded={infoOpen}
+          >
+            <Sparkle size={13} weight="fill" />
+          </button>
+          {infoOpen && <InfoPopover onClose={() => setInfoOpen(false)} />}
+        </div>
+      </div>
+
+      <StatsRow />
+    </div>
+  );
+}
+
+function InfoPopover({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      role="dialog"
+      className="absolute left-1/2 top-[calc(100%+10px)] z-[20] w-[320px] -translate-x-1/2 rounded-[14px] border border-white/10 bg-[#0F0A22]/95 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-md"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="inline-flex items-center gap-2 text-white">
+          <span className="grid h-6 w-6 place-items-center rounded-full bg-ppc-purple-500/20 text-ppc-purple-300">
+            <Info size={13} weight="fill" />
+          </span>
+          <span className="text-[13.5px] font-semibold">What is Patterns?</span>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-white/50 hover:text-white"
+          aria-label="Close"
+        >
+          <X size={14} weight="bold" />
+        </button>
+      </div>
+      <p className="mt-3 text-[12.5px] leading-[1.55] text-white/70">
+        Patterns surfaces themes PPC.io spots across your accounts, agents, and
+        source data — the things showing up in more than one place. This is an
+        experimental feature; treat surfaced ideas as starting points and bring
+        your own judgement.
+      </p>
+      <p className="mt-2 text-[12.5px] font-medium leading-[1.55] text-ppc-purple-300">
+        Strong human judgement required.
+      </p>
+      <span className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-white/10 bg-[#0F0A22]/95" />
+    </div>
+  );
+}
+
+interface Stat { icon: ReactNode; value: string; label: string; }
+
+function StatsRow() {
+  const stats: Stat[] = [
+    { icon: <Cube size={20} weight="duotone" />,         value: '102', label: 'projects scanned' },
+    { icon: <Stack size={20} weight="duotone" />,        value: '416', label: 'agent runs' },
+    { icon: <Sparkle size={20} weight="duotone" />,      value: '5',   label: 'ideas held' },
+    { icon: <ArrowsClockwise size={20} weight="bold" />, value: '3',   label: 'seen again' },
+  ];
+  return (
+    <div className="mt-10 grid max-w-[560px] grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4 sm:gap-x-4">
+      {stats.map((s) => (
+        <div key={s.label} className="min-w-0">
+          <span className="text-ppc-purple-300">{s.icon}</span>
+          <div className="mt-3 text-[34px] font-bold leading-none text-white">{s.value}</div>
+          <div className="mt-2 text-[12px] leading-tight text-white/55">{s.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function HeroIllustration() {
+  const [imgOk, setImgOk] = useState(true);
+  return (
+    <div className="relative mx-auto h-[420px] w-full max-w-[640px] lg:h-[460px]">
+      {imgOk ? (
+        <img
+          src="/patterns-hero.png"
+          alt="PPC.io's pattern machine printing surfaced themes"
+          onError={() => setImgOk(false)}
+          className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_30px_60px_rgba(127,90,240,0.35)]"
+        />
+      ) : (
+        <FallbackOrb />
+      )}
+    </div>
+  );
+}
+
+function FallbackOrb() {
+  // Until /patterns-hero.png is dropped into public/, this CSS-art stands in.
+  // It hints at the printer + brain + cards composition without trying to be
+  // a literal copy of the 3D render.
+  return (
+    <div className="relative h-full w-full">
+      {/* glow */}
+      <div
+        className="absolute left-1/2 top-1/2 h-[260px] w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(192,162,255,0.55) 0%, rgba(127,90,240,0.35) 35%, transparent 70%)',
+        }}
+      />
+      {/* orb */}
+      <div
+        className="absolute left-1/2 top-1/2 h-[180px] w-[180px] -translate-x-1/2 -translate-y-1/2 rounded-full ring-1 ring-white/20"
+        style={{
+          background:
+            'radial-gradient(circle at 35% 30%, #C5A8FF 0%, #7F5AF0 45%, #281A57 100%)',
+        }}
+      />
+      {/* faux cards stack */}
+      <div className="absolute bottom-12 right-8 flex flex-col items-end gap-2">
+        {['Research intent leakage', 'Trust proof gap', 'Tracking fix recurrence'].map((t, i) => (
+          <div
+            key={t}
+            className="rounded-[10px] border border-white/10 bg-white/[0.08] px-3 py-1.5 text-[11.5px] font-medium text-white/85 backdrop-blur-md"
+            style={{ transform: `translateX(${i * -8}px)` }}
+          >
+            {t}
+          </div>
+        ))}
+      </div>
+      <p className="absolute bottom-2 left-2 text-[10px] uppercase tracking-wide text-white/30">
+        Drop public/patterns-hero.png to swap this in
       </p>
     </div>
   );
 }
 
-// ─── Lens diagram ────────────────────────────────────────────────────────
+// ─── Light table section ─────────────────────────────────────────────────
 
-interface SourceChip {
-  icon: typeof MagnifyingGlass;
-  label: string;
-  caption: string;
-}
+type FilterKey = 'new' | 'saved' | 'archived';
 
-const SOURCE_CHIPS: SourceChip[] = [
-  { icon: Briefcase,             label: 'Business context', caption: 'CRM, notes, intake' },
-  { icon: GoogleLogo,            label: 'Google Ads',       caption: 'Campaign data' },
-  { icon: MagnifyingGlass,       label: 'Search terms',     caption: 'Query behavior' },
-  { icon: ShieldCheck,           label: 'Audit agent',      caption: 'Account audits' },
-  { icon: FileText,              label: 'Landing pages',    caption: 'LP analysis' },
-  { icon: ClockCounterClockwise, label: 'Historical runs',  caption: 'Past patterns' },
-];
+function LightTable() {
+  const [filter, setFilter] = useState<FilterKey>('new');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
 
-interface OutputCard {
-  tag: 'Mechanism' | 'Cohort' | 'Operator';
-  icon: typeof MagnifyingGlass;
-  title: string;
-}
-
-const OUTPUTS: OutputCard[] = [
-  { tag: 'Mechanism', icon: MagnifyingGlass, title: 'Research intent leakage after PMAX expansion' },
-  { tag: 'Cohort',    icon: UsersThree,     title: 'Trust proof gaps across high-ticket lead gen' },
-  { tag: 'Operator',  icon: Wrench,         title: 'Same tracking fix reappearing in audits' },
-];
-
-function LensDiagram() {
-  // SVG viewBox is 720×380. Y values match each chip's vertical center inside
-  // the flex columns below (calibrated against the chip heights + py-0.5 col).
-  const LENS_CX = 340;
-  const LENS_CY = 190;
-  const inputY = [40, 102, 164, 226, 288, 350];   // 6 inputs evenly spread
-  const outputY = [78, 190, 302];                  // 3 outputs
+  const rows = PATTERNS.slice(0, 5).filter((p) =>
+    !query
+      ? true
+      : p.headline.toLowerCase().includes(query.toLowerCase()) ||
+        p.whatWeFound.toLowerCase().includes(query.toLowerCase()),
+  );
 
   return (
-    <div className="relative mx-auto h-[380px] w-full max-w-[600px] justify-self-end">
-      {/* connecting lines + lens — SVG sits underneath the chips */}
-      <svg
-        viewBox="0 0 720 380"
-        preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-0 h-full w-full"
-        aria-hidden
-      >
-        <defs>
-          <radialGradient id="lensGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%"  stopColor="#FFFFFF" stopOpacity="0.95" />
-            <stop offset="35%" stopColor="#D6CBFA" stopOpacity="0.9"  />
-            <stop offset="70%" stopColor="#9B82F2" stopOpacity="0.5"  />
-            <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0"   />
-          </radialGradient>
-          <linearGradient id="lineIn" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"  stopColor="#C8BCEF" stopOpacity="0.0" />
-            <stop offset="40%" stopColor="#B7A8EC" stopOpacity="0.45" />
-            <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0.85" />
-          </linearGradient>
-          <linearGradient id="lineOut" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"  stopColor="#7F5AF0" stopOpacity="0.85" />
-            <stop offset="60%" stopColor="#B7A8EC" stopOpacity="0.45" />
-            <stop offset="100%" stopColor="#C8BCEF" stopOpacity="0.0" />
-          </linearGradient>
-        </defs>
+    <section className="relative -mt-3 flex-1 rounded-t-[32px] bg-white">
+      <div className="mx-auto w-full max-w-[1480px] px-6 pb-16 pt-10 lg:px-12 lg:pb-20 lg:pt-12">
+        <FilterBar filter={filter} onChange={setFilter} query={query} onQuery={setQuery} />
 
-        {/* input → lens lines */}
-        {inputY.map((y, i) => (
-          <path
-            key={`in-${i}`}
-            d={`M 230 ${y} C 290 ${y}, 300 ${LENS_CY}, ${LENS_CX} ${LENS_CY}`}
-            stroke="url(#lineIn)"
-            strokeWidth="1"
-            fill="none"
-          />
-        ))}
+        <div className="mt-10">
+          <h2 className="font-display text-[24px] font-bold leading-none tracking-h2 text-ppc-ink">
+            Patterns Surfaced
+          </h2>
 
-        {/* lens → output lines */}
-        {outputY.map((y, i) => (
-          <path
-            key={`out-${i}`}
-            d={`M ${LENS_CX} ${LENS_CY} C 400 ${LENS_CY}, 410 ${y}, 460 ${y}`}
-            stroke="url(#lineOut)"
-            strokeWidth="1"
-            fill="none"
-          />
-        ))}
+          <div className="mt-6 overflow-hidden rounded-[16px] border border-ppc-card-border bg-white">
+            <ul className="divide-y divide-[#EDE8F5]">
+              {rows.map((pattern, idx) => (
+                <PatternRow
+                  key={pattern.id}
+                  pattern={pattern}
+                  index={idx + 1}
+                  expanded={expandedId === pattern.id}
+                  onToggle={() =>
+                    setExpandedId(expandedId === pattern.id ? null : pattern.id)
+                  }
+                />
+              ))}
+            </ul>
+          </div>
 
-        {/* the lens — concentric soft ring with central glow */}
-        <circle cx={LENS_CX} cy={LENS_CY} r="52" fill="url(#lensGlow)" />
-        <circle cx={LENS_CX} cy={LENS_CY} r="38" fill="none" stroke="#A88CFF" strokeOpacity="0.55" strokeWidth="1" />
-        <circle cx={LENS_CX} cy={LENS_CY} r="26" fill="none" stroke="#A88CFF" strokeOpacity="0.35" strokeWidth="1" />
-
-        {/* sparkles scattered around the lens */}
-        <Spark x={304} y={156} size={4} />
-        <Spark x={378} y={160} size={3} />
-        <Spark x={306} y={228} size={4} />
-        <Spark x={376} y={224} size={5} />
-        <Spark x={344} y={134} size={3} />
-        <Spark x={394} y={196} size={3} />
-      </svg>
-
-      {/* center sparkle glyph — sits on top of the SVG */}
-      <Sparkle
-        size={22}
-        weight="fill"
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-ppc-purple-500"
-        style={{ left: 'calc(340 / 720 * 100%)', top: '50%' }}
-      />
-
-      {/* chips — two flex columns separated by the lens gutter */}
-      <div className="relative z-[1] grid h-full grid-cols-[210px_60px_minmax(0,1fr)] items-center gap-0">
-        <div className="flex h-full flex-col justify-between py-1.5">
-          {SOURCE_CHIPS.map((c) => <SourceChipRow key={c.label} {...c} />)}
-        </div>
-        <div /> {/* gutter for the lens */}
-        <div className="flex h-full flex-col justify-around py-1.5">
-          {OUTPUTS.map((o) => <OutputCardRow key={o.title} {...o} />)}
+          <p className="mt-5 text-center text-[12.5px] text-ppc-text-faint">
+            Showing {rows.length} of {PATTERNS.length} patterns
+          </p>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Spark({ x, y, size }: { x: number; y: number; size: number }) {
-  return (
-    <g transform={`translate(${x} ${y})`} opacity="0.7">
-      <path
-        d={`M 0 -${size} L ${size * 0.18} -${size * 0.18} L ${size} 0 L ${size * 0.18} ${size * 0.18} L 0 ${size} L -${size * 0.18} ${size * 0.18} L -${size} 0 L -${size * 0.18} -${size * 0.18} Z`}
-        fill="#A88CFF"
-      />
-    </g>
-  );
-}
-
-function SourceChipRow({ icon: Icon, label, caption }: SourceChip) {
-  return (
-    <div className="flex items-center gap-2.5 rounded-[10px] border border-ppc-card-border bg-white px-2.5 py-2 shadow-[0_1px_0_rgba(15,10,30,0.02)]">
-      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-[7px] bg-[#F1ECFD] text-ppc-purple-700">
-        <Icon size={14} weight="duotone" />
-      </span>
-      <div className="min-w-0">
-        <div className="truncate text-[12.5px] font-semibold leading-tight text-ppc-ink">{label}</div>
-        <div className="truncate text-[11px] leading-tight text-ppc-text-muted">{caption}</div>
-      </div>
-    </div>
-  );
-}
-
-function OutputCardRow({ tag, icon: Icon, title }: OutputCard) {
-  const tagStyles: Record<OutputCard['tag'], string> = {
-    Mechanism: 'bg-[#E3F4E0] text-[#2F7C49]',
-    Cohort:    'bg-[#E3F4E0] text-[#2F7C49]',
-    Operator:  'bg-[#FBEAD0] text-[#A06B19]',
-  };
-  return (
-    <div className="rounded-[12px] border border-ppc-card-border bg-white px-3 py-2.5 shadow-[0_1px_0_rgba(15,10,30,0.02)]">
-      <span className={`mb-1 inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-medium ${tagStyles[tag]}`}>
-        {tag}
-      </span>
-      <div className="flex items-start gap-2">
-        <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-[7px] bg-[#F1ECFD] text-ppc-purple-700">
-          <Icon size={14} weight="duotone" />
-        </span>
-        <div className="text-[12.5px] font-semibold leading-snug text-ppc-ink">
-          {title}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── How it works ────────────────────────────────────────────────────────
-
-interface Step {
-  num: '01' | '02' | '03';
-  title: 'Sweep' | 'Group' | 'Surface';
-  body: string;
-  icon: typeof CalendarBlank;
-  iconBg: string;
-  iconColor: string;
-}
-
-const STEPS: Step[] = [
-  { num: '01', title: 'Sweep',   body: 'Scan context, data, and agent runs.',     icon: CalendarBlank, iconBg: 'bg-[#3B2C66]', iconColor: 'text-[#C6B7FF]' },
-  { num: '02', title: 'Group',   body: 'Find situations that rhyme across niches.', icon: UsersThree,    iconBg: 'bg-[#1F3A33]', iconColor: 'text-[#7BD6A8]' },
-  { num: '03', title: 'Surface', body: 'Show ideas with evidence attached.',       icon: Sparkle,       iconBg: 'bg-[#2C2A55]', iconColor: 'text-[#9C8DFF]' },
-];
-
-interface StatCell {
-  icon: typeof CalendarBlank;
-  value: string;
-  label: string;
-  iconBg: string;
-  iconColor: string;
-}
-
-const SWEEP_STATS: StatCell[] = [
-  { icon: FolderSimple,    value: '102', label: 'projects scanned',      iconBg: 'bg-[#E3F4E0]', iconColor: 'text-[#2F7C49]' },
-  { icon: Briefcase,       value: '416', label: 'agent runs considered', iconBg: 'bg-[#F1ECFD]', iconColor: 'text-ppc-purple-700' },
-  { icon: Sparkle,         value: '5',   label: 'new ideas',             iconBg: 'bg-[#F1ECFD]', iconColor: 'text-ppc-purple-700' },
-  { icon: ArrowsClockwise, value: '3',   label: 'seen again',            iconBg: 'bg-[#F1ECFD]', iconColor: 'text-ppc-purple-700' },
-];
-
-function HowItWorks() {
-  return (
-    <section>
-      <h3 className="font-display text-[22px] font-bold leading-tight tracking-h2 text-ppc-ink">
-        How Patterns works
-      </h3>
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {STEPS.map((s) => <StepCard key={s.num} {...s} />)}
-        <StatsCard />
-      </div>
-      <p className="mt-4 inline-flex items-center gap-2 text-[13px] text-ppc-text-muted">
-        <Sparkle size={14} weight="fill" className="text-ppc-purple-500" />
-        Quiet ideas fade into archive unless reinforced.
-      </p>
     </section>
   );
 }
 
-function StepCard({ num, title, body, icon: Icon, iconBg, iconColor }: Step) {
+interface FilterBarProps {
+  filter: FilterKey;
+  onChange: (k: FilterKey) => void;
+  query: string;
+  onQuery: (q: string) => void;
+}
+
+function FilterBar({ filter, onChange, query, onQuery }: FilterBarProps) {
+  const pills: Array<{ key: FilterKey; label: string; icon: ReactNode }> = [
+    { key: 'new',      label: 'New',      icon: <Sparkle size={14} weight="fill" /> },
+    { key: 'saved',    label: 'Saved',    icon: <BookmarkSimple size={14} weight="fill" /> },
+    { key: 'archived', label: 'Archived', icon: <Archive size={14} weight="fill" /> },
+  ];
+
   return (
-    <div className="relative overflow-hidden rounded-[14px] bg-[radial-gradient(120%_120%_at_50%_-10%,#1A1030_0%,#0F0A1E_55%,#07050D_100%)] p-5 text-white">
-      <div className={`mb-7 grid h-11 w-11 place-items-center rounded-full ${iconBg} ${iconColor}`}>
-        <Icon size={20} weight="duotone" />
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="inline-flex items-center gap-1 rounded-full bg-[#F4F1FA] p-1">
+        {pills.map((p) => {
+          const active = filter === p.key;
+          return (
+            <button
+              key={p.key}
+              type="button"
+              onClick={() => onChange(p.key)}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
+                active
+                  ? 'bg-white text-ppc-purple-700 shadow-[0_1px_3px_rgba(15,10,30,0.05)]'
+                  : 'text-ppc-text-muted hover:text-ppc-ink'
+              }`}
+            >
+              <span className={active ? 'text-ppc-purple-500' : 'text-ppc-text-faint'}>
+                {p.icon}
+              </span>
+              {p.label}
+            </button>
+          );
+        })}
       </div>
-      <div className="flex items-baseline gap-2">
-        <span className="text-[14px] font-medium text-white/45">{num}</span>
-        <span className="text-[17px] font-bold tracking-tight text-white">{title}</span>
+
+      <div className="flex w-full max-w-[360px] items-center gap-2 rounded-full border border-ppc-card-border bg-white px-3.5 py-2">
+        <MagnifyingGlass size={15} weight="bold" className="text-ppc-text-faint" />
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => onQuery(e.target.value)}
+          placeholder="Filter patterns"
+          className="min-w-0 flex-1 bg-transparent text-[13px] text-ppc-ink placeholder:text-ppc-text-faint focus:outline-none"
+        />
+        <button
+          type="button"
+          aria-label="More filters"
+          className="grid h-7 w-7 place-items-center rounded-full text-ppc-text-muted hover:bg-[#F4F1FA] hover:text-ppc-ink"
+        >
+          <SlidersHorizontal size={14} weight="bold" />
+        </button>
       </div>
-      <p className="mt-1 text-[13.5px] leading-[1.45] text-white/65">
-        {body}
-      </p>
     </div>
   );
 }
 
-function StatsCard() {
+// Glyph picker — gives each row its own little fingerprint.
+const ROW_GLYPHS = [Waveform, DotsNine, WaveTriangle, ChartBar, TrendUp];
+
+type RowStatus = 'New' | 'Needs review';
+
+const ROW_STATUS: Record<string, RowStatus> = {
+  'p-01': 'New',
+  'p-02': 'New',
+  'p-03': 'New',
+  'p-04': 'Needs review',
+  'p-05': 'New',
+};
+
+const STATUS_STYLES: Record<RowStatus, string> = {
+  'New':          'text-ppc-purple-700',
+  'Needs review': 'text-[#A06B19]',
+};
+
+interface PatternRowProps {
+  pattern: Pattern;
+  index: number;
+  expanded: boolean;
+  onToggle: () => void;
+}
+
+function PatternRow({ pattern, index, expanded, onToggle }: PatternRowProps) {
+  const Glyph = ROW_GLYPHS[(index - 1) % ROW_GLYPHS.length];
+  const status = ROW_STATUS[pattern.id] ?? 'New';
+  const receipts =
+    pattern.drivenBy.reduce((sum, d) => sum + d.findingsCount, 0) + 1;
+
   return (
-    <div className="rounded-[14px] border border-ppc-card-border bg-white p-4">
-      <div className="grid h-full grid-cols-2 gap-3">
-        {SWEEP_STATS.map((s) => (
-          <div key={s.label} className="flex items-start gap-2.5">
-            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-[8px] ${s.iconBg} ${s.iconColor}`}>
-              <s.icon size={18} weight="duotone" />
-            </span>
-            <div className="min-w-0">
-              <div className="text-[20px] font-bold leading-tight text-ppc-ink">{s.value}</div>
-              <div className="text-[11.5px] leading-tight text-ppc-text-muted">{s.label}</div>
-            </div>
-          </div>
-        ))}
+    <li>
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`group flex w-full items-center gap-5 px-5 py-5 text-left transition-colors hover:bg-[#FAF8FE] ${
+          expanded ? 'bg-[#FAF8FE]' : ''
+        }`}
+      >
+        <span className="w-[28px] text-[13px] font-semibold tabular-nums text-ppc-text-faint">
+          {String(index).padStart(2, '0')}
+        </span>
+
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px] bg-[#F4F0FB] text-ppc-purple-700">
+          <Glyph size={20} weight="duotone" />
+        </span>
+
+        <span className="min-w-0 flex-1">
+          <span className="block text-[15.5px] font-semibold leading-snug text-ppc-ink">
+            {pattern.headline}
+          </span>
+          <span className="mt-0.5 line-clamp-1 block text-[13px] leading-snug text-ppc-text-muted">
+            {pattern.whatWeFound}
+          </span>
+        </span>
+
+        <span className="hidden shrink-0 text-right text-[12.5px] text-ppc-text-muted md:block">
+          <span className="font-medium text-ppc-ink">
+            {pattern.affected.length}
+          </span>{' '}
+          accounts
+          <span className="mx-1 text-ppc-text-faint">·</span>
+          <span className="font-medium text-ppc-ink">{receipts}</span> receipts
+        </span>
+
+        <span
+          className={`hidden w-[88px] shrink-0 text-[13px] font-medium md:inline-block ${STATUS_STYLES[status]}`}
+        >
+          {status}
+        </span>
+
+        <span className="inline-flex shrink-0 items-center gap-1 text-[13px] font-medium text-ppc-purple-700 transition-transform group-hover:translate-x-0.5">
+          {expanded ? (
+            <>
+              Close <X size={13} weight="bold" />
+            </>
+          ) : (
+            <>
+              Open <ArrowRight size={13} weight="bold" />
+            </>
+          )}
+        </span>
+      </button>
+
+      {expanded && (
+        <div className="border-t border-[#EDE8F5] bg-[#FBFAFE] px-5 py-6 lg:px-12">
+          <ExpandedDetail pattern={pattern} />
+        </div>
+      )}
+    </li>
+  );
+}
+
+function ExpandedDetail({ pattern }: { pattern: Pattern }) {
+  return (
+    <div className="grid grid-cols-1 gap-x-10 gap-y-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div>
+        <SectionLabel>Why it matters</SectionLabel>
+        <p className="mt-1.5 text-[14px] leading-[1.55] text-ppc-ink/85">
+          {pattern.whyItMatters}
+        </p>
+
+        <SectionLabel className="mt-5">Recommended action</SectionLabel>
+        <p className="mt-1.5 text-[14px] leading-[1.55] text-ppc-ink/85">
+          {pattern.recommendedAction}
+        </p>
+        <button
+          type="button"
+          onClick={(e) => e.stopPropagation()}
+          className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-grad-cta px-4 py-2 text-[13px] font-medium text-white shadow-[0_2px_10px_rgba(83,74,183,0.30)] hover:opacity-95"
+        >
+          {pattern.recommendedActionCta}
+          <ArrowRight size={13} weight="bold" />
+        </button>
+      </div>
+
+      <div className="space-y-5">
+        <div>
+          <SectionLabel>Affected accounts</SectionLabel>
+          <ul className="mt-2 space-y-1.5">
+            {pattern.affected.map((a) => (
+              <li
+                key={a.id}
+                className="flex items-center gap-2 text-[13px] text-ppc-ink"
+              >
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-[#F4F0FB] text-[10px] font-semibold text-ppc-purple-800">
+                  {initialsOf(a.name)}
+                </span>
+                {a.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <SectionLabel>Driven by</SectionLabel>
+          <ul className="mt-2 space-y-1.5">
+            {pattern.drivenBy.map((d) => (
+              <li
+                key={d.agentName}
+                className="flex items-center gap-2 text-[13px] text-ppc-ink"
+              >
+                <span className="text-[14px]">{d.agentEmoji}</span>
+                <span className="font-medium">{d.agentName}</span>
+                <span className="text-ppc-text-muted">
+                  · {d.findingsCount} finding{d.findingsCount === 1 ? '' : 's'}
+                </span>
+                {d.modifier && (
+                  <span className="text-ppc-text-faint">· {d.modifier}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
 }
 
-// ─── Top patterns ────────────────────────────────────────────────────────
-
-type Status = 'New' | 'Seen again' | 'Developing';
-type Family = 'Mechanism' | 'Cohort' | 'Operator';
-
-interface PatternViz {
-  status: Status;
-  family: Family;
-  icon: typeof MagnifyingGlass;
-  iconBg: string;
-  iconColor: string;
-  linked: string[];
+function SectionLabel({
+  children,
+  className = '',
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`text-[11px] font-semibold tracking-wide text-ppc-text-faint ${className}`}>
+      {children}
+    </div>
+  );
 }
-
-// Visual classification overlay for the top 4 patterns. Real prose lives in
-// mock/patterns.ts (the source of truth shared with the dashboard strip).
-const PATTERN_VIZ: Record<string, PatternViz> = {
-  'p-01': {
-    status: 'New', family: 'Mechanism',
-    icon: MagnifyingGlass, iconBg: 'bg-[#F4ECE0]', iconColor: 'text-[#8A6F3D]',
-    linked: ['Auction shift', 'CPC dip', 'Brand defense'],
-  },
-  'p-02': {
-    status: 'New', family: 'Cohort',
-    icon: CalendarBlank, iconBg: 'bg-[#DBF1E0]', iconColor: 'text-[#2F7C49]',
-    linked: ['Weekend daypart', 'Spend curve', 'CPA divergence'],
-  },
-  'p-03': {
-    status: 'Seen again', family: 'Mechanism',
-    icon: Target, iconBg: 'bg-[#ECE6FD]', iconColor: 'text-ppc-purple-700',
-    linked: ['PMAX intent drift', 'Shared negatives', 'Cross-account'],
-  },
-  'p-04': {
-    status: 'Developing', family: 'Operator',
-    icon: Wrench, iconBg: 'bg-[#FBE3D6]', iconColor: 'text-[#A05A2A]',
-    linked: ['Vertical erosion', 'Brand-search IS', 'Same-week signal'],
-  },
-};
-
-const TOP_PATTERN_IDS = ['p-01', 'p-02', 'p-03', 'p-04'];
-
-const STATUS_STYLES: Record<Status, string> = {
-  'New':         'bg-[#FFEBC4] text-[#9C6B0A]',
-  'Seen again':  'bg-[#ECE6FD] text-[#5946B9]',
-  'Developing':  'bg-[#FBE0CF] text-[#A0521E]',
-};
-
-const FAMILY_STYLES: Record<Family, string> = {
-  Mechanism: 'bg-[#E3F4E0] text-[#2F7C49]',
-  Cohort:    'bg-[#E3F4E0] text-[#2F7C49]',
-  Operator:  'bg-[#FBEAD0] text-[#A06B19]',
-};
 
 function initialsOf(name: string): string {
   return name
@@ -428,296 +654,4 @@ function initialsOf(name: string): string {
     .join('')
     .slice(0, 3)
     .toUpperCase();
-}
-
-function TopPatterns() {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  const topPatterns = TOP_PATTERN_IDS
-    .map((id) => PATTERNS.find((p) => p.id === id))
-    .filter((p): p is Pattern => p != null);
-
-  return (
-    <section>
-      <div className="flex items-start justify-between">
-        <h3 className="font-display text-[22px] font-bold leading-tight tracking-h2 text-ppc-ink">
-          Top patterns this sweep
-        </h3>
-        <div className="text-right">
-          <Link
-            to="#"
-            className="inline-flex items-center gap-1 text-[13px] font-medium text-ppc-purple-700 hover:text-ppc-purple-500"
-          >
-            View all patterns
-            <ArrowRight size={13} weight="bold" />
-          </Link>
-          <div className="text-[11.5px] text-ppc-text-faint">{PATTERNS.length} total</div>
-        </div>
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {topPatterns.map((pattern) => (
-          <PatternCard
-            key={pattern.id}
-            pattern={pattern}
-            expanded={expandedId === pattern.id}
-            onToggle={() => setExpandedId(expandedId === pattern.id ? null : pattern.id)}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-interface PatternCardProps {
-  pattern: Pattern;
-  expanded: boolean;
-  onToggle: () => void;
-}
-
-function PatternCard({ pattern, expanded, onToggle }: PatternCardProps) {
-  const viz = PATTERN_VIZ[pattern.id];
-  if (!viz) return null;
-
-  const initials = pattern.affected.slice(0, 4).map((a) => initialsOf(a.name));
-  const extraClients = Math.max(0, pattern.affected.length - 4);
-  const Icon = viz.icon;
-
-  return (
-    <article
-      onClick={onToggle}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onToggle();
-        }
-      }}
-      role="button"
-      tabIndex={0}
-      className={`group cursor-pointer rounded-[14px] border bg-white p-5 transition-all hover:border-ppc-purple-300 ${
-        expanded
-          ? 'border-ppc-purple-400 shadow-[0_2px_28px_rgba(127,90,240,0.10)] lg:col-span-2'
-          : 'border-ppc-card-border'
-      }`}
-    >
-      {/* top meta row */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 items-start gap-3">
-          <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-full ${viz.iconBg} ${viz.iconColor}`}>
-            <Icon size={20} weight="duotone" />
-          </span>
-          <div className="flex flex-wrap items-center gap-1.5 pt-1.5">
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-medium ${STATUS_STYLES[viz.status]}`}>
-              {viz.status}
-            </span>
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-medium ${FAMILY_STYLES[viz.family]}`}>
-              {viz.family}
-            </span>
-            {pattern.spotted && (
-              <span className="text-[11px] text-ppc-text-faint">
-                {pattern.spotted}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <div className="flex items-center gap-2">
-            <span className="text-[12px] text-ppc-text-muted">
-              {pattern.affected.length} {pattern.affected.length === 1 ? 'account' : 'accounts'}
-            </span>
-            <button
-              type="button"
-              className="text-ppc-text-faint hover:text-ppc-purple-500"
-              aria-label="Save pattern"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Bookmark size={16} weight="regular" />
-            </button>
-            {expanded && (
-              <button
-                type="button"
-                className="ml-1 text-ppc-text-faint hover:text-ppc-ink"
-                aria-label="Collapse pattern"
-                onClick={(e) => { e.stopPropagation(); onToggle(); }}
-              >
-                <X size={14} weight="bold" />
-              </button>
-            )}
-          </div>
-          <div className="flex items-center gap-1">
-            {initials.map((init, i) => (
-              <span
-                key={`${init}-${i}`}
-                className="grid h-[22px] min-w-[22px] place-items-center rounded-md bg-[#F4F0FB] px-1.5 text-[10px] font-semibold text-ppc-purple-800"
-              >
-                {init}
-              </span>
-            ))}
-            {extraClients > 0 && (
-              <span className="grid h-[22px] min-w-[28px] place-items-center rounded-md bg-[#F4F0FB] px-1.5 text-[10px] font-semibold text-ppc-purple-800">
-                +{extraClients}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* title + body */}
-      <h4 className="mt-4 text-[16px] font-bold leading-snug text-ppc-ink">
-        {pattern.headline}
-      </h4>
-      <p
-        className={`mt-1.5 text-[13.5px] leading-[1.5] text-ppc-text-muted ${
-          expanded ? '' : 'line-clamp-2'
-        }`}
-      >
-        {pattern.whatWeFound}
-      </p>
-
-      {/* linked + sources — collapsed row */}
-      {!expanded && (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-y-2 border-t border-[#EDE8F5] pt-3">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="mr-1 text-[11.5px] text-ppc-text-faint">Why linked</span>
-            {viz.linked.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center rounded-md bg-[#F4F0FB] px-2 py-1 text-[11px] font-medium text-ppc-purple-800"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="mr-1 text-[11.5px] text-ppc-text-faint">Sources</span>
-            <SourceIcon Icon={Briefcase} tint="green" />
-            <SourceIcon Icon={GoogleLogo} tint="purple" />
-            <SourceIcon Icon={FileText} tint="purple" />
-            <SourceIcon Icon={ShieldCheck} tint="green" />
-            <SourceIcon Icon={ClockCounterClockwise} tint="purple" />
-          </div>
-        </div>
-      )}
-
-      {/* expanded detail */}
-      {expanded && <ExpandedDetail pattern={pattern} viz={viz} />}
-    </article>
-  );
-}
-
-function ExpandedDetail({ pattern, viz }: { pattern: Pattern; viz: PatternViz }) {
-  return (
-    <div className="mt-5 border-t border-[#EDE8F5] pt-5">
-      <div className="grid grid-cols-1 gap-x-8 gap-y-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <div>
-          <SectionLabel>Why it matters</SectionLabel>
-          <p className="mt-1.5 text-[14px] leading-[1.55] text-ppc-ink/85">
-            {pattern.whyItMatters}
-          </p>
-
-          <SectionLabel className="mt-5">Recommended action</SectionLabel>
-          <p className="mt-1.5 text-[14px] leading-[1.55] text-ppc-ink/85">
-            {pattern.recommendedAction}
-          </p>
-          <button
-            type="button"
-            onClick={(e) => e.stopPropagation()}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-grad-cta px-4 py-2 text-[13px] font-medium text-white shadow-[0_2px_10px_rgba(83,74,183,0.30)] hover:opacity-95"
-          >
-            {pattern.recommendedActionCta}
-            <ArrowRight size={13} weight="bold" />
-          </button>
-        </div>
-
-        <div className="space-y-5">
-          <div>
-            <SectionLabel>Affected accounts</SectionLabel>
-            <ul className="mt-2 space-y-1.5">
-              {pattern.affected.map((a) => (
-                <li key={a.id} className="flex items-center gap-2 text-[13px] text-ppc-ink">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-[#F4F0FB] text-[10px] font-semibold text-ppc-purple-800">
-                    {initialsOf(a.name)}
-                  </span>
-                  {a.name}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <SectionLabel>Driven by</SectionLabel>
-            <ul className="mt-2 space-y-1.5">
-              {pattern.drivenBy.map((d) => (
-                <li key={d.agentName} className="flex items-center gap-2 text-[13px] text-ppc-ink">
-                  <span className="text-[14px]">{d.agentEmoji}</span>
-                  <span className="font-medium">{d.agentName}</span>
-                  <span className="text-ppc-text-muted">
-                    · {d.findingsCount} finding{d.findingsCount === 1 ? '' : 's'}
-                  </span>
-                  {d.modifier && <span className="text-ppc-text-faint">· {d.modifier}</span>}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="mr-1 text-[11.5px] text-ppc-text-faint">Why linked</span>
-            {viz.linked.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center rounded-md bg-[#F4F0FB] px-2 py-1 text-[11px] font-medium text-ppc-purple-800"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SectionLabel({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={`text-[11px] font-semibold tracking-wide text-ppc-text-faint ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-function SourceIcon({ Icon, tint }: { Icon: typeof MagnifyingGlass; tint: 'purple' | 'green' }) {
-  const cls =
-    tint === 'green'
-      ? 'bg-[#E3F4E0] text-[#2F7C49]'
-      : 'bg-[#F1ECFD] text-ppc-purple-700';
-  return (
-    <span className={`grid h-[22px] w-[22px] place-items-center rounded-[6px] ${cls}`}>
-      <Icon size={12} weight="duotone" />
-    </span>
-  );
-}
-
-// ─── Footer row ──────────────────────────────────────────────────────────
-
-function FooterRow() {
-  return (
-    <footer className="flex flex-wrap items-center justify-between gap-3">
-      <p className="inline-flex items-center gap-2 text-[12.5px] text-ppc-text-muted">
-        <Info size={14} weight="duotone" className="text-ppc-text-faint" />
-        Showing curated patterns from the last 45 days.
-        <span className="ml-3 text-ppc-text-muted">Saved ideas stay pinned.</span>
-        <span className="ml-3 text-ppc-text-muted">
-          Archived patterns live in{' '}
-          <Link to="#" className="font-medium text-ppc-purple-700 underline-offset-4 hover:underline">
-            All patterns.
-          </Link>
-        </span>
-      </p>
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FBE9C9] px-3 py-1 text-[12px] font-medium text-[#8B6312]">
-        <CheckCircle size={13} weight="fill" />
-        Experimental
-      </span>
-    </footer>
-  );
 }
