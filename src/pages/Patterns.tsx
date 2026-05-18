@@ -404,10 +404,6 @@ const FLOW_KEYFRAMES = `
   0%, 100% { transform: scale(1); opacity: 0.95; }
   50%      { transform: scale(1.08); opacity: 0.75; }
 }
-@keyframes ppc-text-glow {
-  0%, 100% { text-shadow: 0 0 22px rgba(168,140,255,0.35); }
-  50%      { text-shadow: 0 0 30px rgba(168,140,255,0.55); }
-}
 `;
 
 function SourceColumn() {
@@ -443,18 +439,9 @@ function OutputColumn() {
 
 function StrategicPatternCard() {
   return (
-    <div className="relative flex items-center gap-3 lg:gap-4">
-      <span
-        aria-hidden
-        className="text-[32px] leading-none"
-        style={{ filter: 'drop-shadow(0 0 18px rgba(255,210,120,0.45))' }}
-      >
-        💡
-      </span>
-      <h4
-        className="font-serif text-[36px] italic font-semibold leading-[1.05] text-white lg:text-[40px]"
-        style={{ animation: 'ppc-text-glow 3.4s ease-in-out infinite' }}
-      >
+    <div className="relative flex items-center gap-3">
+      <span aria-hidden className="text-[24px] leading-none">💡</span>
+      <h4 className="font-display text-[34px] font-black italic leading-[1.05] text-ppc-purple-300 lg:text-[38px]">
         Strategic Pattern
       </h4>
     </div>
