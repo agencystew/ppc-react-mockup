@@ -194,7 +194,7 @@ export function TitleRow({
   return (
     <div className="mb-2 flex flex-wrap items-start justify-between gap-4">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="font-display text-[40px] font-extrabold leading-none tracking-[-0.025em] text-ppc-ink">
+        <h1 className="ppc-h1 text-ppc-ink">
           {agentName}
         </h1>
         <OnTrackPill />
@@ -380,7 +380,7 @@ export function HeroCard({ run, mascot }: { run: AgentRun; mascot: React.ReactNo
       <div className="relative grid gap-4 px-9 pb-5 pt-8 sm:grid-cols-[1fr_240px] sm:gap-5 sm:px-10 sm:pt-9">
         {/* Copy column */}
         <div className="min-w-0">
-          <h2 className="font-display text-[42px] font-black leading-[1.0] tracking-[-0.03em] text-white sm:text-[58px]">
+          <h2 className="ppc-h1 text-white">
             {body}
             {hasPeriod && <span style={{ color: '#9F86FF' }}>.</span>}
           </h2>
@@ -453,7 +453,7 @@ function DarkStatTile({
     >
       <StatIconBadge kind={icon} />
       <div className="min-w-0 flex-1">
-        <div className="font-display text-[30px] font-extrabold leading-none tracking-[-0.025em] text-white">
+        <div className="ppc-h2 text-white tabular-nums">
           {main}
           {suffix && (
             <span className="ml-[1px] text-[14px] font-medium text-white/55">
@@ -610,7 +610,7 @@ function StrategistVerdict({
         {/* Left: eyebrow + verdict statement */}
         <div className="min-w-0">
           <VerdictEyebrow />
-          <h3 className="mt-5 font-display text-[28px] font-extrabold leading-[1.15] tracking-[-0.022em] text-white sm:text-[32px]">
+          <h3 className="ppc-h2 mt-5 text-white">
             {verdict.statement}
           </h3>
 
@@ -653,10 +653,7 @@ function StrategistVerdict({
                   boxShadow: '0 0 0 3px rgba(226,165,54,0.18)',
                 }}
               />
-              <span
-                className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-white/55"
-                style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-              >
+              <span className="text-[11px] font-semibold text-white/60">
                 Main risk
               </span>
             </div>
@@ -701,12 +698,11 @@ function StrategistVerdict({
 function VerdictEyebrow() {
   return (
     <span
-      className="inline-flex items-center gap-2 rounded-full px-[11px] py-[5px] text-[10.5px] font-bold uppercase tracking-[0.14em]"
+      className="inline-flex items-center gap-2 rounded-full px-[11px] py-[5px] text-[11px] font-semibold"
       style={{
         background: 'rgba(127,90,240,0.16)',
         color: '#C9B5FF',
         boxShadow: 'inset 0 0 0 1px rgba(159,134,255,0.30)',
-        fontFamily: '"Courier New", ui-monospace, monospace',
       }}
     >
       <Compass size={11} weight="fill" />
@@ -777,12 +773,8 @@ function ActionCard({ index, action }: { index: number; action: ActionCardData }
       <div className="relative pb-7 pl-9 pr-7 pt-7 sm:pl-11 sm:pr-9 sm:pt-8">
         {/* Numbered category eyebrow */}
         <div
-          className="mb-3 flex items-center gap-[10px] text-[11px] font-semibold uppercase leading-none"
-          style={{
-            fontFamily: '"Courier New", ui-monospace, monospace',
-            letterSpacing: '0.14em',
-            color: rail.eyebrow,
-          }}
+          className="mb-3 flex items-center gap-[10px] text-[11px] font-semibold leading-none"
+          style={{ color: rail.eyebrow }}
         >
           <span
             className="inline-flex h-[20px] min-w-[20px] items-center justify-center rounded-[5px] px-[5px] tabular-nums"
@@ -798,7 +790,7 @@ function ActionCard({ index, action }: { index: number; action: ActionCardData }
         </div>
 
         {/* Title */}
-        <h4 className="font-display text-[23px] font-extrabold leading-[1.2] tracking-[-0.018em] text-ppc-ink sm:text-[25px]">
+        <h4 className="ppc-h3 text-ppc-ink">
           {action.title}
         </h4>
 
@@ -845,11 +837,7 @@ function ActionDetail({ label, body }: { label: string; body: string }) {
   return (
     <div className="grid gap-1.5 sm:grid-cols-[160px_1fr] sm:gap-5">
       <span
-        className="pt-[3px] text-[10.5px] font-bold uppercase leading-none text-ppc-text-muted"
-        style={{
-          fontFamily: '"Courier New", ui-monospace, monospace',
-          letterSpacing: '0.12em',
-        }}
+        className="pt-[3px] text-[11px] font-semibold leading-none text-ppc-text-muted"
       >
         {label}
       </span>
@@ -944,10 +932,6 @@ function ActionBadgePill({ badge }: { badge: ActionBadge }) {
         background: style.bg,
         color: style.fg,
         boxShadow: `inset 0 0 0 1px ${style.ring}`,
-        fontFamily: style.mono
-          ? '"Courier New", ui-monospace, monospace'
-          : undefined,
-        letterSpacing: style.mono ? '0.04em' : undefined,
       }}
     >
       {badge.label}
@@ -993,7 +977,7 @@ function InsightCard({ insight }: { insight: InsightCardData }) {
           '0 0 0 1px #e8e2f0, 0 1px 0 rgba(15,10,30,0.02), 0 14px 28px -22px rgba(15,10,30,0.10)',
       }}
     >
-      <h4 className="text-[15px] font-semibold leading-[1.3] tracking-[-0.005em] text-ppc-ink">
+      <h4 className="ppc-h4 text-ppc-ink">
         {insight.title}
       </h4>
 
@@ -1008,10 +992,7 @@ function InsightCard({ insight }: { insight: InsightCardData }) {
           className="h-[5px] w-[5px] rounded-full"
           style={{ background: '#7F5AF0' }}
         />
-        <span
-          className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-ppc-text-muted"
-          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-        >
+        <span className="text-[11px] font-semibold text-ppc-text-muted">
           Signal
         </span>
       </div>
@@ -1034,13 +1015,7 @@ function InsightCard({ insight }: { insight: InsightCardData }) {
 function InsightBlock({ label, body }: { label: string; body: string }) {
   return (
     <div>
-      <p
-        className="mb-1 text-[10px] font-bold uppercase leading-none text-ppc-text-muted"
-        style={{
-          fontFamily: '"Courier New", ui-monospace, monospace',
-          letterSpacing: '0.12em',
-        }}
-      >
+      <p className="mb-1 text-[11px] font-semibold leading-none text-ppc-text-muted">
         {label}
       </p>
       <p className="text-[12.5px] leading-[1.5] text-ppc-ink/85">{body}</p>
@@ -1074,7 +1049,7 @@ function ChecksSection({ checks }: { checks: CheckData[] }) {
           <Question size={18} weight="bold" className="text-white" />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 className="text-[18px] font-semibold tracking-[-0.01em] text-ppc-ink">
+          <h3 className="ppc-h3 text-ppc-ink">
             Checks before export
           </h3>
           <p className="mt-1 max-w-[640px] text-[13px] leading-[1.55] text-ppc-text-muted">
@@ -1100,7 +1075,7 @@ function CheckRow({ check }: { check: CheckData }) {
       style={{ boxShadow: 'inset 0 0 0 1px #f0e6cc' }}
     >
       <div className="min-w-0 flex-1">
-        <h4 className="text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink">
+        <h4 className="ppc-h4 text-ppc-ink">
           {check.title}
         </h4>
         <p className="mt-1.5 max-w-[640px] text-[13px] leading-[1.55] text-ppc-text-muted">
@@ -1146,7 +1121,7 @@ function FullReportFooter({ onSeeFullReport }: { onSeeFullReport: () => void }) 
 function SectionTitle({ title, sub }: { title: string; sub: string }) {
   return (
     <div className="mb-5">
-      <h3 className="text-[20px] font-semibold tracking-[-0.012em] text-ppc-ink">
+      <h3 className="ppc-h3 text-ppc-ink">
         {title}
       </h3>
       <p className="mt-1 text-[13px] leading-[1.55] text-ppc-text-muted">
@@ -1506,7 +1481,7 @@ function FullReportSection({ section }: { section: Section }) {
       <div className="mb-6 flex items-start gap-4">
         <SectionIcon kind={section.icon} />
         <div className="min-w-0 flex-1">
-          <h3 className="text-[20px] font-semibold tracking-[-0.01em] text-ppc-ink">
+          <h3 className="ppc-h3 text-ppc-ink">
             {section.name}
           </h3>
           <p className="mt-[3px] text-[12.5px] text-ppc-text-muted">
@@ -1528,7 +1503,7 @@ function FindingRow({ finding, isLast }: { finding: SectionFinding; isLast: bool
   return (
     <div className={isLast ? '' : 'border-b border-[#f1ecf6] pb-7'}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <h4 className="max-w-[640px] text-[16px] font-semibold tracking-[-0.005em] text-ppc-ink">
+        <h4 className="ppc-h4 max-w-[640px] text-ppc-ink">
           {finding.title}
         </h4>
         {finding.impact && <ImpactChip impact={finding.impact} />}
@@ -1538,7 +1513,7 @@ function FindingRow({ finding, isLast }: { finding: SectionFinding; isLast: bool
       </p>
       {finding.metric && (
         <div className="mt-4 flex items-baseline gap-3">
-          <span className="font-display text-[28px] font-extrabold leading-none tracking-[-0.015em] text-ppc-ink">
+          <span className="ppc-h2 text-ppc-ink tabular-nums">
             {finding.metric.value}
           </span>
           <span className="text-[12.5px] text-ppc-text-muted">
@@ -1642,11 +1617,10 @@ function EvidenceExpand({ evidence }: { evidence: Evidence }) {
               {evidence.tools.map((t) => (
                 <code
                   key={t}
-                  className="rounded-[6px] px-[8px] py-[3px] text-[11.5px]"
+                  className="rounded-[6px] px-[8px] py-[3px] text-[11.5px] font-medium"
                   style={{
                     background: 'rgba(127,90,240,0.18)',
                     color: '#C9B5FF',
-                    fontFamily: 'Courier New, monospace',
                     boxShadow: 'inset 0 0 0 1px rgba(159,134,255,0.30)',
                   }}
                 >
@@ -1657,7 +1631,7 @@ function EvidenceExpand({ evidence }: { evidence: Evidence }) {
 
             {/* Sample data table */}
             <div className="mb-5">
-              <div className="mb-2 text-[10.5px] font-bold uppercase tracking-[0.08em] text-white/55">
+              <div className="mb-2 text-[11px] font-semibold text-white/60">
                 Sample data
               </div>
               <div
@@ -1698,7 +1672,7 @@ function EvidenceExpand({ evidence }: { evidence: Evidence }) {
                           <td
                             key={j}
                             className="px-4 py-[10px] text-white/85"
-                            style={{ fontFamily: j === 0 ? undefined : 'Courier New, monospace' }}
+                            style={j === 0 ? undefined : { fontVariantNumeric: 'tabular-nums' }}
                           >
                             {cell}
                           </td>
@@ -1803,7 +1777,7 @@ export function MethodologyView({
         <div className="mb-6 flex items-start gap-4">
           <MethodShield />
           <div className="min-w-0 flex-1">
-            <h3 className="text-[20px] font-semibold tracking-[-0.01em] text-ppc-ink">
+            <h3 className="ppc-h3 text-ppc-ink">
               How this agent works
             </h3>
             <p className="mt-1 max-w-[640px] text-[14px] leading-[1.55] text-ppc-text-muted">
@@ -1826,7 +1800,7 @@ export function MethodologyView({
             '0 0 0 1px #e7e2ef, 0 1px 0 rgba(15,10,30,0.02), 0 18px 32px -24px rgba(15,10,30,0.12)',
         }}
       >
-        <h3 className="mb-1 text-[18px] font-semibold tracking-[-0.01em] text-ppc-ink">
+        <h3 className="ppc-h3 mb-1 text-ppc-ink">
           Specialists
         </h3>
         <p className="mb-5 text-[13px] text-ppc-text-muted">
@@ -1849,7 +1823,7 @@ export function MethodologyView({
         <div className="flex items-start gap-3">
           <Clock size={18} weight="bold" className="mt-[2px] shrink-0" style={{ color: '#7F5AF0' }} />
           <div className="min-w-0">
-            <h4 className="text-[14px] font-semibold tracking-[-0.005em] text-ppc-ink">
+            <h4 className="ppc-h4 text-ppc-ink">
               Data freshness
             </h4>
             <p className="mt-1 text-[13px] leading-[1.55] text-ppc-text-muted">
@@ -1886,7 +1860,7 @@ function RuntimeStat({ value, label }: { value: string; label: string }) {
         boxShadow: 'inset 0 0 0 1px #eae3f1',
       }}
     >
-      <div className="font-display text-[28px] font-extrabold leading-none tracking-[-0.015em] text-ppc-ink">
+      <div className="ppc-h2 text-ppc-ink tabular-nums">
         {value}
       </div>
       <p className="mt-2 text-[12px] text-ppc-text-muted">{label}</p>
@@ -1916,7 +1890,7 @@ function SpecialistRow({
       <div className="flex items-start gap-4">
         <SectionIcon kind={icon} />
         <div className="min-w-0 flex-1">
-          <h4 className="text-[15px] font-semibold tracking-[-0.005em] text-ppc-ink">
+          <h4 className="ppc-h4 text-ppc-ink">
             {name}
           </h4>
           <p className="mt-1 text-[13px] leading-[1.55] text-ppc-text-muted">
@@ -1926,10 +1900,9 @@ function SpecialistRow({
             {tools.map((t) => (
               <code
                 key={t}
-                className="rounded-[6px] px-[8px] py-[3px] text-[11.5px] text-ppc-purple-600"
+                className="rounded-[6px] px-[8px] py-[3px] text-[11.5px] font-medium text-ppc-purple-600"
                 style={{
                   background: '#EFE9FA',
-                  fontFamily: 'Courier New, monospace',
                   boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.14)',
                 }}
               >
