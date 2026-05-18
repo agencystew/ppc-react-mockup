@@ -268,7 +268,8 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
                   right: 8,
                   top: indicator.top,
                   height: indicator.height,
-                  background: 'rgba(255,255,255,0.06)',
+                  background: 'rgba(127,90,240,0.13)',
+                  boxShadow: 'inset 0 0 0 1px rgba(127,90,240,0.18)',
                   transition: `top 280ms ${SLIDE_EASE}, height 220ms ${SLIDE_EASE}`,
                 }}
               />
@@ -518,11 +519,11 @@ function MainNavItem({
         } ${
           collapsed
             ? isActive
-              ? 'bg-white/[0.06] text-white'
-              : 'text-white/[0.82] hover:bg-white/[0.035] hover:text-white'
+              ? 'bg-[rgba(127,90,240,0.13)] text-white shadow-[inset_0_0_0_1px_rgba(127,90,240,0.18)]'
+              : 'text-white/[0.82] hover:bg-[rgba(127,90,240,0.07)] hover:text-white'
             : isActive
               ? 'text-white'
-              : 'text-white/[0.82] hover:bg-white/[0.025] hover:text-white'
+              : 'text-white/[0.82] hover:bg-[rgba(127,90,240,0.06)] hover:text-white'
         }`
       }
     >
@@ -536,7 +537,7 @@ function MainNavItem({
           />
           {!collapsed && (
             <span
-              className="flex-1 text-[17px] leading-none tracking-[-0.012em]"
+              className="flex-1 text-[15px] leading-none tracking-[-0.01em]"
               style={{
                 fontFamily: SIDEBAR_FONT,
                 fontWeight: isActive ? 900 : 700,
@@ -587,8 +588,8 @@ function ItemGroup({
         title={label}
         className={`group relative z-[1] flex w-full items-center justify-center rounded-[11px] px-2 py-[11px] transition-colors ${
           inSection
-            ? 'bg-white/[0.06] text-white'
-            : 'text-white/[0.82] hover:bg-white/[0.035] hover:text-white'
+            ? 'bg-[rgba(127,90,240,0.13)] text-white shadow-[inset_0_0_0_1px_rgba(127,90,240,0.18)]'
+            : 'text-white/[0.82] hover:bg-[rgba(127,90,240,0.07)] hover:text-white'
         }`}
       >
         <NavIcon Icon={Icon} isActive={inSection} justActivated={justActivated} collapsed />
@@ -605,7 +606,7 @@ function ItemGroup({
         className={`group relative z-[1] flex w-full items-center gap-3 rounded-[11px] pl-[14px] pr-[12px] py-[12px] text-left transition-colors duration-200 ${
           inSection
             ? 'text-white'
-            : 'text-white/[0.82] hover:bg-white/[0.025] hover:text-white'
+            : 'text-white/[0.82] hover:bg-[rgba(127,90,240,0.06)] hover:text-white'
         }`}
       >
         <NavIcon
@@ -615,7 +616,7 @@ function ItemGroup({
           collapsed={false}
         />
         <span
-          className="flex-1 text-[17px] leading-none tracking-[-0.012em]"
+          className="flex-1 text-[15px] leading-none tracking-[-0.01em]"
           style={{
             fontFamily: SIDEBAR_FONT,
             fontWeight: inSection ? 900 : 700,
@@ -686,8 +687,8 @@ function AllProjectsRow({
         title="All projects"
         className={`group relative z-[1] flex w-full items-center justify-center rounded-[11px] px-2 py-[11px] transition-colors ${
           active
-            ? 'bg-white/[0.06] text-white'
-            : 'text-white/[0.82] hover:bg-white/[0.035] hover:text-white'
+            ? 'bg-[rgba(127,90,240,0.13)] text-white shadow-[inset_0_0_0_1px_rgba(127,90,240,0.18)]'
+            : 'text-white/[0.82] hover:bg-[rgba(127,90,240,0.07)] hover:text-white'
         }`}
       >
         <NavIcon
@@ -706,7 +707,7 @@ function AllProjectsRow({
       className={`group relative z-[1] flex w-full items-center gap-3 rounded-[11px] pl-[14px] pr-[12px] py-[12px] text-left transition-colors duration-200 ${
         active
           ? 'text-white'
-          : 'text-white/[0.82] hover:bg-white/[0.025] hover:text-white'
+          : 'text-white/[0.82] hover:bg-[rgba(127,90,240,0.06)] hover:text-white'
       }`}
     >
       <NavIcon
@@ -716,7 +717,7 @@ function AllProjectsRow({
         collapsed={false}
       />
       <span
-        className="flex-1 text-[17px] leading-none tracking-[-0.012em]"
+        className="flex-1 text-[15px] leading-none tracking-[-0.01em]"
         style={{
           fontFamily: SIDEBAR_FONT,
           fontWeight: active ? 900 : 700,
@@ -1039,7 +1040,7 @@ function SwitcherRow({
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onActivate(); } }}
         className={`group relative flex cursor-pointer items-center gap-3 rounded-[10px] px-[10px] py-[9px] transition-colors ${
           isActive
-            ? 'bg-white/[0.06] text-white'
+            ? 'bg-[rgba(127,90,240,0.13)] text-white shadow-[inset_0_0_0_1px_rgba(127,90,240,0.18)]'
             : 'text-white/85 hover:bg-white/[0.04] hover:text-white'
         }`}
       >

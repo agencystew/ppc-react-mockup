@@ -289,13 +289,13 @@ a.ppc-link:hover { text-decoration: underline; text-underline-offset: 3px; }
   animation: sidebar-icon-flash 440ms ease-in-out;
 }
 
-/* Additive overlay above the base slide pill — peaks at +0.08 alpha at
- * mid-animation so the combined visible bg lifts from 0.06 → 0.14 → 0.06.
- * Independent element keyed by justActivatedKey so React remounts it on
- * each activation and the keyframe re-fires. */
+/* Additive purple overlay above the base slide pill — peaks at +0.10 alpha
+ * mid-animation so the combined visible bg lifts from 0.13 → 0.23 → 0.13
+ * (purple). Independent element keyed by justActivatedKey so React remounts
+ * it on each activation and the keyframe re-fires. */
 @keyframes sidebar-pill-flash {
-  0%, 100% { background-color: rgba(255, 255, 255, 0); }
-  40%      { background-color: rgba(255, 255, 255, 0.08); }
+  0%, 100% { background-color: rgba(127, 90, 240, 0); }
+  40%      { background-color: rgba(127, 90, 240, 0.10); }
 }
 .sidebar-pill-flash {
   animation: sidebar-pill-flash 400ms ease-in-out;
