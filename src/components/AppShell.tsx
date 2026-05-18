@@ -174,6 +174,21 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
   });
   const [indicator, setIndicator] = useState<{ top: number; height: number } | null>(null);
 
+  // Per-tab click celebration: marks which key just became active so the
+  // matching row plays a one-shot punch + bloom for ~480ms. Cleared after the
+  // window so the class is removed and the keyframe animation can re-fire on
+  // the next navigation.
+  const [justActivatedKey, setJustActivatedKey] = useState<NavKey | null>(null);
+  useEffect(() => {
+    if (!activeKey) {
+      setJustActivatedKey(null);
+      return;
+    }
+    setJustActivatedKey(activeKey);
+    const t = setTimeout(() => setJustActivatedKey(null), 480);
+    return () => clearTimeout(t);
+  }, [activeKey]);
+
   const measure = () => {
     if (collapsed || !activeKey || !navRef.current) {
       setIndicator(null);
@@ -276,6 +291,7 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
             collapsed={collapsed}
             end
             itemRef={setItemRef('dashboard')}
+            justActivated={justActivatedKey === 'dashboard'}
           />
           <MainNavItem
             to="/chat"
@@ -283,6 +299,7 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
             label="Chat"
             collapsed={collapsed}
             itemRef={setItemRef('chat')}
+            justActivated={justActivatedKey === 'chat'}
           />
           <ItemGroup
             icon={Robot}
@@ -292,6 +309,7 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
             collapsed={collapsed}
             running
             itemRef={setItemRef('agents')}
+            justActivated={justActivatedKey === 'agents'}
           />
           <ItemGroup
             icon={ChartLineUp}
@@ -300,6 +318,7 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
             pages={rebindReportPages}
             collapsed={collapsed}
             itemRef={setItemRef('reports')}
+            justActivated={justActivatedKey === 'reports'}
           />
           <MainNavItem
             to="/patterns"
@@ -307,6 +326,7 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
             label="Patterns"
             collapsed={collapsed}
             itemRef={setItemRef('patterns')}
+            justActivated={justActivatedKey === 'patterns'}
           />
 
           <div className={`my-3 h-px ${collapsed ? 'mx-3' : 'mx-2'} bg-white/[0.06]`} />
@@ -318,6 +338,7 @@ function Sidebar({ collapsed, onToggle, onOpenSwitcher }: SidebarProps) {
             active={projectsActive}
             onClick={onOpenSwitcher}
             itemRef={setItemRef('all-projects')}
+            justActivated={justActivatedKey === 'all-projects'}
           />
 
           {collapsed && <CollapsedProjectStrip scopedId={scopedId} />}
@@ -418,26 +439,40 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
 /* ─── Nav icon (animated) ───────────────────────────────────────────────── */
 
 function NavIcon({
-  Icon, isActive, collapsed,
-}: { Icon: typeof House; isActive: boolean; collapsed: boolean }) {
+  Icon, isActive, justActivated, collapsed,
+}: { Icon: typeof House; isActive: boolean; justActivated?: boolean; collapsed: boolean }) {
   const size = collapsed ? 20 : 24;
   return (
-    <Icon
-      size={size}
-      weight={isActive ? 'fill' : 'duotone'}
-      className={`shrink-0 ${ICON_TRANSITION} ${
-        isActive
-          ? 'text-white drop-shadow-[0_0_8px_rgba(127,90,240,0.45)]'
-          : 'text-white/[0.78]'
-      } group-hover:scale-[1.08] group-active:scale-90`}
-    />
+    <span
+      className={`relative inline-flex shrink-0 items-center justify-center ${ICON_TRANSITION} group-hover:scale-[1.08] group-active:scale-90 ${
+        justActivated ? 'sidebar-just-activated' : ''
+      }`}
+      style={{ width: size, height: size }}
+    >
+      <Icon
+        size={size}
+        weight="duotone"
+        className={`absolute inset-0 transition-opacity duration-[250ms] ${
+          isActive ? 'opacity-0' : 'opacity-100 text-white/[0.78]'
+        }`}
+      />
+      <Icon
+        size={size}
+        weight="fill"
+        className={`absolute inset-0 transition-opacity duration-[250ms] ${
+          isActive
+            ? 'opacity-100 text-white drop-shadow-[0_0_8px_rgba(127,90,240,0.45)]'
+            : 'opacity-0'
+        }`}
+      />
+    </span>
   );
 }
 
 /* ─── Main nav item ─────────────────────────────────────────────────────── */
 
 function MainNavItem({
-  to, icon: Icon, label, collapsed, end, itemRef,
+  to, icon: Icon, label, collapsed, end, itemRef, justActivated,
 }: {
   to: string;
   icon: typeof House;
@@ -445,6 +480,7 @@ function MainNavItem({
   collapsed: boolean;
   end?: boolean;
   itemRef?: (el: HTMLAnchorElement | null) => void;
+  justActivated?: boolean;
 }) {
   return (
     <NavLink
@@ -468,13 +504,20 @@ function MainNavItem({
     >
       {({ isActive }) => (
         <>
-          <NavIcon Icon={Icon} isActive={isActive} collapsed={collapsed} />
+          <NavIcon
+            Icon={Icon}
+            isActive={isActive}
+            justActivated={justActivated}
+            collapsed={collapsed}
+          />
           {!collapsed && (
             <span
-              className={`flex-1 text-[17px] leading-none tracking-[-0.012em] transition-[font-weight] duration-200 ${
-                isActive ? 'font-extrabold' : 'font-bold'
-              }`}
-              style={{ fontFamily: SIDEBAR_FONT }}
+              className="flex-1 text-[17px] leading-none tracking-[-0.012em]"
+              style={{
+                fontFamily: SIDEBAR_FONT,
+                fontWeight: isActive ? 900 : 700,
+                transition: 'font-weight 240ms ease',
+              }}
             >
               {label}
             </span>
@@ -495,6 +538,7 @@ function ItemGroup({
   collapsed,
   running,
   itemRef,
+  justActivated,
 }: {
   icon: typeof House;
   label: string;
@@ -503,6 +547,7 @@ function ItemGroup({
   collapsed: boolean;
   running?: boolean;
   itemRef?: (el: HTMLButtonElement | null) => void;
+  justActivated?: boolean;
 }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -522,7 +567,7 @@ function ItemGroup({
             : 'text-white/[0.82] hover:bg-white/[0.035] hover:text-white'
         }`}
       >
-        <NavIcon Icon={Icon} isActive={inSection} collapsed />
+        <NavIcon Icon={Icon} isActive={inSection} justActivated={justActivated} collapsed />
       </button>
     );
   }
@@ -539,12 +584,19 @@ function ItemGroup({
             : 'text-white/[0.82] hover:bg-white/[0.025] hover:text-white'
         }`}
       >
-        <NavIcon Icon={Icon} isActive={inSection} collapsed={false} />
+        <NavIcon
+          Icon={Icon}
+          isActive={inSection}
+          justActivated={justActivated}
+          collapsed={false}
+        />
         <span
-          className={`flex-1 text-[17px] leading-none tracking-[-0.012em] transition-[font-weight] duration-200 ${
-            inSection ? 'font-extrabold' : 'font-bold'
-          }`}
-          style={{ fontFamily: SIDEBAR_FONT }}
+          className="flex-1 text-[17px] leading-none tracking-[-0.012em]"
+          style={{
+            fontFamily: SIDEBAR_FONT,
+            fontWeight: inSection ? 900 : 700,
+            transition: 'font-weight 240ms ease',
+          }}
         >
           {label}
         </span>
@@ -594,12 +646,13 @@ function ItemGroup({
 /* ─── All projects row (slide-over trigger) ─────────────────────────────── */
 
 function AllProjectsRow({
-  collapsed, active, onClick, itemRef,
+  collapsed, active, onClick, itemRef, justActivated,
 }: {
   collapsed: boolean;
   active: boolean;
   onClick: () => void;
   itemRef?: (el: HTMLButtonElement | null) => void;
+  justActivated?: boolean;
 }) {
   if (collapsed) {
     return (
@@ -613,7 +666,12 @@ function AllProjectsRow({
             : 'text-white/[0.82] hover:bg-white/[0.035] hover:text-white'
         }`}
       >
-        <NavIcon Icon={SquaresFour} isActive={active} collapsed />
+        <NavIcon
+          Icon={SquaresFour}
+          isActive={active}
+          justActivated={justActivated}
+          collapsed
+        />
       </button>
     );
   }
@@ -627,12 +685,19 @@ function AllProjectsRow({
           : 'text-white/[0.82] hover:bg-white/[0.025] hover:text-white'
       }`}
     >
-      <NavIcon Icon={SquaresFour} isActive={active} collapsed={false} />
+      <NavIcon
+        Icon={SquaresFour}
+        isActive={active}
+        justActivated={justActivated}
+        collapsed={false}
+      />
       <span
-        className={`flex-1 text-[17px] leading-none tracking-[-0.012em] transition-[font-weight] duration-200 ${
-          active ? 'font-extrabold' : 'font-bold'
-        }`}
-        style={{ fontFamily: SIDEBAR_FONT }}
+        className="flex-1 text-[17px] leading-none tracking-[-0.012em]"
+        style={{
+          fontFamily: SIDEBAR_FONT,
+          fontWeight: active ? 900 : 700,
+          transition: 'font-weight 240ms ease',
+        }}
       >
         All projects
       </span>

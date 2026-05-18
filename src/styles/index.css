@@ -235,3 +235,33 @@ a.ppc-link:hover { text-decoration: underline; text-underline-offset: 3px; }
   70%  { transform: scale(2.4); opacity: 0;    }
   100% { transform: scale(2.4); opacity: 0;    }
 }
+
+/* Sidebar per-tab click celebration. The .sidebar-just-activated class is
+ * applied to NavIcon wrappers for ~480ms after a tab becomes active (managed
+ * by Sidebar's justActivatedKey state in AppShell.tsx).
+ *  - The wrapper itself runs sidebar-icon-punch — scale 1 → 1.18 → 1 with
+ *    a cubic-bezier overshoot so the return springs slightly past 1.
+ *  - The ::before pseudo runs sidebar-bloom — a soft purple radial that
+ *    expands from behind the icon and fades to transparent. `inset: -8px`
+ *    lets it spill past the icon's 24px box for a generous halo. */
+@keyframes sidebar-icon-punch {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+@keyframes sidebar-bloom {
+  0%   { transform: scale(0.3); opacity: 0.55; }
+  100% { transform: scale(2.4); opacity: 0;    }
+}
+.sidebar-just-activated {
+  animation: sidebar-icon-punch 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.sidebar-just-activated::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(184,160,255,0.55) 0%, rgba(127,90,240,0.30) 35%, transparent 70%);
+  animation: sidebar-bloom 450ms ease-out forwards;
+  pointer-events: none;
+}
