@@ -55,7 +55,6 @@ export function Reports() {
   const [density, setDensity]   = useState<Density>('compact');
   const [query, setQuery]       = useState('');
   const [projectId, setProject] = useState<string>('all');
-  const [bucket, setBucket]     = useState<'all' | 'needs' | 'ready' | 'fyi'>('all');
 
   /* ─── Flatten ──────────────────────────────────────────────────── */
   const all: FlatReport[] = useMemo(() => {
@@ -92,6 +91,7 @@ export function Reports() {
     needs:    all.filter((r) => r.bucket === 'needs').length,
     ready:    all.filter((r) => r.bucket === 'ready').length,
     fyi:      all.filter((r) => r.bucket === 'fyi').length,
+    wins:     all.reduce((acc, r) => acc + r.subFindings.filter((f) => f.impact === 'healthy').length, 0),
     actioned: ACTIONED_THIS_MONTH,
   }), [all]);
 
@@ -101,13 +101,13 @@ export function Reports() {
     return pool.find((r) => r.pinned) ?? pool[0];
   }, [all]);
 
-  /* Rows in the inbox — filtered + sorted (needs first, then ready, then fyi) */
+  /* Rows in the inbox — filtered + sorted (pinned first, then mock order
+   * which already reflects intended recency). No workflow-state sort —
+   * the inbox is "stuff to scan and dig into", not a chore queue. */
   const rows = useMemo(() => {
-    const order: Record<FlatReport['bucket'], number> = { needs: 0, ready: 1, fyi: 2 };
     const q = query.trim().toLowerCase();
     return all
       .filter((r) => projectId === 'all' || r.projectId === projectId)
-      .filter((r) => bucket === 'all' || r.bucket === bucket)
       .filter((r) => {
         if (!q) return true;
         return (
@@ -118,13 +118,11 @@ export function Reports() {
         );
       })
       .sort((a, b) => {
-        const d = order[a.bucket] - order[b.bucket];
-        if (d !== 0) return d;
         if (a.pinned && !b.pinned) return -1;
         if (!a.pinned && b.pinned) return 1;
         return 0;
       });
-  }, [all, query, projectId, bucket]);
+  }, [all, query, projectId]);
 
   return (
     <div className="space-y-7 pb-6">
@@ -155,7 +153,6 @@ export function Reports() {
           density={density} setDensity={setDensity}
           query={query} setQuery={setQuery}
           projectId={projectId} setProject={setProject}
-          bucket={bucket} setBucket={setBucket}
           urgent={urgent}
         />
       )}
@@ -211,12 +208,11 @@ function PersonaButton({
    OPERATOR VIEW — daily triage                                        */
 
 interface OperatorProps {
-  counts: { all: number; needs: number; ready: number; fyi: number; actioned: number };
+  counts: { all: number; needs: number; ready: number; fyi: number; wins: number; actioned: number };
   rows: FlatReport[];
   density: Density; setDensity: (d: Density) => void;
   query: string; setQuery: (q: string) => void;
   projectId: string; setProject: (id: string) => void;
-  bucket: 'all' | 'needs' | 'ready' | 'fyi'; setBucket: (b: 'all' | 'needs' | 'ready' | 'fyi') => void;
   urgent?: FlatReport;
 }
 
@@ -234,7 +230,7 @@ interface OperatorProps {
 function ReportsHero({
   counts,
 }: {
-  counts: { all: number; needs: number; ready: number; fyi: number; actioned: number };
+  counts: { all: number; needs: number; ready: number; fyi: number; wins: number; actioned: number };
 }) {
   return (
     <section
@@ -364,18 +360,16 @@ function ReportsHero({
           className="mt-3 text-[14.5px]"
           style={{ color: 'rgba(184,174,218,0.85)' }}
         >
-          Sorted by what needs you across {ACCOUNTS_COVERED} accounts.
+          What your agents found across {ACCOUNTS_COVERED} accounts.
         </p>
 
         {/* Bottom stats row — value(bold-tabular-white) + noun(muted-lavender)
             pairs, dot-separated at 0.30 alpha. All post-run roll-ups; no
-            pre-run dollar claims. */}
+            chore framing — total volume, positive signal, historical impact. */}
         <div className="mt-5 flex flex-wrap items-center justify-center gap-x-[14px] gap-y-2 text-[14px]">
           <HeroStat value={counts.all.toString()}      label="reports this week" />
           <HeroDot />
-          <HeroStat value={counts.needs.toString()}    label="need you" />
-          <HeroDot />
-          <HeroStat value="9"                          label="auto-shipped" />
+          <HeroStat value={counts.wins.toString()}     label="wins surfaced" />
           <HeroDot />
           <HeroStat value={counts.actioned.toString()} label="actioned this month" />
         </div>
@@ -407,7 +401,7 @@ function HeroDot() {
 
 function OperatorView({
   counts, rows, density, setDensity, query, setQuery,
-  projectId, setProject, bucket, setBucket,
+  projectId, setProject,
 }: OperatorProps) {
   return (
     <>
@@ -436,11 +430,6 @@ function OperatorView({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <SegmentChip active={bucket === 'all'}   onClick={() => setBucket('all')}   label="All reports" count={counts.all} />
-          <SegmentChip active={bucket === 'needs'} onClick={() => setBucket('needs')} label="Needs you"   count={counts.needs} tone="critical" />
-          <SegmentChip active={bucket === 'ready'} onClick={() => setBucket('ready')} label="Ready"       count={counts.ready} tone="warning"  />
-          <SegmentChip active={bucket === 'fyi'}   onClick={() => setBucket('fyi')}   label="FYI"         count={counts.fyi}   tone="info"     />
-          <span className="mx-1.5 hidden h-5 w-px bg-[#d9d4ec] sm:inline-block" />
           <ProjectPicker value={projectId} onChange={setProject} />
           <FilterChip label="All specialists" />
           <FilterChip label="Last 30 days" />
@@ -467,7 +456,7 @@ function OperatorView({
               </span>
             </span>
             <span className="text-[12.5px] text-ppc-text-muted">
-              Last 30 days <span className="text-ppc-text-faint/55">·</span> sorted by what needs you
+              Last 30 days
             </span>
           </div>
           <span className="text-[12.5px] text-ppc-text-muted">
@@ -525,13 +514,16 @@ function OperatorView({
 
 function CompactRow({ report, index }: { report: FlatReport; index: number }) {
   const [expanded, setExpanded] = useState(false);
+  const winsCount = report.subFindings.filter((f) => f.impact === 'healthy').length;
   return (
     <li className="reveal-row" style={{ animationDelay: `${300 + index * 26}ms` }}>
       <article className={`row group ${expanded ? 'row-expanded' : ''}`}>
         <div className="flex items-stretch">
-          <Link
-            to={`/reports/${report.runId}`}
-            className="grid min-w-0 flex-1 grid-cols-[190px_1fr_148px_100px] items-center gap-3 px-6 py-[18px]"
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            className="grid min-w-0 flex-1 cursor-pointer grid-cols-[190px_1fr_100px] items-center gap-3 px-6 py-[18px] text-left"
           >
             <ProjectTag id={report.projectId} name={report.projectName} />
             <div className="min-w-0">
@@ -540,17 +532,17 @@ function CompactRow({ report, index }: { report: FlatReport; index: number }) {
                 <span className="truncate text-[15px] font-semibold tracking-[-0.008em] text-ppc-ink group-hover:text-ppc-purple-700">
                   {report.headline}
                 </span>
+                {winsCount > 0 && <WinsMarker count={winsCount} />}
                 {report.pinned && <PushPin size={12} weight="fill" className="shrink-0 text-ppc-purple-400" />}
               </div>
               <div className="mt-[3px] truncate text-[12.5px] text-ppc-text-muted">
                 {report.agentName} <span className="text-ppc-text-faint/60">·</span> {report.subline}
               </div>
             </div>
-            <BucketPill bucket={report.bucket} status={report.status} />
             <div className="text-right">
               <span className="text-[12.5px] tabular-nums text-ppc-text-muted">{report.finishedLabel}</span>
             </div>
-          </Link>
+          </button>
           <ExpandToggle
             count={report.subFindings.length}
             expanded={expanded}
@@ -565,29 +557,33 @@ function CompactRow({ report, index }: { report: FlatReport; index: number }) {
 
 function ComfortableRow({ report, index }: { report: FlatReport; index: number }) {
   const [expanded, setExpanded] = useState(false);
+  const winsCount = report.subFindings.filter((f) => f.impact === 'healthy').length;
   return (
     <li className="reveal-row" style={{ animationDelay: `${300 + index * 26}ms` }}>
       <article className={`row group ${expanded ? 'row-expanded' : ''}`}>
         <div className="flex items-stretch">
-          <Link to={`/reports/${report.runId}`} className="block min-w-0 flex-1 px-6 py-[18px]">
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            className="block min-w-0 flex-1 cursor-pointer px-6 py-[18px] text-left"
+          >
             <div className="flex items-center justify-between gap-3">
               <ProjectTag id={report.projectId} name={report.projectName} />
-              <div className="flex items-center gap-3">
-                <BucketPill bucket={report.bucket} status={report.status} />
-                <span className="text-[11.5px] tabular-nums text-ppc-text-muted">{report.finishedLabel}</span>
-              </div>
+              <span className="text-[11.5px] tabular-nums text-ppc-text-muted">{report.finishedLabel}</span>
             </div>
             <div className="mt-2.5 flex items-center gap-2.5">
               <span className="text-base leading-none">{report.agentEmoji}</span>
               <span className="text-[15px] font-semibold tracking-[-0.008em] text-ppc-ink group-hover:text-ppc-purple-700">
                 {report.headline}
               </span>
+              {winsCount > 0 && <WinsMarker count={winsCount} />}
               {report.pinned && <PushPin size={11} weight="fill" className="text-ppc-purple-400" />}
             </div>
             <div className="mt-1 text-[12px] text-ppc-text-muted">
               {report.agentName} <span className="text-ppc-text-faint/60">·</span> {report.subline}
             </div>
-          </Link>
+          </button>
           <ExpandToggle
             count={report.subFindings.length}
             expanded={expanded}
@@ -597,6 +593,24 @@ function ComfortableRow({ report, index }: { report: FlatReport; index: number }
         {expanded && <ExpandedFindings findings={report.subFindings} runId={report.runId} />}
       </article>
     </li>
+  );
+}
+
+/* WinsMarker — a small inline chip that appears next to the headline when
+ * the report contains any healthy findings. Wins-first signal at the
+ * inbox level: even before you open the report, you know it has good
+ * news inside, not just "fix this." Green matches the healthy impact dot
+ * inside ExpandedFindings. Hidden when count is 0 — no zero-state noise. */
+function WinsMarker({ count }: { count: number }) {
+  return (
+    <span
+      className="inline-flex shrink-0 items-center gap-[3px] text-[11.5px] font-semibold tabular-nums tracking-[-0.005em]"
+      style={{ color: '#1F8458' }}
+      title={`${count} ${count === 1 ? 'win' : 'wins'} inside`}
+    >
+      <Sparkle size={10} weight="fill" />
+      {count} {count === 1 ? 'win' : 'wins'}
+    </span>
   );
 }
 
@@ -901,40 +915,6 @@ function KpiSparkline({ points, accent }: { points: number[]; accent: string }) 
 
 /* ═══════════════════════════════════════════════════════════════════
    FILTER CHIPS — exact copy of /projects                              */
-
-function SegmentChip({
-  active, onClick, label, count, tone,
-}: { active: boolean; onClick: () => void; label: string; count: number; tone?: 'critical' | 'warning' | 'info' }) {
-  const dot = tone === 'critical' ? '#E24B4A' : tone === 'warning' ? '#D49021' : tone === 'info' ? '#7F5AF0' : null;
-  return (
-    <button
-      onClick={onClick}
-      className={[
-        'inline-flex items-center gap-2 rounded-[10px] px-3 py-[8px] text-[12.5px] font-medium tracking-tight transition-all duration-150',
-        active
-          ? 'text-white shadow-[0_8px_18px_-12px_rgba(127,90,240,0.7)]'
-          : 'border border-[#d9d4ec] bg-white text-ppc-ink hover:-translate-y-px hover:border-ppc-purple-300/55 hover:bg-[#FBFAFF]',
-      ].join(' ')}
-      style={active ? {
-        background: 'linear-gradient(180deg, #8E6BF5 0%, #7F5AF0 50%, #6E47E0 100%)',
-        boxShadow: '0 1px 0 rgba(255,255,255,0.22) inset, 0 0 0 1px rgba(127,90,240,0.55), 0 10px 22px -10px rgba(127,90,240,0.65)',
-      } : undefined}
-    >
-      {dot && !active && (
-        <span className="h-[6px] w-[6px] rounded-full" style={{ background: dot }} />
-      )}
-      {label}
-      <span
-        className={[
-          'tabular-nums rounded-[5px] px-[6px] py-px text-[10.5px] font-bold leading-none',
-          active ? 'bg-white/20 text-white' : 'bg-[#F3F0FF] text-ppc-purple-700',
-        ].join(' ')}
-      >
-        {count}
-      </span>
-    </button>
-  );
-}
 
 function FilterChip({ label }: { label: string }) {
   return (
