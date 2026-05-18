@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import {
   Sparkle,
   MagnifyingGlass, ArrowRight, X, Info,
-  ClockCounterClockwise, Funnel,
+  Funnel, CaretDown,
   ArrowsClockwise, BookmarkSimple, Archive,
   TrendUp, Wrench, CalendarBlank, UsersThree, Target,
-  Briefcase, GoogleLogo, ShieldCheck, FileText,
+  Briefcase, ClockCounterClockwise, Brain, Plugs,
+  Lightbulb,
 } from '@phosphor-icons/react';
 import { PATTERNS, type Pattern } from '../mock/patterns';
 
@@ -43,9 +44,8 @@ function DarkHero() {
       <PerspectiveGrid />
       <BloomGlow />
 
-      <div className="relative z-[2] px-6 pb-7 pt-5 lg:px-12 lg:pb-9 lg:pt-6">
-        <UtilityStrip />
-        <div className="mt-7 grid grid-cols-1 items-center gap-8 lg:mt-9 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-12">
+      <div className="relative z-[2] px-6 pb-7 pt-7 lg:px-12 lg:pb-9 lg:pt-9">
+        <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-12">
           <HeroCopy />
           <HeroIllustration />
         </div>
@@ -142,49 +142,6 @@ function BloomGlow() {
   );
 }
 
-function UtilityStrip() {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-full border border-white/10 bg-white/[0.03] px-5 py-2.5 backdrop-blur-sm">
-      <div className="inline-flex items-center gap-3 text-[13px] text-white/80">
-        <span className="grid h-5 w-5 place-items-center text-ppc-purple-400">
-          <Sparkle size={14} weight="fill" />
-        </span>
-        <span className="font-medium text-white">Sweep complete</span>
-        <span className="text-white/30">·</span>
-        <span>5 ideas ready</span>
-        <span className="text-white/30">·</span>
-        <span className="text-white/55">2h ago</span>
-      </div>
-      <div className="inline-flex items-center gap-3">
-        <button
-          type="button"
-          className="inline-flex items-center gap-1.5 rounded-full bg-ppc-purple-500 px-4 py-1.5 text-[13px] font-medium text-white shadow-[0_6px_22px_rgba(127,90,240,0.45)] transition-shadow hover:shadow-[0_8px_28px_rgba(127,90,240,0.6)]"
-        >
-          <Lightning size={13} weight="fill" />
-          Run sweep
-        </button>
-        <button
-          type="button"
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] text-white/80 transition-colors hover:bg-white/[0.06] hover:text-white"
-        >
-          <ClockCounterClockwise size={13} weight="bold" />
-          Sweep history
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Lightning(props: { size: number; weight: 'fill' | 'bold' }) {
-  // Inline mini bolt — kept self-contained so the utility strip doesn't
-  // reach for another phosphor icon for a single 13px glyph.
-  return (
-    <svg viewBox="0 0 24 24" width={props.size} height={props.size} fill="currentColor">
-      <path d="M13 2L4.5 13.5h6L9 22l9.5-12.5h-6L13 2z" />
-    </svg>
-  );
-}
-
 function HeroCopy() {
   const [infoOpen, setInfoOpen] = useState(false);
   const popRef = useRef<HTMLDivElement | null>(null);
@@ -240,6 +197,124 @@ function HeroCopy() {
         </div>
       </div>
 
+      <RunSweepLauncher />
+    </div>
+  );
+}
+
+function RunSweepLauncher() {
+  const [open, setOpen] = useState(false);
+  const [freq, setFreq] = useState<'weekly' | 'monthly' | 'custom'>('weekly');
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('mousedown', onDoc);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('mousedown', onDoc);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative mt-6 inline-flex">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="inline-flex items-center gap-2 rounded-full bg-grad-cta px-5 py-2.5 text-[14px] font-semibold text-white shadow-[0_10px_28px_rgba(127,90,240,0.45)] transition-shadow hover:shadow-[0_14px_36px_rgba(127,90,240,0.55)]"
+      >
+        <Sparkle size={14} weight="fill" />
+        Run Pattern Sweep
+        <CaretDown
+          size={12}
+          weight="bold"
+          className={`transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {open && <RunSweepPopover freq={freq} onFreqChange={setFreq} onClose={() => setOpen(false)} />}
+    </div>
+  );
+}
+
+interface RunSweepPopoverProps {
+  freq: 'weekly' | 'monthly' | 'custom';
+  onFreqChange: (f: 'weekly' | 'monthly' | 'custom') => void;
+  onClose: () => void;
+}
+
+function RunSweepPopover({ freq, onFreqChange, onClose }: RunSweepPopoverProps) {
+  const freqLabel = freq === 'weekly' ? 'week' : freq === 'monthly' ? 'month' : 'cadence';
+  return (
+    <div
+      role="dialog"
+      className="absolute left-0 top-[calc(100%+10px)] z-[20] w-[380px] rounded-[16px] border border-white/10 bg-[#0F0A22]/95 p-5 shadow-[0_30px_70px_rgba(0,0,0,0.55)] backdrop-blur-md"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="inline-flex items-center gap-2 text-white">
+          <span className="grid h-7 w-7 place-items-center rounded-full bg-ppc-purple-500/20 text-ppc-purple-300">
+            <Sparkle size={13} weight="fill" />
+          </span>
+          <h4 className="text-[14px] font-semibold">Run Pattern Sweep</h4>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-white/50 hover:text-white"
+          aria-label="Close"
+        >
+          <X size={14} weight="bold" />
+        </button>
+      </div>
+
+      <p className="mt-3 text-[12.5px] leading-[1.55] text-white/65">
+        Every <span className="font-semibold text-white">{freqLabel}</span> PPC.io
+        sifts through your accounts, agent runs, and history to surface new strategic
+        patterns worth your attention.
+      </p>
+
+      <div className="mt-4">
+        <div className="text-[11px] font-semibold uppercase tracking-wide text-white/40">
+          Cadence
+        </div>
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          {(['weekly', 'monthly', 'custom'] as const).map((f) => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => onFreqChange(f)}
+              className={`rounded-full px-3 py-2 text-[12.5px] font-semibold capitalize transition-colors ${
+                freq === f
+                  ? 'bg-white text-ppc-purple-700 ring-1 ring-white/30'
+                  : 'bg-white/[0.04] text-white/70 ring-1 ring-white/10 hover:bg-white/[0.08]'
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+        <button
+          type="button"
+          className="flex-1 rounded-full bg-grad-cta px-4 py-2.5 text-[13px] font-semibold text-white shadow-[0_4px_16px_rgba(127,90,240,0.4)] hover:opacity-95"
+        >
+          Schedule sweep
+        </button>
+        <button
+          type="button"
+          className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2.5 text-[13px] font-medium text-white/85 hover:bg-white/[0.08]"
+        >
+          Run once now
+        </button>
+      </div>
     </div>
   );
 }
@@ -295,26 +370,10 @@ interface SignalSource {
 }
 
 const SOURCES: SignalSource[] = [
-  { icon: Briefcase,             label: 'Business context', age: '2h ago',  tint: 'text-[#7BD6A8]' },
-  { icon: GoogleLogo,            label: 'Google Ads',       age: '1h ago',  tint: 'text-[#93C2F8]' },
-  { icon: MagnifyingGlass,       label: 'Search terms',     age: '30m ago', tint: 'text-[#93C2F8]' },
-  { icon: ShieldCheck,           label: 'Audit runs',       age: '1h ago',  tint: 'text-[#F4A871]' },
-  { icon: FileText,              label: 'Landing pages',    age: '45m ago', tint: 'text-[#B7A8EC]' },
-  { icon: ClockCounterClockwise, label: 'History',          age: '2h ago',  tint: 'text-[#93C2F8]' },
-];
-
-interface SignalOutput {
-  icon: typeof MagnifyingGlass;
-  title: string;
-  clients: number;
-  iconBg: string;
-  iconColor: string;
-}
-
-const OUTPUTS: SignalOutput[] = [
-  { icon: MagnifyingGlass, title: 'Research intent is leaking after PMAX expansion', clients: 8,  iconBg: 'bg-[#EDE6FB]', iconColor: 'text-ppc-purple-700' },
-  { icon: UsersThree,      title: 'Trust proof gaps across high-ticket lead gen',    clients: 8,  iconBg: 'bg-[#DBF1E0]', iconColor: 'text-[#2F7C49]' },
-  { icon: Wrench,          title: 'Same tracking fix keeps returning in audits',    clients: 11, iconBg: 'bg-[#FBE3D6]', iconColor: 'text-[#A05A2A]' },
+  { icon: Briefcase,             label: 'Business Context',    age: '2h ago',  tint: 'text-[#7BD6A8]' },
+  { icon: Brain,                 label: 'Agent Memory',        age: '1h ago',  tint: 'text-[#B7A8EC]' },
+  { icon: ClockCounterClockwise, label: 'History',             age: '45m ago', tint: 'text-[#93C2F8]' },
+  { icon: Plugs,                 label: 'Connected Accounts',  age: '30m ago', tint: 'text-[#F4A871]' },
 ];
 
 function SignalFlowPanel() {
@@ -349,31 +408,40 @@ function SourceColumn() {
 
 function OutputColumn() {
   return (
-    <div className="flex flex-col justify-between self-stretch gap-3 py-1">
-      <ul className="space-y-3">
-        {OUTPUTS.map((o) => (
-          <li key={o.title} className="flex items-start gap-2.5">
-            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${o.iconBg} ${o.iconColor}`}>
-              <o.icon size={16} weight="duotone" />
-            </span>
-            <div className="min-w-0">
-              <div className="line-clamp-2 text-[12.5px] font-bold leading-snug text-white">
-                {o.title}
-              </div>
-              <div className="mt-0.5 text-[11px] text-white/45">
-                {o.clients} clients
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-      <Link
-        to="/patterns"
-        className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-300 hover:text-ppc-purple-200"
-      >
-        Explore all {PATTERNS.length} patterns
-        <ArrowRight size={12} weight="bold" />
-      </Link>
+    <div className="flex h-full items-center">
+      <StrategicPatternCard />
+    </div>
+  );
+}
+
+function StrategicPatternCard() {
+  return (
+    <div className="relative w-full overflow-hidden rounded-[18px] border border-white/[0.12] bg-white/[0.05] p-5 backdrop-blur-sm">
+      {/* corner bloom */}
+      <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-ppc-purple-500/20 blur-3xl" />
+
+      <div className="relative flex flex-wrap items-center gap-1.5">
+        <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] font-medium text-white/80 ring-1 ring-white/10">
+          <span aria-hidden>💡</span> Insight
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] font-medium text-white/80 ring-1 ring-white/10">
+          <span aria-hidden>💲</span> Revenue lift
+        </span>
+      </div>
+
+      <div className="relative mt-3 flex items-start gap-3">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-500/35 to-ppc-purple-500/[0.06] text-white shadow-[inset_0_0_0_1px_rgba(168,140,255,0.40)]">
+          <Lightbulb size={20} weight="duotone" />
+        </span>
+        <div className="min-w-0">
+          <h4 className="text-[19px] font-bold leading-tight text-white">
+            Strategic Pattern
+          </h4>
+          <p className="mt-1.5 text-[12.5px] leading-[1.5] text-white/55">
+            The dot-connecting moment — where account-level signals add up to one move worth making.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -425,9 +493,10 @@ const DOTS: Array<[number, number, number, DotColor]> = [
 ];
 
 // Source row y-positions in viewBox space — match the SourceColumn rhythm.
-const SOURCE_Y = [22, 64, 108, 148, 188, 224];
-// Output row y-positions in viewBox space — match the OutputColumn rhythm.
-const OUTPUT_Y = [50, 122, 198];
+// 4 rows distributed evenly across the 248 viewBox.
+const SOURCE_Y = [34, 100, 166, 226];
+// One output centred vertically — the Strategic Pattern card.
+const OUTPUT_Y = [124];
 
 function FlowCanvas() {
   const LENS_CX = 370;
