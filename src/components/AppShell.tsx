@@ -123,7 +123,7 @@ export function AppShell() {
         {fullBleed ? (
           <Outlet />
         ) : (
-          <div className="mx-auto w-full max-w-[1240px] px-8 py-10 lg:px-12 lg:py-12">
+          <div className="mx-auto w-full max-w-[1240px] px-6 py-8 lg:px-8 lg:py-10">
             <Outlet />
           </div>
         )}

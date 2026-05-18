@@ -7,7 +7,7 @@ import {
   ChartBar, Eye, Shield, Drop, TrendUp, PencilSimple, Browser,
   ShoppingCart, Lightning, ListChecks, MapTrifold, Gauge, Flask,
   WaveSawtooth, Buildings, UsersFour, Broadcast, Brain, ListBullets,
-  Rocket, CalendarBlank, Bell,
+  Rocket,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
 import type { AgentCategory, AgentDefinition } from '../types/agent';
@@ -244,7 +244,6 @@ export function AgentCatalog() {
         agents={visible}
         onPickCategory={setCategory}
       />
-      <ScheduleBanner />
     </div>
   );
 }
@@ -264,23 +263,22 @@ function HeroBlock({ readyCount }: { readyCount: number }) {
       {/* Headline + illustration */}
       <div className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_460px] lg:gap-12">
         <div className="flex flex-col">
-          <h1 className="font-display font-black leading-[0.96] tracking-[-0.028em] text-ppc-ink text-[44px] sm:text-[54px] lg:text-[62px]">
-            Meet Your PPC Agents
-          </h1>
-          <h1
-            className="mt-1 leading-[1.04] tracking-[-0.016em] text-ppc-purple-500 text-[40px] sm:text-[50px] lg:text-[58px]"
-            style={{
-              fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif',
-              fontStyle: 'italic',
-              fontWeight: 700,
-            }}
-          >
-            Specialists on standby<span className="text-ppc-purple-500">.</span>
+          <h1 className="font-display font-black leading-[1.0] tracking-[-0.024em] text-ppc-ink text-[46px] sm:text-[58px] lg:text-[70px]">
+            Create your{' '}
+            <span
+              className="font-serif italic font-bold text-ppc-purple-500"
+              style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
+            >
+              agent schedule
+            </span>
+            <span
+              className="font-serif italic text-ppc-purple-500"
+              style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
+            >.</span>
           </h1>
 
-          <p className="mt-5 max-w-[520px] text-[14.5px] leading-[1.55] text-ppc-text-muted">
-            Your AI bench of PPC experts. Run audits, uncover insights,
-            and unlock growth, faster than your competitors can react.
+          <p className="mt-5 max-w-[540px] text-[15px] leading-[1.55] text-ppc-text-muted">
+            Pick the right agents, set the cadence, and let them run automatically across your project. Adjust anytime.
           </p>
 
           <div className="mt-7">
@@ -671,128 +669,5 @@ function AgentGridCard({
         )}
       </div>
     </Link>
-  );
-}
-
-// ════════════════════════════════════════════════════════════════════════
-// 3 · AGENT SCHEDULE CALLOUT — dark banner under the grid
-// ════════════════════════════════════════════════════════════════════════
-//
-// Project-level scheduling: pick agents, choose cadence, get insights on
-// autopilot. Stewart 2026-05-18: restore this callout (was dropped in the
-// v2 catalog rewrite). Same dark-on-lavender editorial moment as before,
-// retitled around "schedule" rather than "weekly plan" to reflect that
-// frequency is a knob, not a fixed cadence.
-
-function ScheduleBanner() {
-  return (
-    <section
-      className="relative overflow-hidden rounded-[20px] px-7 py-7 text-white sm:px-9 sm:py-8"
-      style={{
-        background:
-          'linear-gradient(160deg, #150D2C 0%, #0F0A1E 55%, #08051A 100%)',
-        boxShadow:
-          'inset 0 0 0 1px rgba(127,90,240,0.22), 0 14px 40px -22px rgba(127,90,240,0.40)',
-      }}
-    >
-      {/* Top-right purple bloom */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-16 -top-20 h-[300px] w-[300px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.32) 0%, transparent 60%)' }}
-      />
-
-      <div className="relative flex flex-col gap-7">
-        <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
-          <div className="max-w-[520px]">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-2.5 py-[4px] font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C7B0FF]">
-              <CalendarBlank size={11} weight="duotone" />
-              Agent Schedule
-            </span>
-            <h2 className="mt-3 font-display text-[30px] font-black leading-[1.04] tracking-[-0.020em] sm:text-[34px]">
-              Schedule agents across{' '}
-              <span
-                className="font-serif italic font-bold text-[#C7B0FF]"
-                style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-              >
-                your project
-              </span>
-              <span
-                className="font-serif italic text-[#C7B0FF]"
-                style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-              >.</span>
-            </h2>
-            <p className="mt-3 max-w-[460px] text-[13.5px] leading-[1.55] text-white/65">
-              Pick the right agents, set the cadence, and let them run automatically. Adjust anytime.
-            </p>
-          </div>
-
-          <Link
-            to="/chat?intent=schedule"
-            className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-[14px] px-6 py-[14px] text-[14px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
-            style={{
-              background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 55%, #534AB7 100%)',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.22), 0 10px 26px -10px rgba(127,90,240,0.75)',
-            }}
-          >
-            <Sparkle size={14} weight="fill" />
-            Set my schedule
-            <ArrowRight
-              size={13}
-              weight="bold"
-              className="transition-transform group-hover:translate-x-[1px]"
-            />
-          </Link>
-        </div>
-
-        <div className="grid gap-x-8 gap-y-5 border-t border-white/[0.06] pt-6 sm:grid-cols-3">
-          <ScheduleStep
-            n={1}
-            icon={<CalendarBlank size={18} weight="duotone" />}
-            title="Choose frequency"
-            desc="Daily, weekly, or custom cadence per agent."
-          />
-          <ScheduleStep
-            n={2}
-            icon={<SlidersHorizontal size={18} weight="duotone" />}
-            title="Pick your specialists"
-            desc="Build the right agent lineup for the project."
-          />
-          <ScheduleStep
-            n={3}
-            icon={<Bell size={18} weight="duotone" />}
-            title="Get insights on autopilot"
-            desc="Delivered to your inbox and dashboard."
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ScheduleStep({
-  n, icon, title, desc,
-}: { n: number; icon: ReactElement; title: string; desc: string }) {
-  return (
-    <div className="flex items-start gap-3">
-      <span className="font-mono text-[11px] font-semibold tracking-[0.10em] text-white/45">
-        {n}
-      </span>
-      <span
-        aria-hidden
-        className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-[#C7B0FF]"
-        style={{
-          background: 'rgba(127,90,240,0.10)',
-          boxShadow: 'inset 0 0 0 1px rgba(199,176,255,0.22)',
-        }}
-      >
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <div className="text-[13px] font-semibold leading-[1.2] text-white">{title}</div>
-        <div className="mt-0.5 text-[11.5px] leading-[1.35] text-white/55">{desc}</div>
-      </div>
-    </div>
   );
 }
