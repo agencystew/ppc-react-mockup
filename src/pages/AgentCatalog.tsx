@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowUpRight, ArrowRight, Sparkle, MagnifyingGlass, PaperPlaneTilt,
+  ArrowUpRight, ArrowRight, Sparkle, MagnifyingGlass,
   Info, Fire, Star, Lightbulb, SquaresFour, SlidersHorizontal,
   Target, CurrencyDollar, PaintBrush, ShieldCheck,
   ChartBar, Eye, Shield, Drop, TrendUp, PencilSimple, Browser,
@@ -199,13 +199,6 @@ const SLUG_ICON: Record<string, ReactElement> = {
   'new-client-autopilot': <Rocket            size={22} weight="duotone" />,
 };
 
-const SUGGESTIONS = [
-  'Find wasted spend',
-  'Beat my competitor',
-  'Improve ROAS',
-  'Audit my account',
-];
-
 // ════════════════════════════════════════════════════════════════════════
 // MAIN
 // ════════════════════════════════════════════════════════════════════════
@@ -263,45 +256,62 @@ function HeroBlock({ readyCount }: { readyCount: number }) {
       {/* Headline + illustration */}
       <div className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_460px] lg:gap-12">
         <div className="flex flex-col">
-          <h1 className="font-display font-black leading-[1.0] tracking-[-0.024em] text-ppc-ink text-[46px] sm:text-[58px] lg:text-[70px]">
-            Create your{' '}
-            <span
-              className="font-serif italic font-bold text-ppc-purple-500"
-              style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-            >
-              agent schedule
-            </span>
-            <span
-              className="font-serif italic text-ppc-purple-500"
-              style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-            >.</span>
+          <h1 className="font-display font-black leading-[0.96] tracking-[-0.028em] text-ppc-ink text-[44px] sm:text-[54px] lg:text-[62px]">
+            Meet Your PPC Agents
+          </h1>
+          <h1
+            className="mt-1 leading-[1.04] tracking-[-0.016em] text-ppc-purple-500 text-[40px] sm:text-[50px] lg:text-[58px]"
+            style={{
+              fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif',
+              fontStyle: 'italic',
+              fontWeight: 700,
+            }}
+          >
+            Specialists on standby<span className="text-ppc-purple-500">.</span>
           </h1>
 
           <p className="mt-5 max-w-[540px] text-[15px] leading-[1.55] text-ppc-text-muted">
-            Pick the right agents, set the cadence, and let them run automatically across your project. Adjust anytime.
+            Your AI bench of PPC experts. Run audits, uncover insights,
+            and unlock growth, faster than your competitors can react.
           </p>
 
-          <div className="mt-7">
-            <SearchBar />
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center gap-1.5">
-            <span className="mr-1 text-[12px] text-ppc-text-muted">Try asking:</span>
-            {SUGGESTIONS.map((s) => (
-              <button
-                key={s}
-                type="button"
-                className="rounded-full border-[0.5px] border-ppc-card-border bg-white px-3 py-[6px] text-[12px] font-medium text-ppc-text-muted transition-all hover:-translate-y-[0.5px] hover:border-ppc-purple-300 hover:text-ppc-ink"
-              >
-                {s}
-              </button>
-            ))}
-          </div>
+          <ScheduleCTA />
         </div>
 
         <HeroIllustration />
       </div>
     </section>
+  );
+}
+
+/* Big purple-gradient CTA — borrows the Dashboard's "See all reports" pill
+ * style (ppcio-cta class + linear-gradient + soft glow), scaled up for hero
+ * prominence. Click → /chat?intent=schedule so the user sets up cadence
+ * via a chat with our scheduling agent. */
+function ScheduleCTA() {
+  return (
+    <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+      <Link
+        to="/chat?intent=schedule"
+        className="ppcio-cta ppcio-cta--lg group relative inline-flex items-center gap-2.5 rounded-full text-white transition-transform hover:-translate-y-[1px]"
+        style={{
+          padding: '17px 30px',
+          fontSize: '17px',
+          fontWeight: 700,
+          letterSpacing: '-0.012em',
+          background:
+            'linear-gradient(135deg, #9F86FF 0%, #7F5AF0 50%, #6A45E2 100%)',
+          boxShadow:
+            '0 8px 28px -6px rgba(70,49,134,0.65), 0 0 16px rgba(209,133,236,0.45) inset, 0 0 0 1px rgba(255,255,255,0.12)',
+        }}
+      >
+        <Sparkle size={18} weight="fill" />
+        Create your agent schedule
+      </Link>
+      <span className="text-[12.5px] font-medium text-ppc-text-muted">
+        Chat with our AI to set the cadence
+      </span>
+    </div>
   );
 }
 
@@ -317,29 +327,6 @@ function ReadyPill({ count }: { count: number }) {
       </span>
       <Info size={12} weight="bold" className="text-ppc-text-faint" />
     </span>
-  );
-}
-
-function SearchBar() {
-  return (
-    <form
-      onSubmit={(e) => e.preventDefault()}
-      className="flex w-full items-center gap-2 rounded-[16px] border-[0.5px] border-ppc-card-border bg-white py-2.5 pl-4 pr-2.5 shadow-[0_2px_10px_-6px_rgba(15,10,30,0.08)] focus-within:border-ppc-purple-300 focus-within:shadow-[0_0_0_4px_rgba(127,90,240,0.10),0_4px_14px_-6px_rgba(127,90,240,0.25)]"
-    >
-      <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-ppc-text-muted" />
-      <input
-        type="text"
-        placeholder="Search agents or describe what you need…"
-        className="min-w-0 flex-1 bg-transparent text-[14px] tracking-[-0.005em] text-ppc-ink placeholder:text-ppc-text-muted/85 focus:outline-none"
-      />
-      <button
-        type="submit"
-        aria-label="Submit"
-        className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-ppc-purple-500 text-white shadow-[0_4px_14px_-4px_rgba(127,90,240,0.55)] transition-all hover:-translate-y-[1px] hover:bg-ppc-purple-600"
-      >
-        <PaperPlaneTilt size={15} weight="fill" />
-      </button>
-    </form>
   );
 }
 
