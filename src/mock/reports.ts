@@ -98,8 +98,11 @@ export const NEEDS_TODAY: NeedsReport[] = [
     cta: 'Open report',
     subFindings: [
       { id: 'sf-1a', impact: 'critical', body: "Bicycle Health takes position 1 on 8 of your 11 highest-CPC keywords — accept they own that surface and double down bottom-funnel, or contest?" },
-      { id: 'sf-1b', impact: 'warning',  body: "Workit Health dropped LP price to $99/mo while brand impression share fell 14% over 30 days — repositioning, or a short acquisition push?" },
-      { id: 'sf-1c', impact: 'warning',  body: "Aspen Recovery rotates to position 4 on 4 branded recovery queries — is this the gap to press, or auction noise we'd burn budget chasing?" },
+      { id: 'sf-1b', impact: 'critical', body: "3 rivals testing Substack-style top-of-funnel content; combined organic traffic up 47% in 30 days — gap to plug before they monetise the audience?" },
+      { id: 'sf-1c', impact: 'warning',  body: "Workit Health dropped LP price to $99/mo while brand impression share fell 14% over 30 days — repositioning, or a short acquisition push?" },
+      { id: 'sf-1d', impact: 'warning',  body: "Aspen Recovery rotates to position 4 on 4 branded recovery queries — is this the gap to press, or auction noise we'd burn budget chasing?" },
+      { id: 'sf-1e', impact: 'healthy',  body: "Brand impression share climbed 62% → 74% over 14 days — defensive position strongest in 18 months. Worth redirecting some confidence into non-brand?" },
+      { id: 'sf-1f', impact: 'healthy',  body: "Boulder ranks #1 on 6 of 8 'recovery near me' geo queries at QS 9 — the local moat is real, what's the next geo to press?" },
     ],
   },
   {
@@ -119,8 +122,10 @@ export const NEEDS_TODAY: NeedsReport[] = [
     cta: 'Review batch',
     subFindings: [
       { id: 'sf-2a', impact: 'critical', body: "12 candidates above 95% confidence burning $1,840/mo — auto-apply the batch, or vet one-by-one?" },
-      { id: 'sf-2b', impact: 'warning',  body: "8 candidates cluster around 'travel agent jobs' / 'tour guide jobs' — promote 'jobs' and 'careers' to account-level negatives?" },
-      { id: 'sf-2c', impact: 'warning',  body: "Edinburgh has 6× more job-related candidates than London (47 vs 8) — geographic bias in how the campaigns are matching?" },
+      { id: 'sf-2b', impact: 'critical', body: "'Edinburgh tourism jobs' single-handedly burns £67/week with 0 conversions in 90 days — strongest single noise term in the account." },
+      { id: 'sf-2c', impact: 'warning',  body: "8 candidates cluster around 'travel agent jobs' / 'tour guide jobs' — promote 'jobs' and 'careers' to account-level negatives?" },
+      { id: 'sf-2d', impact: 'warning',  body: "Edinburgh has 6× more job-related candidates than London (47 vs 8) — geographic bias in how the campaigns are matching?" },
+      { id: 'sf-2e', impact: 'healthy',  body: "Auto-applied negatives caught & retired 23 noise terms last month — saved an estimated $1,200 on travel-agent and tour-guide variants alone." },
     ],
   },
 ];
@@ -139,8 +144,9 @@ export const READY_FOR_CLIENT: ReadyReport[] = [
     finishedLabel: '5h ago',
     subFindings: [
       { id: 'sf-3a', impact: 'healthy',  body: "Conv-value up 18% MoM ($72.4K → $85.6K) — mainly from Brand · Recovery Centers. Lead the recap with this?" },
-      { id: 'sf-3b', impact: 'critical', body: "Non-Brand NM Treatment hit $289 CPA against $184 target — flag for client and propose the 7-day pause?" },
-      { id: 'sf-3c', impact: 'healthy',  body: "PMAX picked up 3 new high-converting placements in April — worth featuring as 'algorithm did the work' moments?" },
+      { id: 'sf-3b', impact: 'healthy',  body: "PMAX picked up 3 new high-converting placements in April — worth featuring as 'algorithm did the work' moments?" },
+      { id: 'sf-3c', impact: 'healthy',  body: "Click-to-call rate up 24% in April after the new mobile CTA test — recommend rolling out to the full geo set in May?" },
+      { id: 'sf-3d', impact: 'critical', body: "Non-Brand NM Treatment hit $289 CPA against $184 target — flag for client and propose the 7-day pause?" },
     ],
   },
   {
@@ -151,13 +157,16 @@ export const READY_FOR_CLIENT: ReadyReport[] = [
     projectId: 'durable',
     projectName: 'Durable',
     headline: 'PMAX is leaking budget on irrelevant terms',
-    subline: '3 critical fixes proposed',
+    subline: 'Spend, ROAS, and device-mix flagged',
     status: 'approved',
     finishedLabel: 'Yesterday',
     subFindings: [
       { id: 'sf-4a', impact: 'critical', body: "PMAX matched 'how to build a website free' 247 times — 0 conversions, $312 spent. Add as account-level negative?" },
-      { id: 'sf-4b', impact: 'warning',  body: "Asset group 'Local Restaurants' draws 38% of spend but only 11% of conversions — split or rebalance the budget split?" },
-      { id: 'sf-4c', impact: 'healthy',  body: "Top placement 'restaurant.com' drove 23% of conv-value last 30d — feed this signal back into bidding as an audience seed?" },
+      { id: 'sf-4b', impact: 'critical', body: "Sitelink CTR collapsed 38% on the 'Restaurants' campaign after Apr 22 — feature update, or did the seasonal calendar miss?" },
+      { id: 'sf-4c', impact: 'warning',  body: "Asset group 'Local Restaurants' draws 38% of spend but only 11% of conversions — split or rebalance the budget split?" },
+      { id: 'sf-4d', impact: 'warning',  body: "Mobile CPC inflated 19% over 21 days while desktop held flat — device-bid adjustment review?" },
+      { id: 'sf-4e', impact: 'healthy',  body: "Top placement 'restaurant.com' drove 23% of conv-value last 30d — feed this signal back into bidding as an audience seed?" },
+      { id: 'sf-4f', impact: 'healthy',  body: "Local Restaurants ROAS climbed to 4.2 (vs 2.8 portfolio average) — strongest signal in 90 days; protect this budget envelope?" },
     ],
   },
   {
@@ -189,9 +198,8 @@ export const READY_FOR_CLIENT: ReadyReport[] = [
     status: 'draft-ready',
     finishedLabel: '3 days ago',
     subFindings: [
-      { id: 'sf-6a', impact: 'warning',  body: "14 RSAs have 'BEST' rated headlines untouched in 90+ days — refresh and A/B, or leave the proven winners alone?" },
+      { id: 'sf-6a', impact: 'warning',  body: "14 RSAs have 'BEST' rated headlines untouched in 90+ days; top one 'Botox in Plano' at 0.84% CTR — refresh against benefit-led variants, or leave the proven winners?" },
       { id: 'sf-6b', impact: 'healthy',  body: "3 angles never tested: same-day appointment · weekend hours · insurance accepted. Worth a controlled test against the incumbent?" },
-      { id: 'sf-6c', impact: 'warning',  body: "Top headline 'Botox in Plano' runs at 0.84% CTR — would a benefit-led variant ('Same-Day Botox · Plano') beat it?" },
     ],
   },
 ];
@@ -209,8 +217,7 @@ export const FYI_REPORTS: FyiReport[] = [
     finishedLabel: '1 week ago',
     subFindings: [
       { id: 'sf-7a', impact: 'healthy', body: "GA4 ↔ Google Ads link confirmed across both accounts · no drift in 7 days. Drop the verification cadence to monthly?" },
-      { id: 'sf-7b', impact: 'healthy', body: "Conversion attribution model is still data-driven on both · no setting changes detected. Keep on the watchlist or de-prioritise?" },
-      { id: 'sf-7c', impact: 'healthy', body: "14 audience lists feeding correctly · 0 stale · oldest refresh 3 days ago. Healthy enough to skip the next manual check?" },
+      { id: 'sf-7b', impact: 'healthy', body: "Conversion attribution model still data-driven on both · 14 audience lists fresh · 0 stale. Watchlist or de-prioritise?" },
     ],
   },
   {
@@ -226,7 +233,8 @@ export const FYI_REPORTS: FyiReport[] = [
     subFindings: [
       { id: 'sf-8a', impact: 'warning',  body: "SEMrush and Ahrefs both cut self-serve search spend ~30% in the last 21 days — pivoting to ABM/enterprise, or just a quarterly reset?" },
       { id: 'sf-8b', impact: 'warning',  body: "4 new agency-named brand campaigns spotted in 14 days (SEMrush bidding on 'ahrefs vs', etc.) — they're fishing for switchers." },
-      { id: 'sf-8c', impact: 'healthy',  body: "Worth checking: are we on their 'compete' lists too? An awareness opportunity if not — they're paying the impressions cost." },
+      { id: 'sf-8c', impact: 'warning',  body: "LinkedIn ad spend up 41% in 21 days as their search spend dropped — confirms the ABM pivot, or just channel-shifting?" },
+      { id: 'sf-8d', impact: 'healthy',  body: "Worth checking: are we on their 'compete' lists too? An awareness opportunity if not — they're paying the impressions cost." },
     ],
   },
   {
@@ -256,9 +264,8 @@ export const FYI_REPORTS: FyiReport[] = [
     subline: 'no degradation detected',
     finishedLabel: '2 weeks ago',
     subFindings: [
-      { id: 'sf-10a', impact: 'healthy', body: "No keyword fell below QS 5 this week (previous low was 7) — landing page experience 'Above average' on all 8 campaigns. Strong enough to push more budget into the top-QS ad groups?" },
-      { id: 'sf-10b', impact: 'warning', body: "Expected CTR is still 'Average' (not 'Above') on 3 ad groups — could a fresh RSA push them up, or is this the structural ceiling for the vertical?" },
-      { id: 'sf-10c', impact: 'healthy', body: "Ad relevance scored 'Above average' on every active ad — strongest signal in 6 weeks of data. Test pushing a bolder creative angle while QS is high, or lock in current copy?" },
+      { id: 'sf-10a', impact: 'healthy', body: "No keyword fell below QS 5 this week (previous low was 7) — landing page experience 'Above average' on all 8 campaigns. Push more budget into the top-QS ad groups?" },
+      { id: 'sf-10b', impact: 'warning', body: "Expected CTR still 'Average' (not 'Above') on 3 ad groups — could a fresh RSA push them up, or is this the structural ceiling for the vertical?" },
     ],
   },
 ];
