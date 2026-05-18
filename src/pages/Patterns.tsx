@@ -6,6 +6,7 @@ import {
   ClockCounterClockwise, Funnel,
   ArrowsClockwise, BookmarkSimple, Archive,
   TrendUp, Wrench, CalendarBlank, UsersThree, Target,
+  Briefcase, GoogleLogo, ShieldCheck, FileText,
 } from '@phosphor-icons/react';
 import { PATTERNS, type Pattern } from '../mock/patterns';
 
@@ -48,7 +49,7 @@ function DarkHero() {
           <HeroCopy />
           <HeroIllustration />
         </div>
-        <ProcessCardsRow />
+        <SignalFlowPanel />
       </div>
     </section>
   );
@@ -279,54 +280,256 @@ function InfoPopover({ onClose }: { onClose: () => void }) {
   );
 }
 
-interface ProcessStep {
-  num: '01' | '02' | '03';
-  title: string;
-  body: string;
+// ─── Signal Flow visualization ───────────────────────────────────────────
+// Replaces the old three-card "Scan / Group / Surface" row. The idea is
+// to *show* PPC.io connecting dots — six live sources stream signals into
+// a clustered cloud, the cloud collapses into the AI lens at the centre,
+// and three named patterns emerge on the right. Conveys "this thing is
+// digging" without needing a single explainer word.
+
+interface SignalSource {
   icon: typeof MagnifyingGlass;
+  label: string;
+  age: string;
+  tint: string;        // text-color class for the icon
 }
 
-const PROCESS_STEPS: ProcessStep[] = [
-  { num: '01', title: 'Scan',    body: 'Accounts, agents, and source data.', icon: MagnifyingGlass },
-  { num: '02', title: 'Group',   body: 'Cluster signals that rhyme.',        icon: UsersThree },
-  { num: '03', title: 'Surface', body: 'Patterns with evidence attached.',   icon: Sparkle },
+const SOURCES: SignalSource[] = [
+  { icon: Briefcase,             label: 'Business context', age: '2h ago',  tint: 'text-[#7BD6A8]' },
+  { icon: GoogleLogo,            label: 'Google Ads',       age: '1h ago',  tint: 'text-[#93C2F8]' },
+  { icon: MagnifyingGlass,       label: 'Search terms',     age: '30m ago', tint: 'text-[#93C2F8]' },
+  { icon: ShieldCheck,           label: 'Audit runs',       age: '1h ago',  tint: 'text-[#F4A871]' },
+  { icon: FileText,              label: 'Landing pages',    age: '45m ago', tint: 'text-[#B7A8EC]' },
+  { icon: ClockCounterClockwise, label: 'History',          age: '2h ago',  tint: 'text-[#93C2F8]' },
 ];
 
-function ProcessCardsRow() {
+interface SignalOutput {
+  icon: typeof MagnifyingGlass;
+  title: string;
+  clients: number;
+  iconBg: string;
+  iconColor: string;
+}
+
+const OUTPUTS: SignalOutput[] = [
+  { icon: MagnifyingGlass, title: 'Research intent is leaking after PMAX expansion', clients: 8,  iconBg: 'bg-[#EDE6FB]', iconColor: 'text-ppc-purple-700' },
+  { icon: UsersThree,      title: 'Trust proof gaps across high-ticket lead gen',    clients: 8,  iconBg: 'bg-[#DBF1E0]', iconColor: 'text-[#2F7C49]' },
+  { icon: Wrench,          title: 'Same tracking fix keeps returning in audits',    clients: 11, iconBg: 'bg-[#FBE3D6]', iconColor: 'text-[#A05A2A]' },
+];
+
+function SignalFlowPanel() {
   return (
-    <div className="mt-9 grid grid-cols-1 gap-4 sm:grid-cols-3 lg:mt-10">
-      {PROCESS_STEPS.map((s) => (
-        <ProcessCard key={s.num} {...s} />
-      ))}
+    <div className="mt-9 overflow-hidden rounded-[18px] border border-white/[0.07] bg-white/[0.025] p-5 backdrop-blur-sm lg:mt-10 lg:p-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,200px)_minmax(0,1fr)_minmax(0,300px)] lg:items-stretch lg:gap-6">
+        <SourceColumn />
+        <FlowCanvas />
+        <OutputColumn />
+      </div>
     </div>
   );
 }
 
-function ProcessCard({ num, title, body, icon: Icon }: ProcessStep) {
+function SourceColumn() {
   return (
-    <div className="group relative overflow-hidden rounded-[18px] border border-white/[0.08] bg-white/[0.03] p-5 backdrop-blur-sm transition-all hover:border-white/[0.18] hover:bg-white/[0.06]">
-      {/* purple bloom inside the card — corner glow */}
-      <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-ppc-purple-500/15 blur-3xl transition-opacity group-hover:bg-ppc-purple-500/25" />
-
-      <div className="relative">
-        <span className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-ppc-purple-500/30 to-ppc-purple-500/[0.06] text-white shadow-[inset_0_0_0_1px_rgba(168,140,255,0.35)]">
-          <Icon size={20} weight="duotone" />
-        </span>
-      </div>
-
-      <div className="relative mt-5">
-        <div className="flex items-baseline gap-2">
-          <span className="text-[15px] font-medium leading-none text-white/35">
-            {num}
+    <ul className="flex flex-col justify-between gap-2.5 self-stretch py-1">
+      {SOURCES.map(({ icon: Icon, label, age, tint }) => (
+        <li key={label} className="flex items-center gap-2.5">
+          <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.04] ring-1 ring-white/10 ${tint}`}>
+            <Icon size={13} weight="duotone" />
           </span>
-          <h4 className="text-[18px] font-bold leading-none text-white">
-            {title}
-          </h4>
-        </div>
-        <p className="mt-2 text-[13px] leading-[1.5] text-white/55">
-          {body}
-        </p>
-      </div>
+          <div className="min-w-0 leading-tight">
+            <div className="text-[12.5px] font-semibold text-white">{label}</div>
+            <div className="text-[10.5px] text-white/40">· {age}</div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function OutputColumn() {
+  return (
+    <div className="flex flex-col justify-between self-stretch gap-3 py-1">
+      <ul className="space-y-3">
+        {OUTPUTS.map((o) => (
+          <li key={o.title} className="flex items-start gap-2.5">
+            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${o.iconBg} ${o.iconColor}`}>
+              <o.icon size={16} weight="duotone" />
+            </span>
+            <div className="min-w-0">
+              <div className="line-clamp-2 text-[12.5px] font-bold leading-snug text-white">
+                {o.title}
+              </div>
+              <div className="mt-0.5 text-[11px] text-white/45">
+                {o.clients} clients
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <Link
+        to="/patterns"
+        className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-300 hover:text-ppc-purple-200"
+      >
+        Explore all {PATTERNS.length} patterns
+        <ArrowRight size={12} weight="bold" />
+      </Link>
+    </div>
+  );
+}
+
+/* The dot cloud SVG.
+ *
+ * 6 source paths curve from the left edge through a scatter of coloured
+ * dots into the AI lens at ~ (370, 120). 3 output paths leave the lens
+ * and curve to the right edge at the y-positions of the three pattern
+ * rows. Dots are hand-placed for visual rhythm — denser nearer the lens,
+ * sparser at the edges. */
+
+type DotColor = 'purple' | 'blue' | 'green' | 'orange' | 'gray' | 'bright';
+
+const DOT_FILL: Record<DotColor, string> = {
+  purple: '#B7A8EC',
+  blue:   '#93C2F8',
+  green:  '#7BD6A8',
+  orange: '#F4A871',
+  gray:   '#7E7995',
+  bright: '#A88CFF',
+};
+
+// Each dot: [x, y, r, color]. Coordinates inside the 520×240 viewBox.
+const DOTS: Array<[number, number, number, DotColor]> = [
+  // top band — green + purple (Business context + Google Ads streams)
+  [40,  28, 3,   'gray'],   [78,  18, 3.5, 'green'],  [108, 32, 3,   'purple'],
+  [148, 22, 4,   'green'],  [188, 28, 3.5, 'purple'], [228, 18, 3,   'bright'],
+  [85,  46, 3.5, 'gray'],   [128, 50, 3,   'green'],  [168, 50, 4,   'purple'],
+
+  // upper-mid — blues (Google Ads + Search)
+  [55,  72, 3.5, 'blue'],   [98,  68, 4,   'blue'],   [142, 76, 3,   'blue'],
+  [186, 70, 3.5, 'gray'],   [228, 78, 4,   'purple'], [262, 70, 3,   'blue'],
+
+  // mid — mixed cluster heading toward the lens
+  [70,  100, 3,   'orange'], [115, 108, 3.5, 'purple'], [158, 100, 4,   'blue'],
+  [200, 110, 3,   'green'],  [240, 104, 3.5, 'orange'], [278, 112, 4,   'bright'],
+  [310, 118, 3,   'bright'],
+
+  // lower-mid — orange (Audit runs) + gray
+  [60,  138, 3,   'orange'], [100, 144, 3.5, 'gray'],   [145, 138, 4,   'orange'],
+  [188, 148, 3,   'purple'], [228, 142, 3.5, 'orange'], [262, 148, 3,   'gray'],
+
+  // bottom band — purples + blues (Landing pages + History)
+  [50,  178, 3,   'purple'], [92,  186, 3.5, 'bright'], [136, 178, 4,   'purple'],
+  [180, 188, 3,   'blue'],   [222, 178, 3.5, 'purple'], [50,  218, 3,   'blue'],
+  [88,  226, 3,   'gray'],   [134, 220, 4,   'purple'], [180, 230, 3,   'blue'],
+  [224, 220, 3.5, 'green'],
+];
+
+// Source row y-positions in viewBox space — match the SourceColumn rhythm.
+const SOURCE_Y = [22, 64, 108, 148, 188, 224];
+// Output row y-positions in viewBox space — match the OutputColumn rhythm.
+const OUTPUT_Y = [50, 122, 198];
+
+function FlowCanvas() {
+  const LENS_CX = 370;
+  const LENS_CY = 120;
+  return (
+    <div className="relative mx-auto h-full min-h-[220px] w-full">
+      <svg
+        viewBox="0 0 520 248"
+        preserveAspectRatio="xMidYMid meet"
+        className="absolute inset-0 h-full w-full"
+        role="img"
+        aria-label="Signal flow from six live sources into three surfaced patterns"
+      >
+        <defs>
+          <radialGradient id="lensCore" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stopColor="#FFFFFF" stopOpacity="0.85" />
+            <stop offset="35%"  stopColor="#D6CBFA" stopOpacity="0.65" />
+            <stop offset="65%"  stopColor="#7F5AF0" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0"    />
+          </radialGradient>
+          <linearGradient id="lineIn" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stopColor="#7F5AF0" stopOpacity="0"    />
+            <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0.55" />
+          </linearGradient>
+          <linearGradient id="lineOut" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stopColor="#7F5AF0" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0"    />
+          </linearGradient>
+        </defs>
+
+        {/* source → lens curves */}
+        {SOURCE_Y.map((y, i) => (
+          <path
+            key={`in-${i}`}
+            d={`M -4 ${y} C 140 ${y}, 260 ${LENS_CY}, ${LENS_CX - 22} ${LENS_CY}`}
+            stroke="url(#lineIn)"
+            strokeWidth="1"
+            fill="none"
+          />
+        ))}
+
+        {/* lens → output curves */}
+        {OUTPUT_Y.map((y, i) => (
+          <path
+            key={`out-${i}`}
+            d={`M ${LENS_CX + 22} ${LENS_CY} C 440 ${LENS_CY}, 480 ${y}, 524 ${y}`}
+            stroke="url(#lineOut)"
+            strokeWidth="1"
+            fill="none"
+          />
+        ))}
+
+        {/* lens — soft glow + ring + sparkle marks */}
+        <circle cx={LENS_CX} cy={LENS_CY} r={48} fill="url(#lensCore)" />
+        <circle
+          cx={LENS_CX}
+          cy={LENS_CY}
+          r={28}
+          fill="none"
+          stroke="#A88CFF"
+          strokeOpacity={0.4}
+          strokeWidth={1}
+        />
+        <circle
+          cx={LENS_CX}
+          cy={LENS_CY}
+          r={42}
+          fill="none"
+          stroke="#A88CFF"
+          strokeOpacity={0.18}
+          strokeWidth={1}
+          strokeDasharray="2 3"
+        />
+        {/* sparkle glyph in the lens */}
+        <path
+          d={`M ${LENS_CX} ${LENS_CY - 14} L ${LENS_CX + 3} ${LENS_CY - 3} L ${LENS_CX + 14} ${LENS_CY} L ${LENS_CX + 3} ${LENS_CY + 3} L ${LENS_CX} ${LENS_CY + 14} L ${LENS_CX - 3} ${LENS_CY + 3} L ${LENS_CX - 14} ${LENS_CY} L ${LENS_CX - 3} ${LENS_CY - 3} Z`}
+          fill="#FFFFFF"
+          opacity={0.95}
+        />
+        <path
+          d={`M ${LENS_CX + 12} ${LENS_CY - 12} L ${LENS_CX + 14} ${LENS_CY - 8} L ${LENS_CX + 18} ${LENS_CY - 6} L ${LENS_CX + 14} ${LENS_CY - 4} L ${LENS_CX + 12} ${LENS_CY} L ${LENS_CX + 10} ${LENS_CY - 4} L ${LENS_CX + 6} ${LENS_CY - 6} L ${LENS_CX + 10} ${LENS_CY - 8} Z`}
+          fill="#FFFFFF"
+          opacity={0.75}
+        />
+        <path
+          d={`M ${LENS_CX - 14} ${LENS_CY + 14} L ${LENS_CX - 12} ${LENS_CY + 17} L ${LENS_CX - 9} ${LENS_CY + 19} L ${LENS_CX - 12} ${LENS_CY + 21} L ${LENS_CX - 14} ${LENS_CY + 24} L ${LENS_CX - 16} ${LENS_CY + 21} L ${LENS_CX - 19} ${LENS_CY + 19} L ${LENS_CX - 16} ${LENS_CY + 17} Z`}
+          fill="#FFFFFF"
+          opacity={0.6}
+        />
+
+        {/* the dot cloud */}
+        {DOTS.map(([x, y, r, color], i) => (
+          <circle
+            key={`d-${i}`}
+            cx={x}
+            cy={y}
+            r={r}
+            fill={DOT_FILL[color]}
+            opacity={color === 'gray' ? 0.5 : 0.85}
+          />
+        ))}
+      </svg>
     </div>
   );
 }
