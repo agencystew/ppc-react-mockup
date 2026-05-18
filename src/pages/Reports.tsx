@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import {
   MagnifyingGlass, CaretDown, ArrowRight, ArrowUp, ArrowDown, Sparkle,
   Check, PaperPlaneTilt, PushPin, Rows, SquaresFour, Lightning,
-  Compass, ArrowUpRight, Plus,
+  Compass, ArrowUpRight, Plus, WarningCircle, Info,
 } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -660,40 +660,63 @@ function ExpandToggle({
  * the chevron is clicked. Indents past the project chip column so it
  * reads as belonging to its parent row. Each sub-finding is a deep
  * link into its anchor on the report's AI Summary tab. Footer carries
- * the "Open full report" + "Deep Report" affordances side by side. */
+ * the "Open full report" + "Deep Report" affordances side by side.
+ *
+ * Wins-first ordering: healthy findings float to the top of the list,
+ * then critical, then heads-up. Same rail per the wins-first inbox
+ * rule — no separate Wins block, just win-shaped findings leading.
+ *
+ * Each finding is icon + lowercase label + body. Icon shape carries
+ * impact (Sparkle / WarningCircle / Info) so the meaning lands without
+ * relying on colour alone. */
 function ExpandedFindings({
   findings, runId,
 }: { findings: SubFinding[]; runId: string }) {
-  const impactStyle: Record<SubFinding['impact'], { dot: string; halo: string }> = {
-    critical: { dot: '#E24B4A', halo: 'rgba(226,75,74,0.18)' },
-    warning:  { dot: '#D49021', halo: 'rgba(212,144,33,0.18)' },
-    healthy:  { dot: '#3FB58C', halo: 'rgba(63,181,140,0.18)' },
+  const impactMap: Record<
+    SubFinding['impact'],
+    { Icon: typeof Sparkle; label: string; color: string }
+  > = {
+    healthy:  { Icon: Sparkle,       label: 'Win',      color: '#1F8458' },
+    critical: { Icon: WarningCircle, label: 'Critical', color: '#9F2624' },
+    warning:  { Icon: Info,          label: 'Heads-up', color: '#82500A' },
   };
+  const sorted = useMemo(() => {
+    const order: Record<SubFinding['impact'], number> = { healthy: 0, critical: 1, warning: 2 };
+    return [...findings].sort((a, b) => order[a.impact] - order[b.impact]);
+  }, [findings]);
   return (
     <div
       className="row-expansion border-t border-[#ECEAFA] bg-[#FBFAFF] px-6 py-4"
     >
       <ul className="flex flex-col gap-[2px] pl-[22px]">
-        {findings.map((f) => {
-          const s = impactStyle[f.impact];
+        {sorted.map((f) => {
+          const s = impactMap[f.impact];
           return (
             <li key={f.id}>
               <Link
                 to={`/reports/${runId}#discovery-${f.id}`}
-                className="group/sub flex items-start gap-3 rounded-[8px] px-2 py-[9px] transition-colors hover:bg-white"
+                className="group/sub flex items-baseline gap-2 rounded-[8px] px-2 py-[9px] transition-colors hover:bg-white"
               >
-                <span
-                  aria-hidden
-                  className="mt-[8px] h-[7px] w-[7px] shrink-0 rounded-full"
-                  style={{ background: s.dot, boxShadow: `0 0 0 3px ${s.halo}` }}
+                <s.Icon
+                  size={12}
+                  weight="fill"
+                  className="shrink-0 self-center"
+                  style={{ color: s.color }}
                 />
+                <span
+                  className="shrink-0 self-center text-[11.5px] font-semibold tracking-[-0.005em]"
+                  style={{ color: s.color }}
+                >
+                  {s.label}
+                </span>
+                <span className="shrink-0 self-center text-ppc-text-faint/55">·</span>
                 <span className="min-w-0 flex-1 text-[13.5px] leading-[1.55] text-ppc-ink/85 group-hover/sub:text-ppc-ink">
                   {f.body}
                 </span>
                 <ArrowRight
                   size={12}
                   weight="bold"
-                  className="mt-[5px] shrink-0 text-ppc-text-faint opacity-0 transition-all group-hover/sub:translate-x-[2px] group-hover/sub:text-ppc-purple-500 group-hover/sub:opacity-100"
+                  className="shrink-0 self-center text-ppc-text-faint opacity-0 transition-all group-hover/sub:translate-x-[2px] group-hover/sub:text-ppc-purple-500 group-hover/sub:opacity-100"
                 />
               </Link>
             </li>
