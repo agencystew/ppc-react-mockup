@@ -1092,7 +1092,7 @@ function DensityToggle({ density, onChange }: { density: Density; onChange: (d: 
 /* ═══════════════════════════════════════════════════════════════════
    LEADERSHIP VIEW                                                     */
 
-function LeadershipView({ all, counts }: { all: FlatReport[]; counts: { needs: number; ready: number; fyi: number; actioned: number; all: number } }) {
+function LeadershipView({ all, counts }: { all: FlatReport[]; counts: { needs: number; ready: number; fyi: number; wins: number; actioned: number; all: number } }) {
   const byProject = useMemo(() => {
     const map: Record<string, { name: string; total: number; needs: number }> = {};
     for (const r of all) {
