@@ -13,6 +13,7 @@ import { ProjectPage } from './pages/Project';
 import { ProjectBriefPage } from './pages/ProjectBrief';
 import { Chat } from './pages/Chat';
 import { Patterns } from './pages/Patterns';
+import { PatternDetail } from './pages/PatternDetail';
 
 /* v2 (parked for comparison — same routes prefixed with /v2) */
 import { Dashboard as V2Dashboard } from './pages/_v2/Dashboard';
@@ -65,6 +66,7 @@ export default function App() {
         <Route path="agents/:slug/run/:runId" element={<AgentRunning />} />
         <Route path="reports" element={<Reports />} />
         <Route path="patterns" element={<Patterns />} />
+        <Route path="patterns/:id" element={<PatternDetail />} />
         {/* v5 promoted to canonical /reports/:runId on 2026-05-16.
            The previous v1 report page is reachable at /v1/reports/:runId. */}
         <Route path="reports/:runId" element={<AgentResultsV5 />} />

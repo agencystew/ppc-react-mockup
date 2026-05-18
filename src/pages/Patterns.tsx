@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type ReactNode } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Sparkle,
@@ -383,19 +383,10 @@ function LightTable() {
           </ul>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-          <p className="inline-flex items-center gap-2 text-[12.5px] text-ppc-text-muted">
-            <Info size={14} weight="duotone" className="text-ppc-text-faint" />
-            Patterns are experimental. Validate before acting.
-          </p>
-          <Link
-            to="#"
-            className="inline-flex items-center gap-1 text-[13px] font-semibold text-ppc-purple-700 hover:text-ppc-purple-500"
-          >
-            View all patterns
-            <ArrowRight size={13} weight="bold" />
-          </Link>
-        </div>
+        <p className="mt-5 inline-flex items-center gap-2 text-[12.5px] text-ppc-text-muted">
+          <Info size={14} weight="duotone" className="text-ppc-text-faint" />
+          Patterns are experimental. Validate before acting.
+        </p>
       </div>
     </section>
   );
@@ -577,92 +568,33 @@ function StatusPill({ status }: { status: RowStatus }) {
 }
 
 function ExpandedDetail({ pattern }: { pattern: Pattern }) {
+  // Discreet preview — a single read paragraph plus two CTAs. The full
+  // breakdown lives on /patterns/:id; the inline drop just nudges users
+  // toward it without unloading the entire detail into the list view.
   return (
-    <div className="grid grid-cols-1 gap-x-10 gap-y-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-      <div>
-        <SectionLabel>Why it matters</SectionLabel>
-        <p className="mt-1.5 text-[14px] leading-[1.55] text-ppc-ink/85">
-          {pattern.whyItMatters}
-        </p>
-
-        <SectionLabel className="mt-5">Recommended action</SectionLabel>
-        <p className="mt-1.5 text-[14px] leading-[1.55] text-ppc-ink/85">
-          {pattern.recommendedAction}
-        </p>
+    <div className="max-w-[680px]">
+      <p className="text-[13.5px] leading-[1.6] text-ppc-text-muted">
+        {pattern.whyItMatters}
+      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <Link
+          to={`/patterns/${pattern.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="inline-flex items-center gap-1.5 rounded-full bg-grad-cta px-4 py-2 text-[13px] font-semibold text-white shadow-[0_2px_10px_rgba(83,74,183,0.30)] hover:opacity-95"
+        >
+          See full breakdown
+          <ArrowRight size={13} weight="bold" />
+        </Link>
         <button
           type="button"
           onClick={(e) => e.stopPropagation()}
-          className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-grad-cta px-4 py-2 text-[13px] font-medium text-white shadow-[0_2px_10px_rgba(83,74,183,0.30)] hover:opacity-95"
+          className="inline-flex items-center gap-1.5 rounded-full border border-ppc-card-border bg-white px-4 py-2 text-[13px] font-medium text-ppc-ink hover:bg-white hover:border-ppc-purple-300"
         >
-          {pattern.recommendedActionCta}
-          <ArrowRight size={13} weight="bold" />
+          <Sparkle size={13} weight="fill" className="text-ppc-purple-500" />
+          Ask follow-up
         </button>
       </div>
-
-      <div className="space-y-5">
-        <div>
-          <SectionLabel>Affected accounts</SectionLabel>
-          <ul className="mt-2 space-y-1.5">
-            {pattern.affected.map((a) => (
-              <li
-                key={a.id}
-                className="flex items-center gap-2 text-[13px] text-ppc-ink"
-              >
-                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-[#F4F0FB] text-[10px] font-semibold text-ppc-purple-800">
-                  {initialsOf(a.name)}
-                </span>
-                {a.name}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <SectionLabel>Driven by</SectionLabel>
-          <ul className="mt-2 space-y-1.5">
-            {pattern.drivenBy.map((d) => (
-              <li
-                key={d.agentName}
-                className="flex items-center gap-2 text-[13px] text-ppc-ink"
-              >
-                <span className="text-[14px]">{d.agentEmoji}</span>
-                <span className="font-medium">{d.agentName}</span>
-                <span className="text-ppc-text-muted">
-                  · {d.findingsCount} finding{d.findingsCount === 1 ? '' : 's'}
-                </span>
-                {d.modifier && (
-                  <span className="text-ppc-text-faint">· {d.modifier}</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
     </div>
   );
 }
 
-function SectionLabel({
-  children,
-  className = '',
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`text-[11px] font-semibold tracking-wide text-ppc-text-faint ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-function initialsOf(name: string): string {
-  return name
-    .replace(/[—–-]/g, ' ')
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((w) => w[0])
-    .join('')
-    .slice(0, 3)
-    .toUpperCase();
-}
