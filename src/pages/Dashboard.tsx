@@ -264,7 +264,7 @@ function ActivityHero() {
         }}
       />
 
-      <div className="relative grid gap-10 px-8 pb-9 pt-8 sm:px-12 sm:pb-10 sm:pt-10 lg:grid-cols-[minmax(0,1fr)_minmax(300px,420px)] lg:gap-14">
+      <div className="relative grid gap-10 px-8 pb-9 pt-8 sm:px-12 sm:pb-10 sm:pt-10 lg:grid-cols-[minmax(0,1fr)_minmax(360px,520px)] lg:gap-12">
         {/* ─── Copy column ─────────────────────────────────────────── */}
         <div className="min-w-0">
           <EyebrowChip>Portfolio Command Brief</EyebrowChip>
@@ -317,16 +317,15 @@ function ActivityHero() {
           </div>
         </div>
 
-        {/* ─── Right column · hero-graphic slot ────────────────────
-         *
-         * Stewart is supplying a new hero illustration (brain mascot +
-         * arcade controller + URGENT/WATCH/HEALTHY cluster bubbles).
-         * The existing AgentMascot holds the slot open at the correct
-         * column width so the layout doesn't reflow when the asset
-         * lands — swap the inner block for the new graphic when ready.
-         */}
-        <div className="relative hidden min-w-0 items-center justify-center lg:flex">
-          <AgentMascot size={300} />
+        {/* ─── Right column · hero illustration ─────────────────── */}
+        <div className="relative hidden min-w-0 items-center justify-end lg:flex">
+          <img
+            src={homeHero}
+            alt=""
+            aria-hidden
+            className="w-full max-w-[540px] select-none"
+            draggable={false}
+          />
         </div>
       </div>
     </section>
