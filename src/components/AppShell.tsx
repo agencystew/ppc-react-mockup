@@ -110,7 +110,8 @@ export function AppShell() {
               || pathname === '/v2/chat' || pathname.startsWith('/v2/chat/');
   const isV2 = pathname === '/v2' || pathname.startsWith('/v2/');
   const isPatterns = pathname === '/patterns' || pathname.startsWith('/patterns/');
-  const fullBleed = isChat || isV2 || isPatterns;
+  const isHome = pathname === '/';
+  const fullBleed = isChat || isV2 || isPatterns || isHome;
 
   return (
     <div className="flex min-h-screen w-full font-sans text-ppc-black">

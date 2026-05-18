@@ -2,31 +2,26 @@ import { Link, useSearchParams } from 'react-router-dom';
 import {
   ArrowRight, ArrowUp, ArrowDown, CaretRight, Sparkle,
   MagnifyingGlass, Funnel,
+  FileText, Warning, Eye, ShieldCheck,
+  CurrencyDollar, ChartLineUp, Browser,
 } from '@phosphor-icons/react';
 import { PROJECTS, ACCOUNTS } from '../mock/projects';
-import { RECENT_RUNS_SUMMARY } from '../mock/runs';
 import { AgentMascot } from '../components/AgentMascot';
 import { PATTERNS, type Pattern } from '../mock/patterns';
 
 /* Dashboard · /
  *
- * Brief from Stewart 2026-05-15: take the reference dashboard layout
- * (greeting · big dark hero · portfolio table · 2-up bottom row) and
- * make it PPC.io. Top dark box surfaces RECENT AGENT ACTIVITY with a
- * see-all-reports CTA. Below is the projects table. Below that, a
- * 2-up: Chat CTA + Quick actions.
+ *   1 · Portfolio Command Brief   Wide dark hero — eyebrow, headline, stats,
+ *                                 priority queue, dual CTA, right-column slot
+ *                                 reserved for the upcoming hero illustration.
+ *   2 · Portfolio table           Filter chips + projects table with sparklines.
+ *   3 · Patterns live strip       Purple billboard with cross-account graph.
  *
- * Design language is lifted directly from the competitor-spy report
- * hero card (radial purple bloom + starfield grain + italic purple
- * period in headlines). Same world, same hand.
- *
- *   1 · Greeting strip       Morning, Stewy · THU · 14 MAY date pill
- *   2 · Activity hero        Dark surface, recent runs feed, glowing orb
- *   3 · Portfolio table      Filter chips + projects table with sparklines
- *   4 · Bottom duo           Chat CTA (dark) + Quick actions (light)
+ * The hero breaks out of the standard 1240px page wrap and sits in a wider
+ * container so its border lands close to the sidebar; the rest of the page
+ * stays centered. AppShell.tsx flags '/' as fullBleed, so Dashboard manages
+ * its own wrappers.
  */
-
-const TODAY_PILL = 'THU · 14 MAY';
 
 /* ─── Per-project surface meta. Lives in the dashboard so the
  *     canonical PROJECTS mock stays minimal. */
@@ -112,39 +107,101 @@ const PROJECT_META: Record<string, ProjectMeta> = {
   },
 };
 
-/* ─── Recent agent activity feed (lifts from RECENT_RUNS_SUMMARY but
- *     adds richer per-row context). */
-interface ActivityRow {
-  runId: string;
-  agentEmoji: string;
-  agentName: string;
-  projectName: string;
-  projectAvatarBg: string;
-  headline: string;
-  upside: string;
-  finishedAt: string;
+/* ─── Top-of-hero stats row (5 chips) ────────────────────────────────── */
+
+interface StatChip {
+  Icon: typeof MagnifyingGlass;
+  iconTint: string;     // foreground icon color
+  iconBg: string;       // squircle bg behind icon
+  iconRing: string;     // 1px inset border on squircle
+  value: string;
+  label: string;
 }
 
-const ACTIVITY: ActivityRow[] = [
+const STATS: StatChip[] = [
+  { Icon: MagnifyingGlass, iconTint: '#C7B0FF', iconBg: 'rgba(127,90,240,0.20)', iconRing: 'rgba(127,90,240,0.40)', value: '50', label: 'accounts\nscanned' },
+  { Icon: FileText,        iconTint: '#C7B0FF', iconBg: 'rgba(127,90,240,0.20)', iconRing: 'rgba(127,90,240,0.40)', value: '18', label: 'reports\nready' },
+  { Icon: Warning,         iconTint: '#FF8A7A', iconBg: 'rgba(224,82,79,0.18)',  iconRing: 'rgba(224,82,79,0.45)',  value: '6',  label: 'urgent' },
+  { Icon: Eye,             iconTint: '#F0C57A', iconBg: 'rgba(214,154,53,0.18)', iconRing: 'rgba(214,154,53,0.45)', value: '12', label: 'watch' },
+  { Icon: ShieldCheck,     iconTint: '#7CDDB5', iconBg: 'rgba(93,194,162,0.18)', iconRing: 'rgba(93,194,162,0.40)', value: '32', label: 'healthy' },
+];
+
+/* ─── Priority queue rows (4 rows) ───────────────────────────────────── */
+
+interface PriorityRow {
+  Icon: typeof Warning;
+  iconTint: string;
+  iconBg: string;
+  iconRing: string;
+  label: string;
+  /** Initials shown as account avatars (in order). */
+  initials: string[];
+  /** Avatar gradient backgrounds matched 1:1 to initials. */
+  avatarBgs: string[];
+  overflow: number;
+  count: string;
+  pillTint: string;
+  pillBg: string;
+  pillRing: string;
+  to: string;
+}
+
+const QUEUE: PriorityRow[] = [
   {
-    runId: 'run-competitor-spy-completed',
-    agentEmoji: '🕵️',
-    agentName: 'Competitor Spy',
-    projectName: 'Boulder Care',
-    projectAvatarBg: PROJECT_META['boulder-care'].avatarBg,
-    headline: '11 gaps your rivals are exploiting',
-    upside: '+$8.2K/mo',
-    finishedAt: '2h ago',
+    Icon: Warning, iconTint: '#FF8A7A',
+    iconBg: 'rgba(224,82,79,0.18)', iconRing: 'rgba(224,82,79,0.45)',
+    label: 'Critical accounts',
+    initials: ['B', 'T', 'H'],
+    avatarBgs: [
+      PROJECT_META['boulder-care'].avatarBg,
+      PROJECT_META['the-hoth'].avatarBg,
+      'linear-gradient(155deg, #FB7185 0%, #DC2626 100%)',
+    ],
+    overflow: 8, count: '14 accounts',
+    pillTint: '#FFB1A4', pillBg: 'rgba(224,82,79,0.16)', pillRing: 'rgba(224,82,79,0.38)',
+    to: '/reports?filter=critical',
   },
   {
-    runId: 'run-spend-leak-rocket',
-    agentEmoji: '🔍',
-    agentName: 'Spend Leak Detector',
-    projectName: 'The HOTH',
-    projectAvatarBg: PROJECT_META['the-hoth'].avatarBg,
-    headline: '6 dead campaigns burning $3.4K/mo',
-    upside: '+$3.4K/mo',
-    finishedAt: 'Yesterday',
+    Icon: CurrencyDollar, iconTint: '#F0C57A',
+    iconBg: 'rgba(214,154,53,0.18)', iconRing: 'rgba(214,154,53,0.45)',
+    label: 'Budget shifts',
+    initials: ['A', 'G', 'M'],
+    avatarBgs: [
+      PROJECT_META['authority-builders'].avatarBg,
+      'linear-gradient(155deg, #FCD34D 0%, #B45309 100%)',
+      'linear-gradient(155deg, #F472B6 0%, #BE185D 100%)',
+    ],
+    overflow: 12, count: '18 accounts',
+    pillTint: '#F0C57A', pillBg: 'rgba(214,154,53,0.16)', pillRing: 'rgba(214,154,53,0.38)',
+    to: '/reports?filter=budget',
+  },
+  {
+    Icon: ChartLineUp, iconTint: '#C7B0FF',
+    iconBg: 'rgba(127,90,240,0.20)', iconRing: 'rgba(127,90,240,0.42)',
+    label: 'Competitor moves',
+    initials: ['S', 'R', 'D'],
+    avatarBgs: [
+      'linear-gradient(155deg, #C4B5FD 0%, #7C3AED 100%)',
+      'linear-gradient(155deg, #FCA5A5 0%, #B91C1C 100%)',
+      PROJECT_META['durable'].avatarBg,
+    ],
+    overflow: 6, count: '9 accounts',
+    pillTint: '#C7B0FF', pillBg: 'rgba(127,90,240,0.16)', pillRing: 'rgba(127,90,240,0.42)',
+    to: '/reports?filter=competitor',
+  },
+  {
+    Icon: Browser, iconTint: '#9CC4FF',
+    iconBg: 'rgba(96,165,250,0.18)', iconRing: 'rgba(96,165,250,0.40)',
+    label: 'Landing page checks',
+    initials: ['L', 'W', 'P'],
+    avatarBgs: [
+      PROJECT_META['linkbuilder'].avatarBg,
+      'linear-gradient(155deg, #93C5FD 0%, #1D4ED8 100%)',
+      'linear-gradient(155deg, #F0ABFC 0%, #7E22CE 100%)',
+    ],
+    overflow: 10, count: '12 accounts',
+    pillTint: '#9CC4FF', pillBg: 'rgba(96,165,250,0.16)', pillRing: 'rgba(96,165,250,0.38)',
+    to: '/reports?filter=landing',
   },
 ];
 
@@ -152,57 +209,36 @@ const ACTIVITY: ActivityRow[] = [
 
 export function Dashboard() {
   return (
-    <div className="space-y-6">
-      <GreetingStrip />
-      <ActivityHero />
-      <PortfolioTable />
-      <PatternsLiveStrip />
-    </div>
-  );
-}
-
-/* ─── 1 · Greeting strip ─────────────────────────────────────────────── */
-
-function GreetingStrip() {
-  return (
-    <div className="flex items-end justify-between gap-4">
-      <div>
-        <h1 className="flex items-center gap-3 font-display text-[48px] font-black leading-[1.05] tracking-[-0.02em] text-ppc-ink">
-          Morning, Stewy
-          <span aria-hidden className="inline-block text-[44px] leading-none">👋</span>
-        </h1>
+    <>
+      {/* Wider hero — breaks out of the standard 1240px wrap so its border
+          sits close to the sidebar on widescreen displays. */}
+      <div className="mx-auto w-full max-w-[1720px] px-4 pt-6 sm:px-5 sm:pt-7 lg:px-6 lg:pt-8">
+        <ActivityHero />
       </div>
-      <span
-        className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-[7px] font-mono text-[11px] uppercase tracking-[0.10em] text-ppc-ink"
-        style={{ boxShadow: 'inset 0 0 0 1px #d9d4ec' }}
-      >
-        <span className="h-1.5 w-1.5 rounded-full bg-ppc-purple-500" />
-        {TODAY_PILL}
-      </span>
-    </div>
+
+      {/* Rest of the dashboard — back to the standard centered column so the
+          table and pattern strip stay readable at any viewport width. */}
+      <div className="mx-auto w-full max-w-[1240px] space-y-6 px-6 pb-10 pt-6 lg:px-8 lg:pb-12 lg:pt-8">
+        <PortfolioTable />
+        <PatternsLiveStrip />
+      </div>
+    </>
   );
 }
 
-/* ─── 2 · Activity hero (dark) ───────────────────────────────────────── */
-
-/* Brand language: pure dark base, faint perspective grid masked at the
- * edges, single soft purple bloom up top, bold Figtree headline with a
- * lavender period, Courier mono eyebrow with a status dot, and a friendly
- * AgentMascot anchor in the right column. */
+/* ─── 1 · Portfolio Command Brief (dark hero) ────────────────────────── */
 
 function ActivityHero() {
   return (
     <section
-      className="relative overflow-hidden rounded-[20px] text-white"
+      className="relative overflow-hidden rounded-[24px] text-white"
       style={{
         background: '#08060F',
         boxShadow:
           '0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(15,10,30,0.55)',
       }}
     >
-      {/* Perspective grid, faded toward edges. The signature marketing-site
-          dark-hero treatment — replaces the previous radial-purple-bloom move,
-          which read as generic SaaS dashboard. */}
+      {/* Faint perspective grid, masked toward the edges. */}
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -212,37 +248,52 @@ function ActivityHero() {
             linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
           `,
           backgroundSize: '64px 64px',
-          backgroundPosition: '0 0, 0 0',
           maskImage:
             'radial-gradient(ellipse 90% 70% at 50% 0%, black 25%, transparent 80%)',
           WebkitMaskImage:
             'radial-gradient(ellipse 90% 70% at 50% 0%, black 25%, transparent 80%)',
         }}
       />
-      {/* Single soft purple glow up top, no second bloom. */}
+      {/* Single soft purple bloom anchored top-left, biased to the copy column. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -top-40 left-1/2 h-[460px] w-[820px] -translate-x-1/2 rounded-full"
+        className="pointer-events-none absolute -top-40 -left-32 h-[520px] w-[860px] rounded-full"
         style={{
           background:
-            'radial-gradient(ellipse, rgba(127,90,240,0.20) 0%, transparent 65%)',
+            'radial-gradient(ellipse, rgba(127,90,240,0.22) 0%, transparent 65%)',
         }}
       />
 
-      <div className="relative grid gap-10 px-10 pb-10 pt-8 sm:grid-cols-[1fr_minmax(260px,320px)] sm:gap-12 sm:px-14 sm:pt-10">
+      <div className="relative grid gap-10 px-8 pb-9 pt-8 sm:px-12 sm:pb-10 sm:pt-10 lg:grid-cols-[minmax(0,1fr)_minmax(300px,420px)] lg:gap-14">
         {/* ─── Copy column ─────────────────────────────────────────── */}
         <div className="min-w-0">
-          <h2 className="font-display text-[60px] font-black leading-[0.95] tracking-[-0.030em] text-white sm:text-[76px]">
-            Your agents have been busy<span style={{ color: '#9F86FF' }}>.</span>
+          <EyebrowChip>Portfolio Command Brief</EyebrowChip>
+
+          <h2 className="mt-6 font-display text-[44px] font-black leading-[1.02] tracking-[-0.025em] text-white sm:text-[52px]">
+            Morning, <span style={{ color: '#9F86FF' }}>Stewy.</span>
           </h2>
 
-          <div className="mt-8 flex flex-col gap-2">
-            {ACTIVITY.map((row) => (
-              <ActivityCard key={row.runId} row={row} />
-            ))}
+          <p className="mt-3 text-[22px] font-semibold leading-[1.25] tracking-[-0.012em] text-white sm:text-[26px]">
+            Your portfolio brief is ready.
+          </p>
+
+          <p className="mt-2.5 max-w-[520px] text-[14px] leading-[1.55] text-white/65">
+            Agents scanned accounts, grouped the noise, and queued{' '}
+            <span style={{ color: '#9F86FF' }} className="font-medium">the work that matters most</span>.
+          </p>
+
+          <StatsBar />
+
+          <div className="mt-7">
+            <PriorityHeader />
+            <ul className="mt-3 flex flex-col gap-[6px]">
+              {QUEUE.map((row) => (
+                <PriorityQueueRow key={row.label} row={row} />
+              ))}
+            </ul>
           </div>
 
-          <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+          <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
             <Link
               to="/reports"
               className="ppcio-cta group relative inline-flex items-center gap-2 rounded-full px-[18px] py-[11px] text-[13.5px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
@@ -257,62 +308,160 @@ function ActivityHero() {
               See all reports
             </Link>
             <Link
-              to="/agents"
-              className="inline-flex items-center gap-1.5 text-[13px] font-medium text-white/65 transition-colors hover:text-white"
+              to="/reports?queue=1"
+              className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#C7B0FF] transition-colors hover:text-white"
             >
-              Or send a new specialist out
-              <CaretRight size={11} weight="bold" />
+              Review priority queue
+              <ArrowRight size={12} weight="bold" />
             </Link>
           </div>
         </div>
 
-        {/* ─── Right column · friendly mascot ─────────────────────── */}
-        <div className="relative flex min-w-0 items-center justify-center sm:justify-end">
-          <AgentMascot size={240} />
+        {/* ─── Right column · hero-graphic slot ────────────────────
+         *
+         * Stewart is supplying a new hero illustration (brain mascot +
+         * arcade controller + URGENT/WATCH/HEALTHY cluster bubbles).
+         * The existing AgentMascot holds the slot open at the correct
+         * column width so the layout doesn't reflow when the asset
+         * lands — swap the inner block for the new graphic when ready.
+         */}
+        <div className="relative hidden min-w-0 items-center justify-center lg:flex">
+          <AgentMascot size={300} />
         </div>
       </div>
     </section>
   );
 }
 
-function ActivityCard({ row }: { row: ActivityRow }) {
+function EyebrowChip({ children }: { children: React.ReactNode }) {
   return (
-    <Link
-      to={`/reports/${row.runId}`}
-      className="group flex items-center gap-4 rounded-[12px] px-4 py-3 transition-colors hover:bg-white/[0.05]"
-      style={{
-        background: 'rgba(255,255,255,0.025)',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.07)',
-      }}
+    <span
+      className="inline-flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.03] px-3 py-[5px] text-[11px] uppercase tracking-[0.16em] text-white/75"
+      style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
     >
-      {/* Project avatar. Tonal chip per project. */}
-      <span
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-[9px] text-[13px] font-bold text-white"
+      <Sparkle size={11} weight="fill" className="text-[#C7B0FF]" />
+      {children}
+    </span>
+  );
+}
+
+/* ─── Stats bar — 5 chips, icon left + number/label stack right ──────── */
+
+function StatsBar() {
+  return (
+    <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5 lg:gap-3">
+      {STATS.map((s) => (
+        <div
+          key={s.label}
+          className="flex items-center gap-3 rounded-[12px] px-3 py-[10px]"
+          style={{
+            background: 'rgba(255,255,255,0.025)',
+            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.07)',
+          }}
+        >
+          <span
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-[9px]"
+            style={{
+              background: s.iconBg,
+              boxShadow: `inset 0 0 0 1px ${s.iconRing}`,
+            }}
+          >
+            <s.Icon size={17} weight="bold" style={{ color: s.iconTint }} />
+          </span>
+          <div className="min-w-0 leading-tight">
+            <div className="font-display text-[22px] font-black leading-none tracking-[-0.020em] text-white tabular-nums">
+              {s.value}
+            </div>
+            <div className="mt-[3px] whitespace-pre-line text-[11px] font-medium leading-[1.15] text-white/55">
+              {s.label}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Priority queue header + rows ───────────────────────────────────── */
+
+function PriorityHeader() {
+  return (
+    <div className="flex items-center gap-2 text-[13px] font-semibold text-white/85">
+      Priority queue
+      <Sparkle size={11} weight="fill" className="text-[#C7B0FF]" />
+    </div>
+  );
+}
+
+function PriorityQueueRow({ row }: { row: PriorityRow }) {
+  return (
+    <li>
+      <Link
+        to={row.to}
+        className="group flex items-center gap-3 rounded-[12px] px-3 py-[10px] transition-colors hover:bg-white/[0.05] sm:gap-4 sm:px-4"
         style={{
-          background: row.projectAvatarBg,
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22)',
+          background: 'rgba(255,255,255,0.025)',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.07)',
         }}
       >
-        {row.projectName.charAt(0)}
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2 text-[12px] text-white/55">
-          <span aria-hidden className="text-[14px] leading-none">{row.agentEmoji}</span>
-          <span className="font-medium text-white/85">{row.agentName}</span>
-          <span className="text-white/30">·</span>
-          <span>{row.projectName}</span>
-        </div>
-        <p className="mt-1 truncate text-[14px] font-medium text-white">
-          {row.headline}
-        </p>
-      </div>
-      <span className="hidden text-[11px] text-white/45 sm:inline">{row.finishedAt}</span>
-      <CaretRight
-        size={13}
-        weight="bold"
-        className="shrink-0 text-white/35 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70"
-      />
-    </Link>
+        <span
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-[9px]"
+          style={{
+            background: row.iconBg,
+            boxShadow: `inset 0 0 0 1px ${row.iconRing}`,
+          }}
+        >
+          <row.Icon size={17} weight="bold" style={{ color: row.iconTint }} />
+        </span>
+
+        <span className="min-w-0 flex-1 truncate text-[14px] font-semibold tracking-[-0.005em] text-white">
+          {row.label}
+        </span>
+
+        {/* Avatar stack — single-letter initials per affected account. */}
+        <span className="hidden items-center sm:flex">
+          {row.initials.map((initial, i) => (
+            <span
+              key={`${initial}-${i}`}
+              className={`grid h-[26px] w-[26px] place-items-center rounded-full text-[11px] font-bold text-white ${i > 0 ? '-ml-[7px]' : ''}`}
+              style={{
+                background: row.avatarBgs[i],
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.22), 0 0 0 2px #08060F',
+              }}
+            >
+              {initial}
+            </span>
+          ))}
+          <span
+            className="ml-1.5 inline-flex items-center rounded-full px-[7px] py-[3px] text-[10.5px] font-bold text-white/70 tabular-nums"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.10)',
+            }}
+          >
+            +{row.overflow}
+          </span>
+        </span>
+
+        <span
+          className="inline-flex shrink-0 items-center rounded-full px-2.5 py-[4px] text-[11.5px] font-semibold tabular-nums"
+          style={{
+            background: row.pillBg,
+            color: row.pillTint,
+            boxShadow: `inset 0 0 0 1px ${row.pillRing}`,
+          }}
+        >
+          {row.count}
+        </span>
+
+        <CaretRight
+          size={13}
+          weight="bold"
+          className="shrink-0 text-white/35 transition-transform group-hover:translate-x-0.5 group-hover:text-white/70"
+        />
+      </Link>
+    </li>
   );
 }
 
@@ -947,5 +1096,3 @@ function formatMoney(n: number): string {
   return n.toLocaleString('en-US');
 }
 
-/* Suppress unused warnings on the shared mock. */
-void RECENT_RUNS_SUMMARY;
