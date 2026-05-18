@@ -236,7 +236,7 @@ export function AgentCatalog() {
   }, [category]);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
       <HeroBlock readyCount={12} />
       <CatalogBody
         category={category}
@@ -262,13 +262,13 @@ function HeroBlock({ readyCount }: { readyCount: number }) {
       </div>
 
       {/* Headline + illustration */}
-      <div className="mt-7 grid items-center gap-6 lg:grid-cols-[1fr_minmax(0,540px)] lg:gap-10">
+      <div className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_460px] lg:gap-12">
         <div className="flex flex-col">
-          <h1 className="font-display font-black leading-[0.95] tracking-[-0.030em] text-ppc-ink text-[48px] sm:text-[60px] lg:text-[72px]">
+          <h1 className="font-display font-black leading-[0.96] tracking-[-0.028em] text-ppc-ink text-[44px] sm:text-[54px] lg:text-[62px]">
             Meet Your PPC Agents
           </h1>
           <h1
-            className="mt-1 leading-[1.02] tracking-[-0.018em] text-ppc-purple-500 text-[44px] sm:text-[56px] lg:text-[68px]"
+            className="mt-1 leading-[1.04] tracking-[-0.016em] text-ppc-purple-500 text-[40px] sm:text-[50px] lg:text-[58px]"
             style={{
               fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif',
               fontStyle: 'italic',

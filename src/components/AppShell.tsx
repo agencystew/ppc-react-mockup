@@ -83,6 +83,14 @@ export function AppShell() {
 
   useEffect(() => { setSwitcherOpen(false); }, [pathname]);
 
+  // Scroll-to-top on route change. Without this, the browser preserves
+  // the previous scroll position and an Agent Detail route opens partway
+  // down the page (e.g. landing on /agents/landing-page after scrolling
+  // the catalog). Each route transition resets to (0, 0).
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   useEffect(() => {
     if (!switcherOpen) return;
     const onKey = (e: KeyboardEvent) => {
