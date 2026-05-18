@@ -286,12 +286,13 @@ export function AgentDetail() {
     <div className="font-sans text-ppc-ink">
       <Breadcrumbs trail={['Agents', agent.name]} />
 
-      {/* HERO — full width so the H1 has room to breathe. */}
-      <EditorialHero agent={agent} />
-
-      <div className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start">
+      {/* Single 2-col grid from the top — launch widget pins at top-right
+          alongside the hero, so experienced users see "fill + go" the moment
+          the page loads. Hero now lives inside the left column. */}
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start">
         {/* ═══ LEFT — editorial story ═══════════════════════════════════════ */}
-        <div className="min-w-0 space-y-8">
+        <div className="min-w-0 space-y-10">
+          <EditorialHero agent={agent} />
           <ExpeditionMap agent={agent} />
           <LiveInvestigationLog slug={agent.slug} />
         </div>
@@ -379,23 +380,23 @@ function EditorialHero({ agent }: { agent: AgentDefinition }) {
   const headlineBody = hasPeriod ? agent.headline.slice(0, -1) : agent.headline;
 
   return (
-    <section className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(420px,520px)] lg:gap-16">
+    <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(200px,260px)] lg:gap-10">
       <div className="flex flex-col">
         <CategoryChip label={CATEGORY_LABEL[agent.category] ?? agent.category} />
 
-        <h1 className="mt-5 font-display font-black leading-[0.94] tracking-[-0.038em] text-ppc-ink text-[52px] sm:text-[64px] lg:text-[80px]">
+        <h1 className="mt-5 font-display font-black leading-[0.95] tracking-[-0.038em] text-ppc-ink text-[48px] sm:text-[58px] lg:text-[68px]">
           {agent.name}
         </h1>
 
         <p
-          className="mt-3 font-serif font-bold italic leading-[1.05] tracking-[-0.025em] text-ppc-purple-500 text-[28px] sm:text-[34px] lg:text-[42px]"
+          className="mt-3 font-serif font-bold italic leading-[1.05] tracking-[-0.025em] text-ppc-purple-500 text-[24px] sm:text-[30px] lg:text-[36px]"
           style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
         >
           {headlineBody}
           {hasPeriod && <span className="text-ppc-purple-700">.</span>}
         </p>
 
-        <p className="mt-7 max-w-[520px] text-[16px] leading-[1.65] text-ppc-text-muted">
+        <p className="mt-6 max-w-[520px] text-[16px] leading-[1.65] text-ppc-text-muted">
           {agent.outcomeDescription}
         </p>
       </div>
@@ -428,7 +429,7 @@ function CategoryChip({ label }: { label: string }) {
 
 function IconSpotlight({ Icon }: { Icon: PhosphorIcon }) {
   return (
-    <div className="relative hidden aspect-square w-full max-w-[360px] place-self-center lg:block">
+    <div className="relative hidden aspect-square w-full max-w-[240px] place-self-center lg:block">
       {/* Inline keyframes for the bloom breathing — ambient, very gentle.
           7s cycle, scales 0.96→1.05 and opacity 0.75→1, so the eye reads
           it as life, not motion. */}
@@ -468,7 +469,7 @@ function IconSpotlight({ Icon }: { Icon: PhosphorIcon }) {
         className="relative grid h-full place-items-center"
         style={{ animation: 'spotlight-icon-float 7s ease-in-out infinite' }}
       >
-        <Icon size={220} weight="duotone" className="text-ppc-purple-500" />
+        <Icon size={150} weight="duotone" className="text-ppc-purple-500" />
       </div>
     </div>
   );
@@ -636,22 +637,17 @@ function LiveInvestigationLog({ slug }: { slug: string }) {
 
   return (
     <section
-      className="relative overflow-hidden rounded-[24px] text-white"
+      className="relative overflow-hidden rounded-[24px]"
       style={{
-        background:
-          'radial-gradient(120% 80% at 100% 0%, #1A1030 0%, #0F0A1E 60%, #0A0814 100%)',
+        background: '#EEEDFE',
         boxShadow:
-          '0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(15,10,30,0.55)',
+          '0 0 0 1px #d9d4ec, 0 1px 0 rgba(15,10,30,0.02), 0 20px 40px -28px rgba(15,10,30,0.14)',
       }}
     >
       <style>{`
         @keyframes log-step-pulse {
           0%, 100% { opacity: 0.55; transform: scale(0.95); }
           50%      { opacity: 1;    transform: scale(1.15); }
-        }
-        @keyframes log-title-pulse {
-          0%, 100% { opacity: 0.55; box-shadow: 0 0 0 0 rgba(168,140,255,0.55); }
-          50%      { opacity: 1;    box-shadow: 0 0 0 6px rgba(168,140,255,0); }
         }
       `}</style>
 
@@ -660,33 +656,17 @@ function LiveInvestigationLog({ slug }: { slug: string }) {
         className="pointer-events-none absolute -right-24 -top-24 h-[320px] w-[320px] rounded-full"
         style={{
           background:
-            'radial-gradient(circle, rgba(127,90,240,0.20) 0%, rgba(127,90,240,0.06) 40%, transparent 70%)',
+            'radial-gradient(circle, rgba(127,90,240,0.10) 0%, rgba(127,90,240,0.03) 40%, transparent 70%)',
         }}
       />
 
       <div className="relative px-9 py-9 sm:px-11 sm:py-10">
-        <div className="flex items-center gap-3">
-          <span
-            aria-hidden
-            className="block h-[10px] w-[10px] rounded-full"
-            style={{
-              background: '#A88CFF',
-              animation: 'log-title-pulse 2.6s ease-in-out infinite',
-            }}
-          />
-          <h3 className="font-display text-[26px] font-black leading-[1.05] tracking-[-0.025em] text-white sm:text-[30px]">
-            Watch it work
-            <span
-              className="font-serif font-bold italic text-ppc-purple-400"
-              style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-            >
-              .
-            </span>
-          </h3>
-        </div>
-        <p className="mt-3 max-w-[560px] text-[14px] leading-[1.65] text-white/60">
-          A peek at the reasoning trace — what's happening behind the
-          scenes while it builds your report.
+        <h3 className="flex items-center gap-3 font-display text-[28px] font-black leading-[1.05] tracking-[-0.025em] text-ppc-ink sm:text-[32px]">
+          <span>We're about to get to work</span>
+          <span aria-hidden className="text-[28px] sm:text-[30px]">👀</span>
+        </h3>
+        <p className="mt-3 max-w-[600px] text-[17px] leading-[1.55] text-ppc-text-muted">
+          Sneak peek at what will happen behind the scenes
         </p>
 
         <ul className="mt-7 space-y-[14px]">
@@ -701,10 +681,10 @@ function LiveInvestigationLog({ slug }: { slug: string }) {
                   style={{
                     color:
                       status === 'active'
-                        ? 'rgba(255,255,255,0.96)'
+                        ? '#1a1625'
                         : status === 'done'
-                          ? 'rgba(255,255,255,0.55)'
-                          : 'rgba(255,255,255,0.30)',
+                          ? '#6b6480'
+                          : 'rgba(15,10,30,0.30)',
                   }}
                 >
                   {line}
@@ -725,11 +705,11 @@ function LogStatusDot({ status }: { status: 'pending' | 'active' | 'done' }) {
         aria-hidden
         className="grid h-[20px] w-[20px] shrink-0 place-items-center rounded-full transition-colors"
         style={{
-          background: 'rgba(93,202,165,0.18)',
-          boxShadow: 'inset 0 0 0 1px rgba(93,202,165,0.45)',
+          background: 'rgba(47,143,110,0.16)',
+          boxShadow: 'inset 0 0 0 1px rgba(47,143,110,0.40)',
         }}
       >
-        <Check size={11} weight="bold" style={{ color: '#5DCAA5' }} />
+        <Check size={11} weight="bold" style={{ color: '#2F8F6E' }} />
       </span>
     );
   }
@@ -743,15 +723,15 @@ function LogStatusDot({ status }: { status: 'pending' | 'active' | 'done' }) {
           className="absolute inset-0 rounded-full"
           style={{
             background:
-              'radial-gradient(circle, rgba(168,140,255,0.45) 0%, transparent 70%)',
+              'radial-gradient(circle, rgba(127,90,240,0.45) 0%, transparent 70%)',
             animation: 'log-step-pulse 1.3s ease-in-out infinite',
           }}
         />
         <span
           className="relative h-[7px] w-[7px] rounded-full"
           style={{
-            background: '#A88CFF',
-            boxShadow: '0 0 10px rgba(168,140,255,0.85)',
+            background: '#7F5AF0',
+            boxShadow: '0 0 10px rgba(127,90,240,0.55)',
           }}
         />
       </span>
@@ -762,7 +742,7 @@ function LogStatusDot({ status }: { status: 'pending' | 'active' | 'done' }) {
     <span
       aria-hidden
       className="block h-[20px] w-[20px] shrink-0 rounded-full"
-      style={{ boxShadow: 'inset 0 0 0 1.5px rgba(255,255,255,0.16)' }}
+      style={{ boxShadow: 'inset 0 0 0 1.5px rgba(15,10,30,0.16)' }}
     />
   );
 }
