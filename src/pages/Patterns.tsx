@@ -404,9 +404,9 @@ const FLOW_KEYFRAMES = `
   0%, 100% { transform: scale(1); opacity: 0.95; }
   50%      { transform: scale(1.08); opacity: 0.75; }
 }
-@keyframes ppc-card-glow {
-  0%, 100% { box-shadow: 0 26px 60px -22px rgba(127,90,240,0.40), 0 4px 14px -4px rgba(0,0,0,0.30); }
-  50%      { box-shadow: 0 32px 70px -22px rgba(127,90,240,0.58), 0 4px 14px -4px rgba(0,0,0,0.30); }
+@keyframes ppc-text-glow {
+  0%, 100% { text-shadow: 0 0 22px rgba(168,140,255,0.35); }
+  50%      { text-shadow: 0 0 30px rgba(168,140,255,0.55); }
 }
 `;
 
@@ -443,33 +443,20 @@ function OutputColumn() {
 
 function StrategicPatternCard() {
   return (
-    <div
-      className="relative w-full overflow-hidden rounded-[18px] bg-white p-5"
-      style={{ animation: 'ppc-card-glow 3.4s ease-in-out infinite' }}
-    >
-      {/* faint corner bloom inside the card so it doesn't feel flat */}
-      <div className="pointer-events-none absolute -right-14 -top-14 h-36 w-36 rounded-full bg-ppc-purple-500/10 blur-3xl" />
-
-      <div className="relative flex flex-wrap items-center gap-1.5">
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#F4F1FA] px-2 py-0.5 text-[11px] font-semibold text-ppc-purple-800">
-          <span aria-hidden>💡</span> Insight
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#E7F5EA] px-2 py-0.5 text-[11px] font-semibold text-[#1F6E3D]">
-          <span aria-hidden>💲</span> Revenue lift
-        </span>
-      </div>
-
-      <div className="relative mt-3 flex items-center gap-3">
-        <span
-          aria-hidden
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#F4F0FB] text-[22px] leading-none"
-        >
-          💡
-        </span>
-        <h4 className="text-[26px] font-bold leading-tight tracking-h2 text-ppc-ink">
-          Strategic Pattern
-        </h4>
-      </div>
+    <div className="relative flex items-center gap-3 lg:gap-4">
+      <span
+        aria-hidden
+        className="text-[32px] leading-none"
+        style={{ filter: 'drop-shadow(0 0 18px rgba(255,210,120,0.45))' }}
+      >
+        💡
+      </span>
+      <h4
+        className="font-serif text-[36px] italic font-semibold leading-[1.05] text-white lg:text-[40px]"
+        style={{ animation: 'ppc-text-glow 3.4s ease-in-out infinite' }}
+      >
+        Strategic Pattern
+      </h4>
     </div>
   );
 }
