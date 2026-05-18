@@ -404,6 +404,7 @@ function DiscoverySection({
 
         <div className="flex min-w-0 flex-col gap-10">
           <WinsCard wins={wins} />
+          <WinsToFindingsDivider />
           {discoveries.map((d) => (
             <DiscoveryCardV5
               key={d.id}
@@ -487,6 +488,31 @@ function FindingsRail({ discoveries }: { discoveries: DiscoveryV5[] }) {
   );
 }
 
+// Quiet editorial divider that signals the handoff from Wins → Findings.
+// No chrome, no box — just a hairline + italic phrase. Sits in the same
+// gap-10 flow so spacing stays consistent with the cards above and below.
+function WinsToFindingsDivider() {
+  return (
+    <div
+      className="flex items-center gap-5"
+      role="separator"
+      aria-label="Now onto the findings"
+    >
+      <span aria-hidden className="h-px flex-1" style={{ background: '#e0dbed' }} />
+      <span
+        className="font-display text-[15px] italic"
+        style={{
+          color: '#85819a',
+          letterSpacing: '0.002em',
+        }}
+      >
+        Now onto the findings
+      </span>
+      <span aria-hidden className="h-px flex-1" style={{ background: '#e0dbed' }} />
+    </div>
+  );
+}
+
 // Wins card — sits as the FIRST card in the findings list. Same card
 // chrome as a DiscoveryCardV5 so it reads as one entry in the same flow.
 // Green left accent + TrendUp glyph distinguishes it as the positive lead.
@@ -519,7 +545,10 @@ function WinsCard({ wins }: { wins: WinV5[] }) {
             className="font-display text-[22px] font-extrabold text-ppc-ink"
             style={{ letterSpacing: '-0.02em' }}
           >
-            What's working
+            What's working{' '}
+            <span aria-hidden className="ml-0.5 align-[-2px] text-[20px]">
+              🎉
+            </span>
           </h3>
         </div>
 
