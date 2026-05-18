@@ -404,6 +404,10 @@ const FLOW_KEYFRAMES = `
   0%, 100% { transform: scale(1); opacity: 0.95; }
   50%      { transform: scale(1.08); opacity: 0.75; }
 }
+@keyframes ppc-orb-breath {
+  0%, 100% { transform: scale(1);    opacity: 0.92; }
+  50%      { transform: scale(1.08); opacity: 1;    }
+}
 `;
 
 function SourceColumn() {
@@ -431,19 +435,50 @@ function SourceColumn() {
 
 function OutputColumn() {
   return (
-    <div className="flex h-full items-center">
-      <StrategicPatternCard />
+    <div className="flex h-full items-center justify-center">
+      <StrategicOrb />
     </div>
   );
 }
 
-function StrategicPatternCard() {
+/* Visual punctuation marker — the curve from the lens terminates in this
+ * smaller orb. Same radial-glow + sparkle language as the lens, slightly
+ * different breath cadence so the two read as "input → output". No copy
+ * lives here — the phrase "Strategic Pattern" continues to live in the
+ * Patterns Surfaced section below. */
+function StrategicOrb() {
   return (
-    <div className="relative flex items-center gap-3">
-      <span aria-hidden className="text-[24px] leading-none">💡</span>
-      <h4 className="font-display text-[34px] font-black italic leading-[1.05] text-ppc-purple-300 lg:text-[38px]">
-        Strategic Pattern
-      </h4>
+    <div
+      className="relative h-[96px] w-[96px]"
+      style={{ animation: 'ppc-orb-breath 4s ease-in-out infinite' }}
+    >
+      {/* radial glow */}
+      <div
+        className="absolute inset-0 rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(255,255,255,0.92) 0%, rgba(168,140,255,0.55) 32%, rgba(127,90,240,0.20) 60%, transparent 100%)',
+        }}
+      />
+      {/* inner ring echoing the lens */}
+      <div className="absolute inset-[22px] rounded-full ring-1 ring-white/30" />
+      {/* faint dashed outer ring */}
+      <div
+        className="absolute inset-[6px] rounded-full"
+        style={{ border: '1px dashed rgba(168,140,255,0.25)' }}
+      />
+      {/* centre sparkle */}
+      <svg
+        viewBox="0 0 24 24"
+        className="absolute inset-0 m-auto h-[18px] w-[18px]"
+        aria-hidden
+      >
+        <path
+          d="M 12 2 L 14.5 9.5 L 22 12 L 14.5 14.5 L 12 22 L 9.5 14.5 L 2 12 L 9.5 9.5 Z"
+          fill="#FFFFFF"
+          fillOpacity={0.95}
+        />
+      </svg>
     </div>
   );
 }
