@@ -641,7 +641,7 @@ function ProjectSwitcher({ open, onClose }: { open: boolean; onClose: () => void
     if (query.trim()) {
       const q = query.toLowerCase();
       list = list.filter(
-        (p) => p.name.toLowerCase().includes(q) || p.industry.toLowerCase().includes(q),
+        (p) => p.name.toLowerCase().includes(q) || (p.industry ?? '').toLowerCase().includes(q),
       );
     }
     return list;
@@ -893,7 +893,9 @@ function SwitcherRow({
             className="mt-[2px] block truncate text-[11.5px] font-semibold leading-tight text-white/45"
             style={{ fontFamily: SIDEBAR_FONT }}
           >
-            {project.industry} · {accounts.length} {accounts.length === 1 ? 'account' : 'accounts'}
+            {[project.industry, `${accounts.length} ${accounts.length === 1 ? 'account' : 'accounts'}`]
+              .filter(Boolean)
+              .join(' · ')}
           </span>
         </span>
         <StatusDot tone={status} />
