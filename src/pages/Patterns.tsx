@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import {
-  Sparkle, Cube, Stack, ArrowsClockwise,
+  Sparkle,
   MagnifyingGlass, ArrowRight, X, Info,
   ClockCounterClockwise, Funnel, CaretDown,
   TrendUp, Wrench, CalendarBlank, UsersThree, Target,
@@ -40,9 +40,9 @@ function DarkHero() {
       <PerspectiveGrid />
       <BloomGlow />
 
-      <div className="relative z-[2] mx-auto w-full max-w-[1480px] px-6 pb-16 pt-6 lg:px-12 lg:pb-20 lg:pt-7">
+      <div className="relative z-[2] mx-auto w-full max-w-[1480px] px-6 pb-12 pt-5 lg:px-12 lg:pb-14 lg:pt-6">
         <UtilityStrip />
-        <div className="mt-10 grid grid-cols-1 items-center gap-10 lg:mt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
+        <div className="mt-7 grid grid-cols-1 items-center gap-8 lg:mt-9 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-12">
           <HeroCopy />
           <HeroIllustration />
         </div>
@@ -218,8 +218,8 @@ function HeroCopy() {
         </span>
       </h1>
 
-      <div className="mt-7 flex max-w-[540px] items-start gap-2.5">
-        <p className="text-[16.5px] leading-[1.5] text-white/65">
+      <div className="mt-5 flex max-w-[540px] items-start gap-2.5">
+        <p className="text-[16px] leading-[1.5] text-white/65">
           Experimental reads PPC.io found across accounts, agents, and source data.
         </p>
         <div ref={popRef} className="relative shrink-0">
@@ -236,7 +236,7 @@ function HeroCopy() {
         </div>
       </div>
 
-      <StatsRow />
+      <ProcessCardsRow />
     </div>
   );
 }
@@ -277,24 +277,42 @@ function InfoPopover({ onClose }: { onClose: () => void }) {
   );
 }
 
-interface Stat { icon: ReactNode; value: string; label: string; }
+interface ProcessStep {
+  num: '01' | '02' | '03';
+  title: string;
+  body: string;
+  icon: typeof MagnifyingGlass;
+}
 
-function StatsRow() {
-  const stats: Stat[] = [
-    { icon: <Cube size={20} weight="duotone" />,         value: '102', label: 'projects scanned' },
-    { icon: <Stack size={20} weight="duotone" />,        value: '416', label: 'agent runs' },
-    { icon: <Sparkle size={20} weight="duotone" />,      value: '5',   label: 'ideas held' },
-    { icon: <ArrowsClockwise size={20} weight="bold" />, value: '3',   label: 'seen again' },
-  ];
+const PROCESS_STEPS: ProcessStep[] = [
+  { num: '01', title: 'Scan',    body: 'Accounts, agents, and source data.', icon: MagnifyingGlass },
+  { num: '02', title: 'Group',   body: 'Cluster signals that rhyme.',        icon: UsersThree },
+  { num: '03', title: 'Surface', body: 'Patterns with evidence attached.',   icon: Sparkle },
+];
+
+function ProcessCardsRow() {
   return (
-    <div className="mt-10 grid max-w-[560px] grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4 sm:gap-x-4">
-      {stats.map((s) => (
-        <div key={s.label} className="min-w-0">
-          <span className="text-ppc-purple-300">{s.icon}</span>
-          <div className="mt-3 text-[34px] font-bold leading-none text-white">{s.value}</div>
-          <div className="mt-2 text-[12px] leading-tight text-white/55">{s.label}</div>
-        </div>
+    <div className="mt-7 grid max-w-[620px] grid-cols-1 gap-2.5 sm:grid-cols-3">
+      {PROCESS_STEPS.map((s) => (
+        <ProcessCard key={s.num} {...s} />
       ))}
+    </div>
+  );
+}
+
+function ProcessCard({ num, title, body, icon: Icon }: ProcessStep) {
+  return (
+    <div className="flex items-center gap-3 rounded-[14px] border border-white/8 bg-white px-3.5 py-3 shadow-[0_8px_24px_rgba(7,5,18,0.35)]">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#F4F0FB] text-ppc-purple-700">
+        <Icon size={18} weight="duotone" />
+      </span>
+      <div className="min-w-0">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-[11px] font-semibold leading-none text-ppc-text-faint">{num}</span>
+          <span className="text-[14px] font-bold leading-none text-ppc-ink">{title}</span>
+        </div>
+        <p className="mt-1 text-[11.5px] leading-[1.4] text-ppc-text-muted">{body}</p>
+      </div>
     </div>
   );
 }
@@ -302,7 +320,7 @@ function StatsRow() {
 function HeroIllustration() {
   const [imgOk, setImgOk] = useState(true);
   return (
-    <div className="relative mx-auto h-[420px] w-full max-w-[640px] lg:h-[460px]">
+    <div className="relative mx-auto h-[380px] w-full max-w-[600px] lg:h-[420px]">
       {imgOk ? (
         <img
           src="/patterns-hero.png"
