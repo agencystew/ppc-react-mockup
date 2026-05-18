@@ -1,11 +1,13 @@
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Sparkle, Bookmark, ArrowRight, ArrowsClockwise,
   MagnifyingGlass, Briefcase, ShieldCheck,
   FileText, ClockCounterClockwise, Target, UsersThree,
   Wrench, CalendarBlank, Flask, FolderSimple, Info,
-  GoogleLogo, CheckCircle,
+  GoogleLogo, CheckCircle, HandPalm, X,
 } from '@phosphor-icons/react';
+import { PATTERNS, type Pattern } from '../mock/patterns';
 
 /* /patterns — pixel-rebuilt 2026-05-18 to match Stewart's screenshot reference.
  *
@@ -37,20 +39,15 @@ export function Patterns() {
 
 function HeaderStrip() {
   return (
-    <header className="flex flex-wrap items-start justify-between gap-6">
-      <div>
-        <div className="flex items-center gap-3">
-          <h1 className="font-display text-[34px] font-bold leading-none tracking-display text-ppc-ink">
-            Patterns
-          </h1>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E3F4E0] px-2.5 py-1 text-[12px] font-medium text-[#2F7C49]">
-            <Flask size={13} weight="fill" />
-            Experimental
-          </span>
-        </div>
-        <p className="mt-2 max-w-[640px] text-[14px] leading-[1.45] text-ppc-text-muted">
-          Ideas PPC.io noticed across projects, data, and agent runs.
-        </p>
+    <header className="flex flex-wrap items-center justify-between gap-6">
+      <div className="flex items-center gap-3">
+        <h1 className="font-display text-[28px] font-bold leading-none tracking-h2 text-ppc-ink">
+          Patterns
+        </h1>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E3F4E0] px-2.5 py-1 text-[12px] font-medium text-[#2F7C49]">
+          <Flask size={13} weight="fill" />
+          Experimental
+        </span>
       </div>
 
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] text-ppc-text-muted">
@@ -90,22 +87,23 @@ function Hero() {
 function HeroCopy() {
   return (
     <div className="flex flex-col justify-center">
-      <h2 className="font-display text-[58px] font-black leading-[0.97] -tracking-[0.025em] text-ppc-ink xl:text-[64px]">
-        Ideas that{' '}
-        <span className="italic font-medium text-ppc-purple-500">rhyme</span>
-        <br />
-        across clients.
-      </h2>
-      <p className="mt-7 max-w-[480px] text-[16px] leading-[1.55] text-ppc-text-muted">
-        We scan your roster for repeated situations, shared mechanisms, and
-        strategic threads worth exploring.
-      </p>
-      <div className="mt-7 inline-flex items-center gap-2 text-[13px] text-ppc-text-muted">
-        <span className="grid h-5 w-5 place-items-center rounded-full bg-white text-ppc-purple-700">
-          <UsersThree size={12} weight="fill" />
+      <h2 className="font-display text-[60px] font-black leading-[0.97] -tracking-[0.025em] text-ppc-ink xl:text-[68px]">
+        Your Agency Has{' '}
+        <span className="italic font-medium text-ppc-purple-500">
+          Patterns
         </span>
-        Human judgment recommended.
-      </div>
+        .
+      </h2>
+      <p className="mt-8 inline-flex max-w-[520px] items-start gap-3 text-[19px] leading-[1.4] text-ppc-ink/80">
+        <span className="mt-[3px] grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#FBE9C9] text-[#8B6312]">
+          <HandPalm size={15} weight="fill" />
+        </span>
+        <span>
+          This is an{' '}
+          <span className="font-semibold text-ppc-ink">experimental feature</span>
+          {' '}— strong human judgement required.
+        </span>
+      </p>
     </div>
   );
 }
@@ -147,7 +145,7 @@ function LensDiagram() {
   const outputY = [120, 248, 376];              // 3 outputs
 
   return (
-    <div className="relative h-[500px] w-full">
+    <div className="relative mx-auto h-[500px] w-full max-w-[600px] justify-self-end">
       {/* connecting lines + lens — SVG sits underneath the chips */}
       <svg
         viewBox="0 0 720 500"
@@ -219,7 +217,7 @@ function LensDiagram() {
       />
 
       {/* chips — two flex columns separated by the lens gutter */}
-      <div className="relative z-[1] grid h-full grid-cols-[minmax(0,1fr)_56px_minmax(0,1fr)] items-center gap-0">
+      <div className="relative z-[1] grid h-full grid-cols-[210px_60px_minmax(0,1fr)] items-center gap-0">
         <div className="flex h-full flex-col justify-between py-1.5">
           {SOURCE_CHIPS.map((c) => <SourceChipRow key={c.label} {...c} />)}
         </div>
@@ -372,79 +370,41 @@ function StatsCard() {
 type Status = 'New' | 'Seen again' | 'Developing';
 type Family = 'Mechanism' | 'Cohort' | 'Operator';
 
-interface TopPattern {
-  id: string;
+interface PatternViz {
+  status: Status;
+  family: Family;
   icon: typeof MagnifyingGlass;
   iconBg: string;
   iconColor: string;
-  status: Status;
-  family: Family;
-  clients: number;
-  initials: string[];
-  extraClients: number; // 0 hides the +N pill
-  title: string;
-  body: string;
   linked: string[];
 }
 
-const TOP_PATTERNS: TopPattern[] = [
-  {
-    id: 'tp-01',
-    icon: MagnifyingGlass,
-    iconBg: 'bg-[#F4ECE0]',
-    iconColor: 'text-[#8A6F3D]',
-    status: 'New',
-    family: 'Mechanism',
-    clients: 8,
-    initials: ['D', 'F', 'B', 'LC'],
-    extraClients: 4,
-    title: 'Research intent leakage after PMAX expansion',
-    body: 'PMAX is matching research-stage queries and spending on "how to" terms and weaker CVR.',
-    linked: ['Query drift', 'Campaign expansion', 'Weaker CVR'],
+// Visual classification overlay for the top 4 patterns. Real prose lives in
+// mock/patterns.ts (the source of truth shared with the dashboard strip).
+const PATTERN_VIZ: Record<string, PatternViz> = {
+  'p-01': {
+    status: 'New', family: 'Mechanism',
+    icon: MagnifyingGlass, iconBg: 'bg-[#F4ECE0]', iconColor: 'text-[#8A6F3D]',
+    linked: ['Auction shift', 'CPC dip', 'Brand defense'],
   },
-  {
-    id: 'tp-02',
-    icon: Target,
-    iconBg: 'bg-[#DBF1E0]',
-    iconColor: 'text-[#2F7C49]',
-    status: 'Seen again',
-    family: 'Mechanism',
-    clients: 8,
-    initials: ['BC', 'LS', 'PC', 'BA'],
-    extraClients: 4,
-    title: 'Trust proof gaps across high-ticket lead gen',
-    body: 'Landing pages lack strong proof above the fold, impacting conversion rates.',
-    linked: ['Buyer risk', 'Proof gap', 'Paid intent mismatch'],
+  'p-02': {
+    status: 'New', family: 'Cohort',
+    icon: CalendarBlank, iconBg: 'bg-[#DBF1E0]', iconColor: 'text-[#2F7C49]',
+    linked: ['Weekend daypart', 'Spend curve', 'CPA divergence'],
   },
-  {
-    id: 'tp-03',
-    icon: Wrench,
-    iconBg: 'bg-[#FBE3D6]',
-    iconColor: 'text-[#A05A2A]',
-    status: 'Developing',
-    family: 'Operator',
-    clients: 11,
-    initials: ['TH', 'DB', 'AB', 'WS'],
-    extraClients: 7,
-    title: 'Same tracking fix keeps reappearing in audits',
-    body: 'The same conversion tracking issue is flagged across accounts and audit runs.',
-    linked: ['Repeated audit finding', 'Attribution gap'],
+  'p-03': {
+    status: 'Seen again', family: 'Mechanism',
+    icon: Target, iconBg: 'bg-[#ECE6FD]', iconColor: 'text-ppc-purple-700',
+    linked: ['PMAX intent drift', 'Shared negatives', 'Cross-account'],
   },
-  {
-    id: 'tp-04',
-    icon: CalendarBlank,
-    iconBg: 'bg-[#DBF1E0]',
-    iconColor: 'text-[#2F7C49]',
-    status: 'New',
-    family: 'Cohort',
-    clients: 3,
-    initials: ['HF', 'SP', 'KB'],
-    extraClients: 0,
-    title: 'Weekend inventory is quietly overfunded',
-    body: 'Weekend spend is high while CVR is low compared to weekdays.',
-    linked: ['Low weekend CVR', 'Spend drift'],
+  'p-04': {
+    status: 'Developing', family: 'Operator',
+    icon: Wrench, iconBg: 'bg-[#FBE3D6]', iconColor: 'text-[#A05A2A]',
+    linked: ['Vertical erosion', 'Brand-search IS', 'Same-week signal'],
   },
-];
+};
+
+const TOP_PATTERN_IDS = ['p-01', 'p-02', 'p-03', 'p-04'];
 
 const STATUS_STYLES: Record<Status, string> = {
   'New':         'bg-[#FFEBC4] text-[#9C6B0A]',
@@ -458,7 +418,24 @@ const FAMILY_STYLES: Record<Family, string> = {
   Operator:  'bg-[#FBEAD0] text-[#A06B19]',
 };
 
+function initialsOf(name: string): string {
+  return name
+    .replace(/[—–-]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w[0])
+    .join('')
+    .slice(0, 3)
+    .toUpperCase();
+}
+
 function TopPatterns() {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const topPatterns = TOP_PATTERN_IDS
+    .map((id) => PATTERNS.find((p) => p.id === id))
+    .filter((p): p is Pattern => p != null);
+
   return (
     <section>
       <div className="flex items-start justify-between">
@@ -473,55 +450,112 @@ function TopPatterns() {
             View all patterns
             <ArrowRight size={13} weight="bold" />
           </Link>
-          <div className="text-[11.5px] text-ppc-text-faint">50 total</div>
+          <div className="text-[11.5px] text-ppc-text-faint">{PATTERNS.length} total</div>
         </div>
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {TOP_PATTERNS.map((p) => <PatternCard key={p.id} {...p} />)}
+        {topPatterns.map((pattern) => (
+          <PatternCard
+            key={pattern.id}
+            pattern={pattern}
+            expanded={expandedId === pattern.id}
+            onToggle={() => setExpandedId(expandedId === pattern.id ? null : pattern.id)}
+          />
+        ))}
       </div>
     </section>
   );
 }
 
-function PatternCard(p: TopPattern) {
+interface PatternCardProps {
+  pattern: Pattern;
+  expanded: boolean;
+  onToggle: () => void;
+}
+
+function PatternCard({ pattern, expanded, onToggle }: PatternCardProps) {
+  const viz = PATTERN_VIZ[pattern.id];
+  if (!viz) return null;
+
+  const initials = pattern.affected.slice(0, 4).map((a) => initialsOf(a.name));
+  const extraClients = Math.max(0, pattern.affected.length - 4);
+  const Icon = viz.icon;
+
   return (
-    <article className="rounded-[14px] border border-ppc-card-border bg-white p-5">
+    <article
+      onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      className={`group cursor-pointer rounded-[14px] border bg-white p-5 transition-all hover:border-ppc-purple-300 ${
+        expanded
+          ? 'border-ppc-purple-400 shadow-[0_2px_28px_rgba(127,90,240,0.10)] lg:col-span-2'
+          : 'border-ppc-card-border'
+      }`}
+    >
       {/* top meta row */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-3">
-          <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-full ${p.iconBg} ${p.iconColor}`}>
-            <p.icon size={20} weight="duotone" />
+          <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-full ${viz.iconBg} ${viz.iconColor}`}>
+            <Icon size={20} weight="duotone" />
           </span>
           <div className="flex flex-wrap items-center gap-1.5 pt-1.5">
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-medium ${STATUS_STYLES[p.status]}`}>
-              {p.status}
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-medium ${STATUS_STYLES[viz.status]}`}>
+              {viz.status}
             </span>
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-medium ${FAMILY_STYLES[p.family]}`}>
-              {p.family}
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-medium ${FAMILY_STYLES[viz.family]}`}>
+              {viz.family}
             </span>
+            {pattern.spotted && (
+              <span className="text-[11px] text-ppc-text-faint">
+                {pattern.spotted}
+              </span>
+            )}
           </div>
         </div>
 
         <div className="flex shrink-0 flex-col items-end gap-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-[12px] text-ppc-text-muted">{p.clients} clients</span>
-            <button type="button" className="text-ppc-text-faint hover:text-ppc-purple-500" aria-label="Save pattern">
+            <span className="text-[12px] text-ppc-text-muted">
+              {pattern.affected.length} {pattern.affected.length === 1 ? 'account' : 'accounts'}
+            </span>
+            <button
+              type="button"
+              className="text-ppc-text-faint hover:text-ppc-purple-500"
+              aria-label="Save pattern"
+              onClick={(e) => e.stopPropagation()}
+            >
               <Bookmark size={16} weight="regular" />
             </button>
+            {expanded && (
+              <button
+                type="button"
+                className="ml-1 text-ppc-text-faint hover:text-ppc-ink"
+                aria-label="Collapse pattern"
+                onClick={(e) => { e.stopPropagation(); onToggle(); }}
+              >
+                <X size={14} weight="bold" />
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-1">
-            {p.initials.map((init) => (
+            {initials.map((init, i) => (
               <span
-                key={init}
+                key={`${init}-${i}`}
                 className="grid h-[22px] min-w-[22px] place-items-center rounded-md bg-[#F4F0FB] px-1.5 text-[10px] font-semibold text-ppc-purple-800"
               >
                 {init}
               </span>
             ))}
-            {p.extraClients > 0 && (
+            {extraClients > 0 && (
               <span className="grid h-[22px] min-w-[28px] place-items-center rounded-md bg-[#F4F0FB] px-1.5 text-[10px] font-semibold text-ppc-purple-800">
-                +{p.extraClients}
+                +{extraClients}
               </span>
             )}
           </div>
@@ -530,35 +564,124 @@ function PatternCard(p: TopPattern) {
 
       {/* title + body */}
       <h4 className="mt-4 text-[16px] font-bold leading-snug text-ppc-ink">
-        {p.title}
+        {pattern.headline}
       </h4>
-      <p className="mt-1.5 text-[13.5px] leading-[1.5] text-ppc-text-muted">
-        {p.body}
+      <p
+        className={`mt-1.5 text-[13.5px] leading-[1.5] text-ppc-text-muted ${
+          expanded ? '' : 'line-clamp-2'
+        }`}
+      >
+        {pattern.whatWeFound}
       </p>
 
-      {/* linked + sources */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-y-2 border-t border-[#EDE8F5] pt-3">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 text-[11.5px] text-ppc-text-faint">Why linked</span>
-          {p.linked.map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex items-center rounded-md bg-[#F4F0FB] px-2 py-1 text-[11px] font-medium text-ppc-purple-800"
-            >
-              {tag}
-            </span>
-          ))}
+      {/* linked + sources — collapsed row */}
+      {!expanded && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-y-2 border-t border-[#EDE8F5] pt-3">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 text-[11.5px] text-ppc-text-faint">Why linked</span>
+            {viz.linked.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center rounded-md bg-[#F4F0FB] px-2 py-1 text-[11px] font-medium text-ppc-purple-800"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="mr-1 text-[11.5px] text-ppc-text-faint">Sources</span>
+            <SourceIcon Icon={Briefcase} tint="green" />
+            <SourceIcon Icon={GoogleLogo} tint="purple" />
+            <SourceIcon Icon={FileText} tint="purple" />
+            <SourceIcon Icon={ShieldCheck} tint="green" />
+            <SourceIcon Icon={ClockCounterClockwise} tint="purple" />
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="mr-1 text-[11.5px] text-ppc-text-faint">Sources</span>
-          <SourceIcon Icon={Briefcase} tint="green" />
-          <SourceIcon Icon={GoogleLogo} tint="purple" />
-          <SourceIcon Icon={FileText} tint="purple" />
-          <SourceIcon Icon={ShieldCheck} tint="green" />
-          <SourceIcon Icon={ClockCounterClockwise} tint="purple" />
+      )}
+
+      {/* expanded detail */}
+      {expanded && <ExpandedDetail pattern={pattern} viz={viz} />}
+    </article>
+  );
+}
+
+function ExpandedDetail({ pattern, viz }: { pattern: Pattern; viz: PatternViz }) {
+  return (
+    <div className="mt-5 border-t border-[#EDE8F5] pt-5">
+      <div className="grid grid-cols-1 gap-x-8 gap-y-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <div>
+          <SectionLabel>Why it matters</SectionLabel>
+          <p className="mt-1.5 text-[14px] leading-[1.55] text-ppc-ink/85">
+            {pattern.whyItMatters}
+          </p>
+
+          <SectionLabel className="mt-5">Recommended action</SectionLabel>
+          <p className="mt-1.5 text-[14px] leading-[1.55] text-ppc-ink/85">
+            {pattern.recommendedAction}
+          </p>
+          <button
+            type="button"
+            onClick={(e) => e.stopPropagation()}
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-grad-cta px-4 py-2 text-[13px] font-medium text-white shadow-[0_2px_10px_rgba(83,74,183,0.30)] hover:opacity-95"
+          >
+            {pattern.recommendedActionCta}
+            <ArrowRight size={13} weight="bold" />
+          </button>
+        </div>
+
+        <div className="space-y-5">
+          <div>
+            <SectionLabel>Affected accounts</SectionLabel>
+            <ul className="mt-2 space-y-1.5">
+              {pattern.affected.map((a) => (
+                <li key={a.id} className="flex items-center gap-2 text-[13px] text-ppc-ink">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-[#F4F0FB] text-[10px] font-semibold text-ppc-purple-800">
+                    {initialsOf(a.name)}
+                  </span>
+                  {a.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <SectionLabel>Driven by</SectionLabel>
+            <ul className="mt-2 space-y-1.5">
+              {pattern.drivenBy.map((d) => (
+                <li key={d.agentName} className="flex items-center gap-2 text-[13px] text-ppc-ink">
+                  <span className="text-[14px]">{d.agentEmoji}</span>
+                  <span className="font-medium">{d.agentName}</span>
+                  <span className="text-ppc-text-muted">
+                    · {d.findingsCount} finding{d.findingsCount === 1 ? '' : 's'}
+                  </span>
+                  {d.modifier && <span className="text-ppc-text-faint">· {d.modifier}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 text-[11.5px] text-ppc-text-faint">Why linked</span>
+            {viz.linked.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center rounded-md bg-[#F4F0FB] px-2 py-1 text-[11px] font-medium text-ppc-purple-800"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
-    </article>
+    </div>
+  );
+}
+
+function SectionLabel({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={`text-[11px] font-semibold tracking-wide text-ppc-text-faint ${className}`}>
+      {children}
+    </div>
   );
 }
 
