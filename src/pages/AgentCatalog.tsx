@@ -583,14 +583,14 @@ function AgentGridCard({
     >
       {highImpact && (
         <span
-          className="absolute -top-2 left-5 inline-flex items-center gap-1 rounded-full px-2.5 py-[4px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-white"
+          className="absolute -top-2.5 left-5 inline-flex items-center gap-1.5 rounded-full px-3 py-[5px] text-[12px] font-bold tracking-[-0.008em] text-white"
           style={{
             background: 'linear-gradient(95deg, #F25C9E 0%, #E0418A 100%)',
             boxShadow: '0 6px 16px -8px rgba(232,113,170,0.65)',
           }}
         >
-          <Fire size={10} weight="fill" />
-          High impact
+          <Fire size={12} weight="fill" />
+          Top pick
         </span>
       )}
 
@@ -626,7 +626,7 @@ function AgentGridCard({
       <div className="mt-3.5 flex items-center gap-1.5">
         {tagLabel && tagPalette && (
           <span
-            className="inline-flex items-center rounded-[5px] px-2 py-[3px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.10em]"
+            className="inline-flex items-center rounded-full px-2.5 py-[3px] text-[11.5px] font-semibold tracking-[-0.005em]"
             style={{ background: tagPalette.bg, color: tagPalette.fg }}
           >
             {tagLabel}
