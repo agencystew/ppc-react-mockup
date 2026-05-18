@@ -453,10 +453,7 @@ function SearchRow({ collapsed }: { collapsed: boolean }) {
           placeholder="Search..."
           className="w-full cursor-pointer rounded-[10px] border border-white/[0.07] bg-white/[0.035] py-[10px] pl-[34px] pr-14 text-[14px] text-white outline-none placeholder:text-white/55 transition-colors hover:border-white/[0.12] hover:bg-white/[0.05]"
         />
-        <kbd
-          className="pointer-events-none absolute right-2.5 top-1/2 flex h-[20px] -translate-y-1/2 items-center rounded-[5px] border border-white/[0.10] bg-white/[0.04] px-[6px] font-mono text-[11px] leading-none text-white/70"
-          style={{ fontFamily: '"Courier New", ui-monospace, Menlo, monospace' }}
-        >
+        <kbd className="pointer-events-none absolute right-2.5 top-1/2 flex h-[20px] -translate-y-1/2 items-center rounded-[5px] border border-white/[0.10] bg-white/[0.04] px-[6px] text-[11px] font-semibold leading-none text-white/70">
           ⌘K
         </kbd>
       </div>
