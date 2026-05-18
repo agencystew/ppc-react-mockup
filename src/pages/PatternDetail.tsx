@@ -6,7 +6,7 @@ import {
   ChatCircleText, ChatCircle, CheckCircle, DotsThree,
   FileText, Lightbulb, MagnifyingGlass, Question,
   Sparkle, TrendUp, UsersThree, Wrench, ShieldCheck,
-  CurrencyDollar, Gauge, GoogleLogo, ClockCounterClockwise,
+  CurrencyDollar, Gauge, GoogleLogo,
 } from '@phosphor-icons/react';
 import { PATTERNS, type Pattern } from '../mock/patterns';
 import {
