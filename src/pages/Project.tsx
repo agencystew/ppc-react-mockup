@@ -375,7 +375,7 @@ function ProjectTabBar({
 function OverviewView({ projectId }: { projectId: string }) {
   return (
     <>
-      <TodaysBriefCard findings={FINDINGS} />
+      <TodaysBriefCard findings={FINDINGS} projectId={projectId} />
 
       <SectionHeading
         title="Performance"
@@ -435,7 +435,7 @@ function OverviewView({ projectId }: { projectId: string }) {
  * are nested inside the same card on a low-opacity inner surface — they
  * belong to the brief, not a separate block.
  */
-function TodaysBriefCard({ findings }: { findings: Finding[] }) {
+function TodaysBriefCard({ findings, projectId }: { findings: Finding[]; projectId: string }) {
   // Wave shape (24 control points, mountain rising right).
   const wavePts = [
     0.62, 0.58, 0.54, 0.51, 0.48, 0.46, 0.42, 0.38,
@@ -512,13 +512,14 @@ function TodaysBriefCard({ findings }: { findings: Finding[] }) {
             recoverable spend across 47 keywords and 3 campaigns.
           </p>
 
-          <button
+          <Link
+            to={`/projects/${projectId}/brief`}
             className="mt-5 inline-flex items-center gap-2 rounded-[10px] px-4 py-2.5 text-[13.5px] font-semibold text-white shadow-[0_1px_2px_rgba(124,109,255,0.5),0_12px_28px_-10px_rgba(124,109,255,0.65)] transition-transform hover:-translate-y-px"
             style={{ background: C.purple }}
           >
-            See all findings
+            Open full brief
             <ArrowRight size={13} weight="bold" />
-          </button>
+          </Link>
         </div>
 
         {/* Wave chart — decoration only */}

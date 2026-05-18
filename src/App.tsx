@@ -10,6 +10,7 @@ import { AgentResults } from './pages/AgentResults';
 import { Reports } from './pages/Reports';
 import { Projects } from './pages/Projects';
 import { ProjectPage } from './pages/Project';
+import { ProjectBriefPage } from './pages/ProjectBrief';
 import { Chat } from './pages/Chat';
 import { Patterns } from './pages/Patterns';
 
@@ -71,6 +72,7 @@ export default function App() {
 
         <Route path="projects" element={<Projects />} />
         <Route path="projects/:id" element={<ProjectPage />} />
+        <Route path="projects/:id/brief" element={<ProjectBriefPage />} />
 
         {/* Project-scoped surfaces (URL = scope). Same components, two URL shapes:
            the ScopePill + AgentDetail launch panel pre-fill key off useParams.id. */}
