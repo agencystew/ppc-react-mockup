@@ -44,8 +44,8 @@ function DarkHero() {
       <PerspectiveGrid />
       <BloomGlow />
 
-      <div className="relative z-[2] px-6 pb-7 pt-7 lg:px-12 lg:pb-9 lg:pt-9">
-        <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-12">
+      <div className="relative z-[2] px-6 pb-6 pt-6 lg:px-10 lg:pb-7 lg:pt-7">
+        <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-10">
           <HeroCopy />
           <HeroIllustration />
         </div>
@@ -165,7 +165,7 @@ function HeroCopy() {
 
   return (
     <div>
-      <h1 className="font-display text-[72px] font-black leading-[0.96] -tracking-[0.03em] text-white xl:text-[88px]">
+      <h1 className="font-display text-[48px] font-black leading-[0.98] -tracking-[0.025em] text-white lg:text-[56px] xl:text-[64px]">
         Patterns
         <br />
         <span
@@ -179,8 +179,8 @@ function HeroCopy() {
         </span>
       </h1>
 
-      <div className="mt-5 flex max-w-[540px] items-start gap-2.5">
-        <p className="text-[16px] leading-[1.5] text-white/65">
+      <div className="mt-4 flex max-w-[540px] items-start gap-2.5">
+        <p className="text-[15.5px] leading-[1.5] text-white/65">
           Experimental reads PPC.io found across accounts, agents, and source data.
         </p>
         <div ref={popRef} className="relative shrink-0">
@@ -222,7 +222,7 @@ function RunSweepLauncher() {
   }, [open]);
 
   return (
-    <div ref={ref} className="relative mt-6 inline-flex">
+    <div ref={ref} className="relative mt-5 inline-flex">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -378,8 +378,9 @@ const SOURCES: SignalSource[] = [
 
 function SignalFlowPanel() {
   return (
-    <div className="mt-9 overflow-hidden rounded-[22px] border border-white/[0.07] bg-white/[0.025] p-6 backdrop-blur-sm lg:mt-10 lg:p-8">
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)_minmax(0,400px)] lg:items-center lg:gap-10">
+    <div className="relative mt-6 overflow-hidden rounded-[18px] border border-white/[0.07] bg-white/[0.025] px-5 py-4 backdrop-blur-sm lg:mt-7 lg:px-6 lg:py-5">
+      <style>{FLOW_KEYFRAMES}</style>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,240px)_minmax(0,1fr)_minmax(0,360px)] lg:items-center lg:gap-8">
         <SourceColumn />
         <FlowCanvas />
         <OutputColumn />
@@ -388,21 +389,43 @@ function SignalFlowPanel() {
   );
 }
 
+const FLOW_KEYFRAMES = `
+@keyframes ppc-flow-dash {
+  to { stroke-dashoffset: -16; }
+}
+@keyframes ppc-pulse-dot {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(0.78); }
+}
+@keyframes ppc-lens-breath {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1; }
+}
+@keyframes ppc-lens-glow {
+  0%, 100% { transform: scale(1); opacity: 0.95; }
+  50%      { transform: scale(1.08); opacity: 0.75; }
+}
+@keyframes ppc-card-glow {
+  0%, 100% { box-shadow: 0 26px 60px -22px rgba(127,90,240,0.40), 0 4px 14px -4px rgba(0,0,0,0.30); }
+  50%      { box-shadow: 0 32px 70px -22px rgba(127,90,240,0.58), 0 4px 14px -4px rgba(0,0,0,0.30); }
+}
+`;
+
 function SourceColumn() {
   return (
-    <ul className="flex flex-col gap-2.5 self-stretch">
+    <ul className="flex flex-col gap-2 self-stretch">
       {SOURCES.map(({ icon: Icon, label, iconColor, iconBg }) => (
         <li
           key={label}
-          className="flex items-center gap-3.5 rounded-[14px] border border-white/[0.10] bg-white/[0.045] px-4 py-3 backdrop-blur-sm transition-colors hover:border-white/[0.18] hover:bg-white/[0.07]"
+          className="flex items-center gap-3 rounded-[12px] border border-white/[0.10] bg-white/[0.045] px-3 py-2 backdrop-blur-sm transition-colors hover:border-white/[0.18] hover:bg-white/[0.07]"
         >
           <span
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full ring-1 ring-white/15"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full ring-1 ring-white/15"
             style={{ background: iconBg, color: iconColor }}
           >
-            <Icon size={20} weight="duotone" />
+            <Icon size={16} weight="duotone" />
           </span>
-          <div className="text-[14.5px] font-bold leading-tight text-white">
+          <div className="text-[13.5px] font-bold leading-tight text-white">
             {label}
           </div>
         </li>
@@ -422,35 +445,32 @@ function OutputColumn() {
 function StrategicPatternCard() {
   return (
     <div
-      className="relative w-full overflow-hidden rounded-[22px] bg-white p-6 lg:p-7"
-      style={{
-        boxShadow:
-          '0 30px 80px -20px rgba(127,90,240,0.45), 0 4px 18px -4px rgba(0,0,0,0.35)',
-      }}
+      className="relative w-full overflow-hidden rounded-[18px] bg-white p-5"
+      style={{ animation: 'ppc-card-glow 3.4s ease-in-out infinite' }}
     >
       {/* faint corner bloom inside the card so it doesn't feel flat */}
-      <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-ppc-purple-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-14 -top-14 h-36 w-36 rounded-full bg-ppc-purple-500/10 blur-3xl" />
 
       <div className="relative flex flex-wrap items-center gap-1.5">
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#F4F1FA] px-2.5 py-1 text-[11.5px] font-semibold text-ppc-purple-800">
+        <span className="inline-flex items-center gap-1 rounded-full bg-[#F4F1FA] px-2 py-0.5 text-[11px] font-semibold text-ppc-purple-800">
           <span aria-hidden>💡</span> Insight
         </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#E7F5EA] px-2.5 py-1 text-[11.5px] font-semibold text-[#1F6E3D]">
+        <span className="inline-flex items-center gap-1 rounded-full bg-[#E7F5EA] px-2 py-0.5 text-[11px] font-semibold text-[#1F6E3D]">
           <span aria-hidden>💲</span> Revenue lift
         </span>
       </div>
 
-      <div className="relative mt-4 flex items-start gap-3.5">
-        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#F4F0FB] text-ppc-purple-700">
-          <Lightbulb size={22} weight="duotone" />
+      <div className="relative mt-3 flex items-start gap-3">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#F4F0FB] text-ppc-purple-700">
+          <Lightbulb size={20} weight="duotone" />
         </span>
         <div className="min-w-0">
-          <h4 className="text-[22px] font-bold leading-tight tracking-h2 text-ppc-ink">
+          <h4 className="text-[18px] font-bold leading-tight tracking-h2 text-ppc-ink">
             Strategic Pattern
           </h4>
-          <p className="mt-1.5 text-[13.5px] leading-[1.55] text-ppc-text-muted">
-            The dot-connecting moment — where signals across accounts, agents,
-            and history line up into one move worth making.
+          <p className="mt-1 text-[12.5px] leading-[1.5] text-ppc-text-muted">
+            The dot-connecting moment — where signals line up into one move
+            worth making.
           </p>
         </div>
       </div>
@@ -505,111 +525,153 @@ const DOTS: Array<[number, number, number, DotColor]> = [
 ];
 
 // Source row y-positions in viewBox space — match the SourceColumn rhythm.
-// 4 rows distributed evenly across the 248 viewBox.
-const SOURCE_Y = [34, 100, 166, 226];
+// 4 rows distributed evenly across the 180-tall viewBox.
+const SOURCE_Y = [24, 76, 128, 178];
 // One output centred vertically — the Strategic Pattern card.
-const OUTPUT_Y = [124];
+const OUTPUT_Y = [100];
 
 function FlowCanvas() {
-  const LENS_CX = 370;
-  const LENS_CY = 120;
+  const LENS_CX = 360;
+  const LENS_CY = 100;
+
+  // Pre-computed source→lens path strings — reused for both the visible
+  // curve stroke AND the animateMotion paths for the traveling particles.
+  const inPaths = SOURCE_Y.map(
+    (y) => `M -4 ${y} C 140 ${y}, 240 ${LENS_CY}, ${LENS_CX - 20} ${LENS_CY}`,
+  );
+  const outPath = `M ${LENS_CX + 20} ${LENS_CY} C 440 ${LENS_CY}, 480 ${OUTPUT_Y[0]}, 524 ${OUTPUT_Y[0]}`;
+
   return (
-    <div className="relative mx-auto h-full min-h-[220px] w-full">
+    <div className="relative mx-auto h-full min-h-[200px] w-full">
       <svg
-        viewBox="0 0 520 248"
+        viewBox="0 0 520 200"
         preserveAspectRatio="xMidYMid meet"
         className="absolute inset-0 h-full w-full"
         role="img"
-        aria-label="Signal flow from six live sources into three surfaced patterns"
+        aria-label="Animated signal flow from four live sources through the AI lens into one strategic pattern"
       >
         <defs>
           <radialGradient id="lensCore" cx="50%" cy="50%" r="50%">
-            <stop offset="0%"   stopColor="#FFFFFF" stopOpacity="0.85" />
-            <stop offset="35%"  stopColor="#D6CBFA" stopOpacity="0.65" />
-            <stop offset="65%"  stopColor="#7F5AF0" stopOpacity="0.35" />
+            <stop offset="0%"   stopColor="#FFFFFF" stopOpacity="0.95" />
+            <stop offset="35%"  stopColor="#D6CBFA" stopOpacity="0.70" />
+            <stop offset="65%"  stopColor="#7F5AF0" stopOpacity="0.40" />
             <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0"    />
           </radialGradient>
-          <linearGradient id="lineIn" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"   stopColor="#7F5AF0" stopOpacity="0"    />
-            <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0.55" />
-          </linearGradient>
-          <linearGradient id="lineOut" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"   stopColor="#7F5AF0" stopOpacity="0.55" />
+          <radialGradient id="particleGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stopColor="#FFFFFF" stopOpacity="0.95" />
+            <stop offset="60%"  stopColor="#A88CFF" stopOpacity="0.85" />
             <stop offset="100%" stopColor="#7F5AF0" stopOpacity="0"    />
-          </linearGradient>
+          </radialGradient>
         </defs>
 
-        {/* source → lens curves */}
-        {SOURCE_Y.map((y, i) => (
+        {/* source → lens curves — animated flowing dashes */}
+        {inPaths.map((d, i) => (
           <path
             key={`in-${i}`}
-            d={`M -4 ${y} C 140 ${y}, 260 ${LENS_CY}, ${LENS_CX - 22} ${LENS_CY}`}
-            stroke="url(#lineIn)"
-            strokeWidth="1"
+            d={d}
+            stroke="#A88CFF"
+            strokeOpacity={0.45}
+            strokeWidth={1}
             fill="none"
+            strokeDasharray="3 5"
+            style={{
+              animation: `ppc-flow-dash ${2.2 + i * 0.25}s linear infinite`,
+            }}
           />
         ))}
 
-        {/* lens → output curves */}
-        {OUTPUT_Y.map((y, i) => (
-          <path
-            key={`out-${i}`}
-            d={`M ${LENS_CX + 22} ${LENS_CY} C 440 ${LENS_CY}, 480 ${y}, 524 ${y}`}
-            stroke="url(#lineOut)"
-            strokeWidth="1"
-            fill="none"
-          />
-        ))}
+        {/* lens → output curve — animated flowing dashes */}
+        <path
+          d={outPath}
+          stroke="#A88CFF"
+          strokeOpacity={0.55}
+          strokeWidth={1.25}
+          fill="none"
+          strokeDasharray="3 5"
+          style={{ animation: 'ppc-flow-dash 1.9s linear infinite' }}
+        />
 
-        {/* lens — soft glow + ring + sparkle marks */}
-        <circle cx={LENS_CX} cy={LENS_CY} r={48} fill="url(#lensCore)" />
+        {/* lens — soft glow that breathes */}
+        <g style={{ transformOrigin: `${LENS_CX}px ${LENS_CY}px`, animation: 'ppc-lens-glow 3.4s ease-in-out infinite' }}>
+          <circle cx={LENS_CX} cy={LENS_CY} r={42} fill="url(#lensCore)" />
+        </g>
         <circle
           cx={LENS_CX}
           cy={LENS_CY}
-          r={28}
+          r={24}
           fill="none"
           stroke="#A88CFF"
-          strokeOpacity={0.4}
+          strokeOpacity={0.45}
           strokeWidth={1}
+          style={{ animation: 'ppc-lens-breath 3.4s ease-in-out infinite' }}
         />
         <circle
           cx={LENS_CX}
           cy={LENS_CY}
-          r={42}
+          r={36}
           fill="none"
           stroke="#A88CFF"
-          strokeOpacity={0.18}
+          strokeOpacity={0.22}
           strokeWidth={1}
           strokeDasharray="2 3"
         />
         {/* sparkle glyph in the lens */}
         <path
-          d={`M ${LENS_CX} ${LENS_CY - 14} L ${LENS_CX + 3} ${LENS_CY - 3} L ${LENS_CX + 14} ${LENS_CY} L ${LENS_CX + 3} ${LENS_CY + 3} L ${LENS_CX} ${LENS_CY + 14} L ${LENS_CX - 3} ${LENS_CY + 3} L ${LENS_CX - 14} ${LENS_CY} L ${LENS_CX - 3} ${LENS_CY - 3} Z`}
+          d={`M ${LENS_CX} ${LENS_CY - 12} L ${LENS_CX + 3} ${LENS_CY - 3} L ${LENS_CX + 12} ${LENS_CY} L ${LENS_CX + 3} ${LENS_CY + 3} L ${LENS_CX} ${LENS_CY + 12} L ${LENS_CX - 3} ${LENS_CY + 3} L ${LENS_CX - 12} ${LENS_CY} L ${LENS_CX - 3} ${LENS_CY - 3} Z`}
           fill="#FFFFFF"
           opacity={0.95}
         />
-        <path
-          d={`M ${LENS_CX + 12} ${LENS_CY - 12} L ${LENS_CX + 14} ${LENS_CY - 8} L ${LENS_CX + 18} ${LENS_CY - 6} L ${LENS_CX + 14} ${LENS_CY - 4} L ${LENS_CX + 12} ${LENS_CY} L ${LENS_CX + 10} ${LENS_CY - 4} L ${LENS_CX + 6} ${LENS_CY - 6} L ${LENS_CX + 10} ${LENS_CY - 8} Z`}
-          fill="#FFFFFF"
-          opacity={0.75}
-        />
-        <path
-          d={`M ${LENS_CX - 14} ${LENS_CY + 14} L ${LENS_CX - 12} ${LENS_CY + 17} L ${LENS_CX - 9} ${LENS_CY + 19} L ${LENS_CX - 12} ${LENS_CY + 21} L ${LENS_CX - 14} ${LENS_CY + 24} L ${LENS_CX - 16} ${LENS_CY + 21} L ${LENS_CX - 19} ${LENS_CY + 19} L ${LENS_CX - 16} ${LENS_CY + 17} Z`}
-          fill="#FFFFFF"
-          opacity={0.6}
-        />
 
-        {/* the dot cloud */}
-        {DOTS.map(([x, y, r, color], i) => (
-          <circle
-            key={`d-${i}`}
-            cx={x}
-            cy={y}
-            r={r}
-            fill={DOT_FILL[color]}
-            opacity={color === 'gray' ? 0.5 : 0.85}
-          />
+        {/* static dot cloud — each dot has a subtle out-of-phase pulse */}
+        {DOTS.map(([x, y, r, color], i) => {
+          // Scale dot y from old 248-tall layout into the new 200-tall canvas.
+          const yScaled = Math.round((y / 248) * 200);
+          return (
+            <circle
+              key={`d-${i}`}
+              cx={x}
+              cy={yScaled}
+              r={r}
+              fill={DOT_FILL[color]}
+              opacity={color === 'gray' ? 0.45 : 0.8}
+              style={{
+                transformBox: 'fill-box',
+                transformOrigin: 'center',
+                animation: `ppc-pulse-dot ${2 + (i % 5) * 0.4}s ease-in-out ${(i % 7) * 0.18}s infinite`,
+              }}
+            />
+          );
+        })}
+
+        {/* traveling particles along each source→lens curve */}
+        {inPaths.map((d, i) => (
+          <circle key={`p-${i}-a`} r={2.6} fill="url(#particleGrad)">
+            <animateMotion
+              dur={`${2.4 + i * 0.4}s`}
+              repeatCount="indefinite"
+              path={d}
+              begin={`${i * 0.55}s`}
+            />
+          </circle>
         ))}
+        {inPaths.map((d, i) => (
+          <circle key={`p-${i}-b`} r={2} fill="url(#particleGrad)" opacity={0.7}>
+            <animateMotion
+              dur={`${2.4 + i * 0.4}s`}
+              repeatCount="indefinite"
+              path={d}
+              begin={`${i * 0.55 + 1.1}s`}
+            />
+          </circle>
+        ))}
+
+        {/* traveling particles along the output curve */}
+        <circle r={3} fill="url(#particleGrad)">
+          <animateMotion dur="2.2s" repeatCount="indefinite" path={outPath} />
+        </circle>
+        <circle r={2.2} fill="url(#particleGrad)" opacity={0.7}>
+          <animateMotion dur="2.2s" repeatCount="indefinite" path={outPath} begin="1.1s" />
+        </circle>
       </svg>
     </div>
   );
@@ -617,13 +679,13 @@ function FlowCanvas() {
 
 function HeroIllustration() {
   return (
-    <div className="relative mx-auto w-full max-w-[760px]">
+    <div className="relative mx-auto w-full max-w-[540px]">
       <img
         src="/patterns-hero.png"
         alt="A purple brain mascot at the PPC.io pattern desk, with New, Seen again, and Saved trays of cards on the left and Leaky landing pages, Budget drift, and Tracking gaps patterns surfacing on the right."
         width={1819}
         height={865}
-        className="h-auto w-full select-none drop-shadow-[0_36px_60px_rgba(127,90,240,0.38)]"
+        className="h-auto w-full select-none drop-shadow-[0_28px_50px_rgba(127,90,240,0.35)]"
         draggable={false}
       />
     </div>
