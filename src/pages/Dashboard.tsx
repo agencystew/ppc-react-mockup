@@ -269,11 +269,11 @@ function ActivityHero() {
         <div className="min-w-0">
           <EyebrowChip>Portfolio Command Brief</EyebrowChip>
 
-          <h2 className="mt-6 font-display text-[44px] font-black leading-[1.02] tracking-[-0.025em] text-white sm:text-[52px]">
+          <h1 className="ppc-h1 mt-6 text-white">
             Morning, <span style={{ color: '#9F86FF' }}>Stewy.</span>
-          </h2>
+          </h1>
 
-          <p className="mt-3 text-[22px] font-semibold leading-[1.25] tracking-[-0.012em] text-white sm:text-[26px]">
+          <p className="ppc-h3 mt-3 text-white">
             Your portfolio brief is ready.
           </p>
 
@@ -335,10 +335,7 @@ function ActivityHero() {
 
 function EyebrowChip({ children }: { children: React.ReactNode }) {
   return (
-    <span
-      className="inline-flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.03] px-3 py-[5px] text-[11px] uppercase tracking-[0.16em] text-white/75"
-      style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-    >
+    <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.03] px-3 py-[5px] text-[11px] font-semibold text-white/80">
       <Sparkle size={11} weight="fill" className="text-[#C7B0FF]" />
       {children}
     </span>
@@ -480,8 +477,8 @@ function PortfolioTable() {
       {/* Filter row + section title */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <h2 className="text-[18px] font-semibold tracking-[-0.01em] text-ppc-ink">
-            Your portfolio<span className="text-ppc-purple-500">.</span>
+          <h2 className="ppc-h3 text-ppc-ink">
+            Your portfolio<span className="ppc-period">.</span>
           </h2>
         </div>
 
@@ -673,7 +670,7 @@ function SignalPill({
     >
       <span className="truncate">{signal.label}</span>
       {Arrow && <Arrow size={10} weight="bold" />}
-      <span className="font-mono text-[10.5px] tabular-nums opacity-80">{trendPct}</span>
+      <span className="text-[11px] font-semibold tabular-nums opacity-80">{trendPct}</span>
     </span>
   );
 }
@@ -752,7 +749,7 @@ function FilterChip({
     >
       <span style={!active && toneFg ? { color: toneFg } : undefined}>{label}</span>
       <span
-        className="rounded-[5px] px-[6px] py-[1px] font-mono text-[10.5px] tabular-nums"
+        className="rounded-[5px] px-[6px] py-[1px] text-[11px] font-semibold tabular-nums"
         style={{
           background: active ? 'rgba(255,255,255,0.18)' : '#EEEDFE',
           color: active ? '#fff' : (toneFg ?? '#6b6480'),
@@ -826,21 +823,21 @@ function PatternsLiveStrip() {
       <span aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'radial-gradient(circle at 18% 30%, white 1px, transparent 1px), radial-gradient(circle at 78% 65%, white 1px, transparent 1px), radial-gradient(circle at 50% 90%, white 1px, transparent 1px)', backgroundSize: '160px 160px, 110px 110px, 200px 200px' }} />
 
       <div className="relative flex items-center justify-between px-7 pt-7 sm:px-10 sm:pt-8">
-        <span className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-white/75" style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}>
+        <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-white/80">
           <span className="relative inline-flex h-1.5 w-1.5">
             <span className="absolute inset-0 animate-ping rounded-full bg-white opacity-75" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
           </span>
           Live
         </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/35 px-2.5 py-[3px] text-[10px] font-medium uppercase tracking-[0.18em] text-white/80" style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/35 px-2.5 py-[3px] text-[11px] font-semibold text-white/85">
           Experimental
         </span>
       </div>
 
       <div className="relative mx-auto max-w-[860px] px-7 pb-10 pt-7 sm:px-12 sm:pb-12 sm:pt-9">
         <Ornament />
-        <h2 className="mx-auto font-display text-[44px] font-black leading-[1.0] tracking-[-0.030em] text-white sm:text-[58px]">
+        <h2 className="ppc-h1 mx-auto text-white">
           {isEmpty ? (
             <>Listening across <SerifAccent>your accounts</SerifAccent><SerifPeriod /></>
           ) : (
@@ -930,14 +927,14 @@ function PatternCard({ pattern, isFresh }: { pattern: Pattern; isFresh: boolean 
       <span aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: accent }} />
       <div className="flex items-start justify-between gap-3">
         <span
-          className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[10.5px] font-medium uppercase tracking-[0.10em]"
-          style={{ borderColor: `${accent}66`, color: accent, fontFamily: '"Courier New", ui-monospace, monospace' }}
+          className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[11px] font-semibold"
+          style={{ borderColor: `${accent}66`, color: accent }}
         >
           <span className="h-1.5 w-1.5 rounded-full" style={{ background: accent }} />
           {shortCategory(pattern.category)}
         </span>
         {pattern.spotted && (
-          <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.08em] text-white/55" style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}>
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-white/60">
             {isFresh && (
               <span className="relative inline-flex h-1.5 w-1.5">
                 <span className="absolute inset-0 animate-ping rounded-full bg-white opacity-75" />
@@ -975,9 +972,6 @@ function WatchingForList() {
   ];
   return (
     <div className="mx-auto max-w-[720px]">
-      <p className="mb-3 text-center text-[10.5px] uppercase tracking-[0.18em] text-white/55" style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}>
-        Watching for
-      </p>
       <div className="flex flex-wrap items-center justify-center gap-2">
         {items.map((it) => (
           <span key={it.label} className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/[0.05] px-3.5 py-[7px] text-[12.5px] text-white/80">
