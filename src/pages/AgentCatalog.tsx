@@ -1,29 +1,45 @@
-import type { ReactElement } from 'react';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, ArrowUpRight, Bell, Brain, Broadcast, Browser, Buildings,
-  CalendarBlank, CaretLeft, CaretRight, ChartBar, Clock, Drop, Eye,
-  Fire, Flask, Funnel, Gauge, GridFour, Lightning, ListBullets, ListChecks,
-  MagnifyingGlass, MapTrifold, PaintBrush, PaperPlaneTilt, PencilSimple,
-  Rocket, Shield, ShieldCheck, ShoppingCart, Sparkle, SlidersHorizontal,
-  SquaresFour, Target, TrendUp, UsersFour, WaveSawtooth,
+  ArrowUpRight, ArrowRight, Sparkle, MagnifyingGlass, PaperPlaneTilt,
+  Info, Fire, Star, Lightbulb, SquaresFour, SlidersHorizontal,
+  Target, CurrencyDollar, PaintBrush, ShieldCheck,
+  ChartBar, Eye, Shield, Drop, TrendUp, PencilSimple, Browser,
+  ShoppingCart, Lightning, ListChecks, MapTrifold, Gauge, Flask,
+  WaveSawtooth, Buildings, UsersFour, Broadcast, Brain, ListBullets,
+  Rocket,
 } from '@phosphor-icons/react';
 import { AGENTS } from '../mock/agents';
 import type { AgentCategory, AgentDefinition } from '../types/agent';
 
-// Agent Catalog · /agents
-// Redesigned 2026-05-15 against the "bench of specialists" concept Stewart
-// approved. Lavender canvas, soft cards, 5-up recommended carousel with a
-// single HIGH-IMPACT pink card in the middle, then a dark "Build your
-// weekly agent plan" banner, then the full grid.
-//
-// Pre-run rules HONOURED here (override anything the source mockup did):
-//   - No $ figures pre-run    (feedback_no_pre_run_dollar_figures)
-//   - No duration chips pre-run (feedback_no_pre_run_duration_claims)
-//   - No em-dashes anywhere   (stewart-profile)
-//   - Trailing purple period on every headline (DESIGN-SYSTEM)
-//   - Bright purple #7F5AF0 is rationed (status pills + primary CTA only)
+/* /agents — Agent Catalog
+ *
+ * Rebuilt 2026-05-18 against Stewart's hero-illustration + sticky-sidebar
+ * mockup. Two halves:
+ *
+ *   1. Hero — lavender canvas, eyebrow + "12 agents ready" pill, Figtree
+ *      900 headline "Meet Your PPC Agents" with a Playfair-italic accent
+ *      line "Specialists on standby." in purple. Search bar + suggestion
+ *      chips on the left, the Agent Library illustration on the right.
+ *      Drop `agent-library.png` into /public — a CSS-only fallback covers
+ *      missing-asset cases so dev never blows up.
+ *
+ *   2. Catalog body — two-column grid:
+ *        ┌──────────────────────────┐
+ *        │ 264px categories  │  3-col grid of agent cards
+ *        │ sticky sidebar    │   "Recommended for you" by default,
+ *        │ + Suggest CTA     │   switches to per-category on filter click
+ *        └──────────────────────────┘
+ *
+ * Per Stewart 2026-05-18: character faces ONLY in the hero illustration —
+ * the grid cards keep the existing Phosphor duotone icons in tinted seats.
+ *
+ * Pre-run rules honoured (from memory):
+ *   - No $ figures on cards          (feedback_no_pre_run_dollar_figures)
+ *   - No minute estimates on cards   (feedback_no_pre_run_duration_claims)
+ *   - No em-dashes in copy            (stewart-profile)
+ *   - Bright purple #7F5AF0 rationed (CTA + status pills only)
+ */
 
 // ─── Italic-serif period — workspace signature mark ─────────────────────
 function P({ char = '.' }: { char?: '.' | '?' }) {
@@ -37,67 +53,108 @@ function P({ char = '.' }: { char?: '.' | '?' }) {
   );
 }
 
-// ─── Surface-level outcome buckets ──────────────────────────────────────
-// User-facing pill labels group the underlying AgentCategory tags into
-// outcome-led buckets that read better above the fold. Each agent slug
-// maps to exactly one bucket so the counts add up cleanly.
+// ─── Categories model ──────────────────────────────────────────────────
+// Sidebar uses these eight buckets (plus "All" + "Recommended" meta rows).
+// Each agent slug maps to exactly one bucket below. Counts compute live
+// off SLUG_CATEGORY so the sidebar stays in sync if the agent list changes.
 
-type Bucket = 'all' | 'audit' | 'optimize' | 'protect' | 'insights';
+type CategoryKey =
+  | 'all'
+  | 'recommended'
+  | 'audits'
+  | 'insights'
+  | 'optimization'
+  | 'keywords'
+  | 'budget-bids'
+  | 'creative'
+  | 'account-health';
 
-const BUCKET_LABEL: Record<Exclude<Bucket, 'all'>, string> = {
-  audit:    'Audit & Diagnose',
-  optimize: 'Optimize & Grow',
-  protect:  'Protect & Save',
-  insights: 'Insights & Research',
-};
+interface CategoryDef {
+  key: CategoryKey;
+  label: string;
+  icon: ReactElement;
+}
 
-const SLUG_BUCKET: Record<string, Exclude<Bucket, 'all'>> = {
-  // Audit & Diagnose
-  'weekly-audit':         'audit',
-  'deep-account-audit':   'audit',
-  'change-impact':        'audit',
-  'demand-ceiling':       'audit',
-  'test-recommender':     'audit',
-  'pmax':                 'audit',
-  'landing-page':         'audit',
-  // Optimize & Grow
-  'keyword':              'optimize',
-  'campaign-architect':   'optimize',
-  'budget-pacer':         'optimize',
-  'profit-tracker':       'optimize',
-  'ad-copy':              'optimize',
-  'landing-page-designer':'optimize',
-  'shopping-feed':        'optimize',
-  // Protect & Save
-  'negative-keyword':     'protect',
-  'spend-leak':           'protect',
-  'keyword-auditor':      'protect',
-  'brand-safety':         'protect',
-  // Insights & Research
+const CATEGORIES: CategoryDef[] = [
+  { key: 'all',            label: 'All agents',     icon: <SquaresFour       size={14} weight="duotone" /> },
+  { key: 'recommended',    label: 'Recommended',    icon: <Star              size={14} weight="duotone" /> },
+  { key: 'audits',         label: 'Audits',         icon: <MagnifyingGlass   size={14} weight="duotone" /> },
+  { key: 'insights',       label: 'Insights',       icon: <Lightbulb         size={14} weight="duotone" /> },
+  { key: 'optimization',   label: 'Optimization',   icon: <SlidersHorizontal size={14} weight="duotone" /> },
+  { key: 'keywords',       label: 'Keywords',       icon: <Target            size={14} weight="duotone" /> },
+  { key: 'budget-bids',    label: 'Budget & Bids',  icon: <CurrencyDollar    size={14} weight="duotone" /> },
+  { key: 'creative',       label: 'Creative',       icon: <PaintBrush        size={14} weight="duotone" /> },
+  { key: 'account-health', label: 'Account Health', icon: <ShieldCheck       size={14} weight="duotone" /> },
+];
+
+const SLUG_CATEGORY: Record<string, Exclude<CategoryKey, 'all' | 'recommended'>> = {
+  'weekly-audit':         'audits',
+  'deep-account-audit':   'audits',
+  'change-impact':        'audits',
   'competitor-spy':       'insights',
   'buyer-journey':        'insights',
-  'readiness':            'insights',
+  'demand-ceiling':       'insights',
   'persona':              'insights',
+  'readiness':            'insights',
   'business-context':     'insights',
   'competitor-context':   'insights',
   'google-ads-context':   'insights',
   'context-enrichment':   'insights',
-  'sales-intelligence':   'insights',
-  'client-reporting':     'insights',
-  'new-client-autopilot': 'insights',
+  'profit-tracker':       'optimization',
+  'campaign-architect':   'optimization',
+  'test-recommender':     'optimization',
+  'pmax':                 'optimization',
+  'keyword':              'keywords',
+  'keyword-auditor':      'keywords',
+  'negative-keyword':     'keywords',
+  'budget-pacer':         'budget-bids',
+  'spend-leak':           'budget-bids',
+  'ad-copy':              'creative',
+  'landing-page':         'creative',
+  'landing-page-designer':'creative',
+  'shopping-feed':        'creative',
+  'brand-safety':         'account-health',
+  'client-reporting':     'account-health',
+  'sales-intelligence':   'account-health',
+  'new-client-autopilot': 'account-health',
 };
 
-// Chip palette per bucket — soft tint background + deep readable text.
-const BUCKET_PALETTE: Record<Exclude<Bucket, 'all'>, { bg: string; fg: string }> = {
-  audit:    { bg: '#EEEDFE', fg: '#3C3489' },
-  optimize: { bg: '#EAF3DE', fg: '#27500A' },
-  protect:  { bg: '#FAEEDA', fg: '#633806' },
-  insights: { bg: '#E6F1FB', fg: '#0C447C' },
+// Recommended subset — first slug gets HIGH IMPACT pink/peach styling.
+const RECOMMENDED_SLUGS = [
+  'landing-page',        // HIGH IMPACT
+  'weekly-audit',
+  'competitor-spy',
+  'keyword',
+  'negative-keyword',
+  'budget-pacer',
+];
+
+// Override card copy on recommended cards so the grid reads punchier
+// than the generic catalog blurbs.
+const RECOMMENDED_COPY: Record<string, {
+  name: string;
+  blurb: string;
+  tag: string;
+  cta: string;
+}> = {
+  'landing-page':     { name: 'Landing Page Match',     blurb: 'Analyze landing pages vs search intent and get specific CRO ideas.',         tag: 'Conversion',   cta: 'Run now' },
+  'weekly-audit':     { name: 'Weekly Audit',           blurb: 'Full account health check across structure, spend, keywords and more.',     tag: 'Audit',        cta: 'Run audit' },
+  'competitor-spy':   { name: 'Competitor Spy',         blurb: 'See what your competitors are doing and find the gaps you can exploit.',    tag: 'Insights',     cta: 'Run spy' },
+  'keyword':          { name: 'Search Term Miner',      blurb: 'Uncover high-value search terms hiding in your data.',                       tag: 'Keywords',     cta: 'Run now' },
+  'negative-keyword': { name: 'Negative Keyword Guard', blurb: "Find negative keywords you're missing and stop wasted spend.",              tag: 'Optimization', cta: 'Run now' },
+  'budget-pacer':     { name: 'Budget Optimizer',       blurb: 'Reallocate budgets for maximum results across campaigns.',                   tag: 'Budget',       cta: 'Optimize' },
 };
 
-// Mascot-seat icon tint per agent slug (the soft circle behind the icon).
-// Keeps each card visually distinct on the grid without depending on
-// emoji rendering across platforms.
+const TAG_PALETTE: Record<string, { bg: string; fg: string }> = {
+  'Conversion':   { bg: '#FBE3EE', fg: '#B83361' },
+  'Audit':        { bg: '#EEEDFE', fg: '#3C3489' },
+  'Insights':     { bg: '#E6F1FB', fg: '#0C447C' },
+  'Keywords':     { bg: '#EAF3DE', fg: '#27500A' },
+  'Optimization': { bg: '#FAEEDA', fg: '#633806' },
+  'Budget':       { bg: '#FAEEDA', fg: '#633806' },
+};
+
+// Soft tint behind each agent's icon glyph on grid cards.
 const CATEGORY_TINT: Record<AgentCategory, { bg: string; fg: string }> = {
   operations:  { bg: '#EEEDFE', fg: '#534AB7' },
   diagnostics: { bg: '#EEEDFE', fg: '#534AB7' },
@@ -108,44 +165,40 @@ const CATEGORY_TINT: Record<AgentCategory, { bg: string; fg: string }> = {
   context:     { bg: '#F1EFE8', fg: '#2C2C2A' },
 };
 
-// ─── Per-slug Phosphor icon ─────────────────────────────────────────────
-// The concept renders agent cards with clean line icons inside tinted
-// circular badges, not platform emoji. We keep emoji in the agent data
-// (used elsewhere as a fast eyeball-glyph) but override the visual on
-// /agents so the grid reads like a single icon set.
+// Per-slug Phosphor icon — kept as a single icon set across the grid so
+// cards feel like one designed system, not platform emoji.
 const SLUG_ICON: Record<string, ReactElement> = {
-  'weekly-audit':         <ChartBar          size={20} weight="duotone" />,
-  'deep-account-audit':   <MagnifyingGlass   size={20} weight="duotone" />,
-  'negative-keyword':     <Shield            size={20} weight="duotone" />,
-  'budget-pacer':         <Clock             size={20} weight="duotone" />,
-  'spend-leak':           <Drop              size={20} weight="duotone" />,
-  'profit-tracker':       <TrendUp           size={20} weight="duotone" />,
-  'ad-copy':              <PencilSimple      size={20} weight="duotone" />,
-  'landing-page':         <Browser           size={20} weight="duotone" />,
-  'landing-page-designer':<PaintBrush        size={20} weight="duotone" />,
-  'shopping-feed':        <ShoppingCart      size={20} weight="duotone" />,
-  'competitor-spy':       <Eye               size={20} weight="duotone" />,
-  'pmax':                 <Lightning         size={20} weight="duotone" />,
-  'keyword':              <Target            size={20} weight="duotone" />,
-  'keyword-auditor':      <ListChecks        size={20} weight="duotone" />,
-  'campaign-architect':   <SquaresFour       size={20} weight="duotone" />,
-  'buyer-journey':        <MapTrifold        size={20} weight="duotone" />,
-  'readiness':            <Gauge             size={20} weight="duotone" />,
-  'demand-ceiling':       <ChartBar          size={20} weight="duotone" />,
-  'test-recommender':     <Flask             size={20} weight="duotone" />,
-  'change-impact':        <WaveSawtooth      size={20} weight="duotone" />,
-  'brand-safety':         <ShieldCheck       size={20} weight="duotone" />,
-  'business-context':     <Buildings         size={20} weight="duotone" />,
-  'competitor-context':   <UsersFour         size={20} weight="duotone" />,
-  'google-ads-context':   <Broadcast         size={20} weight="duotone" />,
-  'persona':              <Brain             size={20} weight="duotone" />,
-  'context-enrichment':   <Sparkle           size={20} weight="duotone" />,
-  'client-reporting':     <ListBullets       size={20} weight="duotone" />,
-  'sales-intelligence':   <Target            size={20} weight="duotone" />,
-  'new-client-autopilot': <Rocket            size={20} weight="duotone" />,
+  'weekly-audit':         <ChartBar          size={22} weight="duotone" />,
+  'deep-account-audit':   <MagnifyingGlass   size={22} weight="duotone" />,
+  'negative-keyword':     <Shield            size={22} weight="duotone" />,
+  'budget-pacer':         <CurrencyDollar    size={22} weight="duotone" />,
+  'spend-leak':           <Drop              size={22} weight="duotone" />,
+  'profit-tracker':       <TrendUp           size={22} weight="duotone" />,
+  'ad-copy':              <PencilSimple      size={22} weight="duotone" />,
+  'landing-page':         <Browser           size={22} weight="duotone" />,
+  'landing-page-designer':<PaintBrush        size={22} weight="duotone" />,
+  'shopping-feed':        <ShoppingCart      size={22} weight="duotone" />,
+  'competitor-spy':       <Eye               size={22} weight="duotone" />,
+  'pmax':                 <Lightning         size={22} weight="duotone" />,
+  'keyword':              <Target            size={22} weight="duotone" />,
+  'keyword-auditor':      <ListChecks        size={22} weight="duotone" />,
+  'campaign-architect':   <SquaresFour       size={22} weight="duotone" />,
+  'buyer-journey':        <MapTrifold        size={22} weight="duotone" />,
+  'readiness':            <Gauge             size={22} weight="duotone" />,
+  'demand-ceiling':       <ChartBar          size={22} weight="duotone" />,
+  'test-recommender':     <Flask             size={22} weight="duotone" />,
+  'change-impact':        <WaveSawtooth      size={22} weight="duotone" />,
+  'brand-safety':         <ShieldCheck       size={22} weight="duotone" />,
+  'business-context':     <Buildings         size={22} weight="duotone" />,
+  'competitor-context':   <UsersFour         size={22} weight="duotone" />,
+  'google-ads-context':   <Broadcast         size={22} weight="duotone" />,
+  'persona':              <Brain             size={22} weight="duotone" />,
+  'context-enrichment':   <Sparkle           size={22} weight="duotone" />,
+  'client-reporting':     <ListBullets       size={22} weight="duotone" />,
+  'sales-intelligence':   <Target            size={22} weight="duotone" />,
+  'new-client-autopilot': <Rocket            size={22} weight="duotone" />,
 };
 
-// ─── Suggestion chips below the search bar ──────────────────────────────
 const SUGGESTIONS = [
   'Find wasted spend',
   'Beat my competitor',
@@ -153,95 +206,43 @@ const SUGGESTIONS = [
   'Audit my account',
 ];
 
-// ─── Recommended carousel (5 cards, center is HIGH IMPACT) ──────────────
-// Order matters. Index 2 (third card) is the highlighted impact pick.
-const RECOMMENDED_SLUGS = [
-  'weekly-audit',
-  'competitor-spy',
-  'landing-page',
-  'negative-keyword',
-  'keyword',
-];
-
-const RECOMMENDED_TAG: Record<string, { label: string; palette: Exclude<Bucket, 'all'> }> = {
-  'weekly-audit':    { label: 'Routine',    palette: 'audit' },
-  'competitor-spy':  { label: 'Insights',   palette: 'insights' },
-  'landing-page':    { label: 'Conversion', palette: 'audit' },
-  'negative-keyword':{ label: 'Waste',      palette: 'protect' },
-  'keyword':         { label: 'Growth',     palette: 'optimize' },
-};
-
-// Override recommended card copy so the carousel reads punchier than the
-// generic catalog descriptions. Pre-run rules still apply (no $, no MIN).
-const RECOMMENDED_COPY: Record<string, { name: string; blurb: string; icon: ReactElement }> = {
-  'weekly-audit': {
-    name: 'Weekly Audit',
-    blurb: 'Full account health check across structure, spend, keywords, and performance.',
-    icon: <ChartBar size={24} weight="duotone" />,
-  },
-  'competitor-spy': {
-    name: 'Competitor Spy',
-    blurb: "See what your competitors are doing, and find the gaps you can exploit.",
-    icon: <Eye size={24} weight="duotone" />,
-  },
-  'landing-page': {
-    name: 'Landing Page Match',
-    blurb: 'Analyze your landing pages versus search intent and get specific improvement ideas.',
-    icon: <Target size={24} weight="duotone" />,
-  },
-  'negative-keyword': {
-    name: 'Negative Keyword',
-    blurb: 'Discover and group brand-safe negative keywords that stop waste cold.',
-    icon: <Shield size={24} weight="duotone" />,
-  },
-  'keyword': {
-    name: 'Expansion Opportunities',
-    blurb: 'Find high-opportunity keywords and audiences ready to scale your growth.',
-    icon: <TrendUp size={24} weight="duotone" />,
-  },
-};
-
 // ════════════════════════════════════════════════════════════════════════
 // MAIN
 // ════════════════════════════════════════════════════════════════════════
 
 export function AgentCatalog() {
-  const [bucket, setBucket] = useState<Bucket>('all');
-  const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [category, setCategory] = useState<CategoryKey>('recommended');
 
   const counts = useMemo(() => {
-    const c: Record<string, number> = { all: AGENTS.length };
+    const c: Record<string, number> = {
+      all:         AGENTS.length,
+      recommended: RECOMMENDED_SLUGS.length,
+    };
     AGENTS.forEach((a) => {
-      const b = SLUG_BUCKET[a.slug];
-      if (b) c[b] = (c[b] || 0) + 1;
+      const k = SLUG_CATEGORY[a.slug];
+      if (k) c[k] = (c[k] || 0) + 1;
     });
     return c;
   }, []);
 
-  const visible = useMemo(() => {
-    if (bucket === 'all') return AGENTS;
-    return AGENTS.filter((a) => SLUG_BUCKET[a.slug] === bucket);
-  }, [bucket]);
-
-  const recommended = useMemo(
-    () => RECOMMENDED_SLUGS
-      .map((slug) => AGENTS.find((a) => a.slug === slug))
-      .filter((a): a is AgentDefinition => Boolean(a)),
-    [],
-  );
+  const visible: AgentDefinition[] = useMemo(() => {
+    if (category === 'all') return AGENTS;
+    if (category === 'recommended') {
+      return RECOMMENDED_SLUGS
+        .map((slug) => AGENTS.find((a) => a.slug === slug))
+        .filter((a): a is AgentDefinition => Boolean(a));
+    }
+    return AGENTS.filter((a) => SLUG_CATEGORY[a.slug] === category);
+  }, [category]);
 
   return (
-    <div className="space-y-14">
-      <HeroBlock />
-      <RecommendedCarousel agents={recommended} />
-      <PlanBanner />
-      <AllSpecialists
-        bucket={bucket}
+    <div className="space-y-10">
+      <HeroBlock readyCount={12} />
+      <CatalogBody
+        category={category}
         counts={counts}
-        view={view}
         agents={visible}
-        onPickBucket={setBucket}
-        onToggleView={() => setView(view === 'grid' ? 'list' : 'grid')}
+        onPickCategory={setCategory}
       />
     </div>
   );
@@ -251,50 +252,75 @@ export function AgentCatalog() {
 // 1 · HERO
 // ════════════════════════════════════════════════════════════════════════
 
-function HeroBlock() {
+function HeroBlock({ readyCount }: { readyCount: number }) {
   return (
-    <section className="grid items-start gap-8 lg:grid-cols-[1fr_460px]">
-      <div className="flex flex-col">
-        <span className="inline-flex w-fit items-center rounded-full bg-ppc-panel-soft px-3 py-[5px] font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ppc-purple-700">
-          Agents
+    <section className="relative">
+      {/* Eyebrow + ready pill */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <span className="inline-flex items-center rounded-full bg-ppc-panel-soft px-3 py-[5px] font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ppc-purple-700">
+          Agents Catalog
         </span>
-
-        <h1 className="mt-5 font-display font-black leading-[0.94] tracking-[-0.038em] text-ppc-ink text-[56px] sm:text-[72px] lg:text-[84px]">
-          Your PPC Agents<P />
-          <br />
-          <span
-            className="font-serif italic font-bold text-ppc-purple-500"
-            style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-          >
-            Always Working
-          </span>
-          <P />
-        </h1>
-
-        <p className="mt-5 max-w-[560px] text-[14.5px] leading-[1.55] text-ppc-text-muted">
-          Your AI bench of PPC experts. Run audits, uncover insights, and
-          unlock growth, faster than your competitors can react.
-        </p>
-
-        <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <SearchBar />
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 text-[12px] text-ppc-text-muted">Try asking:</span>
-          {SUGGESTIONS.map((s) => (
-            <button
-              key={s}
-              className="rounded-full border-[0.5px] border-ppc-card-border bg-white px-3 py-[6px] text-[12px] font-medium text-ppc-text-muted transition-all hover:-translate-y-[0.5px] hover:border-ppc-purple-300 hover:text-ppc-ink"
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        <ReadyPill count={readyCount} />
       </div>
 
-      <MascotBench />
+      {/* Headline + illustration */}
+      <div className="mt-7 grid items-center gap-6 lg:grid-cols-[1fr_minmax(0,540px)] lg:gap-10">
+        <div className="flex flex-col">
+          <h1 className="font-display font-black leading-[0.95] tracking-[-0.030em] text-ppc-ink text-[48px] sm:text-[60px] lg:text-[72px]">
+            Meet Your PPC Agents
+          </h1>
+          <h1
+            className="mt-1 leading-[1.02] tracking-[-0.018em] text-ppc-purple-500 text-[44px] sm:text-[56px] lg:text-[68px]"
+            style={{
+              fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif',
+              fontStyle: 'italic',
+              fontWeight: 700,
+            }}
+          >
+            Specialists on standby<span className="text-ppc-purple-500">.</span>
+          </h1>
+
+          <p className="mt-5 max-w-[520px] text-[14.5px] leading-[1.55] text-ppc-text-muted">
+            Your AI bench of PPC experts. Run audits, uncover insights,
+            and unlock growth, faster than your competitors can react.
+          </p>
+
+          <div className="mt-7">
+            <SearchBar />
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 text-[12px] text-ppc-text-muted">Try asking:</span>
+            {SUGGESTIONS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                className="rounded-full border-[0.5px] border-ppc-card-border bg-white px-3 py-[6px] text-[12px] font-medium text-ppc-text-muted transition-all hover:-translate-y-[0.5px] hover:border-ppc-purple-300 hover:text-ppc-ink"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <HeroIllustration />
+      </div>
     </section>
+  );
+}
+
+function ReadyPill({ count }: { count: number }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border-[0.5px] border-ppc-card-border bg-white pl-2.5 pr-3 py-[6px] text-[12.5px] font-semibold text-ppc-ink shadow-[0_2px_8px_-4px_rgba(15,10,30,0.08)]">
+      <span className="relative inline-flex h-[7px] w-[7px]">
+        <span className="absolute inset-0 animate-ping rounded-full bg-[#5DC2A2]/55" />
+        <span className="relative h-[7px] w-[7px] rounded-full bg-[#5DC2A2] shadow-[0_0_0_2px_rgba(93,194,162,0.18)]" />
+      </span>
+      <span>
+        {count} agents ready
+      </span>
+      <Info size={12} weight="bold" className="text-ppc-text-faint" />
+    </span>
   );
 }
 
@@ -302,7 +328,7 @@ function SearchBar() {
   return (
     <form
       onSubmit={(e) => e.preventDefault()}
-      className="flex flex-1 items-center gap-2 rounded-[16px] border-[0.5px] border-ppc-card-border bg-white py-2.5 pl-4 pr-2.5 shadow-[0_2px_10px_-6px_rgba(15,10,30,0.08)] focus-within:border-ppc-purple-300 focus-within:shadow-[0_0_0_4px_rgba(127,90,240,0.10),0_4px_14px_-6px_rgba(127,90,240,0.25)]"
+      className="flex w-full items-center gap-2 rounded-[16px] border-[0.5px] border-ppc-card-border bg-white py-2.5 pl-4 pr-2.5 shadow-[0_2px_10px_-6px_rgba(15,10,30,0.08)] focus-within:border-ppc-purple-300 focus-within:shadow-[0_0_0_4px_rgba(127,90,240,0.10),0_4px_14px_-6px_rgba(127,90,240,0.25)]"
     >
       <MagnifyingGlass size={16} weight="bold" className="shrink-0 text-ppc-text-muted" />
       <input
@@ -321,14 +347,12 @@ function SearchBar() {
   );
 }
 
-// Mascot bench image — the hero's emotional anchor. Sits in the top
-// right of the hero on lg+, hides on mobile to keep the H1 the moment.
-// Source asset is a transparent RGBA PNG (3088×1200) so no blend hack.
-function MascotBench() {
+/* Agent Library hero image — six AI specialists on a two-tier shelf.
+ * Drop the file at /public/agent-library.png. If absent, an onError
+ * handler swaps in a CSS-only fallback so the layout never breaks. */
+function HeroIllustration() {
   return (
-    <div className="relative hidden h-[320px] w-full lg:block">
-      {/* Soft lavender bloom behind the image — stage-light glow under
-        * the center "AI Specialist" mascot, not a flat backdrop. */}
+    <div className="relative hidden lg:flex items-center justify-center">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -338,122 +362,243 @@ function MascotBench() {
         }}
       />
       <img
-        src="/agents-mascots.png"
-        alt="Four AI specialists on stadium seats, the center mascot framed as today's pick"
-        className="relative h-full w-full object-contain"
+        src="/agent-library.png"
+        alt="Agent Library — six AI specialists on a two-tier display shelf"
+        className="relative w-full max-h-[420px] object-contain drop-shadow-[0_30px_40px_rgba(127,90,240,0.25)]"
         draggable={false}
+        onError={(e) => {
+          const img = e.target as HTMLImageElement;
+          img.style.display = 'none';
+          const fb = img.nextElementSibling as HTMLElement | null;
+          if (fb) fb.style.display = 'grid';
+        }}
       />
+      <div
+        aria-hidden
+        className="relative hidden h-[360px] w-full place-items-center rounded-[24px] border-[0.5px] border-ppc-purple-300/40 bg-white/40 text-ppc-text-faint"
+        style={{ display: 'none' }}
+      >
+        <span className="text-[12px] font-medium">Agent library</span>
+      </div>
     </div>
   );
 }
 
 // ════════════════════════════════════════════════════════════════════════
-// 2 · RECOMMENDED CAROUSEL
+// 2 · BODY — categories sidebar + agent grid
 // ════════════════════════════════════════════════════════════════════════
 
-function RecommendedCarousel({ agents }: { agents: AgentDefinition[] }) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  // High-impact card index inside the recommended list.
-  const HIGHLIGHT_INDEX = 2;
+interface BodyProps {
+  category: CategoryKey;
+  counts: Record<string, number>;
+  agents: AgentDefinition[];
+  onPickCategory: (k: CategoryKey) => void;
+}
 
-  function scrollBy(dir: -1 | 1) {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const card = el.querySelector<HTMLElement>('[data-rec-card]');
-    const step = card ? card.offsetWidth + 12 : 280;
-    el.scrollBy({ left: dir * step, behavior: 'smooth' });
-  }
-
+function CatalogBody({ category, counts, agents, onPickCategory }: BodyProps) {
   return (
-    <section className="relative">
-      <div className="mb-5 flex items-baseline justify-between gap-3">
-        <h2 className="font-display text-[20px] font-bold tracking-[-0.012em] text-ppc-ink sm:text-[22px]">
-          Recommended for you<P />
-        </h2>
-        <Link
-          to="/chat?intent=why-these"
-          className="inline-flex items-center gap-1 text-[13px] font-semibold text-ppc-purple-500 hover:text-ppc-purple-600"
-        >
-          Why these?
-          <ArrowRight size={11} weight="bold" />
-        </Link>
-      </div>
-
-      <div className="relative">
-        {/* Carousel arrows — sit outside the row on desktop. */}
-        <CarouselArrow side="left"  onClick={() => scrollBy(-1)} />
-        <CarouselArrow side="right" onClick={() => scrollBy(1)}  />
-
-        <div
-          ref={scrollerRef}
-          /* pt-3.5 (14px) leaves enough room above the cards for the
-           * HIGH IMPACT badge's -top-2 (8px) overhang to render without
-           * being clipped — overflow-x:auto silently forces overflow-y:auto
-           * in browsers, so any negative-top child would otherwise be cut. */
-          className="-mx-1 -mt-3.5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2 pt-3.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {agents.map((a, i) => (
-            <RecommendedCard
-              key={a.slug}
-              agent={a}
-              highlight={i === HIGHLIGHT_INDEX}
-            />
-          ))}
-        </div>
-      </div>
+    <section className="grid items-start gap-5 lg:grid-cols-[264px_1fr]">
+      <CategoriesSidebar
+        category={category}
+        counts={counts}
+        onPick={onPickCategory}
+      />
+      <AgentsPanel category={category} agents={agents} />
     </section>
   );
 }
 
-function CarouselArrow({ side, onClick }: { side: 'left' | 'right'; onClick: () => void }) {
+// ─── Sticky categories sidebar ─────────────────────────────────────────
+
+function CategoriesSidebar({
+  category, counts, onPick,
+}: {
+  category: CategoryKey;
+  counts: Record<string, number>;
+  onPick: (k: CategoryKey) => void;
+}) {
+  return (
+    <aside className="space-y-3 lg:sticky lg:top-6">
+      <div className="rounded-[18px] border-[0.5px] border-ppc-card-border bg-white p-4 shadow-[0_2px_12px_-8px_rgba(15,10,30,0.05)]">
+        <h3 className="px-2 pb-3 text-[14.5px] font-bold tracking-[-0.012em] text-ppc-ink">
+          Categories
+        </h3>
+        <ul className="flex flex-col gap-[2px]">
+          {CATEGORIES.map((c) => (
+            <li key={c.key}>
+              <CategoryRow
+                def={c}
+                active={category === c.key}
+                count={counts[c.key] ?? 0}
+                onClick={() => onPick(c.key)}
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <SuggestCard />
+    </aside>
+  );
+}
+
+function CategoryRow({
+  def, active, count, onClick,
+}: {
+  def: CategoryDef;
+  active: boolean;
+  count: number;
+  onClick: () => void;
+}) {
   return (
     <button
-      aria-label={side === 'left' ? 'Previous' : 'Next'}
       onClick={onClick}
-      className={`absolute top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full border-[0.5px] border-ppc-card-border bg-white text-ppc-ink shadow-[0_8px_22px_-12px_rgba(15,10,30,0.20)] transition-all hover:-translate-y-[calc(50%+1px)] hover:border-ppc-purple-300 hover:text-ppc-purple-500 lg:grid ${
-        side === 'left' ? '-left-5' : '-right-5'
+      className={`group flex w-full items-center gap-2.5 rounded-[10px] px-2.5 py-[8px] text-left transition-colors ${
+        active
+          ? 'bg-ppc-panel-soft text-ppc-ink'
+          : 'text-ppc-text-muted hover:bg-[#F6F4FE] hover:text-ppc-ink'
       }`}
     >
-      {side === 'left' ? <CaretLeft size={14} weight="bold" /> : <CaretRight size={14} weight="bold" />}
+      <span
+        className={`grid h-[22px] w-[22px] shrink-0 place-items-center rounded-[6px] transition-colors ${
+          active
+            ? 'bg-white text-ppc-purple-500 shadow-[inset_0_0_0_1px_rgba(127,90,240,0.20)]'
+            : 'text-ppc-text-faint group-hover:text-ppc-purple-500'
+        }`}
+      >
+        {def.icon}
+      </span>
+      <span className="flex-1 text-[13px] font-semibold tracking-[-0.005em]">
+        {def.label}
+      </span>
+      <span
+        className={`tabular-nums text-[11px] font-semibold ${
+          active ? 'text-ppc-purple-600' : 'text-ppc-text-faint'
+        }`}
+      >
+        {count}
+      </span>
     </button>
   );
 }
 
-function RecommendedCard({
-  agent: a,
-  highlight,
-}: { agent: AgentDefinition; highlight: boolean }) {
-  const copy = RECOMMENDED_COPY[a.slug];
-  const tag = RECOMMENDED_TAG[a.slug];
-  const tagPalette = tag ? BUCKET_PALETTE[tag.palette] : null;
+function SuggestCard() {
+  return (
+    <button
+      type="button"
+      className="group flex w-full items-center gap-3 rounded-[16px] border-[0.5px] border-ppc-purple-300/30 bg-ppc-panel-soft px-4 py-3.5 text-left transition-all hover:-translate-y-[0.5px] hover:border-ppc-purple-300/60 hover:shadow-[0_8px_22px_-14px_rgba(127,90,240,0.35)]"
+    >
+      <div className="min-w-0 flex-1">
+        <div className="text-[13px] font-bold leading-tight text-ppc-ink">
+          Suggest an agent
+        </div>
+        <div className="mt-0.5 text-[11.5px] leading-tight text-ppc-text-muted">
+          Tell us what you need
+        </div>
+      </div>
+      <span
+        aria-hidden
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-ppc-purple-500 shadow-[0_4px_12px_-6px_rgba(127,90,240,0.45)] transition-transform group-hover:-translate-y-[1px]"
+      >
+        <Lightbulb size={16} weight="duotone" />
+      </span>
+    </button>
+  );
+}
+
+// ─── Agents panel (right column) ───────────────────────────────────────
+
+function AgentsPanel({
+  category, agents,
+}: { category: CategoryKey; agents: AgentDefinition[] }) {
+  const isRecommended = category === 'recommended';
+  const header = isRecommended
+    ? 'Recommended for you'
+    : CATEGORIES.find((c) => c.key === category)?.label ?? 'Agents';
+
+  return (
+    <div className="rounded-[20px] border-[0.5px] border-ppc-card-border bg-white p-5 shadow-[0_2px_12px_-8px_rgba(15,10,30,0.05)] lg:p-6">
+      <div className="mb-5 flex items-baseline justify-between gap-3">
+        <h2 className="inline-flex items-center gap-2 font-display text-[20px] font-bold tracking-[-0.012em] text-ppc-ink">
+          <span>{header}</span>
+          {isRecommended && (
+            <Sparkle size={16} weight="fill" className="-mt-0.5 text-ppc-purple-500" />
+          )}
+          <P />
+        </h2>
+        {isRecommended && (
+          <Link
+            to="/chat?intent=why-these"
+            className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ppc-purple-500 hover:text-ppc-purple-600"
+          >
+            View all recommended
+            <ArrowRight size={11} weight="bold" />
+          </Link>
+        )}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {agents.map((a, i) => (
+          <AgentGridCard
+            key={a.slug}
+            agent={a}
+            highImpact={isRecommended && i === 0}
+            useRecommendedCopy={isRecommended}
+          />
+        ))}
+      </div>
+
+      {agents.length === 0 && (
+        <div className="rounded-[12px] border-[0.5px] border-dashed border-ppc-card-border bg-ppc-canvas/30 p-10 text-center">
+          <p className="text-[13.5px] text-ppc-text-muted">
+            No agents in this category yet.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Single agent card ─────────────────────────────────────────────────
+
+function AgentGridCard({
+  agent: a, highImpact, useRecommendedCopy,
+}: {
+  agent: AgentDefinition;
+  highImpact: boolean;
+  useRecommendedCopy: boolean;
+}) {
   const tint = CATEGORY_TINT[a.category];
+  const icon = SLUG_ICON[a.slug];
+  const copy = useRecommendedCopy ? RECOMMENDED_COPY[a.slug] : undefined;
+  const tagLabel = copy?.tag
+    ?? CATEGORIES.find((c) => c.key === SLUG_CATEGORY[a.slug])?.label;
+  const tagPalette = tagLabel ? TAG_PALETTE[tagLabel] : null;
+  const ctaLabel = copy?.cta ?? 'Run now';
+  const cardName = copy?.name ?? a.name;
+  const cardBlurb = copy?.blurb ?? a.outcomeDescription;
 
   return (
     <Link
-      data-rec-card
       to={`/agents/${a.slug}`}
-      className={`group relative flex w-[280px] shrink-0 snap-start flex-col rounded-[16px] p-5 transition-all hover:-translate-y-[1px] sm:w-[300px] ${
-        highlight
+      data-card={highImpact ? 'high-impact' : 'standard'}
+      className={`group relative flex flex-col rounded-[16px] p-5 transition-all hover:-translate-y-[1px] ${
+        highImpact
           ? ''
-          : 'border-[0.5px] border-ppc-card-border bg-white hover:border-ppc-purple-300 hover:shadow-[0_10px_28px_-18px_rgba(127,90,240,0.40)]'
+          : 'border-[0.5px] border-ppc-card-border bg-white hover:border-ppc-purple-300 hover:shadow-[0_12px_30px_-18px_rgba(127,90,240,0.40)]'
       }`}
       style={
-        highlight
+        highImpact
           ? {
               background:
                 'linear-gradient(165deg, #FFEFF6 0%, #FBE3EE 55%, #FCDCE7 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(232,113,170,0.30), 0 12px 32px -18px rgba(232,113,170,0.55)',
+                'inset 0 0 0 1px rgba(232,113,170,0.30), 0 14px 36px -20px rgba(232,113,170,0.55)',
             }
           : undefined
       }
     >
-      {/* Absolute-positioned badge that overlaps the top edge of the card.
-        * Critical: keeping it OUT of normal flow so the icon row below
-        * aligns with the icon row in every non-highlight card. Previous
-        * `mb-3` inline version pushed all content on this card down by
-        * ~28px, breaking row-level visual alignment across the carousel. */}
-      {highlight && (
+      {highImpact && (
         <span
           className="absolute -top-2 left-5 inline-flex items-center gap-1 rounded-full px-2.5 py-[4px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-white"
           style={{
@@ -471,45 +616,45 @@ function RecommendedCard({
           aria-hidden
           className="grid h-12 w-12 place-items-center rounded-full"
           style={{
-            background: highlight ? '#F9D3E3' : tint.bg,
-            color:      highlight ? '#B83361' : tint.fg,
+            background: highImpact ? '#F9D3E3' : tint.bg,
+            color:      highImpact ? '#B83361' : tint.fg,
           }}
         >
-          {copy?.icon ?? <span className="text-[22px]">{a.emoji}</span>}
+          {icon ?? <span className="text-[22px]">{a.emoji}</span>}
         </span>
-        <ArrowUpRight
-          size={13}
-          weight="bold"
-          className="mt-1 text-ppc-text-faint transition-colors group-hover:text-ppc-purple-500"
-        />
+        <button
+          type="button"
+          aria-label="Favourite"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          className="grid h-7 w-7 place-items-center rounded-full text-ppc-text-faint transition-colors hover:bg-ppc-canvas/60 hover:text-ppc-purple-500"
+        >
+          <Star size={14} weight="bold" />
+        </button>
       </div>
 
-      <h3 className="mt-3 font-display text-[17px] font-bold leading-[1.2] tracking-[-0.012em] text-ppc-ink">
-        {copy?.name ?? a.name}<P />
+      <h3 className="mt-3.5 font-display text-[16.5px] font-bold leading-[1.2] tracking-[-0.012em] text-ppc-ink">
+        {cardName}<P />
       </h3>
 
-      <p className="mt-1.5 line-clamp-3 text-[12.5px] leading-[1.55] tracking-tight text-ppc-text-muted">
-        {copy?.blurb ?? a.outcomeDescription}
+      <p className="mt-1.5 line-clamp-2 text-[12.5px] leading-[1.55] tracking-tight text-ppc-text-muted">
+        {cardBlurb}
       </p>
 
-      <div className="mt-3 flex items-center gap-1.5">
-        {tag && tagPalette && (
+      <div className="mt-3.5 flex items-center gap-1.5">
+        {tagLabel && tagPalette && (
           <span
             className="inline-flex items-center rounded-[5px] px-2 py-[3px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.10em]"
             style={{ background: tagPalette.bg, color: tagPalette.fg }}
           >
-            {tag.label}
+            {tagLabel}
           </span>
         )}
       </div>
 
-      <div className="mt-4">
-        {highlight ? (
+      <div className="mt-auto pt-4">
+        {highImpact ? (
           <span
-            /* Same border-box width as the non-highlight buttons via a
-             * transparent border, so the gradient pill sits at the exact
-             * same visual width as the white ones across the row. */
-            className="flex items-center justify-center gap-1.5 rounded-[12px] border-[0.5px] border-transparent px-4 py-[10px] text-[13px] font-semibold text-white transition-all group-hover:-translate-y-[1px]"
+            className="flex items-center justify-center gap-1.5 rounded-[12px] px-4 py-[10px] text-[13px] font-semibold text-white transition-all group-hover:-translate-y-[1px]"
             style={{
               background:
                 'linear-gradient(95deg, #F25C9E 0%, #E0418A 60%, #C9337A 100%)',
@@ -517,319 +662,16 @@ function RecommendedCard({
                 'inset 0 1px 0 rgba(255,255,255,0.22), 0 8px 22px -10px rgba(232,113,170,0.65)',
             }}
           >
-            Run now
+            {ctaLabel}
             <ArrowUpRight size={12} weight="bold" />
           </span>
         ) : (
           <span className="flex items-center justify-center gap-1.5 rounded-[12px] border-[0.5px] border-ppc-card-border bg-white px-4 py-[10px] text-[13px] font-semibold text-ppc-ink transition-all group-hover:border-ppc-purple-300 group-hover:text-ppc-purple-700">
-            Run now
+            {ctaLabel}
             <ArrowUpRight size={12} weight="bold" />
           </span>
         )}
       </div>
-    </Link>
-  );
-}
-
-// ════════════════════════════════════════════════════════════════════════
-// 3 · BUILD YOUR WEEKLY AGENT PLAN — dark banner
-// ════════════════════════════════════════════════════════════════════════
-
-function PlanBanner() {
-  return (
-    <section
-      className="relative overflow-hidden rounded-[20px] px-7 py-7 text-white sm:px-9 sm:py-8"
-      style={{
-        background:
-          'linear-gradient(160deg, #150D2C 0%, #0F0A1E 55%, #08051A 100%)',
-        boxShadow:
-          'inset 0 0 0 1px rgba(127,90,240,0.22), 0 14px 40px -22px rgba(127,90,240,0.40)',
-      }}
-    >
-      {/* Top-right purple bloom */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-16 -top-20 h-[300px] w-[300px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(127,90,240,0.32) 0%, transparent 60%)' }}
-      />
-
-      {/* Two-row layout: top row = title+sub on the left, CTA on the right;
-        * bottom row = three numbered steps spread across full banner width.
-        * Avoids the prior bug where the steps column was crushed into ~200px
-        * by competing with the H2 and the CTA on a single row. */}
-      <div className="relative flex flex-col gap-7">
-        <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
-          <div className="max-w-[480px]">
-            <h2 className="font-display text-[30px] font-black leading-[1.04] tracking-[-0.020em] sm:text-[34px]">
-              Build your{' '}
-              <span
-                className="font-serif italic font-bold text-[#C7B0FF]"
-                style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-              >
-                weekly
-              </span>{' '}
-              agent plan<span
-                className="font-serif italic text-[#C7B0FF]"
-                style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-              >.</span>
-            </h2>
-            <p className="mt-3 max-w-[440px] text-[13.5px] leading-[1.55] text-white/65">
-              Schedule the right agents to run automatically. Wake up to insights, not dashboards.
-            </p>
-          </div>
-
-          <Link
-            to="/chat?intent=schedule"
-            className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-[14px] px-6 py-[14px] text-[14px] font-semibold text-white transition-transform hover:-translate-y-[1px]"
-            style={{
-              background: 'linear-gradient(155deg, #A88CFF 0%, #7F5AF0 55%, #534AB7 100%)',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.22), 0 10px 26px -10px rgba(127,90,240,0.75)',
-            }}
-          >
-            <Sparkle size={14} weight="fill" />
-            Create my plan
-            <ArrowRight size={13} weight="bold" className="transition-transform group-hover:translate-x-[1px]" />
-          </Link>
-        </div>
-
-        {/* Three numbered steps — full-width grid below the title/CTA row. */}
-        <div className="grid gap-x-8 gap-y-5 border-t border-white/[0.06] pt-6 sm:grid-cols-3">
-          <PlanStep n={1} icon={<CalendarBlank size={18} weight="duotone" />}      title="Choose frequency"         desc="Daily, weekly, or custom." />
-          <PlanStep n={2} icon={<SlidersHorizontal size={18} weight="duotone" />}  title="Pick your specialists"    desc="Build the perfect agent lineup." />
-          <PlanStep n={3} icon={<Bell size={18} weight="duotone" />}               title="Get insights on autopilot" desc="Delivered to your inbox and dashboard." />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PlanStep({
-  n, icon, title, desc,
-}: { n: number; icon: ReactElement; title: string; desc: string }) {
-  return (
-    <div className="flex items-start gap-3">
-      <span className="font-mono text-[11px] font-semibold tracking-[0.10em] text-white/45">{n}</span>
-      <span
-        aria-hidden
-        className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-[#C7B0FF]"
-        style={{
-          background: 'rgba(127,90,240,0.10)',
-          boxShadow:  'inset 0 0 0 1px rgba(199,176,255,0.22)',
-        }}
-      >
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <div className="text-[13px] font-semibold leading-[1.2] text-white">{title}</div>
-        <div className="mt-0.5 text-[11.5px] leading-[1.35] text-white/55">{desc}</div>
-      </div>
-    </div>
-  );
-}
-
-// ════════════════════════════════════════════════════════════════════════
-// 4 · ALL SPECIALISTS
-// ════════════════════════════════════════════════════════════════════════
-
-interface AllProps {
-  bucket: Bucket;
-  counts: Record<string, number>;
-  view: 'grid' | 'list';
-  agents: AgentDefinition[];
-  onPickBucket: (b: Bucket) => void;
-  onToggleView: () => void;
-}
-
-function AllSpecialists({
-  bucket, counts, view, agents, onPickBucket, onToggleView,
-}: AllProps) {
-  const PRIMARY: Array<{ key: Bucket; label: string }> = [
-    { key: 'all',      label: 'All' },
-    { key: 'audit',    label: BUCKET_LABEL.audit },
-    { key: 'optimize', label: BUCKET_LABEL.optimize },
-    { key: 'protect',  label: BUCKET_LABEL.protect },
-    { key: 'insights', label: BUCKET_LABEL.insights },
-  ];
-
-  return (
-    <section>
-      <h2 className="font-display text-[20px] font-bold tracking-[-0.012em] text-ppc-ink sm:text-[22px]">
-        All specialists<P />
-      </h2>
-
-      <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
-        {PRIMARY.map((f) => (
-          <FilterPill
-            key={f.key}
-            label={f.label}
-            count={counts[f.key] ?? 0}
-            active={bucket === f.key}
-            onSelect={() => onPickBucket(f.key)}
-          />
-        ))}
-
-        <span className="mx-1 h-5 w-px bg-ppc-card-border" />
-
-        <button className="inline-flex items-center gap-1.5 rounded-full border-[0.5px] border-ppc-card-border bg-white px-3 py-[7px] text-[12px] font-medium text-ppc-ink transition-colors hover:border-ppc-purple-300">
-          <Funnel size={12} weight="bold" />
-          Filters
-        </button>
-
-        <div className="ml-auto inline-flex overflow-hidden rounded-full border-[0.5px] border-ppc-card-border bg-white">
-          <button
-            aria-label="Grid view"
-            onClick={view === 'list' ? onToggleView : undefined}
-            className={`grid h-[28px] w-[30px] place-items-center transition-colors ${
-              view === 'grid'
-                ? 'bg-ppc-panel-soft text-ppc-purple-700'
-                : 'text-ppc-text-muted hover:text-ppc-ink'
-            }`}
-          >
-            <GridFour size={12} weight="bold" />
-          </button>
-          <button
-            aria-label="List view"
-            onClick={view === 'grid' ? onToggleView : undefined}
-            className={`grid h-[28px] w-[30px] place-items-center transition-colors ${
-              view === 'list'
-                ? 'bg-ppc-panel-soft text-ppc-purple-700'
-                : 'text-ppc-text-muted hover:text-ppc-ink'
-            }`}
-          >
-            <ListBullets size={12} weight="bold" />
-          </button>
-        </div>
-      </div>
-
-      <div
-        className={`mt-6 ${
-          view === 'grid'
-            ? 'grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-            : 'flex flex-col gap-2'
-        }`}
-      >
-        {agents.map((a) =>
-          view === 'grid'
-            ? <AgentCard key={a.slug} agent={a} />
-            : <AgentRow  key={a.slug} agent={a} />,
-        )}
-      </div>
-    </section>
-  );
-}
-
-function FilterPill({
-  label, count, active, onSelect,
-}: { label: string; count: number; active: boolean; onSelect: () => void }) {
-  return (
-    <button
-      onClick={onSelect}
-      className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-[7px] text-[12.5px] font-medium tracking-tight transition-all ${
-        active
-          ? 'bg-ppc-purple-500 text-white shadow-[0_4px_14px_-6px_rgba(127,90,240,0.55)]'
-          : 'border-[0.5px] border-ppc-card-border bg-white text-ppc-ink hover:-translate-y-[0.5px] hover:border-ppc-purple-300'
-      }`}
-    >
-      {label}
-      <span
-        className={`tabular-nums font-mono text-[10px] font-semibold ${
-          active ? 'text-white/85' : 'text-ppc-text-muted'
-        }`}
-      >
-        {count}
-      </span>
-    </button>
-  );
-}
-
-// ─── Grid card ──────────────────────────────────────────────────────────
-
-function AgentCard({ agent: a }: { agent: AgentDefinition }) {
-  const tint = CATEGORY_TINT[a.category];
-  const b = SLUG_BUCKET[a.slug];
-  const bucketPalette = b ? BUCKET_PALETTE[b] : null;
-  const icon = SLUG_ICON[a.slug];
-  return (
-    <Link
-      to={`/agents/${a.slug}`}
-      className="group flex h-full flex-col rounded-[14px] border-[0.5px] border-ppc-card-border bg-white p-5 transition-all hover:-translate-y-[1px] hover:border-ppc-purple-300 hover:shadow-[0_10px_28px_-18px_rgba(127,90,240,0.40)]"
-    >
-      <div className="flex items-start justify-between gap-2">
-        <span
-          aria-hidden
-          className="grid h-11 w-11 place-items-center rounded-full"
-          style={{ background: tint.bg, color: tint.fg }}
-        >
-          {icon ?? <span className="text-[20px] leading-none">{a.emoji}</span>}
-        </span>
-        <ArrowUpRight
-          size={13}
-          weight="bold"
-          className="mt-1 text-ppc-text-faint transition-colors group-hover:text-ppc-purple-500"
-        />
-      </div>
-
-      <h3 className="mt-4 font-display text-[16px] font-bold leading-[1.2] tracking-[-0.012em] text-ppc-ink">
-        {a.name}<P />
-      </h3>
-
-      <p className="mt-1.5 line-clamp-3 text-[12.5px] leading-[1.55] tracking-tight text-ppc-text-muted">
-        {a.outcomeDescription}
-      </p>
-
-      <div className="mt-auto flex items-center gap-1.5 pt-4">
-        {bucketPalette && (
-          <span
-            className="inline-flex items-center rounded-[5px] px-2 py-[3px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.10em]"
-            style={{ background: bucketPalette.bg, color: bucketPalette.fg }}
-          >
-            {b && BUCKET_LABEL[b]}
-          </span>
-        )}
-      </div>
-    </Link>
-  );
-}
-
-function AgentRow({ agent: a }: { agent: AgentDefinition }) {
-  const tint = CATEGORY_TINT[a.category];
-  const b = SLUG_BUCKET[a.slug];
-  const bucketPalette = b ? BUCKET_PALETTE[b] : null;
-  const icon = SLUG_ICON[a.slug];
-  return (
-    <Link
-      to={`/agents/${a.slug}`}
-      className="group flex items-center gap-4 rounded-[12px] border-[0.5px] border-ppc-card-border bg-white px-4 py-3 transition-all hover:-translate-y-[0.5px] hover:border-ppc-purple-300"
-    >
-      <span
-        aria-hidden
-        className="grid h-10 w-10 shrink-0 place-items-center rounded-full"
-        style={{ background: tint.bg, color: tint.fg }}
-      >
-        {icon ?? <span className="text-[19px] leading-none">{a.emoji}</span>}
-      </span>
-      <div className="min-w-0 flex-1">
-        <h4 className="truncate text-[14px] font-semibold leading-tight tracking-[-0.01em] text-ppc-ink">
-          {a.name}
-        </h4>
-        <p className="truncate text-[12px] leading-[1.4] tracking-tight text-ppc-text-muted">
-          {a.outcomeDescription}
-        </p>
-      </div>
-      {bucketPalette && (
-        <span
-          className="hidden shrink-0 rounded-[5px] px-2 py-[3px] font-mono text-[9.5px] font-semibold uppercase tracking-[0.10em] sm:inline-flex"
-          style={{ background: bucketPalette.bg, color: bucketPalette.fg }}
-        >
-          {b && BUCKET_LABEL[b]}
-        </span>
-      )}
-      <ArrowUpRight
-        size={13}
-        weight="bold"
-        className="shrink-0 text-ppc-text-faint transition-colors group-hover:text-ppc-purple-500"
-      />
     </Link>
   );
 }
