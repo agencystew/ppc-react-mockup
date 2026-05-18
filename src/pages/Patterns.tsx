@@ -7,7 +7,6 @@ import {
   ArrowsClockwise, BookmarkSimple, Archive,
   TrendUp, Wrench, CalendarBlank, UsersThree, Target,
   Briefcase, ClockCounterClockwise, Brain, Plugs,
-  Lightbulb,
 } from '@phosphor-icons/react';
 import { PATTERNS, type Pattern } from '../mock/patterns';
 
@@ -460,19 +459,16 @@ function StrategicPatternCard() {
         </span>
       </div>
 
-      <div className="relative mt-3 flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#F4F0FB] text-ppc-purple-700">
-          <Lightbulb size={20} weight="duotone" />
+      <div className="relative mt-3 flex items-center gap-3">
+        <span
+          aria-hidden
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#F4F0FB] text-[22px] leading-none"
+        >
+          💡
         </span>
-        <div className="min-w-0">
-          <h4 className="text-[18px] font-bold leading-tight tracking-h2 text-ppc-ink">
-            Strategic Pattern
-          </h4>
-          <p className="mt-1 text-[12.5px] leading-[1.5] text-ppc-text-muted">
-            The dot-connecting moment — where signals line up into one move
-            worth making.
-          </p>
-        </div>
+        <h4 className="text-[26px] font-bold leading-tight tracking-h2 text-ppc-ink">
+          Strategic Pattern
+        </h4>
       </div>
     </div>
   );
