@@ -519,17 +519,8 @@ function ExpeditionMap({ agent }: { agent: AgentDefinition }) {
 
       <div className="relative px-9 py-11 sm:px-11 sm:py-12">
         <h2 className="font-display text-[34px] font-black leading-[0.98] tracking-[-0.028em] text-white sm:text-[42px]">
-          The territory
-          <span
-            className="ml-2 font-serif font-bold italic text-ppc-purple-400"
-            style={{ fontFamily: 'PF-Marlet-Display, "Playfair Display", Georgia, serif' }}
-          >
-            it covers.
-          </span>
+          Specific Agent Focus<span className="text-ppc-purple-400">.</span>
         </h2>
-        <p className="mt-4 max-w-[560px] text-[15px] leading-[1.65] text-white/65">
-          Specific Agent Focus
-        </p>
 
         <ol className="mt-10 grid gap-x-12 gap-y-8 sm:grid-cols-2">
           {items.map((it, i) => {
