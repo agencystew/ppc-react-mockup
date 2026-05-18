@@ -68,7 +68,7 @@ function ChatHistoryRail({ activeId }: { activeId?: string }) {
       className="sticky top-0 hidden h-screen w-[296px] shrink-0 flex-col border-r-[0.5px] border-ppc-card-border bg-white md:flex"
     >
       <div className="px-5 pt-[22px] pb-3">
-        <h2 className="text-[19px] font-bold tracking-[-0.012em] text-ppc-ink">
+        <h2 className="ppc-h3 text-ppc-ink">
           Chat<span className="font-serif italic text-ppc-purple-500">.</span>
         </h2>
       </div>
@@ -167,10 +167,7 @@ function ChatHistoryRow({ thread, active }: { thread: ChatThread; active: boolea
       {thread.live ? (
         <span className="ppcio-live-dot mt-[6px] inline-block h-[6px] w-[6px] shrink-0 rounded-full bg-ppc-status-healthy" />
       ) : (
-        <span
-          className="shrink-0 pt-[1px] text-[10px] font-medium uppercase tracking-[0.04em] text-ppc-text-faint"
-          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-        >
+        <span className="shrink-0 pt-[1px] text-[11px] font-medium text-ppc-text-faint tabular-nums">
           {compactTime(thread.relativeTime)}
         </span>
       )}
@@ -311,7 +308,7 @@ function ProjectSelector({
           className="absolute left-0 top-full z-20 mt-1.5 w-[256px] overflow-hidden rounded-[12px] border-[0.5px] border-ppc-card-border bg-white"
           style={{ boxShadow: '0 12px 32px -12px rgba(15,10,30,0.18)' }}
         >
-          <div className="px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-ppc-text-faint">
+          <div className="px-3 py-2 text-[11px] font-semibold text-ppc-text-faint">
             Scope to project
           </div>
           <ul className="max-h-[320px] overflow-y-auto pb-1.5">
@@ -365,7 +362,7 @@ function ProjectSelector({
 function Hero({ project }: { project: typeof PROJECTS[number] }) {
   return (
     <section className="pt-8 lg:pt-12">
-      <h1 className="text-center font-display text-[40px] font-extrabold leading-[1.05] tracking-[-0.025em] text-ppc-ink sm:text-[44px]">
+      <h1 className="ppc-h1 text-center text-ppc-ink">
         Ask anything about your<br />
         PPC <PerformanceWord />
       </h1>
@@ -422,10 +419,7 @@ function DarkInput({ project }: { project: typeof PROJECTS[number] }) {
             placeholder="Ask a question or describe what you need…"
             className="flex-1 bg-transparent text-[14.5px] text-white outline-none placeholder:text-white/45"
           />
-          <kbd
-            className="mt-[1px] inline-flex h-[20px] items-center rounded-[5px] border border-white/[0.10] bg-white/[0.05] px-[7px] font-mono text-[10.5px] leading-none text-white/65"
-            style={{ fontFamily: '"Courier New", ui-monospace, Menlo, monospace' }}
-          >
+          <kbd className="mt-[1px] inline-flex h-[20px] items-center rounded-[5px] border border-white/[0.10] bg-white/[0.05] px-[7px] text-[11px] font-semibold leading-none text-white/65">
             ⌘K
           </kbd>
         </div>
@@ -534,7 +528,7 @@ function TrustStrip() {
             >
               A long memory
             </div>
-            <h2 className="mt-2 font-display text-[26px] font-extrabold leading-[1.1] tracking-[-0.022em] text-white">
+            <h2 className="ppc-h2 mt-2 text-white">
               Every chat builds on the last
               <span className="font-serif italic text-ppc-purple-300">.</span>
             </h2>
@@ -558,8 +552,8 @@ function TrustStrip() {
               1,247
             </span>
             <span
-              className="font-mono text-[10px] font-semibold uppercase"
-              style={{ color: '#A89BFF', letterSpacing: '0.14em' }}
+              className="text-[11px] font-semibold"
+              style={{ color: '#A89BFF' }}
             >
               memories so far
             </span>
@@ -606,8 +600,8 @@ function MemoryPillar({
       className={`flex flex-col gap-1.5 py-5 sm:px-5 ${divider ? 'sm:border-l sm:border-white/[0.06]' : ''}`}
     >
       <span
-        className="inline-flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase"
-        style={{ color: '#A89BFF', letterSpacing: '0.14em' }}
+        className="inline-flex items-center gap-1.5 text-[11px] font-semibold"
+        style={{ color: '#A89BFF' }}
       >
         {icon}
         {title}
@@ -941,10 +935,7 @@ function ChartCard({ chart }: { chart: ChatChart }) {
         <p className="text-[13px] font-semibold tracking-[-0.005em] text-ppc-ink">
           {chart.label}
         </p>
-        <p
-          className="text-[11.5px] font-medium tabular-nums text-ppc-status-critical"
-          style={{ fontFamily: '"Courier New", ui-monospace, monospace' }}
-        >
+        <p className="text-[11.5px] font-medium tabular-nums text-ppc-status-critical">
           {chart.delta}
         </p>
       </div>
@@ -962,10 +953,7 @@ function ChartCard({ chart }: { chart: ChatChart }) {
           })}
         </div>
       </div>
-      <div
-        className="mt-2 flex justify-between text-[10.5px] tabular-nums text-ppc-text-faint"
-        style={{ fontFamily: '"Courier New", ui-monospace, monospace', letterSpacing: '0.04em' }}
-      >
+      <div className="mt-2 flex justify-between text-[11px] tabular-nums text-ppc-text-faint">
         <span>{chart.axisLeft}</span>
         <span>{chart.axisRight}</span>
       </div>
@@ -991,11 +979,6 @@ function FactorsCard({ factors }: { factors: ChatFactorsCard }) {
                   ? 'text-ppc-text-faint'
                   : 'font-medium text-ppc-status-critical'
               }`}
-              style={
-                r.tone === 'muted'
-                  ? undefined
-                  : { fontFamily: '"Courier New", ui-monospace, monospace' }
-              }
             >
               {r.value}
             </span>
@@ -1066,11 +1049,11 @@ function InlineRunningCard({ run }: { run: ChatRunningCard }) {
           <div className="flex items-center gap-2">
             <p className="text-[14px] font-semibold tracking-[-0.005em] text-white">{run.agentName}</p>
             <span className="ppcio-live-dot inline-block h-[6px] w-[6px] rounded-full bg-ppc-status-healthy" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-ppc-text-on-dark">Running</span>
+            <span className="text-[11px] font-semibold text-ppc-text-on-dark">Running</span>
           </div>
           <p className="mt-[3px] truncate text-[12px] text-white/60">{run.description}</p>
         </div>
-        <span className="hidden font-mono text-[11px] tabular-nums text-ppc-text-on-dark sm:inline">
+        <span className="hidden text-[11px] font-medium tabular-nums text-ppc-text-on-dark sm:inline">
           {run.elapsed}
         </span>
       </div>

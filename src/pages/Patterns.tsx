@@ -164,7 +164,7 @@ function HeroCopy() {
 
   return (
     <div>
-      <h1 className="font-display text-[48px] font-black leading-[0.98] -tracking-[0.025em] text-white lg:text-[56px] xl:text-[64px]">
+      <h1 className="ppc-h1 text-white">
         Patterns
         <br />
         <span

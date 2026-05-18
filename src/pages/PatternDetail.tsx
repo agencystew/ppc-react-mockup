@@ -160,9 +160,9 @@ function Hero({ pattern, detail }: { pattern: Pattern; detail: Detail }) {
           <Icon size={30} weight="duotone" />
         </span>
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-[30px] font-bold leading-[1.12] -tracking-[0.02em] text-ppc-ink lg:text-[36px]">
+          <h1 className="ppc-h1 text-ppc-ink">
             {heroHeadline}
-            <span className="text-ppc-purple-500">.</span>
+            <span className="ppc-period">.</span>
           </h1>
           <ul className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] text-ppc-text-muted">
             <MetaItem icon={Sparkle} text="Experimental" tint="purple" />

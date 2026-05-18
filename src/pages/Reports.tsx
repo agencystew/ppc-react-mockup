@@ -133,8 +133,8 @@ export function Reports() {
               persona switcher pinned right. Mirrors /projects spacing. */}
       <header className="reveal flex flex-wrap items-end justify-between gap-5" style={{ animationDelay: '0ms' }}>
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-[46px] font-extrabold leading-[0.96] tracking-[-0.030em] text-ppc-ink">
-            Reports<span className="text-ppc-purple-500">.</span>
+          <h1 className="ppc-h1 text-ppc-ink">
+            Reports<span className="ppc-period">.</span>
           </h1>
         </div>
         <PersonaSwitch persona={persona} onChange={setPersona} />
@@ -338,14 +338,9 @@ function ReportsHero({
 
         {/* Headline — slightly smaller than verdict card (this is the inbox,
             not the moment of arrival). Same italic-purple period motif. */}
-        <h2
-          className="font-display font-black text-white"
-          style={{
-            fontSize: 'clamp(30px, 3.4vw, 44px)',
-            letterSpacing: '-0.028em',
-            lineHeight: 1.06,
-          }}
-        >
+        <h2 className="ppc-h2 text-white">
+          {/* Note: smaller .ppc-h2 (28px) per single 44px H1 scale; the page H1
+            is the moment, this is the inbox sub-heading. */}
           Your inbox of{' '}
           <span
             className="font-serif italic"
@@ -451,7 +446,7 @@ function OperatorView({
           <div className="flex items-baseline gap-3">
             <span className="inline-flex items-center gap-2">
               <Sparkle size={15} weight="fill" className="text-ppc-purple-500" />
-              <span className="font-display text-[17px] font-bold tracking-[-0.012em] text-ppc-ink">
+              <span className="ppc-h4 text-ppc-ink">
                 Inbox
               </span>
             </span>
@@ -1354,13 +1349,15 @@ function ClientReadyView({ all }: { all: FlatReport[] }) {
    PAGE STYLES                                                          */
 
 const PAGE_STYLES = `
+  /* Survivor eyebrow — kept the legacy class name so call sites work, but
+     swept off mono uppercase to mixed-case Figtree per the 2026-05-18 type pass. */
   .mono-eyebrow {
-    font-family: 'Courier New', ui-monospace, monospace;
-    font-size: 10.5px;
+    font-family: var(--font-sans);
+    font-size: 11px;
     font-weight: 600;
-    line-height: 1;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-transform: none;
   }
 
   @keyframes rp-reveal {

@@ -26,7 +26,7 @@ import { PROJECTS } from '../mock/projects';
 
 // ─── Tokens ────────────────────────────────────────────────────────────
 const C = {
-  pageBg:    '#f7f6fc',
+  pageBg:    '#ECEAFA',  /* canonical lavender canvas — matches every other app page */
   pageBor:   '#e8e6f0',
   ink:       '#18181b',
   neutral7:  '#3f3f46',
@@ -255,10 +255,7 @@ export function ProjectPage() {
           {project.name.charAt(0)}
         </div>
         <div className="min-w-0">
-          <h1
-            className="text-[40px] font-extrabold leading-[1.02]"
-            style={{ color: C.ink, letterSpacing: '-0.025em' }}
-          >
+          <h1 className="ppc-h1" style={{ color: C.ink }}>
             {project.name}
           </h1>
           <div className="mt-2.5 flex flex-wrap items-center gap-2.5 text-[13.5px]" style={{ color: C.neutral5 }}>

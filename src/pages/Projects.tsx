@@ -134,8 +134,8 @@ export function Projects() {
           period. Filters button + New-project CTA pinned right.        */}
       <header className="reveal flex items-end justify-between gap-6" style={{ animationDelay: '0ms' }}>
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-[46px] font-extrabold leading-[0.96] tracking-[-0.030em] text-ppc-ink">
-            All projects<span className="text-ppc-purple-500">.</span>
+          <h1 className="ppc-h1 text-ppc-ink">
+            All projects<span className="ppc-period">.</span>
           </h1>
         </div>
 
@@ -245,7 +245,7 @@ export function Projects() {
         <div className="flex items-center justify-between border-b border-[#ECEAFA] px-6 py-3.5">
           <div className="flex items-center gap-2.5">
             <Sparkle size={13} weight="fill" className="text-ppc-purple-500" />
-            <span className="font-display text-[14.5px] font-semibold tracking-[-0.012em] text-ppc-ink">
+            <span className="ppc-h4 text-ppc-ink">
               The roster
             </span>
             <span className="mono-eyebrow text-ppc-text-faint">
@@ -365,8 +365,8 @@ export function Projects() {
                         <ArrowRight size={10} weight="bold" className="opacity-0 transition-all duration-200 group-hover:translate-x-[1px] group-hover:opacity-100" />
                       </span>
                     ) : (
-                      <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-ppc-text-faint">
-                        clear
+                      <span className="text-[11px] font-medium text-ppc-text-faint">
+                        Clear
                       </span>
                     )}
                   </Td>
@@ -439,7 +439,7 @@ export function Projects() {
               <Sparkle size={11} weight="fill" className="text-[#C7B0FF]" />
               AI insight
             </div>
-            <h2 className="mt-4 font-display text-[34px] font-extrabold leading-[1.06] tracking-[-0.024em] text-white">
+            <h2 className="ppc-h2 mt-4 text-white">
               {totals.stateCounts.critical} accounts need <em
                 className="font-serif italic font-bold not-italic"
                 style={{
@@ -488,7 +488,7 @@ export function Projects() {
             >
               <div className="mono-eyebrow text-white/55">Total recoverable</div>
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="tabular-nums font-display text-[44px] font-extrabold leading-none tracking-[-0.028em] text-white">
+                <span className="ppc-h1 tabular-nums text-white">
                   ${recoverable.toLocaleString()}
                 </span>
                 <span className="text-[14px] font-medium text-white/55">/ mo</span>
@@ -551,7 +551,7 @@ function KpiCard({
           {delta.pct.toFixed(1)}%
         </span>
       </div>
-      <div className="mt-2.5 font-display text-[30px] font-extrabold leading-[1.0] tracking-[-0.024em] tabular-nums text-ppc-ink">
+      <div className="ppc-h2 mt-2.5 tabular-nums text-ppc-ink">
         {value}
       </div>
       <div className="mt-3 -mb-1">
@@ -655,7 +655,7 @@ function Th({
     <th
       scope="col"
       className={[
-        'font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ppc-text-faint',
+        'text-[11px] font-semibold text-ppc-text-faint',
         align === 'right' ? 'text-right' : 'text-left',
         first ? 'pl-6 pr-2' : '',
         lastCol ? 'pl-2 pr-6' : '',
@@ -775,13 +775,15 @@ function hashStr(s: string): number {
  * rows — the reference reads as a calm ledger, not a triage board. The
  * priority word + status dot already carry the urgency cue. */
 const PAGE_STYLES = `
+  /* Survivor eyebrow — legacy class name kept, swept off mono uppercase
+     to mixed-case Figtree per the 2026-05-18 type pass. */
   .mono-eyebrow {
-    font-family: 'Courier New', ui-monospace, monospace;
-    font-size: 10.5px;
+    font-family: var(--font-sans);
+    font-size: 11px;
     font-weight: 600;
-    line-height: 1;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-transform: none;
   }
 
   @keyframes pj-reveal {
